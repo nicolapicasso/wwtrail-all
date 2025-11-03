@@ -1,93 +1,76 @@
-// lib/api/client.ts
-import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
-import { ApiError } from '@/types/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-// Crear instancia de Axios
-const apiClient: AxiosInstance = axios.create({
+// Create axios instance
+export const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-// Interceptor de Request - Añadir token JWT
+// Request interceptor - Add JWT token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = Cookies.get('token');
-    
+    const token = Cookies.get('accessToken');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    // Añadir idioma del usuario
-    const language = Cookies.get('language') || 'es';
-    if (config.headers) {
-      config.headers['Accept-Language'] = language;
-    }
-    
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
 
-// Interceptor de Response - Manejo de errores
+// Response interceptor - Handle token refresh
 apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error: AxiosError<ApiError>) => {
-    // Error de red
-    if (!error.response) {
-      console.error('Network error:', error.message);
-      return Promise.reject({
-        message: 'Error de conexión. Verifica tu conexión a internet.',
-        statusCode: 0,
-      });
-    }
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Error del servidor
-    const apiError: ApiError = {
-      message: error.response.data?.message || 'Error desconocido',
-      statusCode: error.response.status,
-      errors: error.response.data?.errors,
-    };
+    // If error is 401 and we haven't retried yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-    // Token expirado o inválido (401)
-    if (error.response.status === 401) {
-      Cookies.remove('token');
-      Cookies.remove('user');
-      
-      // Redirigir a login solo si no estamos ya en login/register
-      if (typeof window !== 'undefined' && 
-          !window.location.pathname.includes('/login') &&
-          !window.location.pathname.includes('/register')) {
-        window.location.href = '/login';
+      try {
+        const refreshToken = Cookies.get('refreshToken');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // Try to refresh the token
+        const response = await axios.post(`${API_URL}/auth/refresh`, {
+          refreshToken,
+        });
+
+        const { accessToken } = response.data;
+
+        // Save new token
+        Cookies.set('accessToken', accessToken, {
+          expires: 1, // 1 day
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+        });
+
+        // Retry original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, clear tokens and redirect to login
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
+        window.location.href = '/auth/login';
+        return Promise.reject(refreshError);
       }
     }
 
-    // Forbidden (403)
-    if (error.response.status === 403) {
-      apiError.message = 'No tienes permisos para realizar esta acción';
-    }
-
-    // Not Found (404)
-    if (error.response.status === 404) {
-      apiError.message = 'Recurso no encontrado';
-    }
-
-    // Server Error (500)
-    if (error.response.status >= 500) {
-      apiError.message = 'Error del servidor. Inténtalo más tarde.';
-    }
-
-    console.error('API Error:', apiError);
-    return Promise.reject(apiError);
+    return Promise.reject(error);
   }
 );
 
