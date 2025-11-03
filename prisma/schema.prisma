@@ -1,5 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// ===================================
+// WWTRAIL - NEW SCHEMA v2.0
+// Modelo de 3 niveles: Event → Competition → Edition
+// ===================================
 
 generator client {
   provider        = "prisma-client-js"
@@ -9,19 +11,12 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [postgis, uuid_ossp(map: "uuid-ossp"), pg_trgm]
+  extensions = [postgis(schema: "public"), uuid_ossp(map: "uuid-ossp"), pg_trgm]
 }
 
-// ============================================
+// ===================================
 // ENUMS
-// ============================================
-
-enum UserRole {
-  ADMIN
-  ORGANIZER
-  ATHLETE
-  VIEWER
-}
+// ===================================
 
 enum Language {
   ES
@@ -32,7 +27,14 @@ enum Language {
   DE
 }
 
-enum CompetitionType {
+enum UserRole {
+  ADMIN
+  ORGANIZER
+  ATHLETE
+  VIEWER
+}
+
+enum RaceType {
   TRAIL
   ULTRA
   VERTICAL
@@ -41,28 +43,36 @@ enum CompetitionType {
   OTHER
 }
 
-enum CompetitionStatus {
+enum EventStatus {
   DRAFT
   PUBLISHED
+  CANCELLED
+}
+
+enum EditionStatus {
+  UPCOMING
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
   ONGOING
   FINISHED
   CANCELLED
 }
 
 enum RegistrationStatus {
+  NOT_OPEN
   OPEN
-  CLOSED
   FULL
-  COMING_SOON
+  CLOSED
 }
 
-enum ParticipantStatus {
+enum ParticipationStatus {
+  INTERESTED
   REGISTERED
   CONFIRMED
-  DNS // Did Not Start
-  DNF // Did Not Finish
-  DSQ // Disqualified
-  FINISHED
+  COMPLETED
+  DNS
+  DNF
+  DSQ
 }
 
 enum TranslationStatus {
@@ -72,411 +82,530 @@ enum TranslationStatus {
   NEEDS_REVIEW
 }
 
-enum FileType {
-  IMAGE
-  DOCUMENT
-  GPX
-  KML
-  VIDEO
-  OTHER
+enum PostCategory {
+  GENERAL
+  TRAINING
+  NUTRITION
+  GEAR
+  DESTINATIONS
+  INTERVIEWS
+  RACE_REPORTS
+  TIPS
 }
 
-// ============================================
-// USUARIOS Y AUTENTICACIÓN
-// ============================================
-enum UserCompetitionStatus {
-  INTERESTED      // "Me interesa"
-  REGISTERED      // "Me he inscrito" (externamente)
-  CONFIRMED       // "Inscripción confirmada"
-  COMPLETED       // "He completado la carrera"
-  DNF             // "No terminé" (Did Not Finish)
-  DNS             // "No participé" (Did Not Start)
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
+// ===================================
+// USER & AUTH
+// ===================================
 
 model User {
-  userCompetitions  UserCompetition[]
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  username  String   @unique
-  password  String // Hash bcrypt
-  firstName String?
-  lastName  String?
-  
-  role      UserRole @default(ATHLETE)
-  language  Language @default(ES)
-  
-  avatar    String?
-  bio       String?
-  phone     String?
-  birthDate DateTime?
-  
-  // Ubicación del usuario
-  country   String?
-  city      String?
-  
-  isActive  Boolean  @default(true)
-  isVerified Boolean @default(false)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relaciones
-  competitions    Competition[]
-  participants    Participant[]
-  results         Result[]
-  reviews         Review[]
-  favorites       Favorite[]
-  notifications   Notification[]
-  refreshTokens   RefreshToken[]
-  
-  @@index([email])
-  @@index([username])
+  id          String    @id @default(uuid())
+  email       String    @unique @db.VarChar(255)
+  username    String    @unique @db.VarChar(50)
+  password    String    @db.VarChar(255)
+  firstName   String?   @db.VarChar(100)
+  lastName    String?   @db.VarChar(100)
+  role        UserRole  @default(ATHLETE)
+  isActive    Boolean   @default(true)
+  avatar      String?   @db.Text
+  bio         String?   @db.Text
+  phone       String?   @db.VarChar(20)
+  city        String?   @db.VarChar(100)
+  country     String?   @db.VarChar(2)
+  language    Language  @default(ES)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  refreshTokens     RefreshToken[]
+  organizedEvents   Event[]              @relation("EventOrganizer")
+  userEditions      UserEdition[]
+  posts             Post[]
+  reviews           Review[]
+  participants      Participant[]
+  results           Result[]
+
   @@map("users")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid()) @db.Uuid
-  token     String   @unique
-  userId    String   @db.Uuid
+  id        String   @id @default(uuid())
+  token     String   @unique @db.Text
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
+
   @@index([userId])
-  @@index([token])
   @@map("refresh_tokens")
 }
 
-// ============================================
-// COMPETICIONES
-// ============================================
+// ===================================
+// NIVEL 1: EVENT (Evento permanente)
+// ===================================
+
+model Event {
+  id               String    @id @default(uuid())
+  slug             String    @unique @db.VarChar(255)
+  name             String    @db.VarChar(255)
+  description      String?   @db.Text
+  
+  // Ubicación general
+  country          String    @db.VarChar(2)
+  city             String    @db.VarChar(100)
+  location         Unsupported("geography(Point, 4326)")?
+  latitude         Decimal?  @db.Decimal(10, 8)
+  longitude        Decimal?  @db.Decimal(11, 8)
+  
+  // Información general
+  websiteUrl       String?   @db.Text
+  email            String?   @db.VarChar(255)
+  phone            String?   @db.VarChar(20)
+  facebookUrl      String?   @db.Text
+  instagramUrl     String?   @db.Text
+  
+  // Media
+  logo             String?   @db.Text
+  coverImage       String?   @db.Text
+  images           String[]
+  
+  // Metadata
+  firstEditionYear Int?
+  isActive         Boolean   @default(true)
+  isHighlighted    Boolean   @default(false)
+  viewCount        Int       @default(0)
+  originalLanguage Language  @default(ES)
+  
+  // Estado
+  status           EventStatus @default(DRAFT)
+  
+  // Relations
+  organizerId      String
+  organizer        User      @relation("EventOrganizer", fields: [organizerId], references: [id])
+  
+  competitions     Competition[]
+  translations     EventTranslation[]
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([country])
+  @@index([status])
+  @@index([organizerId])
+  @@map("events")
+}
+
+model EventTranslation {
+  id          String            @id @default(uuid())
+  eventId     String
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  language    Language
+  name        String            @db.VarChar(255)
+  description String?           @db.Text
+  status      TranslationStatus @default(PENDING)
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([eventId, language])
+  @@index([eventId])
+  @@map("event_translations")
+}
+
+// ===================================
+// NIVEL 2: COMPETITION (Distancia permanente)
+// ===================================
 
 model Competition {
-  userCompetitions  UserCompetition[]
-  id          String  @id @default(uuid()) @db.Uuid
-  slug        String  @unique
+  id                  String   @id @default(uuid())
+  eventId             String
+  event               Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   
-  // Información básica (idioma base ES)
-  name        String
-  description String? @db.Text
+  slug                String   @unique @db.VarChar(255)
+  name                String   @db.VarChar(255)
+  shortName           String?  @db.VarChar(50)
+  description         String?  @db.Text
   
-  // Tipo y estado
-  type        CompetitionType
-  status      CompetitionStatus @default(DRAFT)
+  // Tipo
+  type                RaceType @default(TRAIL)
   
-  // Fechas
-  startDate   DateTime
-  endDate     DateTime?
+  // Datos BASE (valores por defecto que heredan las ediciones)
+  baseDistance        Decimal? @db.Decimal(6, 2)
+  baseElevation       Int?
+  baseMaxParticipants Int?
+  baseTechnicalLevel  Int?     @db.SmallInt // 1-5
   
-  // Registro
-  registrationStatus RegistrationStatus @default(COMING_SOON)
-  registrationUrl    String?
-  registrationStart  DateTime?
-  registrationEnd    DateTime?
-  maxParticipants    Int?
-  currentParticipants Int @default(0)
+  // Información general
+  websiteUrl          String?  @db.Text
   
-  // Ubicación
-  country     String
-  region      String?
-  city        String
+  // Display
+  displayOrder        Int      @default(0)
+  isActive            Boolean  @default(true)
   
-  // Coordenadas (Point PostGIS)
-  location    Unsupported("geometry(Point, 4326)")?
+  // Relations
+  editions            Edition[]
+  translations        CompetitionTranslation[]
   
-  // Detalles técnicos
-  distance    Float? // en km
-  elevation   Float? // desnivel positivo en m
-  
-  // URLs y contacto
-  website     String?
-  email       String?
-  phone       String?
-  
-  // Imágenes
-  coverImage  String?
-  logoImage   String?
-  
-  // Organizador
-  organizerId String  @db.Uuid
-  organizer   User    @relation(fields: [organizerId], references: [id])
-  
-  // Metadatos
-  isHighlighted Boolean @default(false)
-  viewCount     Int     @default(0)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relaciones
-  translations  CompetitionTranslation[]
-  categories    Category[]
-  participants  Participant[]
-  results       Result[]
-  reviews       Review[]
-  files         File[]
-  favorites     Favorite[]
-  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([eventId, slug])
+  @@index([eventId])
   @@index([slug])
-  @@index([status])
-  @@index([startDate])
-  @@index([country])
-  @@index([type])
-  @@index([organizerId])
   @@map("competitions")
 }
 
 model CompetitionTranslation {
-  id            String  @id @default(uuid()) @db.Uuid
-  competitionId String  @db.Uuid
-  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
-  
+  id            String            @id @default(uuid())
+  competitionId String
+  competition   Competition       @relation(fields: [competitionId], references: [id], onDelete: Cascade)
   language      Language
-  name          String
-  description   String? @db.Text
-  
-  // Control de traducción
+  name          String            @db.VarChar(255)
+  shortName     String?           @db.VarChar(50)
+  description   String?           @db.Text
   status        TranslationStatus @default(PENDING)
-  translatedBy  String? // 'AI' o ID del traductor
   
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
   @@unique([competitionId, language])
   @@index([competitionId])
-  @@index([language])
   @@map("competition_translations")
 }
 
-// ============================================
-// CATEGORÍAS DE COMPETICIÓN
-// ============================================
+// ===================================
+// NIVEL 3: EDITION (Edición anual)
+// ===================================
 
-model Category {
-  id            String  @id @default(uuid()) @db.Uuid
-  competitionId String  @db.Uuid
-  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+model Edition {
+  id                  String             @id @default(uuid())
+  competitionId       String
+  competition         Competition        @relation(fields: [competitionId], references: [id], onDelete: Cascade)
   
-  name          String
-  distance      Float? // en km
-  elevation     Float? // en m
-  price         Float?
-  currency      String @default("EUR")
-  maxParticipants Int?
+  year                Int
+  slug                String             @unique @db.VarChar(255)
   
-  // Ruta GPX/KML
-  routeFile     String?
+  // Datos específicos de esta edición (si NULL, hereda del base)
+  distance            Decimal?           @db.Decimal(6, 2)
+  elevation           Int?
+  technicalLevel      Int?               @db.SmallInt
   
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  // Fechas específicas
+  startDate           DateTime
+  startTime           String?            @db.VarChar(10)
+  cutoffTime          String?            @db.VarChar(10)
   
-  // Relaciones
-  participants  Participant[]
-  results       Result[]
+  // Ubicación específica (si cambia respecto al evento)
+  city                String?            @db.VarChar(100)
+  location            Unsupported("geography(Point, 4326)")?
+  latitude            Decimal?           @db.Decimal(10, 8)
+  longitude           Decimal?           @db.Decimal(11, 8)
   
+  // Recorrido
+  gpxFile             String?            @db.Text
+  elevationProfile    String?            @db.Text
+  routeDescription    String?            @db.Text
+  routeMap            String?            @db.Text
+  
+  // Participación
+  maxParticipants     Int?
+  currentParticipants Int                @default(0)
+  minimumAge          Int?               @default(18)
+  
+  // Inscripción
+  price               Decimal?           @db.Decimal(10, 2)
+  currency            String?            @db.VarChar(3) @default("EUR")
+  earlyBirdPrice      Decimal?           @db.Decimal(10, 2)
+  earlyBirdDeadline   DateTime?
+  registrationUrl     String?            @db.Text
+  registrationStatus  RegistrationStatus @default(NOT_OPEN)
+  
+  // Estado
+  status              EditionStatus      @default(UPCOMING)
+  isCancelled         Boolean            @default(false)
+  cancellationReason  String?            @db.Text
+  
+  // Estadísticas de resultados
+  finishers           Int?
+  dnfCount            Int?
+  dnsCount            Int?
+  dsqCount            Int?
+  winnerTime          String?            @db.VarChar(20)
+  recordTime          String?            @db.VarChar(20)
+  recordHolder        String?            @db.VarChar(255)
+  averageTime         String?            @db.VarChar(20)
+  
+  // Media
+  featuredImage       String?            @db.Text
+  images              String[]
+  videoUrl            String?            @db.Text
+  
+  // Engagement
+  viewCount           Int                @default(0)
+  
+  // Relations
+  participants        Participant[]
+  results             Result[]
+  reviews             Review[]
+  userEditions        UserEdition[]
+  posts               Post[]
+  translations        EditionTranslation[]
+  
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@unique([competitionId, year])
   @@index([competitionId])
-  @@map("categories")
+  @@index([year])
+  @@index([startDate])
+  @@index([status])
+  @@index([slug])
+  @@map("editions")
 }
 
-// ============================================
-// PARTICIPANTES
-// ============================================
+model EditionTranslation {
+  id                 String            @id @default(uuid())
+  editionId          String
+  edition            Edition           @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  language           Language
+  routeDescription   String?           @db.Text
+  cancellationReason String?           @db.Text
+  status             TranslationStatus @default(PENDING)
+  
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@unique([editionId, language])
+  @@index([editionId])
+  @@map("edition_translations")
+}
+
+// ===================================
+// USER TRACKING (Participación histórica)
+// ===================================
+
+model UserEdition {
+  id             String              @id @default(uuid())
+  userId         String
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  editionId      String
+  edition        Edition             @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  
+  // Estado de participación
+  status         ParticipationStatus @default(INTERESTED)
+  
+  // Si participó, detalles:
+  bibNumber      String?             @db.VarChar(20)
+  position       Int?
+  categoryName   String?             @db.VarChar(50)
+  categoryRank   Int?
+  time           String?             @db.VarChar(20)
+  pace           String?             @db.VarChar(20)
+  
+  // Experiencia personal
+  notes          String?             @db.Text
+  rating         Int?                @db.SmallInt // 1-5
+  wouldRepeat    Boolean?
+  
+  // Media
+  photos         String[]
+  certificateUrl String?             @db.Text
+  
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([userId, editionId])
+  @@index([userId])
+  @@index([editionId])
+  @@map("user_editions")
+}
+
+// ===================================
+// PARTICIPANTS (Inscripciones oficiales)
+// ===================================
 
 model Participant {
-  id            String  @id @default(uuid()) @db.Uuid
+  id          String              @id @default(uuid())
+  editionId   String
+  edition     Edition             @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
   
-  competitionId String  @db.Uuid
-  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  firstName   String?             @db.VarChar(100)
+  lastName    String?             @db.VarChar(100)
+  email       String?             @db.VarChar(255)
+  bibNumber   String?             @db.VarChar(20)
+  category    String?             @db.VarChar(50)
+  team        String?             @db.VarChar(100)
   
-  categoryId    String?  @db.Uuid
-  category      Category? @relation(fields: [categoryId], references: [id])
+  status      ParticipationStatus @default(REGISTERED)
   
-  userId        String?  @db.Uuid
-  user          User?    @relation(fields: [userId], references: [id])
-  
-  // Info del participante (por si no es usuario registrado)
-  firstName     String?
-  lastName      String?
-  email         String?
-  bibNumber     String?
-  
-  status        ParticipantStatus @default(REGISTERED)
-  
-  registeredAt  DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  // Relaciones
-  results       Result[]
-  
-  @@unique([competitionId, bibNumber])
-  @@index([competitionId])
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([editionId, bibNumber])
+  @@index([editionId])
   @@index([userId])
-  @@index([categoryId])
   @@map("participants")
 }
 
-// ============================================
-// RESULTADOS
-// ============================================
+// ===================================
+// RESULTS (Resultados oficiales)
+// ===================================
 
 model Result {
-  id            String  @id @default(uuid()) @db.Uuid
+  id          String   @id @default(uuid())
+  editionId   String
+  edition     Edition  @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   
-  competitionId String  @db.Uuid
-  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  bibNumber   String?  @db.VarChar(20)
+  firstName   String?  @db.VarChar(100)
+  lastName    String?  @db.VarChar(100)
   
-  categoryId    String  @db.Uuid
-  category      Category @relation(fields: [categoryId], references: [id])
+  position    Int?
+  category    String?  @db.VarChar(50)
+  categoryRank Int?
   
-  participantId String  @db.Uuid
-  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  time        String?  @db.VarChar(20)
+  timeSeconds Int?
+  pace        String?  @db.VarChar(20)
   
-  userId        String? @db.Uuid
-  user          User?   @relation(fields: [userId], references: [id])
+  // Splits
+  checkpoint1 String?  @db.VarChar(20)
+  checkpoint2 String?  @db.VarChar(20)
+  checkpoint3 String?  @db.VarChar(20)
+  checkpoint4 String?  @db.VarChar(20)
   
-  // Resultados
-  position      Int?
-  time          String? // Formato: HH:MM:SS
-  timeSeconds   Int?
+  status      ParticipationStatus @default(COMPLETED)
+  isVerified  Boolean  @default(false)
   
-  // Datos adicionales
-  pace          String? // min/km
-  avgHeartRate  Int?
-  
-  // Verificación
-  isVerified    Boolean @default(false)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@unique([competitionId, participantId])
-  @@index([competitionId])
-  @@index([categoryId])
-  @@index([participantId])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([editionId, bibNumber])
+  @@index([editionId])
   @@index([userId])
+  @@index([position])
   @@map("results")
 }
 
-// ============================================
-// RESEÑAS Y FAVORITOS
-// ============================================
+// ===================================
+// REVIEWS
+// ===================================
 
 model Review {
-  id            String  @id @default(uuid()) @db.Uuid
+  id          String   @id @default(uuid())
+  editionId   String
+  edition     Edition  @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  competitionId String  @db.Uuid
-  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  rating      Int      @db.SmallInt // 1-5
+  comment     String?  @db.Text
   
-  userId        String  @db.Uuid
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Aspectos específicos (opcional)
+  organization Int?    @db.SmallInt // 1-5
+  route       Int?     @db.SmallInt
+  atmosphere  Int?     @db.SmallInt
+  valueForMoney Int?   @db.SmallInt
   
-  rating        Int // 1-5
-  comment       String? @db.Text
+  isVerified  Boolean  @default(false)
   
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@unique([competitionId, userId])
-  @@index([competitionId])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([editionId, userId])
+  @@index([editionId])
   @@index([userId])
   @@map("reviews")
 }
 
-model Favorite {
-  id            String  @id @default(uuid()) @db.Uuid
-  
-  competitionId String  @db.Uuid
-  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
-  
-  userId        String  @db.Uuid
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime @default(now())
-  
-  @@unique([competitionId, userId])
-  @@index([competitionId])
-  @@index([userId])
-  @@map("favorites")
-}
+// ===================================
+// BLOG/MAGAZINE
+// ===================================
 
-// ============================================
-// ARCHIVOS
-// ============================================
-
-model File {
-  id            String  @id @default(uuid()) @db.Uuid
+model Post {
+  id            String       @id @default(uuid())
+  slug          String       @unique @db.VarChar(255)
+  title         String       @db.VarChar(255)
+  excerpt       String?      @db.Text
+  content       String       @db.Text
+  featuredImage String?      @db.Text
   
-  competitionId String? @db.Uuid
-  competition   Competition? @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  category      PostCategory @default(GENERAL)
+  status        PostStatus   @default(DRAFT)
   
-  filename      String
-  originalName  String
-  path          String
-  url           String
-  mimeType      String
-  size          Int
-  type          FileType
+  // Relación con edición específica
+  editionId     String?
+  edition       Edition?     @relation(fields: [editionId], references: [id], onDelete: SetNull)
   
-  createdAt     DateTime @default(now())
+  authorId      String
+  author        User         @relation(fields: [authorId], references: [id])
   
-  @@index([competitionId])
-  @@map("files")
-}
-
-// ============================================
-// NOTIFICACIONES
-// ============================================
-
-model Notification {
-  id        String  @id @default(uuid()) @db.Uuid
+  viewCount     Int          @default(0)
+  publishedAt   DateTime?
   
-  userId    String  @db.Uuid
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags          PostTag[]
+  translations  PostTranslation[]
   
-  title     String
-  message   String  @db.Text
-  type      String // 'info', 'success', 'warning', 'error'
-  
-  isRead    Boolean @default(false)
-  
-  createdAt DateTime @default(now())
-  
-  @@index([userId])
-  @@index([isRead])
-  @@map("notifications")
-}
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
-model UserCompetition {
-  id                String                  @id @default(uuid()) @db.Uuid
-  userId            String                  @db.Uuid
-  competitionId     String                  @db.Uuid
-
-  // Estado
-  status            UserCompetitionStatus   @default(INTERESTED)
-
-  // Resultados personales (opcionales)
-  finishTime        String?                 // Formato: "HH:MM:SS"
-  finishTimeSeconds Int?                    // Para cálculos
-  position          Int?                    // Posición general
-  categoryPosition  Int?                    // Posición en categoría
-
-  // Notas y valoración personal
-  notes             String?                 @db.Text
-  personalRating    Int?                    // 1-5 estrellas
-
-  // Fechas
-  markedAt          DateTime                @default(now())
-  completedAt       DateTime?               // Fecha real de participación
-  updatedAt         DateTime                @updatedAt
-
-  // Relaciones
-  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  competition       Competition             @relation(fields: [competitionId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, competitionId])
-  @@index([userId])
-  @@index([competitionId])
+  @@index([slug])
   @@index([status])
-  @@map("user_competitions")
+  @@index([category])
+  @@index([authorId])
+  @@index([editionId])
+  @@map("posts")
 }
+
+model PostTranslation {
+  id          String            @id @default(uuid())
+  postId      String
+  post        Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
+  language    Language
+  title       String            @db.VarChar(255)
+  excerpt     String?           @db.Text
+  content     String            @db.Text
+  status      TranslationStatus @default(PENDING)
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([postId, language])
+  @@index([postId])
+  @@map("post_translations")
+}
+
+model PostTag {
+  id    String @id @default(uuid())
+  name  String @unique @db.VarChar(50)
+  slug  String @unique @db.VarChar(50)
+  posts Post[]
+
+  @@map("post_tags")
+}
+
+// ===================================
+// NOTAS IMPORTANTES
+// ===================================
+
+// 1. El modelo antiguo "competitions" se deprecará gradualmente
+// 2. Las rutas antiguas seguirán funcionando como alias
+// 3. La migración de datos será:
+//    - Competition antigua → Event + Competition + Edition 2025
+// 4. Herencia de datos:
+//    - Si Edition.distance es NULL → usa Competition.baseDistance
+//    - Si Edition.elevation es NULL → usa Competition.baseElevation
+// 5. Auto-creación de ediciones:
+//    - Cada 1 de enero se crean automáticamente ediciones nuevas
+//    - Se puede crear ediciones históricas on-demand

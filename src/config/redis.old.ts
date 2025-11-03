@@ -19,28 +19,25 @@ redisClient.on('disconnect', () => logger.warn('⚠️ Redis disconnected'));
   }
 })();
 
-// Cache TTL constants
-export const CACHE_TTL = 5 * 60; // 5 minutos
-export const CACHE_TTL_LONG = 60 * 60; // 1 hora
-
 // Cache helpers
-export const cache = {
-  async get(key: string): Promise<string | null> {
+export const cacheService = {
+  async get<T>(key: string): Promise<T | null> {
     try {
       const data = await redisClient.get(key);
-      return data;
+      return data ? JSON.parse(data) : null;
     } catch (error) {
       logger.error(`Cache get error for key ${key}:`, error);
       return null;
     }
   },
 
-  async set(key: string, value: string, ttl?: number): Promise<void> {
+  async set(key: string, value: any, ttl?: number): Promise<void> {
     try {
+      const serialized = JSON.stringify(value);
       if (ttl) {
-        await redisClient.setEx(key, ttl, value);
+        await redisClient.setEx(key, ttl, serialized);
       } else {
-        await redisClient.set(key, value);
+        await redisClient.set(key, serialized);
       }
     } catch (error) {
       logger.error(`Cache set error for key ${key}:`, error);
@@ -64,8 +61,5 @@ export const cache = {
     }
   },
 };
-
-// Legacy export
-export const cacheService = cache;
 
 export default redisClient;

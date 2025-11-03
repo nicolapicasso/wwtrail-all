@@ -1,686 +1,442 @@
-import { Prisma } from '@prisma/client';
-import prisma from '../config/database';
-import { AppError } from '../middlewares/error.middleware';
-import { CreateCompetitionInput, UpdateCompetitionInput } from '../schemas/competition.schema';
-import slugify from '../utils/slugify';
-import { cacheService } from '../config/redis';
+import { PrismaClient } from '@prisma/client';
 import logger from '../utils/logger';
+import { slugify } from '../utils/slugify';
 
-const CACHE_TTL = 300; // 5 minutos
-const CACHE_TTL_LONG = 3600; // 1 hora para datos que cambian poco
+const prisma = new PrismaClient();
 
+/**
+ * CompetitionService v2
+ * 
+ * Maneja las COMPETICIONES (distancias/carreras) dentro de un evento.
+ * Ejemplo: UTMB 171K, CCC 101K, OCC 56K son competitions del evento UTMB Mont Blanc
+ * 
+ * Competition tiene datos BASE que heredan las Editions:
+ * - baseDistance, baseElevation, baseMaxParticipants
+ */
 export class CompetitionService {
-  // ==========================================
-  // CRUD BÁSICO
-  // ==========================================
+  /**
+   * Crear una nueva competición dentro de un evento
+   * @param eventId - ID del evento padre
+   * @param data - Datos de la competición
+   * @param userId - ID del usuario (debe ser organizador del evento o ADMIN)
+   */
+  static async create(eventId: string, data: any, userId: string) {
+    // Verificar que el evento existe
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { id: true, organizerId: true, slug: true },
+    });
 
-  static async create(data: CreateCompetitionInput, organizerId: string) {
-    // Generar slug único
-    const slug = await this.generateUniqueSlug(data.name);
-
-    // Preparar datos de ubicación
-    let locationData = null;
-    if (data.latitude && data.longitude) {
-      // PostGIS: crear Point geometry
-      locationData = Prisma.sql`ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)`;
+    if (!event) {
+      throw new Error('Event not found');
     }
+
+    // Verificar permisos (organizador del evento o ADMIN)
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN' && event.organizerId !== userId) {
+      throw new Error('Unauthorized: Only event organizer or admin can create competitions');
+    }
+
+    // Generar slug único basado en evento + nombre de competición
+    const baseSlug = `${event.slug}-${slugify(data.name)}`;
+    const slug = await this.generateUniqueSlug(baseSlug);
 
     // Crear competición
     const competition = await prisma.competition.create({
       data: {
-        slug,
+        eventId,
         name: data.name,
+        slug,
         description: data.description,
         type: data.type,
-        startDate: new Date(data.startDate),
-        endDate: data.endDate ? new Date(data.endDate) : null,
-        country: data.country,
-        region: data.region,
-        city: data.city,
-        location: locationData as any,
-        distance: data.distance,
-        elevation: data.elevation,
-        website: data.website,
-        email: data.email,
-        phone: data.phone,
-        registrationUrl: data.registrationUrl,
-        registrationStart: data.registrationStart ? new Date(data.registrationStart) : null,
-        registrationEnd: data.registrationEnd ? new Date(data.registrationEnd) : null,
-        maxParticipants: data.maxParticipants,
-        organizerId,
+        
+        // Datos base que heredarán las editions
+        baseDistance: data.baseDistance,
+        baseElevation: data.baseElevation,
+        baseMaxParticipants: data.baseMaxParticipants,
+        
+
+        
+        // Orden de visualización
+        displayOrder: data.displayOrder || 0,
+        
+        // Estado
+        isActive: true,
       },
       include: {
-        organizer: {
+        event: {
           select: {
             id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
+            name: true,
+            slug: true,
+            country: true,
+            city: true,
           },
         },
-      },
-    });
-
-    logger.info(`Competition created: ${competition.name} (${competition.slug}) by organizer ${organizerId}`);
-
-    // Invalidar caché
-    await cacheService.del('competitions:list');
-
-    return competition;
-  }
-
-  static async findAll(filters: any = {}, userId?: string, userRole?: string) {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      type,
-      status,
-      country,
-      startDate,
-      endDate,
-      sortBy = 'startDate',
-      sortOrder = 'asc',
-    } = filters;
-
-    // Convertir a números (vienen como strings desde query params)
-    const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
-    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
-
-    const skip = (pageNum - 1) * limitNum;
-
-    const where: any = {};
-
-    // Filtro por status según rol del usuario
-    if (!userId || userRole === 'ATHLETE' || userRole === 'VIEWER') {
-      where.status = 'PUBLISHED';
-    } else if (userRole === 'ORGANIZER') {
-      where.OR = [
-        { status: 'PUBLISHED' },
-        { organizerId: userId },
-      ];
-    }
-    // ADMIN: no se añade filtro de status (ve todas)
-
-    // Búsqueda por texto
-    if (search) {
-      where.OR = [
-        ...(where.OR || []),
-        { name: { contains: search, mode: 'insensitive' } },
-        { city: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-      ];
-    }
-
-    // Filtro por tipo
-    if (type) {
-      where.type = type;
-    }
-
-    // Filtro por status (si se especifica explícitamente)
-    if (status) {
-      where.status = status;
-    }
-
-    // Filtro por país
-    if (country) {
-      where.country = { equals: country, mode: 'insensitive' };
-    }
-
-    // Filtro por rango de fechas
-    if (startDate) {
-      where.startDate = { ...where.startDate, gte: new Date(startDate) };
-    }
-    if (endDate) {
-      where.startDate = { ...where.startDate, lte: new Date(endDate) };
-    }
-
-    // Hash de parámetros para cache
-    const cacheKey = `competitions:${JSON.stringify({ where, sortBy, sortOrder, page: pageNum, limit: limitNum })}`;
-
-    const cached = await cacheService.get(cacheKey);
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
-    // Consulta a BD
-    const [competitions, total] = await Promise.all([
-      prisma.competition.findMany({
-        where,
-        include: {
-          organizer: {
-            select: {
-              id: true,
-              username: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-          _count: {
-            select: {
-              participants: true,
-              reviews: true,
-            },
-          },
-        },
-        orderBy: { [sortBy]: sortOrder },
-        skip,
-        take: limitNum,
-      }),
-      prisma.competition.count({ where }),
-    ]);
-
-    const result = {
-      data: competitions,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        pages: Math.ceil(total / limitNum),
-      },
-    };
-
-    // Guardar en cache
-    await cacheService.set(cacheKey, JSON.stringify(result), CACHE_TTL);
-
-    return result;
-  }
-
-  static async findById(id: string) {
-    const cacheKey = `competition:${id}`;
-    const cached = await cacheService.get(cacheKey);
-
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
-    const competition = await prisma.competition.findUnique({
-      where: { id },
-      include: {
-        organizer: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-        categories: true,
-        translations: true,
         _count: {
           select: {
-            participants: true,
-            reviews: true,
+            editions: true,
           },
         },
       },
     });
 
-    if (!competition) {
-      throw new AppError('Competition not found', 404);
-    }
-
-    // Incrementar viewCount
-    await prisma.competition.update({
-      where: { id },
-      data: { viewCount: { increment: 1 } },
-    });
-
-    // Guardar en cache
-    await cacheService.set(cacheKey, JSON.stringify(competition), CACHE_TTL);
+    logger.info(`Competition created: ${competition.id} - ${competition.name} (Event: ${event.slug})`);
 
     return competition;
   }
 
-  static async findBySlug(slug: string) {
-    const competition = await prisma.competition.findUnique({
-      where: { slug },
-      include: {
-        organizer: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-        categories: true,
-        translations: true,
-        _count: {
-          select: {
-            participants: true,
-            reviews: true,
-          },
-        },
-      },
-    });
-
-    if (!competition) {
-      throw new AppError('Competition not found', 404);
-    }
-
-    // Incrementar viewCount
-    await prisma.competition.update({
-      where: { slug },
-      data: { viewCount: { increment: 1 } },
-    });
-
-    return competition;
-  }
-
-  static async update(id: string, data: UpdateCompetitionInput, userId: string) {
-    // Verificar que la competición existe
-    const competition = await prisma.competition.findUnique({
-      where: { id },
-      select: { id: true, organizerId: true },
-    });
-
-    if (!competition) {
-      throw new AppError('Competition not found', 404);
-    }
-
-    // Obtener rol del usuario
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    // Verificar permisos: solo el organizador o admin pueden actualizar
-    if (user?.role !== 'ADMIN' && competition.organizerId !== userId) {
-      throw new AppError('You do not have permission to update this competition', 403);
-    }
-
-    // Preparar datos de ubicación si se actualizan coordenadas
-    let locationData = undefined;
-    if (data.latitude !== undefined && data.longitude !== undefined) {
-      if (data.latitude && data.longitude) {
-        locationData = Prisma.sql`ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)` as any;
-      } else {
-        locationData = null;
-      }
-    }
-
-    // Preparar datos de actualización
-    const updateData: any = {
-      ...data,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
-      registrationStart: data.registrationStart ? new Date(data.registrationStart) : undefined,
-      registrationEnd: data.registrationEnd ? new Date(data.registrationEnd) : undefined,
-    };
-
-    if (locationData !== undefined) {
-      updateData.location = locationData;
-    }
-
-    // Actualizar competición
-    const updated = await prisma.competition.update({
-      where: { id },
-      data: updateData,
-      include: {
-        organizer: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
-    });
-
-    logger.info(`Competition updated: ${updated.name} (${updated.id}) by user ${userId}`);
-
-    // Invalidar caché
-    await cacheService.del(`competition:${id}`);
-    await cacheService.del('competitions:list');
-
-    return updated;
-  }
-
-  static async delete(id: string, userId: string) {
-    // Verificar que la competición existe
-    const competition = await prisma.competition.findUnique({
-      where: { id },
-      select: { id: true, name: true, organizerId: true },
-    });
-
-    if (!competition) {
-      throw new AppError('Competition not found', 404);
-    }
-
-    // Obtener rol del usuario
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    // Verificar permisos: solo el organizador o admin pueden eliminar
-    if (user?.role !== 'ADMIN' && competition.organizerId !== userId) {
-      throw new AppError('You do not have permission to delete this competition', 403);
-    }
-
-    // Eliminar competición
-    await prisma.competition.delete({
-      where: { id },
-    });
-
-    logger.warn(`Competition deleted: ${competition.name} (${id}) by user ${userId}`);
-
-    // Invalidar caché
-    await cacheService.del(`competition:${id}`);
-    await cacheService.del('competitions:list');
-
-    return { message: 'Competition deleted successfully' };
-  }
-
-  // ==========================================
-  // BÚSQUEDAS AVANZADAS
-  // ==========================================
-
-  static async findNearby(latitude: number, longitude: number, radiusKm: number = 50) {
-    const radiusMeters = radiusKm * 1000;
-
-    const competitions = await prisma.$queryRaw<any[]>`
-      SELECT 
-        id,
-        slug,
-        name,
-        city,
-        country,
-        "startDate",
-        ST_Distance(
-          location::geography,
-          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
-        ) / 1000 as distance_km
-      FROM competitions
-      WHERE 
-        location IS NOT NULL
-        AND status = 'PUBLISHED'
-        AND ST_DWithin(
-          location::geography,
-          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
-          ${radiusMeters}
-        )
-      ORDER BY distance_km ASC
-      LIMIT 20
-    `;
-
-    logger.info(`Found ${competitions.length} competitions within ${radiusKm}km of (${latitude}, ${longitude})`);
-
-    return competitions;
-  }
-
-  static async search(query: string, limit: number = 20) {
-    if (query.length < 2) {
-      throw new AppError('Search query must be at least 2 characters', 400);
-    }
-
-    const cacheKey = `search:${query}:${limit}`;
-    const cached = await cacheService.get(cacheKey);
-
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
-    const competitions = await prisma.$queryRaw<any[]>`
-      SELECT 
-        id,
-        slug,
-        name,
-        city,
-        country,
-        "startDate",
-        type,
-        distance,
-        elevation,
-        similarity(name, ${query}) + 
-        similarity(COALESCE(city, ''), ${query}) + 
-        similarity(COALESCE(description, ''), ${query}) as relevance
-      FROM competitions
-      WHERE 
-        status = 'PUBLISHED'
-        AND (
-          name ILIKE ${`%${query}%`}
-          OR city ILIKE ${`%${query}%`}
-          OR country ILIKE ${`%${query}%`}
-          OR description ILIKE ${`%${query}%`}
-        )
-      ORDER BY relevance DESC, "startDate" ASC
-      LIMIT ${limit}
-    `;
-
-    logger.info(`Search for "${query}" returned ${competitions.length} results`);
-
-    // Guardar en cache
-    await cacheService.set(cacheKey, JSON.stringify(competitions), CACHE_TTL);
-
-    return competitions;
-  }
-
-  static async getFeatured(limit: number = 10) {
-    const cacheKey = `competitions:featured:${limit}`;
-    const cached = await cacheService.get(cacheKey);
-
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
+  /**
+   * Obtener todas las competiciones de un evento
+   * @param eventId - ID del evento
+   */
+  static async findByEvent(eventId: string) {
     const competitions = await prisma.competition.findMany({
       where: {
-        status: 'PUBLISHED',
-        isHighlighted: true,
-        startDate: {
-          gte: new Date(),
-        },
+        eventId,
+        isActive: true,
       },
       include: {
-        organizer: {
+        event: {
           select: {
             id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
+            name: true,
+            slug: true,
           },
         },
         _count: {
           select: {
-            participants: true,
-            reviews: true,
-          },
-        },
-      },
-      orderBy: [
-        { startDate: 'asc' },
-        { viewCount: 'desc' },
-      ],
-      take: limit,
-    });
-
-    // Guardar en cache (larga duración)
-    await cacheService.set(cacheKey, JSON.stringify(competitions), CACHE_TTL_LONG);
-
-    return competitions;
-  }
-
-  static async getUpcoming(limit: number = 20) {
-    const cacheKey = `competitions:upcoming:${limit}`;
-    const cached = await cacheService.get(cacheKey);
-
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
-    const competitions = await prisma.competition.findMany({
-      where: {
-        status: 'PUBLISHED',
-        startDate: {
-          gte: new Date(),
-        },
-      },
-      include: {
-        organizer: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        _count: {
-          select: {
-            participants: true,
-            reviews: true,
+            editions: true,
           },
         },
       },
       orderBy: {
-        startDate: 'asc',
+        displayOrder: 'asc',
       },
-      take: limit,
     });
-
-    // Guardar en cache
-    await cacheService.set(cacheKey, JSON.stringify(competitions), CACHE_TTL);
 
     return competitions;
   }
 
-  static async getByCountry(country: string, options: { page?: number; limit?: number } = {}) {
-    const page = options.page || 1;
-    const limit = options.limit || 20;
-    
-    // Convertir a números si vienen como strings
-    const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
-    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
-    
-    const skip = (pageNum - 1) * limitNum;
-
-    const cacheKey = `competitions:country:${country}:${pageNum}:${limitNum}`;
-    const cached = await cacheService.get(cacheKey);
-
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
-    const where = {
-      status: 'PUBLISHED' as const,
-      country: {
-        equals: country,
-        mode: 'insensitive' as const,
-      },
-    };
-
-    const [competitions, total] = await Promise.all([
-      prisma.competition.findMany({
-        where,
-        include: {
-          organizer: {
-            select: {
-              id: true,
-              username: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-          _count: {
-            select: {
-              participants: true,
-              reviews: true,
-            },
-          },
-        },
-        orderBy: {
-          startDate: 'asc',
-        },
-        skip,
-        take: limitNum,
-      }),
-      prisma.competition.count({ where }),
-    ]);
-
-    const result = {
-      data: competitions,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        pages: Math.ceil(total / limitNum),
-      },
-    };
-
-    // Guardar en cache
-    await cacheService.set(cacheKey, JSON.stringify(result), CACHE_TTL);
-
-    return result;
-  }
-
-  static async getStats(id: string) {
+  /**
+   * Obtener una competición por ID
+   * @param id - ID de la competición
+   */
+  static async findById(id: string) {
     const competition = await prisma.competition.findUnique({
       where: { id },
-      select: {
-        id: true,
-        name: true,
-        viewCount: true,
-        maxParticipants: true,
-        currentParticipants: true,
-        registrationStatus: true,
-        _count: {
+      include: {
+        event: {
           select: {
-            participants: true,
-            reviews: true,
-            categories: true,
-            results: true,
+            id: true,
+            name: true,
+            slug: true,
+            country: true,
+            city: true,
+            organizerId: true,
           },
         },
-        reviews: {
+        editions: {
+          where: { isActive: true },
+          orderBy: { year: 'desc' },
+          take: 10,
           select: {
-            rating: true,
+            id: true,
+            year: true,
+            slug: true,
+            startDate: true,
+            status: true,
+            price: true,
+            registrationStatus: true,
+          },
+        },
+        _count: {
+          select: {
+            editions: true,
           },
         },
       },
     });
 
     if (!competition) {
-      throw new AppError('Competition not found', 404);
+      throw new Error('Competition not found');
     }
 
-    // Calcular rating promedio
-    const averageRating =
-      competition.reviews.length > 0
-        ? competition.reviews.reduce((sum, r) => sum + r.rating, 0) / competition.reviews.length
-        : 0;
-
-    return {
-      id: competition.id,
-      name: competition.name,
-      totalParticipants: competition._count.participants,
-      totalReviews: competition._count.reviews,
-      totalCategories: competition._count.categories,
-      totalResults: competition._count.results,
-      averageRating: parseFloat(averageRating.toFixed(2)),
-      viewCount: competition.viewCount,
-      currentParticipants: competition.currentParticipants,
-      maxParticipants: competition.maxParticipants,
-      registrationStatus: competition.registrationStatus,
-    };
+    return competition;
   }
 
-  // ==========================================
-  // MÉTODOS PRIVADOS
-  // ==========================================
+  /**
+   * Obtener una competición por slug
+   * @param slug - Slug de la competición
+   */
+  static async findBySlug(slug: string) {
+    const competition = await prisma.competition.findUnique({
+      where: { slug },
+      include: {
+        event: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            country: true,
+            city: true,
+          },
+        },
+        editions: {
+          where: { isActive: true },
+          orderBy: { year: 'desc' },
+          take: 10,
+          select: {
+            id: true,
+            year: true,
+            slug: true,
+            startDate: true,
+            status: true,
+            price: true,
+            registrationStatus: true,
+          },
+        },
+        _count: {
+          select: {
+            editions: true,
+          },
+        },
+      },
+    });
 
-  private static async generateUniqueSlug(name: string): Promise<string> {
-    let slug = slugify(name);
-    let counter = 1;
-
-    while (await prisma.competition.findUnique({ where: { slug } })) {
-      slug = `${slugify(name)}-${counter}`;
-      counter++;
+    if (!competition) {
+      throw new Error('Competition not found');
     }
 
-    return slug;
+    return competition;
+  }
+
+  /**
+   * Actualizar una competición
+   * @param id - ID de la competición
+   * @param data - Datos a actualizar
+   * @param userId - ID del usuario
+   */
+  static async update(id: string, data: any, userId: string) {
+    // Verificar que existe
+    const existing = await prisma.competition.findUnique({
+      where: { id },
+      include: {
+        event: {
+          select: { organizerId: true },
+        },
+      },
+    });
+
+    if (!existing) {
+      throw new Error('Competition not found');
+    }
+
+    // Verificar permisos
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
+      throw new Error('Unauthorized: Only event organizer or admin can update this competition');
+    }
+
+    // Actualizar
+    const competition = await prisma.competition.update({
+      where: { id },
+      data: {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        baseDistance: data.baseDistance,
+        baseElevation: data.baseElevation,
+        baseMaxParticipants: data.baseMaxParticipants,
+        displayOrder: data.displayOrder,
+      },
+      include: {
+        event: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        _count: {
+          select: {
+            editions: true,
+          },
+        },
+      },
+    });
+
+    logger.info(`Competition updated: ${id}`);
+
+    return competition;
+  }
+
+  /**
+   * Eliminar una competición
+   * CUIDADO: También elimina todas sus editions (cascade)
+   * @param id - ID de la competición
+   * @param userId - ID del usuario
+   */
+  static async delete(id: string, userId: string) {
+    // Verificar que existe
+    const existing = await prisma.competition.findUnique({
+      where: { id },
+      include: {
+        event: {
+          select: { organizerId: true },
+        },
+        _count: {
+          select: {
+            editions: true,
+          },
+        },
+      },
+    });
+
+    if (!existing) {
+      throw new Error('Competition not found');
+    }
+
+    // Verificar permisos
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
+      throw new Error('Unauthorized: Only event organizer or admin can delete this competition');
+    }
+
+    // Advertir si tiene editions
+    if (existing._count.editions > 0) {
+      logger.warn(
+        `Deleting competition ${id} with ${existing._count.editions} editions (cascade delete)`
+      );
+    }
+
+    // Eliminar (cascade a editions)
+    await prisma.competition.delete({
+      where: { id },
+    });
+
+    logger.warn(`Competition deleted: ${id} - ${existing.name}`);
+
+    return { message: 'Competition deleted successfully' };
+  }
+
+  /**
+   * Reordenar competiciones de un evento
+   * @param eventId - ID del evento
+   * @param order - Array de { id, displayOrder }
+   * @param userId - ID del usuario
+   */
+  static async reorder(eventId: string, order: { id: string; displayOrder: number }[], userId: string) {
+    // Verificar que el evento existe
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { id: true, organizerId: true },
+    });
+
+    if (!event) {
+      throw new Error('Event not found');
+    }
+
+    // Verificar permisos
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN' && event.organizerId !== userId) {
+      throw new Error('Unauthorized');
+    }
+
+    // Actualizar orden en transacción
+    await prisma.$transaction(
+      order.map((item) =>
+        prisma.competition.update({
+          where: { id: item.id },
+          data: { displayOrder: item.displayOrder },
+        })
+      )
+    );
+
+    logger.info(`Competitions reordered for event ${eventId}`);
+
+    return { message: 'Competitions reordered successfully' };
+  }
+
+  /**
+   * Activar/desactivar una competición
+   * @param id - ID de la competición
+   * @param userId - ID del usuario
+   */
+  static async toggleActive(id: string, userId: string) {
+    // Verificar que existe
+    const existing = await prisma.competition.findUnique({
+      where: { id },
+      include: {
+        event: {
+          select: { organizerId: true },
+        },
+      },
+    });
+
+    if (!existing) {
+      throw new Error('Competition not found');
+    }
+
+    // Verificar permisos
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
+      throw new Error('Unauthorized');
+    }
+
+    // Toggle
+    const competition = await prisma.competition.update({
+      where: { id },
+      data: {
+        isActive: !existing.isActive,
+      },
+    });
+
+    logger.info(`Competition ${id} active status changed to: ${competition.isActive}`);
+
+    return competition;
+  }
+
+  /**
+   * Generar slug único para una competición
+   * @param baseSlug - Slug base
+   */
+  private static async generateUniqueSlug(baseSlug: string): Promise<string> {
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (true) {
+      const existing = await prisma.competition.findUnique({
+        where: { slug },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        return slug;
+      }
+
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
   }
 }

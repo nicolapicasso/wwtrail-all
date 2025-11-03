@@ -22,7 +22,6 @@ import translationRoutes from './routes/translation.routes';
 import userCompetitionRoutes from './routes/user-competition.routes';
 import adminRoutes from './routes/admin.routes';
 import eventRoutes from './routes/event.routes';
-import editionRoutes from './routes/edition.routes';
 
 dotenv.config();
 
@@ -99,8 +98,6 @@ app.use(`/api/${API_VERSION}`, adminRoutes);
 // ============================================
 
 app.use('/api/v2/events', eventRoutes);
-app.use('/api/v2/competitions', competitionRoutes);
-app.use('/api/v2/editions', editionRoutes);
 
 // ============================================
 // ERROR HANDLERS

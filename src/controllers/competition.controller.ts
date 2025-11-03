@@ -1,16 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 import { CompetitionService } from '../services/competition.service';
-import { CreateCompetitionInput, UpdateCompetitionInput } from '../schemas/competition.schema';
+import logger from '../utils/logger';
 
+/**
+ * CompetitionController v2
+ * 
+ * Maneja peticiones HTTP para competiciones (distancias/carreras dentro de eventos)
+ */
 export class CompetitionController {
-  // CRUD Básico
-  
+  /**
+   * POST /api/v2/events/:eventId/competitions
+   * Crear una nueva competición dentro de un evento
+   * @auth Required (organizador del evento o ADMIN)
+   */
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const data: CreateCompetitionInput = req.body;
-      const organizerId = req.user!.id;
+      const { eventId } = req.params;
+      const userId = req.user!.id;
+      const data = req.body;
 
-      const competition = await CompetitionService.create(data, organizerId);
+      const competition = await CompetitionService.create(eventId, data, userId);
 
       res.status(201).json({
         status: 'success',
@@ -22,28 +31,39 @@ export class CompetitionController {
     }
   }
 
-  static async getAll(req: Request, res: Response, next: NextFunction) {
+  /**
+   * GET /api/v2/events/:eventId/competitions
+   * Obtener todas las competiciones de un evento
+   * @auth No requerida
+   */
+  static async getByEvent(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user?.id;
-      const userRole = req.user?.role;
+      const { eventId } = req.params;
 
-      const result = await CompetitionService.findAll(req.query, userId, userRole);
+      const competitions = await CompetitionService.findByEvent(eventId);
 
-      res.status(200).json({
+      res.json({
         status: 'success',
-        ...result,
+        data: competitions,
+        count: competitions.length,
       });
     } catch (error) {
       next(error);
     }
   }
 
+  /**
+   * GET /api/v2/competitions/:id
+   * Obtener una competición por ID
+   * @auth No requerida
+   */
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+
       const competition = await CompetitionService.findById(id);
 
-      res.status(200).json({
+      res.json({
         status: 'success',
         data: competition,
       });
@@ -52,12 +72,18 @@ export class CompetitionController {
     }
   }
 
+  /**
+   * GET /api/v2/competitions/slug/:slug
+   * Obtener una competición por slug
+   * @auth No requerida
+   */
   static async getBySlug(req: Request, res: Response, next: NextFunction) {
     try {
       const { slug } = req.params;
+
       const competition = await CompetitionService.findBySlug(slug);
 
-      res.status(200).json({
+      res.json({
         status: 'success',
         data: competition,
       });
@@ -66,15 +92,20 @@ export class CompetitionController {
     }
   }
 
+  /**
+   * PUT /api/v2/competitions/:id
+   * Actualizar una competición
+   * @auth Required (organizador del evento o ADMIN)
+   */
   static async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const data: UpdateCompetitionInput = req.body;
       const userId = req.user!.id;
+      const data = req.body;
 
       const competition = await CompetitionService.update(id, data, userId);
 
-      res.status(200).json({
+      res.json({
         status: 'success',
         message: 'Competition updated successfully',
         data: competition,
@@ -84,6 +115,11 @@ export class CompetitionController {
     }
   }
 
+  /**
+   * DELETE /api/v2/competitions/:id
+   * Eliminar una competición (y todas sus editions en cascade)
+   * @auth Required (organizador del evento o ADMIN)
+   */
   static async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -91,7 +127,7 @@ export class CompetitionController {
 
       await CompetitionService.delete(id, userId);
 
-      res.status(200).json({
+      res.json({
         status: 'success',
         message: 'Competition deleted successfully',
       });
@@ -100,142 +136,51 @@ export class CompetitionController {
     }
   }
 
-  // Búsquedas Avanzadas
-
-  static async search(req: Request, res: Response, next: NextFunction) {
+  /**
+   * POST /api/v2/events/:eventId/competitions/reorder
+   * Reordenar competiciones de un evento
+   * @auth Required (organizador del evento o ADMIN)
+   */
+  static async reorder(req: Request, res: Response, next: NextFunction) {
     try {
-      const { q, limit } = req.query;
+      const { eventId } = req.params;
+      const userId = req.user!.id;
+      const { order } = req.body;
 
-      if (!q || typeof q !== 'string') {
+      if (!Array.isArray(order)) {
         return res.status(400).json({
           status: 'error',
-          message: 'Search query (q) is required',
+          message: 'Order must be an array of { id, displayOrder }',
         });
       }
 
-      const limitNum = limit ? parseInt(limit as string, 10) : 20;
-      const results = await CompetitionService.search(q, limitNum);
+      await CompetitionService.reorder(eventId, order, userId);
 
-      res.status(200).json({
+      res.json({
         status: 'success',
-        data: results,
-        count: (results as any[]).length,
+        message: 'Competitions reordered successfully',
       });
     } catch (error) {
       next(error);
     }
   }
 
-  static async getNearby(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { lat, lon, radius } = req.query;
-
-      if (!lat || !lon) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Latitude (lat) and longitude (lon) are required',
-        });
-      }
-
-      const latitude = parseFloat(lat as string);
-      const longitude = parseFloat(lon as string);
-      const radiusKm = radius ? parseFloat(radius as string) : 50;
-
-      // Validar rangos
-      if (latitude < -90 || latitude > 90) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Latitude must be between -90 and 90',
-        });
-      }
-
-      if (longitude < -180 || longitude > 180) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Longitude must be between -180 and 180',
-        });
-      }
-
-      const competitions = await CompetitionService.findNearby(
-        latitude,
-        longitude,
-        radiusKm
-      );
-
-      res.status(200).json({
-        status: 'success',
-        data: competitions,
-        count: (competitions as any[]).length,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async getFeatured(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { limit } = req.query;
-      const limitNum = limit ? parseInt(limit as string, 10) : 10;
-
-      const competitions = await CompetitionService.getFeatured(limitNum);
-
-      res.status(200).json({
-        status: 'success',
-        data: competitions,
-        count: competitions.length,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async getUpcoming(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { limit } = req.query;
-      const limitNum = limit ? parseInt(limit as string, 10) : 20;
-
-      const competitions = await CompetitionService.getUpcoming(limitNum);
-
-      res.status(200).json({
-        status: 'success',
-        data: competitions,
-        count: competitions.length,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async getByCountry(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { country } = req.params;
-      const { page, limit } = req.query;
-
-      const pageNum = page ? parseInt(page as string, 10) : 1;
-      const limitNum = limit ? parseInt(limit as string, 10) : 20;
-
-      const result = await CompetitionService.getByCountry(country, {
-        page: pageNum,
-        limit: limitNum,
-      });
-
-      res.status(200).json({
-        status: 'success',
-        ...result,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async getStats(req: Request, res: Response, next: NextFunction) {
+  /**
+   * PATCH /api/v2/competitions/:id/toggle
+   * Activar/desactivar una competición
+   * @auth Required (organizador del evento o ADMIN)
+   */
+  static async toggleActive(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const stats = await CompetitionService.getStats(id);
+      const userId = req.user!.id;
 
-      res.status(200).json({
+      const competition = await CompetitionService.toggleActive(id, userId);
+
+      res.json({
         status: 'success',
-        data: stats,
+        message: `Competition ${competition.isActive ? 'activated' : 'deactivated'}`,
+        data: competition,
       });
     } catch (error) {
       next(error);
