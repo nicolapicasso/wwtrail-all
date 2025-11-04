@@ -48,8 +48,8 @@ interface UpdateEventInput {
 }
 
 interface EventFilters {
-  page?: number;
-  limit?: number;
+  page?: number | string;  // ✅ Puede venir como string desde query params
+  limit?: number | string; // ✅ Puede venir como string desde query params
   search?: string;
   country?: string;
   isHighlighted?: boolean;
@@ -59,6 +59,224 @@ interface EventFilters {
 }
 
 export class EventService {
+  /**
+   * Obtener eventos del usuario (solo los suyos)
+   * ADMIN ve todos, ORGANIZER solo los suyos
+   */
+  static async getMyEvents(userId: string, userRole: string, filters: any = {}) {
+    try {
+      const { page = 1, limit = 20, status } = filters;
+      const skip = (page - 1) * limit;
+
+      // Base where clause
+      const where: any = {};
+
+      // Si es ORGANIZER, solo ve los suyos
+      if (userRole !== 'ADMIN') {
+        where.organizerId = userId;
+      }
+
+      // Filtro de status si se proporciona
+      if (status) {
+        where.status = status;
+      }
+
+      // Obtener eventos
+      const [events, total] = await Promise.all([
+        prisma.event.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            organizer: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+            _count: {
+              select: {
+                competitions: true,
+              },
+            },
+          },
+        }),
+        prisma.event.count({ where }),
+      ]);
+
+      logger.info(`Retrieved ${events.length} events for user ${userId}`);
+
+      return {
+        data: events,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      logger.error(`Error getting user events: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener eventos pendientes de aprobación (solo ADMIN)
+   */
+  static async getPendingEvents(filters: any = {}) {
+    try {
+      const { page = 1, limit = 20 } = filters;
+      const skip = (page - 1) * limit;
+
+      const [events, total] = await Promise.all([
+        prisma.event.findMany({
+          where: { status: 'DRAFT' },
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            organizer: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+            _count: {
+              select: {
+                competitions: true,
+              },
+            },
+          },
+        }),
+        prisma.event.count({ where: { status: 'DRAFT' } }),
+      ]);
+
+      logger.info(`Retrieved ${events.length} pending events`);
+
+      return {
+        data: events,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      logger.error(`Error getting pending events: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Aprobar evento (cambiar status a PUBLISHED)
+   * Solo ADMIN
+   */
+  static async approveEvent(eventId: string, adminId: string) {
+    try {
+      const event = await prisma.event.update({
+        where: { id: eventId },
+        data: { 
+          status: 'PUBLISHED',
+          updatedAt: new Date(),
+        },
+        include: {
+          organizer: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Invalidar caché
+      await cache.del('events:list');
+      await cache.del(`event:${eventId}`);
+
+      logger.info(`Event ${eventId} approved by admin ${adminId}`);
+
+      return event;
+    } catch (error) {
+      logger.error(`Error approving event: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Rechazar evento (cambiar status a REJECTED con razón)
+   * Solo ADMIN
+   */
+  static async rejectEvent(eventId: string, adminId: string, reason?: string) {
+    try {
+      const event = await prisma.event.update({
+        where: { id: eventId },
+        data: { 
+          status: 'REJECTED',
+          updatedAt: new Date(),
+        },
+        include: {
+          organizer: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      logger.warn(`Event ${eventId} rejected by admin ${adminId}. Reason: ${reason || 'No reason provided'}`);
+
+      return event;
+    } catch (error) {
+      logger.error(`Error rejecting event: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener estadísticas del colaborador
+   */
+  static async getUserStats(userId: string, userRole: string) {
+    try {
+      const where: any = userRole === 'ADMIN' ? {} : { organizerId: userId };
+
+      const [total, published, draft, rejected] = await Promise.all([
+        prisma.event.count({ where }),
+        prisma.event.count({ where: { ...where, status: 'PUBLISHED' } }),
+        prisma.event.count({ where: { ...where, status: 'DRAFT' } }),
+        prisma.event.count({ where: { ...where, status: 'REJECTED' } }),
+      ]);
+
+      const stats = {
+        totalEvents: total,
+        published,
+        draft,
+        rejected,
+        approvalRate: total > 0 ? ((published / total) * 100).toFixed(1) : '0',
+      };
+
+      logger.info(`Stats retrieved for user ${userId}`);
+      return stats;
+    } catch (error) {
+      logger.error(`Error getting user stats: ${error}`);
+      throw error;
+    }
+  }
+
   // ===================================
   // CRUD BÁSICO
   // ===================================
@@ -66,77 +284,83 @@ export class EventService {
   /**
    * Crear un nuevo evento
    */
-  static async create(data: CreateEventInput, organizerId: string) {
-    // Generar slug único
-    const slug = await generateUniqueSlug(data.name, 'event');
+  
+  /**
+   * Crear evento con lógica de roles
+   * - ADMIN: crea con status PUBLISHED
+   * - ORGANIZER: crea con status DRAFT (pendiente aprobación)
+   */
+  static async create(data: any, organizerId: string, userRole: string) {
+    try {
+      // Determinar status según rol
+      const status = userRole === 'ADMIN' ? 'PUBLISHED' : 'DRAFT';
 
-    // Crear el evento
-    const event = await prisma.event.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        country: data.country,
-        city: data.city,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        websiteUrl: data.websiteUrl,
-        email: data.email,
-        phone: data.phone,
-        facebookUrl: data.facebookUrl,
-        instagramUrl: data.instagramUrl,
-        logo: data.logo,
-        coverImage: data.coverImage,
-        firstEditionYear: data.firstEditionYear,
-        isHighlighted: data.isHighlighted,
-        originalLanguage: data.originalLanguage,
-        organizerId: organizerId,
-        slug: slug,
-        status: EventStatus.DRAFT,
-      },
-      include: {
-        organizer: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+      // Generar slug único
+      const slug = await this.generateUniqueSlug(data.name);
+
+      // Preparar coordenadas PostGIS si existen
+      let locationData = {};
+      if (data.latitude && data.longitude) {
+        // Crear el evento primero sin location
+        locationData = {
+          latitude: data.latitude,
+          longitude: data.longitude,
+        };
+      }
+
+      // Crear evento
+      const event = await prisma.event.create({
+        data: {
+          ...data,
+          slug,
+          organizerId,
+          status, // ✅ Asignar status según rol
+          ...locationData,
+        },
+        include: {
+          organizer: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Si hay coordenadas, actualizar el location con PostGIS
-    if (data.latitude && data.longitude) {
-      await prisma.$executeRawUnsafe(`
-        UPDATE events 
-        SET location = ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)
-        WHERE id = '${event.id}'
-      `);
+      // Si tiene coordenadas, actualizar con PostGIS
+      if (data.latitude && data.longitude) {
+        await prisma.$executeRaw`
+          UPDATE events
+          SET location = ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)
+          WHERE id = ${event.id}::uuid
+        `;
+      }
+
+      // Invalidar caché
+      await cache.del('events:list');
+
+      logger.info(`Event created: ${event.id} by user ${organizerId} with status ${status}`);
+      return event;
+    } catch (error) {
+      logger.error(`Error creating event: ${error}`);
+      throw error;
     }
-
-    // Invalidar caché
-    await cache.del('events:list');
-
-    logger.info(`Event created: ${event.name} (${event.id})`);
-
-    return event;
   }
-
   /**
    * Listar eventos con filtros y paginación
    */
   static async findAll(filters: EventFilters = {}) {
-    const {
-      page = 1,
-      limit = 20,
-      search,
-      country,
-      isHighlighted,
-      status,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = filters;
+    // ✅ CORRECCIÓN: Convertir explícitamente a números
+    const page = Number(filters.page) || 1;
+    const limit = Number(filters.limit) || 20;
+    const search = filters.search;
+    const country = filters.country;
+    const isHighlighted = filters.isHighlighted;
+    const status = filters.status;
+    const sortBy = filters.sortBy || 'createdAt';
+    const sortOrder = filters.sortOrder || 'desc';
 
     const skip = (page - 1) * limit;
 
@@ -177,7 +401,7 @@ export class EventService {
       prisma.event.findMany({
         where,
         skip,
-        take: limit,
+        take: limit, // ✅ Ahora es número
         orderBy: { [sortBy]: sortOrder },
         include: {
           organizer: {
@@ -545,8 +769,10 @@ export class EventService {
   /**
    * Eventos por país
    */
-  static async getByCountry(country: string, options: { page?: number; limit?: number } = {}) {
-    const { page = 1, limit = 20 } = options;
+  static async getByCountry(country: string, options: { page?: number | string; limit?: number | string } = {}) {
+    // ✅ CORRECCIÓN: Convertir explícitamente a números
+    const page = Number(options.page) || 1;
+    const limit = Number(options.limit) || 20;
     const skip = (page - 1) * limit;
 
     const cacheKey = `events:country:${country}:${page}:${limit}`;
@@ -564,7 +790,7 @@ export class EventService {
           status: EventStatus.PUBLISHED,
         },
         skip,
-        take: limit,
+        take: limit, // ✅ Ahora es número
         orderBy: { viewCount: 'desc' },
         include: {
           organizer: {

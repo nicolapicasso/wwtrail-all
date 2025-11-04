@@ -311,33 +311,41 @@ export class EditionService {
   }
 
   /**
-   * Obtener edición CON HERENCIA de datos
+   * Obtener edición CON HERENCIA de datos ⭐
    * Si un campo es NULL en Edition, se usa el valor de Competition
+   * ESTE ES EL MÉTODO CLAVE PARA EL FRONTEND
    */
   static async getWithInheritance(id: string) {
     const edition = await this.findById(id);
 
-    // Aplicar herencia de datos
+    // ✅ CORRECCIÓN: Aplicar herencia y retornar campos resueltos
     return {
       ...edition,
       
-      // Si edition.distance es NULL, usar competition.baseDistance
-      distance: edition.distance ?? edition.competition.baseDistance,
+      // Campos resueltos con herencia
+      resolvedDistance: edition.distance ?? edition.competition.baseDistance,
+      resolvedElevation: edition.elevation ?? edition.competition.baseElevation,
+      resolvedMaxParticipants: edition.maxParticipants ?? edition.competition.baseMaxParticipants,
+      resolvedCity: edition.city ?? edition.competition.event.city,
       
-      // Si edition.elevation es NULL, usar competition.baseElevation
-      elevation: edition.elevation ?? edition.competition.baseElevation,
+      // Información estructurada del evento y competición
+      event: {
+        id: edition.competition.event.id,
+        name: edition.competition.event.name,
+        slug: edition.competition.event.slug,
+        country: edition.competition.event.country,
+        city: edition.competition.event.city,
+      },
       
-      // Si edition.maxParticipants es NULL, usar competition.baseMaxParticipants
-      maxParticipants: edition.maxParticipants ?? edition.competition.baseMaxParticipants,
-      
-      // Si edition.city es NULL, usar event.city
-      city: edition.city ?? edition.competition.event.city,
-      
-      // Información adicional útil
-      eventName: edition.competition.event.name,
-      eventCountry: edition.competition.event.country,
-      competitionName: edition.competition.name,
-      competitionType: edition.competition.type,
+      competition: {
+        id: edition.competition.id,
+        name: edition.competition.name,
+        slug: edition.competition.slug,
+        type: edition.competition.type,
+        baseDistance: edition.competition.baseDistance,
+        baseElevation: edition.competition.baseElevation,
+        baseMaxParticipants: edition.competition.baseMaxParticipants,
+      },
     };
   }
 

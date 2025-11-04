@@ -174,7 +174,7 @@ export class CompetitionService {
    * @param slug - Slug de la competición
    */
   static async findBySlug(slug: string) {
-    const competition = await prisma.competition.findUnique({
+    const competition = await prisma.competition.findFirst({
       where: { slug },
       include: {
         event: {
@@ -187,7 +187,6 @@ export class CompetitionService {
           },
         },
         editions: {
-          where: { isActive: true },
           orderBy: { year: 'desc' },
           take: 10,
           select: {

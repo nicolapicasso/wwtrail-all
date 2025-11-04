@@ -214,7 +214,6 @@ export class AuthService {
         country: true,
         city: true,
         isActive: true,
-        isVerified: true,
         createdAt: true,
         updatedAt: true,
       },

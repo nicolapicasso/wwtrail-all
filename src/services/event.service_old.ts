@@ -48,8 +48,8 @@ interface UpdateEventInput {
 }
 
 interface EventFilters {
-  page?: number;
-  limit?: number;
+  page?: number | string;  // ✅ Puede venir como string desde query params
+  limit?: number | string; // ✅ Puede venir como string desde query params
   search?: string;
   country?: string;
   isHighlighted?: boolean;
@@ -66,22 +66,32 @@ export class EventService {
   /**
    * Crear un nuevo evento
    */
-  static async create(data: CreateEventInput) {
+  static async create(data: CreateEventInput, organizerId: string) {
     // Generar slug único
     const slug = await generateUniqueSlug(data.name, 'event');
 
     // Crear el evento
     const event = await prisma.event.create({
       data: {
-        ...data,
-        slug,
-        status: EventStatus.DRAFT, // Por defecto en borrador
-        // Si hay coordenadas, crear el point de PostGIS
-        ...(data.latitude && data.longitude && {
-          location: prisma.$executeRawUnsafe(
-            `ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)`
-          ),
-        }),
+        name: data.name,
+        description: data.description,
+        country: data.country,
+        city: data.city,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        websiteUrl: data.websiteUrl,
+        email: data.email,
+        phone: data.phone,
+        facebookUrl: data.facebookUrl,
+        instagramUrl: data.instagramUrl,
+        logo: data.logo,
+        coverImage: data.coverImage,
+        firstEditionYear: data.firstEditionYear,
+        isHighlighted: data.isHighlighted,
+        originalLanguage: data.originalLanguage,
+        organizerId: organizerId,
+        slug: slug,
+        status: EventStatus.DRAFT,
       },
       include: {
         organizer: {
@@ -96,6 +106,15 @@ export class EventService {
       },
     });
 
+    // Si hay coordenadas, actualizar el location con PostGIS
+    if (data.latitude && data.longitude) {
+      await prisma.$executeRawUnsafe(`
+        UPDATE events 
+        SET location = ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)
+        WHERE id = '${event.id}'
+      `);
+    }
+
     // Invalidar caché
     await cache.del('events:list');
 
@@ -108,16 +127,15 @@ export class EventService {
    * Listar eventos con filtros y paginación
    */
   static async findAll(filters: EventFilters = {}) {
-    const {
-      page = 1,
-      limit = 20,
-      search,
-      country,
-      isHighlighted,
-      status,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = filters;
+    // ✅ CORRECCIÓN: Convertir explícitamente a números
+    const page = Number(filters.page) || 1;
+    const limit = Number(filters.limit) || 20;
+    const search = filters.search;
+    const country = filters.country;
+    const isHighlighted = filters.isHighlighted;
+    const status = filters.status;
+    const sortBy = filters.sortBy || 'createdAt';
+    const sortOrder = filters.sortOrder || 'desc';
 
     const skip = (page - 1) * limit;
 
@@ -158,7 +176,7 @@ export class EventService {
       prisma.event.findMany({
         where,
         skip,
-        take: limit,
+        take: limit, // ✅ Ahora es número
         orderBy: { [sortBy]: sortOrder },
         include: {
           organizer: {
@@ -526,8 +544,10 @@ export class EventService {
   /**
    * Eventos por país
    */
-  static async getByCountry(country: string, options: { page?: number; limit?: number } = {}) {
-    const { page = 1, limit = 20 } = options;
+  static async getByCountry(country: string, options: { page?: number | string; limit?: number | string } = {}) {
+    // ✅ CORRECCIÓN: Convertir explícitamente a números
+    const page = Number(options.page) || 1;
+    const limit = Number(options.limit) || 20;
     const skip = (page - 1) * limit;
 
     const cacheKey = `events:country:${country}:${page}:${limit}`;
@@ -545,7 +565,7 @@ export class EventService {
           status: EventStatus.PUBLISHED,
         },
         skip,
-        take: limit,
+        take: limit, // ✅ Ahora es número
         orderBy: { viewCount: 'desc' },
         include: {
           organizer: {
@@ -634,5 +654,3 @@ export class EventService {
     };
   }
 }
-
-

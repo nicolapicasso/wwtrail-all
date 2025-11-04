@@ -14,34 +14,22 @@ export class EventController {
    * Crear un nuevo evento
    * @auth Required (ORGANIZER o ADMIN)
    */
-  
-  /**
-   * Crear evento (ahora considera el rol del usuario)
-   * POST /api/v2/events
-   */
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = req.body;
       const userId = req.user!.id;
-      const userRole = req.user!.role;
+      const data = req.body;
 
-      const event = await EventService.create(data, userId, userRole);
-
-      // Mensaje diferente según el status
-      const message = userRole === 'ADMIN' 
-        ? 'Event created and published successfully'
-        : 'Event created successfully. Pending approval by administrator.';
+      const event = await EventService.create(data, userId);
 
       res.status(201).json({
         status: 'success',
-        message,
+        message: 'Event created successfully',
         data: event,
       });
     } catch (error) {
       next(error);
     }
   }
-
 
   /**
    * GET /api/v2/events
@@ -289,107 +277,6 @@ export class EventController {
       res.json({
         status: 'success',
         message: 'Event deleted successfully',
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-  /**
-   * Obtener mis eventos (solo los que he creado)
-   * GET /api/v2/events/my-events
-   */
-  static async getMyEvents(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user!.id;
-      const userRole = req.user!.role;
-      const filters = req.query;
-
-      const result = await EventService.getMyEvents(userId, userRole, filters);
-
-      res.json({
-        status: 'success',
-        ...result,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Obtener eventos pendientes de aprobación (solo ADMIN)
-   * GET /api/v2/events/pending
-   */
-  static async getPendingEvents(req: Request, res: Response, next: NextFunction) {
-    try {
-      const filters = req.query;
-      const result = await EventService.getPendingEvents(filters);
-
-      res.json({
-        status: 'success',
-        ...result,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Aprobar evento (solo ADMIN)
-   * POST /api/v2/events/:id/approve
-   */
-  static async approveEvent(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const adminId = req.user!.id;
-
-      const event = await EventService.approveEvent(id, adminId);
-
-      res.json({
-        status: 'success',
-        message: 'Event approved and published successfully',
-        data: event,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Rechazar evento (solo ADMIN)
-   * POST /api/v2/events/:id/reject
-   */
-  static async rejectEvent(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const adminId = req.user!.id;
-      const { reason } = req.body;
-
-      const event = await EventService.rejectEvent(id, adminId, reason);
-
-      res.json({
-        status: 'success',
-        message: 'Event rejected',
-        data: event,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Obtener estadísticas del usuario
-   * GET /api/v2/events/my-stats
-   */
-  static async getMyStats(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user!.id;
-      const userRole = req.user!.role;
-
-      const stats = await EventService.getUserStats(userId, userRole);
-
-      res.json({
-        status: 'success',
-        data: stats,
       });
     } catch (error) {
       next(error);

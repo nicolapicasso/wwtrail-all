@@ -3,6 +3,7 @@ import { EventController } from '../controllers/event.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { authorize } from '../middlewares/authorize.middleware';
 import { validate } from '../middlewares/validate.middleware';
+import { checkEventOwnership } from '../middlewares/ownership.middleware';
 import {
   createEventSchema,
   updateEventSchema,
@@ -18,71 +19,131 @@ import { eventCompetitionsRouter } from './competition.routes';
 
 const router = Router();
 
-/**
- * RUTAS PÚBLICAS (No requieren autenticación)
- */
+// ============================================
+// IMPORTANTE: ORDEN DE LAS RUTAS
+// ============================================
+// Las rutas más específicas DEBEN ir primero
+// para evitar que sean capturadas por /:id
+// ============================================
 
-// GET /api/v2/events/search - Búsqueda full-text
+// ===================================
+// RUTAS PÚBLICAS (sin autenticación)
+// ===================================
+
+// Búsqueda full-text
 router.get(
   '/search',
   validate(searchEventsSchema),
   EventController.search
 );
 
-// GET /api/v2/events/nearby - Búsqueda geoespacial
+// Búsqueda geoespacial
 router.get(
   '/nearby',
   validate(nearbyEventsSchema),
   EventController.getNearby
 );
 
-// GET /api/v2/events/featured - Eventos destacados
+// Eventos destacados
 router.get(
   '/featured',
   validate(featuredEventsSchema),
   EventController.getFeatured
 );
 
-// GET /api/v2/events/country/:country - Por país
+// Por país
 router.get(
   '/country/:country',
   validate(eventsByCountrySchema),
   EventController.getByCountry
 );
 
-// GET /api/v2/events/slug/:slug - Por slug (antes de /:id)
+// Por slug (antes de /:id)
 router.get(
   '/slug/:slug',
   validate(eventSlugSchema),
   EventController.getBySlug
 );
 
-// GET /api/v2/events - Listar todos
+// ===================================
+// RUTAS PROTEGIDAS - USUARIOS
+// ===================================
+
+// Mis eventos (ORGANIZER ve solo suyos, ADMIN ve todos)
+router.get(
+  '/my-events',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  EventController.getMyEvents
+);
+
+// Mis estadísticas
+router.get(
+  '/my-stats',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  EventController.getMyStats
+);
+
+// ===================================
+// RUTAS PROTEGIDAS - SOLO ADMIN
+// ===================================
+
+// Eventos pendientes de aprobación
+router.get(
+  '/pending',
+  authenticate,
+  authorize('ADMIN'),
+  EventController.getPendingEvents
+);
+
+// Aprobar evento
+router.post(
+  '/:id/approve',
+  authenticate,
+  authorize('ADMIN'),
+  EventController.approveEvent
+);
+
+// Rechazar evento
+router.post(
+  '/:id/reject',
+  authenticate,
+  authorize('ADMIN'),
+  EventController.rejectEvent
+);
+
+// ===================================
+// RUTAS PÚBLICAS CON ID
+// (Deben ir después de las rutas específicas)
+// ===================================
+
+// Listar todos los eventos
 router.get(
   '/',
   validate(getEventsSchema),
   EventController.getAll
 );
 
-// GET /api/v2/events/:id/stats - Estadísticas
+// Estadísticas del evento
 router.get(
   '/:id/stats',
   validate(eventIdSchema),
   EventController.getStats
 );
 
-// GET /api/v2/events/:id - Por ID
+// Por ID (DEBE ir al final)
 router.get(
   '/:id',
   validate(eventIdSchema),
   EventController.getById
 );
 
-/**
- * RUTAS PROTEGIDAS (Requieren autenticación)
- */
+// ===================================
+// RUTAS PROTEGIDAS - CRUD
+// ===================================
 
-// POST /api/v2/events - Crear evento (ORGANIZER o ADMIN)
+// Crear evento (ORGANIZER crea en DRAFT, ADMIN en PUBLISHED)
 router.post(
   '/',
   authenticate,
@@ -91,33 +152,38 @@ router.post(
   EventController.create
 );
 
-// PUT /api/v2/events/:id - Actualizar (organizador o ADMIN)
+// Actualizar evento (solo creador o ADMIN)
 router.put(
   '/:id',
   authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
   validate(updateEventSchema),
+  checkEventOwnership,
   EventController.update
 );
 
-// PATCH /api/v2/events/:id - Actualizar parcial (alias de PUT)
+// Actualizar evento parcial (alias de PUT)
 router.patch(
   '/:id',
   authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
   validate(updateEventSchema),
+  checkEventOwnership,
   EventController.update
 );
 
-// DELETE /api/v2/events/:id - Eliminar (organizador o ADMIN)
+// Eliminar evento (solo ADMIN)
 router.delete(
   '/:id',
   authenticate,
+  authorize('ADMIN'),
   validate(eventIdSchema),
   EventController.delete
 );
 
-/**
- * RUTAS ANIDADAS - COMPETITIONS
- */
+// ===================================
+// RUTAS ANIDADAS - COMPETITIONS
+// ===================================
 
 // /api/v2/events/:eventId/competitions/*
 router.use('/:eventId/competitions', eventCompetitionsRouter);

@@ -184,15 +184,3 @@ export const eventSlugSchema = z.object({
     slug: z.string().min(1, 'Slug is required'),
   }),
 });
-
-
-/**
- * Schema para rechazar evento con razón
- */
-export const rejectEventSchema = z.object({
-  body: z.object({
-    reason: z.string().min(10, 'Reason must be at least 10 characters').max(500).optional(),
-  }),
-});
-
-export type RejectEventInput = z.infer<typeof rejectEventSchema>['body'];

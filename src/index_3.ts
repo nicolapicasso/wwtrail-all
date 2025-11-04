@@ -59,9 +59,8 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-// Rate limiting - DESACTIVADO en desarrollo para evitar error 429
-// Descomentar en producción para proteger la API
-// app.use(apiLimiter);
+// Rate limiting
+app.use(apiLimiter);
 
 // ============================================
 // HEALTH CHECK
