@@ -1,26 +1,77 @@
-// components/CompetitionCard.tsx - Individual competition card component
+// components/CompetitionList.tsx - List competitions for an event
 
 'use client';
 
 import Link from 'next/link';
 import { Competition } from '@/types/v2';
+import { useCompetitions } from '@/hooks/useCompetitions';
 import { Mountain, TrendingUp, Users, Calendar } from 'lucide-react';
+
+interface CompetitionListProps {
+  eventId: string;
+  eventSlug?: string;
+  onSelect?: (competition: Competition) => void;
+}
+
+export function CompetitionList({ eventId, eventSlug, onSelect }: CompetitionListProps) {
+  const { competitions, loading, error } = useCompetitions(eventId);
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="animate-pulse rounded-lg border p-4">
+            <div className="h-6 w-48 rounded bg-gray-200" />
+            <div className="mt-2 h-4 w-full rounded bg-gray-200" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <p className="text-sm text-red-800">Error loading competitions: {error}</p>
+      </div>
+    );
+  }
+
+  if (competitions.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed p-8 text-center">
+        <Mountain className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-semibold text-gray-900">No competitions yet</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          This event doesn't have any competitions configured.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {competitions.map((competition) => (
+        <CompetitionCard
+          key={competition.id}
+          competition={competition}
+          eventSlug={eventSlug}
+          onClick={onSelect ? () => onSelect(competition) : undefined}
+        />
+      ))}
+    </div>
+  );
+}
 
 interface CompetitionCardProps {
   competition: Competition;
   eventSlug?: string;
   onClick?: () => void;
-  className?: string;
 }
 
-export function CompetitionCard({ 
-  competition, 
-  eventSlug, 
-  onClick,
-  className = '' 
-}: CompetitionCardProps) {
+function CompetitionCard({ competition, eventSlug, onClick }: CompetitionCardProps) {
   const content = (
-    <div className={`group relative overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md ${className}`}>
+    <div className="group relative overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between">
         {/* Main Info */}
         <div className="flex-1">
@@ -98,9 +149,7 @@ export function CompetitionCard({
           {competition._count?.editions !== undefined && (
             <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
-              <span>
-                {competition._count.editions} edition{competition._count.editions !== 1 ? 's' : ''} available
-              </span>
+              <span>{competition._count.editions} edition{competition._count.editions !== 1 ? 's' : ''} available</span>
             </div>
           )}
         </div>
@@ -149,28 +198,33 @@ export function CompetitionCard({
   return content;
 }
 
-// Compact version for inline display
-interface CompetitionCardCompactProps {
-  competition: Competition;
+// Compact version for tables/lists
+interface CompetitionListCompactProps {
+  eventId: string;
   className?: string;
 }
 
-export function CompetitionCardCompact({ competition, className = '' }: CompetitionCardCompactProps) {
+export function CompetitionListCompact({ eventId, className = '' }: CompetitionListCompactProps) {
+  const { competitions, loading } = useCompetitions(eventId);
+
+  if (loading) {
+    return <div className={`animate-pulse h-6 rounded bg-gray-200 ${className}`} />;
+  }
+
+  if (competitions.length === 0) {
+    return <span className={`text-sm text-muted-foreground ${className}`}>No competitions</span>;
+  }
+
   return (
-    <div className={`flex items-center justify-between rounded-md border p-3 ${className}`}>
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-          <Mountain className="h-5 w-5 text-green-600" />
+    <div className={`space-y-1 ${className}`}>
+      {competitions.map((comp) => (
+        <div key={comp.id} className="flex items-center gap-2 text-sm">
+          <span className="font-medium">{comp.name}</span>
+          {comp.baseDistance && (
+            <span className="text-muted-foreground">• {comp.baseDistance}km</span>
+          )}
         </div>
-        <div>
-          <p className="font-semibold">{competition.name}</p>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {competition.baseDistance && <span>{competition.baseDistance}km</span>}
-            {competition.baseElevation && <span>• {competition.baseElevation}m D+</span>}
-          </div>
-        </div>
-      </div>
-      <span className="text-xs font-medium text-muted-foreground">{competition.type}</span>
+      ))}
     </div>
   );
 }

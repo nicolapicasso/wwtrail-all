@@ -1,5 +1,5 @@
 // lib/api/auth.service.ts
-import { apiClientV1 } from './client';
+import apiClient from './client';
 import Cookies from 'js-cookie';
 import type { LoginCredentials, RegisterData, AuthResponse, User } from '@/types/auth';
 
@@ -11,8 +11,8 @@ interface ApiResponse<T> {
 }
 
 /**
- * Auth Service - USA V1
- * Usa apiClientV1 que tiene baseURL=/api/v1
+ * Auth Service
+ * IMPORTANTE: Usa rutas relativas porque client.ts ya tiene baseURL=/api/v1
  */
 export const authService = {
   /**
@@ -20,7 +20,7 @@ export const authService = {
    * POST /auth/login (relativo a /api/v1)
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await apiClientV1.post<ApiResponse<AuthResponse>>(
+    const response = await apiClient.post<ApiResponse<AuthResponse>>(
       '/auth/login',
       credentials
     );
@@ -48,7 +48,7 @@ export const authService = {
    * POST /auth/register
    */
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await apiClientV1.post<ApiResponse<AuthResponse>>(
+    const response = await apiClient.post<ApiResponse<AuthResponse>>(
       '/auth/register',
       data
     );
@@ -81,7 +81,7 @@ export const authService = {
       
       if (refreshToken) {
         // Enviar refreshToken al backend para invalidarlo
-        await apiClientV1.post('/auth/logout', { refreshToken });
+        await apiClient.post('/auth/logout', { refreshToken });
       }
     } catch (error) {
       console.error('Error during logout:', error);
@@ -97,7 +97,7 @@ export const authService = {
    * GET /auth/me
    */
   async getCurrentUser(): Promise<User> {
-    const response = await apiClientV1.get<ApiResponse<User>>('/auth/me');
+    const response = await apiClient.get<ApiResponse<User>>('/auth/me');
     return response.data.data;
   },
 
@@ -106,7 +106,7 @@ export const authService = {
    * POST /auth/refresh
    */
   async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const response = await apiClientV1.post<ApiResponse<{ accessToken: string; refreshToken: string }>>(
+    const response = await apiClient.post<ApiResponse<{ accessToken: string; refreshToken: string }>>(
       '/auth/refresh',
       { refreshToken }
     );
@@ -135,7 +135,7 @@ export const authService = {
    */
   async logoutAll(): Promise<void> {
     try {
-      await apiClientV1.post('/auth/logout-all');
+      await apiClient.post('/auth/logout-all');
     } finally {
       Cookies.remove('accessToken');
       Cookies.remove('refreshToken');

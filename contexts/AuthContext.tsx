@@ -30,11 +30,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadUser = async () => {
     try {
       if (authService.isAuthenticated()) {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
+        // Intentar obtener usuario actual
+        try {
+          const currentUser = await authService.getCurrentUser();
+          setUser(currentUser);
+        } catch (error: any) {
+          // Si falla porque la ruta no existe (404), limpiar auth
+          if (error?.response?.status === 404) {
+            console.warn('Auth endpoint not available yet, clearing auth state');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setUser(null);
+          } else {
+            // Otros errores (401, 403, etc), también limpiar
+            console.error('Failed to load user:', error);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setUser(null);
+          }
+        }
       }
     } catch (error) {
-      console.error('Failed to load user:', error);
+      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -86,9 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to refresh user:', error);
-      setUser(null);
+      // Si falla, limpiar estado
+      if (error?.response?.status === 404 || error?.response?.status === 401) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+      }
     }
   };
 
