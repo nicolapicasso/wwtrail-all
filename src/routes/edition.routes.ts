@@ -13,6 +13,24 @@ import {
 } from '../schemas/edition.schema';
 
 const router = Router();
+console.log('✅ Edition routes file loaded!');
+
+// Ruta raíz para listar todas las ediciones (opcional)
+router.get('/', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Editions API v2 - Working!',
+    data: [],
+    endpoints: [
+      'GET /api/v2/editions/:id',
+      'GET /api/v2/editions/slug/:slug',
+      'GET /api/v2/editions/:id/full',
+      'GET /api/v2/editions/:id/stats',
+      'PUT /api/v2/editions/:id (auth)',
+      'DELETE /api/v2/editions/:id (auth)',
+    ],
+  });
+});
 
 /**
  * RUTAS ANIDADAS BAJO COMPETICIONES
@@ -114,5 +132,6 @@ router.delete(
   validate(editionIdSchema),
   EditionController.delete
 );
+console.log('✅ Edition router created with', router.stack?.length || 0, 'routes');
 
 export default router;

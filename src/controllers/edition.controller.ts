@@ -252,7 +252,7 @@ export class EditionController {
 
       res.json({
         status: 'success',
-        message: `Edition ${edition.isActive ? 'activated' : 'deactivated'}`,
+        message: `Edition ${true ? 'activated' : 'deactivated'}`,
         data: edition,
       });
     } catch (error) {

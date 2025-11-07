@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, EventStatus } from '@prisma/client';
 import logger from '../utils/logger';
 import { slugify } from '../utils/slugify';
 
@@ -15,13 +15,52 @@ const prisma = new PrismaClient();
  */
 export class CompetitionService {
   /**
+   * Listar todas las competiciones
+   */
+  static async findAll(options: any = {}) {
+    const { limit = 50, sortBy = 'name' } = options;
+
+    const competitions = await prisma.competition.findMany({
+      take: limit,
+      include: {
+        event: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            country: true,
+            city: true,
+            typicalMonth: true,
+          },
+        },
+        _count: {
+          select: {
+            editions: true,
+          },
+        },
+      },
+    });
+
+    // Ordenar según el campo
+    if (sortBy === 'startDate' || sortBy === 'typicalMonth') {
+      // Ordenar por mes del evento
+      competitions.sort((a, b) => {
+        const monthA = a.event.typicalMonth || 99;
+        const monthB = b.event.typicalMonth || 99;
+        return monthA - monthB;
+      });
+    } else if (sortBy === 'name') {
+      // Ordenar por nombre
+      competitions.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return competitions;
+  }
+
+  /**
    * Crear una nueva competición dentro de un evento
-   * @param eventId - ID del evento padre
-   * @param data - Datos de la competición
-   * @param userId - ID del usuario (debe ser organizador del evento o ADMIN)
    */
   static async create(eventId: string, data: any, userId: string) {
-    // Verificar que el evento existe
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       select: { id: true, organizerId: true, slug: true },
@@ -31,7 +70,6 @@ export class CompetitionService {
       throw new Error('Event not found');
     }
 
-    // Verificar permisos (organizador del evento o ADMIN)
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
@@ -41,11 +79,9 @@ export class CompetitionService {
       throw new Error('Unauthorized: Only event organizer or admin can create competitions');
     }
 
-    // Generar slug único basado en evento + nombre de competición
     const baseSlug = `${event.slug}-${slugify(data.name)}`;
     const slug = await this.generateUniqueSlug(baseSlug);
 
-    // Crear competición
     const competition = await prisma.competition.create({
       data: {
         eventId,
@@ -53,19 +89,11 @@ export class CompetitionService {
         slug,
         description: data.description,
         type: data.type,
-        
-        // Datos base que heredarán las editions
         baseDistance: data.baseDistance,
         baseElevation: data.baseElevation,
         baseMaxParticipants: data.baseMaxParticipants,
-        
-
-        
-        // Orden de visualización
-        displayOrder: data.displayOrder || 0,
-        
-        // Estado
-        isActive: true,
+        organizerId: userId,
+        status: EventStatus.PUBLISHED,
       },
       include: {
         event: {
@@ -85,20 +113,18 @@ export class CompetitionService {
       },
     });
 
-    logger.info(`Competition created: ${competition.id} - ${competition.name} (Event: ${event.slug})`);
-
+    logger.info(`Competition created: ${competition.id} - ${competition.name}`);
     return competition;
   }
 
   /**
    * Obtener todas las competiciones de un evento
-   * @param eventId - ID del evento
    */
   static async findByEvent(eventId: string) {
     const competitions = await prisma.competition.findMany({
       where: {
         eventId,
-        isActive: true,
+        status: EventStatus.PUBLISHED,
       },
       include: {
         event: {
@@ -115,7 +141,7 @@ export class CompetitionService {
         },
       },
       orderBy: {
-        displayOrder: 'asc',
+        baseDistance: 'asc',
       },
     });
 
@@ -124,7 +150,6 @@ export class CompetitionService {
 
   /**
    * Obtener una competición por ID
-   * @param id - ID de la competición
    */
   static async findById(id: string) {
     const competition = await prisma.competition.findUnique({
@@ -141,7 +166,6 @@ export class CompetitionService {
           },
         },
         editions: {
-          where: { isActive: true },
           orderBy: { year: 'desc' },
           take: 10,
           select: {
@@ -150,7 +174,6 @@ export class CompetitionService {
             slug: true,
             startDate: true,
             status: true,
-            price: true,
             registrationStatus: true,
           },
         },
@@ -171,7 +194,6 @@ export class CompetitionService {
 
   /**
    * Obtener una competición por slug
-   * @param slug - Slug de la competición
    */
   static async findBySlug(slug: string) {
     const competition = await prisma.competition.findFirst({
@@ -195,7 +217,6 @@ export class CompetitionService {
             slug: true,
             startDate: true,
             status: true,
-            price: true,
             registrationStatus: true,
           },
         },
@@ -216,12 +237,8 @@ export class CompetitionService {
 
   /**
    * Actualizar una competición
-   * @param id - ID de la competición
-   * @param data - Datos a actualizar
-   * @param userId - ID del usuario
    */
   static async update(id: string, data: any, userId: string) {
-    // Verificar que existe
     const existing = await prisma.competition.findUnique({
       where: { id },
       include: {
@@ -235,17 +252,15 @@ export class CompetitionService {
       throw new Error('Competition not found');
     }
 
-    // Verificar permisos
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
 
     if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
-      throw new Error('Unauthorized: Only event organizer or admin can update this competition');
+      throw new Error('Unauthorized');
     }
 
-    // Actualizar
     const competition = await prisma.competition.update({
       where: { id },
       data: {
@@ -255,7 +270,6 @@ export class CompetitionService {
         baseDistance: data.baseDistance,
         baseElevation: data.baseElevation,
         baseMaxParticipants: data.baseMaxParticipants,
-        displayOrder: data.displayOrder,
       },
       include: {
         event: {
@@ -274,18 +288,13 @@ export class CompetitionService {
     });
 
     logger.info(`Competition updated: ${id}`);
-
     return competition;
   }
 
   /**
    * Eliminar una competición
-   * CUIDADO: También elimina todas sus editions (cascade)
-   * @param id - ID de la competición
-   * @param userId - ID del usuario
    */
   static async delete(id: string, userId: string) {
-    // Verificar que existe
     const existing = await prisma.competition.findUnique({
       where: { id },
       include: {
@@ -304,121 +313,29 @@ export class CompetitionService {
       throw new Error('Competition not found');
     }
 
-    // Verificar permisos
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
 
     if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
-      throw new Error('Unauthorized: Only event organizer or admin can delete this competition');
+      throw new Error('Unauthorized');
     }
 
-    // Advertir si tiene editions
     if (existing._count.editions > 0) {
-      logger.warn(
-        `Deleting competition ${id} with ${existing._count.editions} editions (cascade delete)`
-      );
+      logger.warn(`Deleting competition ${id} with ${existing._count.editions} editions`);
     }
 
-    // Eliminar (cascade a editions)
     await prisma.competition.delete({
       where: { id },
     });
 
-    logger.warn(`Competition deleted: ${id} - ${existing.name}`);
-
+    logger.warn(`Competition deleted: ${id}`);
     return { message: 'Competition deleted successfully' };
   }
 
   /**
-   * Reordenar competiciones de un evento
-   * @param eventId - ID del evento
-   * @param order - Array de { id, displayOrder }
-   * @param userId - ID del usuario
-   */
-  static async reorder(eventId: string, order: { id: string; displayOrder: number }[], userId: string) {
-    // Verificar que el evento existe
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      select: { id: true, organizerId: true },
-    });
-
-    if (!event) {
-      throw new Error('Event not found');
-    }
-
-    // Verificar permisos
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    if (user?.role !== 'ADMIN' && event.organizerId !== userId) {
-      throw new Error('Unauthorized');
-    }
-
-    // Actualizar orden en transacción
-    await prisma.$transaction(
-      order.map((item) =>
-        prisma.competition.update({
-          where: { id: item.id },
-          data: { displayOrder: item.displayOrder },
-        })
-      )
-    );
-
-    logger.info(`Competitions reordered for event ${eventId}`);
-
-    return { message: 'Competitions reordered successfully' };
-  }
-
-  /**
-   * Activar/desactivar una competición
-   * @param id - ID de la competición
-   * @param userId - ID del usuario
-   */
-  static async toggleActive(id: string, userId: string) {
-    // Verificar que existe
-    const existing = await prisma.competition.findUnique({
-      where: { id },
-      include: {
-        event: {
-          select: { organizerId: true },
-        },
-      },
-    });
-
-    if (!existing) {
-      throw new Error('Competition not found');
-    }
-
-    // Verificar permisos
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
-      throw new Error('Unauthorized');
-    }
-
-    // Toggle
-    const competition = await prisma.competition.update({
-      where: { id },
-      data: {
-        isActive: !existing.isActive,
-      },
-    });
-
-    logger.info(`Competition ${id} active status changed to: ${competition.isActive}`);
-
-    return competition;
-  }
-
-  /**
-   * Generar slug único para una competición
-   * @param baseSlug - Slug base
+   * Generar slug único
    */
   private static async generateUniqueSlug(baseSlug: string): Promise<string> {
     let slug = baseSlug;

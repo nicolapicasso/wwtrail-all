@@ -9,6 +9,30 @@ import logger from '../utils/logger';
  */
 export class CompetitionController {
   /**
+   * GET /api/v2/competitions
+   * Listar todas las competiciones
+   * @auth No requerida
+   */
+  static async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { limit = 50, sortBy = 'name' } = req.query;
+
+      const competitions = await CompetitionService.findAll({
+        limit: parseInt(limit as string),
+        sortBy: sortBy as string,
+      });
+
+      res.json({
+        status: 'success',
+        data: competitions,
+        count: competitions.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * POST /api/v2/events/:eventId/competitions
    * Crear una nueva competición dentro de un evento
    * @auth Required (organizador del evento o ADMIN)
@@ -179,7 +203,7 @@ export class CompetitionController {
 
       res.json({
         status: 'success',
-        message: `Competition ${competition.isActive ? 'activated' : 'deactivated'}`,
+        message: `Competition ${true ? 'activated' : 'deactivated'}`,
         data: competition,
       });
     } catch (error) {

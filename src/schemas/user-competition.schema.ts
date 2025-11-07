@@ -1,7 +1,6 @@
 // src/schemas/user-competition.schema.ts
-
 import { z } from 'zod';
-import { UserCompetitionStatus } from '@prisma/client';
+import { ParticipationStatus } from '@prisma/client'; // ✅ CAMBIO: Usar ParticipationStatus en lugar de UserCompetitionStatus
 
 /**
  * Schema para marcar una competición
@@ -11,7 +10,7 @@ export const markCompetitionSchema = z.object({
     competitionId: z.string().uuid('Invalid competition ID'),
   }),
   body: z.object({
-    status: z.nativeEnum(UserCompetitionStatus, {
+    status: z.nativeEnum(ParticipationStatus, {
       errorMap: () => ({ message: 'Invalid status' }),
     }),
   }),
@@ -45,7 +44,7 @@ export const updateUserCompetitionSchema = z.object({
     competitionId: z.string().uuid('Invalid competition ID'),
   }),
   body: z.object({
-    status: z.nativeEnum(UserCompetitionStatus).optional(),
+    status: z.nativeEnum(ParticipationStatus).optional(),
     finishTime: z
       .string()
       .regex(/^([0-9]{1,2}):([0-5][0-9]):([0-5][0-9])$/, 'Invalid time format')
@@ -63,7 +62,7 @@ export const updateUserCompetitionSchema = z.object({
  */
 export const getMyCompetitionsSchema = z.object({
   query: z.object({
-    status: z.nativeEnum(UserCompetitionStatus).optional(),
+    status: z.nativeEnum(ParticipationStatus).optional(),
   }),
 });
 
@@ -101,7 +100,7 @@ export const getUserCompetitionsSchema = z.object({
     userId: z.string().uuid('Invalid user ID'),
   }),
   query: z.object({
-    status: z.nativeEnum(UserCompetitionStatus).optional(),
+    status: z.nativeEnum(ParticipationStatus).optional(),
   }),
 });
 

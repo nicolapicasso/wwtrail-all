@@ -1,263 +1,391 @@
-// prisma/seed.ts
-import { PrismaClient, Language, UserRole, RaceType, EventStatus, EditionStatus, RegistrationStatus } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import { PrismaClient, UserRole, RaceType, EventStatus, EditionStatus, RegistrationStatus, ParticipationStatus, Language, TranslationStatus } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Starting seed v2...\n');
 
+  // Limpiar base de datos
+  console.log('🧹 Cleaning database...');
+  await prisma.userEdition.deleteMany();
+  await prisma.userCompetition.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.favorite.deleteMany();
+  await prisma.competitionTranslation.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.edition.deleteMany();
+  await prisma.competition.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.user.deleteMany();
+
+  // 1. CREAR USUARIOS
   console.log('👤 Creating users...');
-
-  const hashedPassword = await bcrypt.hash('Admin123!', 10);
-  const organizerPassword = await bcrypt.hash('Organizer123!', 10);
-  const athletePassword = await bcrypt.hash('Athlete123!', 10);
-
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@wwtrail.com' },
-    update: {},
-    create: {
+  
+  const hashedPassword = await bcrypt.hash('Password123!', 10);
+  
+  const admin = await prisma.user.create({
+    data: {
       email: 'admin@wwtrail.com',
       username: 'admin',
       password: hashedPassword,
       firstName: 'Admin',
       lastName: 'WWTRAIL',
       role: UserRole.ADMIN,
+      isActive: true,
+      language: Language.ES,
       country: 'ES',
       city: 'Madrid',
-      language: Language.ES,
-      isActive: true,
     },
   });
 
-  const organizer1 = await prisma.user.upsert({
-    where: { email: 'maria@trailrunning.es' },
-    update: {},
-    create: {
+  const organizerUTMB = await prisma.user.create({
+    data: {
+      email: 'jean@montblanc.fr',
+      username: 'jean_utmb',
+      password: hashedPassword,
+      firstName: 'Jean',
+      lastName: 'Dupont',
+      role: UserRole.ORGANIZER,
+      isActive: true,
+      language: Language.FR,
+      country: 'FR',
+      city: 'Chamonix',
+    },
+  });
+
+  const organizerES = await prisma.user.create({
+    data: {
       email: 'maria@trailrunning.es',
-      username: 'maria_trails',
-      password: organizerPassword,
+      username: 'maria_trail',
+      password: hashedPassword,
       firstName: 'María',
       lastName: 'García',
       role: UserRole.ORGANIZER,
+      isActive: true,
+      language: Language.ES,
       country: 'ES',
       city: 'Barcelona',
-      language: Language.ES,
-      isActive: true,
     },
   });
 
-  const organizer2 = await prisma.user.upsert({
-    where: { email: 'jean@montblanc.fr' },
-    update: {},
-    create: {
-      email: 'jean@montblanc.fr',
-      username: 'jean_ultra',
-      password: organizerPassword,
-      firstName: 'Jean',
-      lastName: 'Dubois',
-      role: UserRole.ORGANIZER,
-      country: 'FR',
-      city: 'Chamonix',
-      language: Language.FR,
-      isActive: true,
-    },
-  });
-
-  const athlete1 = await prisma.user.upsert({
-    where: { email: 'carlos@runner.com' },
-    update: {},
-    create: {
+  const athlete = await prisma.user.create({
+    data: {
       email: 'carlos@runner.com',
       username: 'carlos_runner',
-      password: athletePassword,
+      password: hashedPassword,
       firstName: 'Carlos',
       lastName: 'Martínez',
       role: UserRole.ATHLETE,
+      isActive: true,
+      language: Language.ES,
       country: 'ES',
       city: 'Valencia',
-      language: Language.ES,
-      isActive: true,
     },
   });
 
   console.log('✅ 4 users created\n');
 
-  console.log('🎯 Creating events...\n');
+  // 2. CREAR EVENTOS (Nivel 1)
+  console.log('🏔️ Creating events...');
 
-  const utmbEvent = await prisma.event.create({
+  const eventUTMB = await prisma.event.create({
     data: {
-      name: 'UTMB Mont Blanc',
+      name: 'UTMB Mont-Blanc',
       slug: 'utmb-mont-blanc',
-      description: 'El trail running más prestigioso del mundo.',
+      description: 'El evento de trail running más prestigioso del mundo en Chamonix, Francia.',
       country: 'FR',
       city: 'Chamonix',
-      latitude: 45.9237,
-      longitude: 6.8694,
-      websiteUrl: 'https://utmb.world',
+      typicalMonth: 8,
       firstEditionYear: 2003,
-      isActive: true,
-      isHighlighted: true,
+      website: 'https://utmb.world',
+      email: 'info@utmb.world',
+      phone: '+33 4 50 47 62 73',
+      organizerId: organizerUTMB.id,
       status: EventStatus.PUBLISHED,
-      organizerId: organizer2.id,
+      featured: true,
     },
   });
-  console.log(`  ✅ Event: ${utmbEvent.name}`);
 
-  const transgrancEvent = await prisma.event.create({
+  const eventTGC = await prisma.event.create({
     data: {
       name: 'Transgrancanaria',
       slug: 'transgrancanaria',
-      description: 'La travesía épica de Gran Canaria.',
+      description: 'Una de las ultras más duras de Europa en la isla de Gran Canaria.',
       country: 'ES',
       city: 'Las Palmas',
-      latitude: 28.1248,
-      longitude: -15.4302,
+      typicalMonth: 2,
       firstEditionYear: 2003,
-      isActive: true,
-      isHighlighted: true,
+      website: 'https://transgrancanaria.net',
+      email: 'info@transgrancanaria.net',
+      organizerId: organizerES.id,
       status: EventStatus.PUBLISHED,
-      organizerId: organizer1.id,
+      featured: true,
     },
   });
-  console.log(`  ✅ Event: ${transgrancEvent.name}\n`);
 
-  console.log('🏃 Creating competitions...\n');
+  console.log('✅ 2 events created\n');
 
-  const utmb171 = await prisma.competition.create({
+  // 3. CREAR COMPETICIONES (Nivel 2 - Distancias)
+  console.log('🏃 Creating competitions...');
+
+  const compUTMB171 = await prisma.competition.create({
     data: {
-      eventId: utmbEvent.id,
+      eventId: eventUTMB.id,
       name: 'UTMB 171K',
-      shortName: 'UTMB',
-      slug: 'utmb-171k',
-      type: RaceType.ULTRA,
+      slug: 'utmb-mont-blanc-utmb-171k',
+      description: 'La carrera principal: 171km con 10.000m D+',
       baseDistance: 171,
       baseElevation: 10000,
-      baseMaxParticipants: 2500,
-      displayOrder: 1,
-      isActive: true,
+      baseMaxParticipants: 2300,
+      type: RaceType.ULTRA,
+      organizerId: organizerUTMB.id,
+      status: EventStatus.PUBLISHED,
+      featured: true,
     },
   });
-  console.log(`    ✅ Competition: ${utmb171.name}`);
 
-  const ccc101 = await prisma.competition.create({
+  const compCCC = await prisma.competition.create({
     data: {
-      eventId: utmbEvent.id,
+      eventId: eventUTMB.id,
       name: 'CCC 101K',
-      shortName: 'CCC',
-      slug: 'ccc-101k',
-      type: RaceType.ULTRA,
+      slug: 'utmb-mont-blanc-ccc-101k',
+      description: 'Courmayeur - Champex - Chamonix: 101km con 6100m D+',
       baseDistance: 101,
       baseElevation: 6100,
-      displayOrder: 2,
-      isActive: true,
+      baseMaxParticipants: 1700,
+      type: RaceType.ULTRA,
+      organizerId: organizerUTMB.id,
+      status: EventStatus.PUBLISHED,
+      featured: false,
     },
   });
-  console.log(`    ✅ Competition: ${ccc101.name}\n`);
 
-  const tg125 = await prisma.competition.create({
+  const compTGC125 = await prisma.competition.create({
     data: {
-      eventId: transgrancEvent.id,
+      eventId: eventTGC.id,
       name: 'Transgrancanaria 125K',
       slug: 'transgrancanaria-125k',
-      type: RaceType.ULTRA,
+      description: 'La clásica: 125km atravesando Gran Canaria de norte a sur',
       baseDistance: 125,
       baseElevation: 7500,
-      displayOrder: 1,
-      isActive: true,
+      baseMaxParticipants: 1500,
+      type: RaceType.ULTRA,
+      organizerId: organizerES.id,
+      status: EventStatus.PUBLISHED,
+      featured: true,
     },
   });
-  console.log(`    ✅ Competition: ${tg125.name}\n`);
 
-  console.log('📅 Creating editions...\n');
+  console.log('✅ 3 competitions created\n');
 
-  const utmb2025 = await prisma.edition.create({
+  // 4. CREAR EDICIONES (Nivel 3 - Años específicos)
+  console.log('📅 Creating editions...');
+
+  const editionUTMB2025 = await prisma.edition.create({
     data: {
-      competitionId: utmb171.id,
+      competitionId: compUTMB171.id,
       year: 2025,
-      slug: 'utmb-171k-2025',
+      slug: 'utmb-mont-blanc-utmb-171k-2025',
       startDate: new Date('2025-08-29T17:00:00Z'),
-      price: 350,
+      endDate: new Date('2025-08-31T12:00:00Z'),
+      registrationOpenDate: new Date('2024-12-15T10:00:00Z'),
+      registrationCloseDate: new Date('2025-08-15T23:59:59Z'),
+      registrationUrl: 'https://utmb.world/registration',
+      prices: {
+        early: 230,
+        normal: 260,
+        late: 290,
+      },
+      status: EditionStatus.UPCOMING,
       registrationStatus: RegistrationStatus.OPEN,
-      status: EditionStatus.UPCOMING,
-      maxParticipants: 2500,
       currentParticipants: 1850,
+      featured: true,
     },
   });
-  console.log(`      ✅ Edition: UTMB 171K 2025`);
 
-  const utmb2023 = await prisma.edition.create({
+  const editionUTMB2023 = await prisma.edition.create({
     data: {
-      competitionId: utmb171.id,
+      competitionId: compUTMB171.id,
       year: 2023,
-      slug: 'utmb-171k-2023',
-      startDate: new Date('2023-08-28T17:00:00Z'),
+      slug: 'utmb-mont-blanc-utmb-171k-2023',
+      startDate: new Date('2023-08-25T17:00:00Z'),
+      endDate: new Date('2023-08-27T12:00:00Z'),
+      prices: {
+        early: 210,
+        normal: 240,
+      },
       status: EditionStatus.FINISHED,
-      distance: 171,
-      elevation: 10000,
-      finishers: 1987,
-      winnerTime: '19:37:43',
+      registrationStatus: RegistrationStatus.CLOSED,
+      currentParticipants: 2300,
+      featured: false,
     },
   });
-  console.log(`      ✅ Edition: UTMB 171K 2023 (histórica)\n`);
 
-  await prisma.edition.create({
+  const editionCCC2025 = await prisma.edition.create({
     data: {
-      competitionId: ccc101.id,
+      competitionId: compCCC.id,
       year: 2025,
-      slug: 'ccc-101k-2025',
-      startDate: new Date('2025-08-30T06:00:00Z'),
+      slug: 'utmb-mont-blanc-ccc-101k-2025',
+      startDate: new Date('2025-08-30T08:00:00Z'),
+      endDate: new Date('2025-08-31T06:00:00Z'),
+      registrationOpenDate: new Date('2024-12-15T10:00:00Z'),
+      registrationCloseDate: new Date('2025-08-15T23:59:59Z'),
+      registrationUrl: 'https://utmb.world/registration',
+      prices: {
+        early: 160,
+        normal: 180,
+        late: 200,
+      },
       status: EditionStatus.UPCOMING,
+      registrationStatus: RegistrationStatus.OPEN,
+      currentParticipants: 1200,
+      featured: false,
     },
   });
-  console.log(`      ✅ Edition: CCC 101K 2025\n`);
 
-  await prisma.edition.create({
+  const editionTGC2025 = await prisma.edition.create({
     data: {
-      competitionId: tg125.id,
+      competitionId: compTGC125.id,
       year: 2025,
       slug: 'transgrancanaria-125k-2025',
-      startDate: new Date('2025-02-28T22:00:00Z'),
+      startDate: new Date('2025-02-22T07:00:00Z'),
+      endDate: new Date('2025-02-23T18:00:00Z'),
+      registrationOpenDate: new Date('2024-09-01T10:00:00Z'),
+      registrationCloseDate: new Date('2025-02-01T23:59:59Z'),
+      registrationUrl: 'https://transgrancanaria.net/inscripcion',
+      prices: {
+        early: 140,
+        normal: 170,
+        late: 200,
+      },
       status: EditionStatus.REGISTRATION_CLOSED,
+      registrationStatus: RegistrationStatus.CLOSED,
+      currentParticipants: 1500,
+      featured: true,
     },
   });
-  console.log(`      ✅ Edition: TG 125K 2025\n`);
 
-  console.log('⭐ Creating user tracking...\n');
+  console.log('✅ 4 editions created\n');
 
-  await prisma.userEdition.create({
+  // 5. CREAR TRADUCCIONES
+  console.log('🌍 Creating translations...');
+
+  await prisma.competitionTranslation.create({
     data: {
-      userId: athlete1.id,
-      editionId: utmb2023.id,
-      status: 'COMPLETED',
-      position: 487,
-      time: '32:15:43',
-      notes: '¡Increíble experiencia!',
-      rating: 5,
+      competitionId: compUTMB171.id,
+      language: Language.ES,
+      name: 'UTMB 171K',
+      description: 'La carrera principal: 171km con 10.000m D+',
+      status: TranslationStatus.APPROVED,
     },
   });
-  console.log(`    ✅ Carlos completed UTMB 2023\n`);
 
-  console.log('💬 Creating reviews...\n');
+  await prisma.competitionTranslation.create({
+    data: {
+      competitionId: compCCC.id,
+      language: Language.ES,
+      name: 'CCC 101K',
+      description: 'Courmayeur - Champex - Chamonix: 101km con 6100m D+',
+      status: TranslationStatus.APPROVED,
+    },
+  });
+
+  console.log('✅ 2 translations created\n');
+
+  // 6. CREAR CATEGORÍAS
+  console.log('📂 Creating categories...');
+
+  await prisma.category.create({
+    data: {
+      competitionId: compUTMB171.id,
+      name: 'Masculino General',
+      description: 'Categoría masculina abierta',
+      minAge: 18,
+      gender: 'M',
+    },
+  });
+
+  await prisma.category.create({
+    data: {
+      competitionId: compUTMB171.id,
+      name: 'Femenino General',
+      description: 'Categoría femenina abierta',
+      minAge: 18,
+      gender: 'F',
+    },
+  });
+
+  console.log('✅ 2 categories created\n');
+
+  // 7. CREAR REVIEWS
+  console.log('⭐ Creating reviews...');
 
   await prisma.review.create({
     data: {
-      editionId: utmb2023.id,
-      userId: athlete1.id,
+      competitionId: compUTMB171.id,
+      userId: athlete.id,
       rating: 5,
-      comment: '¡Increíble experiencia! La mejor carrera.',
-      isVerified: true,
+      comment: 'Increíble experiencia. La organización fue impecable y el recorrido espectacular.',
     },
   });
-  console.log(`    ✅ Review for UTMB 2023\n`);
 
-  console.log('\n🎉 SEED COMPLETED!\n');
-  console.log('Users: 4');
-  console.log('Events: 2');
-  console.log('Competitions: 3');
-  console.log('Editions: 4');
-  console.log('User tracking: 1');
-  console.log('Reviews: 1\n');
+  console.log('✅ 1 review created\n');
+
+  // 8. CREAR USER COMPETITIONS
+  console.log('📝 Creating user competitions tracking...');
+
+  await prisma.userCompetition.create({
+    data: {
+      userId: athlete.id,
+      competitionId: compUTMB171.id,
+      status: ParticipationStatus.INTERESTED,
+    },
+  });
+
+  await prisma.userCompetition.create({
+    data: {
+      userId: athlete.id,
+      competitionId: compTGC125.id,
+      status: ParticipationStatus.REGISTERED,
+      notes: 'Primera ultra de 100k+. Emocionado!',
+    },
+  });
+
+  console.log('✅ 2 user competitions created\n');
+
+  // 9. CREAR USER EDITIONS
+  console.log('🎯 Creating user editions tracking...');
+
+  await prisma.userEdition.create({
+    data: {
+      userId: athlete.id,
+      editionId: editionUTMB2023.id,
+      status: ParticipationStatus.COMPLETED,
+      finishTime: '28:45:30',
+      finishTimeSeconds: 103530,
+      position: 587,
+      bibNumber: 'UTMB1234',
+      notes: 'Mi primera UTMB. Experiencia inolvidable.',
+      personalRating: 5,
+      completedAt: new Date('2023-08-27T06:45:30Z'),
+    },
+  });
+
+  console.log('✅ 1 user edition created\n');
+
+  console.log('🎉 Seed completed successfully!\n');
+  console.log('📊 Summary:');
+  console.log('- 4 Users (1 admin, 2 organizers, 1 athlete)');
+  console.log('- 2 Events (UTMB, Transgrancanaria)');
+  console.log('- 3 Competitions (171K, 101K, 125K)');
+  console.log('- 4 Editions (2025 + 1 historical)');
+  console.log('- 2 Translations');
+  console.log('- 2 Categories');
+  console.log('- 1 Review');
+  console.log('- 2 User Competitions');
+  console.log('- 1 User Edition');
 }
 
 main()

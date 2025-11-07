@@ -49,6 +49,12 @@ eventCompetitionsRouter.post(
  * Estas rutas se montan en: /api/v2/competitions
  */
 
+// ✅ NUEVO: GET /api/v2/competitions - Listar todas las competiciones
+router.get(
+  '/',
+  CompetitionController.getAll
+);
+
 // GET /api/v2/competitions/slug/:slug - Por slug (antes de /:id)
 router.get(
   '/slug/:slug',

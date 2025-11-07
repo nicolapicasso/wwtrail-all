@@ -44,7 +44,7 @@ interface UpdateEventInput {
   firstEditionYear?: number;
   isHighlighted?: boolean;
   status?: EventStatus;
-  isActive?: boolean;
+  status?: EventStatus;
 }
 
 interface EventFilters {
@@ -463,8 +463,8 @@ export class EventService {
           },
         },
         competitions: {
-          where: { isActive: true },
-          orderBy: { displayOrder: 'asc' },
+          where: { status: EventStatus.PUBLISHED },
+          orderBy: { baseDistance: 'asc' },
           include: {
             _count: {
               select: {
@@ -473,7 +473,7 @@ export class EventService {
             },
           },
         },
-        translations: true,
+        
         _count: {
           select: {
             competitions: true,
@@ -523,8 +523,8 @@ export class EventService {
           },
         },
         competitions: {
-          where: { isActive: true },
-          orderBy: { displayOrder: 'asc' },
+          where: { status: EventStatus.PUBLISHED },
+          orderBy: { baseDistance: 'asc' },
           include: {
             _count: {
               select: {
@@ -533,7 +533,7 @@ export class EventService {
             },
           },
         },
-        translations: true,
+        
         _count: {
           select: {
             competitions: true,
@@ -736,9 +736,9 @@ export class EventService {
 
     const events = await prisma.event.findMany({
       where: {
-        isHighlighted: true,
+        
         status: EventStatus.PUBLISHED,
-        isActive: true,
+        
       },
       take: limit,
       orderBy: [
