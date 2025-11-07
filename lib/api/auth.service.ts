@@ -1,167 +1,117 @@
 // lib/api/auth.service.ts
-import { apiClientV1 } from './client';
+import { apiClientV1 } from './client'; // ← IMPORTANTE: Usar V1
 import Cookies from 'js-cookie';
-import type { LoginCredentials, RegisterData, AuthResponse, User } from '@/types/auth';
+import { LoginCredentials, RegisterData, AuthResponse, User } from '@/types/auth';
 
-// Tipo para las respuestas de la API
-interface ApiResponse<T> {
-  status: string;
-  message?: string;
-  data: T;
-}
-
-/**
- * Auth Service - USA V1
- * Usa apiClientV1 que tiene baseURL=/api/v1
- */
-export const authService = {
+class AuthService {
   /**
-   * Login de usuario
-   * POST /auth/login (relativo a /api/v1)
+   * Login
    */
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await apiClientV1.post<ApiResponse<AuthResponse>>(
-      '/auth/login',
-      credentials
-    );
+  async login(credentials: LoginCredentials): Promise<{
+    user: User;
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const response = await apiClientV1.post<AuthResponse>('/auth/login', credentials);
     
+    // ✅ CORRECCIÓN: Acceder a response.data.data
     const { accessToken, refreshToken, user } = response.data.data;
-
-    // Guardar tokens en cookies
-    Cookies.set('accessToken', accessToken, {
-      expires: 1, // 1 día
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
-
-    Cookies.set('refreshToken', refreshToken, {
-      expires: 7, // 7 días
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
-
-    return response.data.data;
-  },
+    
+    // ✅ CAMBIO: Usar Cookies en lugar de localStorage
+    Cookies.set('accessToken', accessToken, { expires: 7 }); // 7 días
+    Cookies.set('refreshToken', refreshToken, { expires: 30 }); // 30 días
+    
+    return { user, accessToken, refreshToken };
+  }
 
   /**
-   * Registro de usuario
-   * POST /auth/register
+   * Register
    */
-  async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await apiClientV1.post<ApiResponse<AuthResponse>>(
-      '/auth/register',
-      data
-    );
+  async register(data: RegisterData): Promise<{
+    user: User;
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const response = await apiClientV1.post<AuthResponse>('/auth/register', data);
     
+    // ✅ CORRECCIÓN: Acceder a response.data.data
     const { accessToken, refreshToken, user } = response.data.data;
-
-    // Guardar tokens en cookies
-    Cookies.set('accessToken', accessToken, {
-      expires: 1,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
-
-    Cookies.set('refreshToken', refreshToken, {
-      expires: 7,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
-
-    return response.data.data;
-  },
+    
+    // ✅ CAMBIO: Usar Cookies en lugar de localStorage
+    Cookies.set('accessToken', accessToken, { expires: 7 });
+    Cookies.set('refreshToken', refreshToken, { expires: 30 });
+    
+    return { user, accessToken, refreshToken };
+  }
 
   /**
    * Logout
-   * POST /auth/logout
    */
   async logout(): Promise<void> {
+    const refreshToken = Cookies.get('refreshToken');
+    
     try {
-      const refreshToken = Cookies.get('refreshToken');
-      
       if (refreshToken) {
-        // Enviar refreshToken al backend para invalidarlo
         await apiClientV1.post('/auth/logout', { refreshToken });
       }
-    } catch (error) {
-      console.error('Error during logout:', error);
     } finally {
-      // SIEMPRE limpiar cookies, incluso si la API falla
+      // ✅ CAMBIO: Limpiar cookies en lugar de localStorage
       Cookies.remove('accessToken');
       Cookies.remove('refreshToken');
     }
-  },
+  }
 
   /**
-   * Obtener usuario actual
-   * GET /auth/me
+   * Get current user
    */
   async getCurrentUser(): Promise<User> {
-    const response = await apiClientV1.get<ApiResponse<User>>('/auth/me');
+    const response = await apiClientV1.get<{ data: User }>('/auth/me');
     return response.data.data;
-  },
+  }
 
   /**
    * Refresh token
-   * POST /auth/refresh
    */
-  async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const response = await apiClientV1.post<ApiResponse<{ accessToken: string; refreshToken: string }>>(
+  async refreshToken(): Promise<string> {
+    const refreshToken = Cookies.get('refreshToken');
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await apiClientV1.post<{ data: { accessToken: string } }>(
       '/auth/refresh',
       { refreshToken }
     );
-    
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
-    
-    // Actualizar tokens en cookies
-    Cookies.set('accessToken', newAccessToken, {
-      expires: 1,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
 
-    Cookies.set('refreshToken', newRefreshToken, {
-      expires: 7,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
+    const newAccessToken = response.data.data.accessToken;
     
-    return response.data.data;
-  },
+    // ✅ CAMBIO: Guardar en cookies
+    Cookies.set('accessToken', newAccessToken, { expires: 7 });
+    
+    return newAccessToken;
+  }
 
   /**
-   * Logout de todos los dispositivos
-   * POST /auth/logout-all
-   */
-  async logoutAll(): Promise<void> {
-    try {
-      await apiClientV1.post('/auth/logout-all');
-    } finally {
-      Cookies.remove('accessToken');
-      Cookies.remove('refreshToken');
-    }
-  },
-
-  /**
-   * Verificar si el usuario está autenticado
+   * Check if user is authenticated
    */
   isAuthenticated(): boolean {
     return !!Cookies.get('accessToken');
-  },
+  }
 
   /**
-   * Obtener access token
+   * Get access token
    */
-  getAccessToken(): string | undefined {
-    return Cookies.get('accessToken');
-  },
+  getAccessToken(): string | null {
+    return Cookies.get('accessToken') || null;
+  }
 
   /**
-   * Obtener refresh token
+   * Get refresh token
    */
-  getRefreshToken(): string | undefined {
-    return Cookies.get('refreshToken');
-  },
-};
+  getRefreshToken(): string | null {
+    return Cookies.get('refreshToken') || null;
+  }
+}
 
-export default authService;
+export const authService = new AuthService();

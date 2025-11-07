@@ -37,7 +37,7 @@ export function CompetitionActions({
 
   if (!user) {
     return (
-      <Button onClick={() => router.push('/login')} variant="default">
+      <Button onClick={() => router.push('/auth/login')} variant="default">
         Iniciar sesión para guardar
       </Button>
     );
@@ -49,7 +49,7 @@ export function CompetitionActions({
       await markCompetition(competitionId, { status });
       refresh();
       onStatusChange?.();
-      
+
       const statusLabels: Record<UserCompetitionStatus, string> = {
         [UserCompetitionStatus.INTERESTED]: 'Te interesa',
         [UserCompetitionStatus.REGISTERED]: 'Inscrito',

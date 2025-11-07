@@ -61,6 +61,7 @@ export interface EditionWithDetails extends EditionWithCompetition {
     country: string;
     city: string;
     organizerId: string;
+    
   };
 }
 
@@ -147,10 +148,18 @@ export interface EditionStats {
   competitionName: string;
   eventName: string;
   totalParticipants: number;
+  totalFinishers?: number;
   totalResults: number;
   totalReviews: number;
   averageRating?: number;
   totalUserTracking: number;
+  totalCategories: number;
+  viewCount: number;
+  currentParticipants?: number;
+  maxParticipants?: number;
+  registrationStatus?: 'OPEN' | 'CLOSED' | 'FULL' | 'COMING_SOON';
+  status?: 'UPCOMING' | 'ONGOING' | 'FINISHED';
+
 }
 
 /**

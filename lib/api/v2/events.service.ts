@@ -127,4 +127,72 @@ export const eventsService = {
   async delete(id: string): Promise<void> {
     await apiClientV2.delete(`/events/${id}`);
   },
+
+  /**
+   * Get my events (requires auth: ORGANIZER or ADMIN)
+   */
+  async getMyEvents(filters?: Partial<EventFilters>): Promise<EventListResponse> {
+    const response = await apiClientV2.get<EventListResponse>('/events/my-events', {
+      params: filters,
+    });
+    return response.data;
+  },
+
+  /**
+   * Get my stats (requires auth: ORGANIZER or ADMIN)
+   */
+  async getMyStats(): Promise<{
+    totalEvents: number;
+    publishedEvents: number;
+    draftEvents: number;
+    rejectedEvents: number;
+    totalCompetitions: number;
+    totalEditions: number;
+    totalViews: number;
+  }> {
+    const response = await apiClientV2.get<{
+      status: string;
+      data: {
+        totalEvents: number;
+        publishedEvents: number;
+        draftEvents: number;
+        rejectedEvents: number;
+        totalCompetitions: number;
+        totalEditions: number;
+        totalViews: number;
+      };
+    }>('/events/my-stats');
+    return response.data.data;
+  },
+
+  /**
+   * Get pending events (requires auth: ADMIN only)
+   */
+  async getPendingEvents(filters?: { page?: number; limit?: number }): Promise<EventListResponse> {
+    const response = await apiClientV2.get<EventListResponse>('/events/pending', {
+      params: filters,
+    });
+    return response.data;
+  },
+
+  /**
+   * Approve event (requires auth: ADMIN only)
+   */
+  async approveEvent(eventId: string): Promise<Event> {
+    const response = await apiClientV2.post<{ status: string; message: string; data: Event }>(
+      `/events/${eventId}/approve`
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Reject event (requires auth: ADMIN only)
+   */
+  async rejectEvent(eventId: string, reason?: string): Promise<Event> {
+    const response = await apiClientV2.post<{ status: string; message: string; data: Event }>(
+      `/events/${eventId}/reject`,
+      { reason }
+    );
+    return response.data.data;
+  },
 };

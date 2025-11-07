@@ -1,0 +1,27 @@
+hooks/useMyEvents.ts(42,21): error TS2345: Argument of type '{ page: number; limit: number; total: number; pages: number; }' is not assignable to parameter of type 'SetStateAction<{ page: number; limit: number; total: number; totalPages: number; }>'.
+  Property 'totalPages' is missing in type '{ page: number; limit: number; total: number; pages: number; }' but required in type '{ page: number; limit: number; total: number; totalPages: number; }'.
+hooks/useMyStats.ts(32,25): error TS2339: Property 'data' does not exist on type '{ totalEvents: number; publishedEvents: number; draftEvents: number; rejectedEvents: number; totalCompetitions: number; totalEditions: number; totalViews: number; }'.
+hooks/usePendingEvents.ts(43,21): error TS2345: Argument of type '{ page: number; limit: number; total: number; pages: number; }' is not assignable to parameter of type 'SetStateAction<{ page: number; limit: number; total: number; totalPages: number; }>'.
+  Property 'totalPages' is missing in type '{ page: number; limit: number; total: number; pages: number; }' but required in type '{ page: number; limit: number; total: number; totalPages: number; }'.
+lib/api/auth.service.old.ts(28,13): error TS2339: Property 'accessToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.old.ts(28,26): error TS2339: Property 'refreshToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.old.ts(28,40): error TS2339: Property 'user' does not exist on type 'AuthResponse'.
+lib/api/auth.service.old.ts(56,13): error TS2339: Property 'accessToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.old.ts(56,26): error TS2339: Property 'refreshToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.old.ts(56,40): error TS2339: Property 'user' does not exist on type 'AuthResponse'.
+lib/api/auth.service.ts(28,13): error TS2339: Property 'accessToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.ts(28,26): error TS2339: Property 'refreshToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.ts(28,40): error TS2339: Property 'user' does not exist on type 'AuthResponse'.
+lib/api/auth.service.ts(56,13): error TS2339: Property 'accessToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.ts(56,26): error TS2339: Property 'refreshToken' does not exist on type 'AuthResponse'.
+lib/api/auth.service.ts(56,40): error TS2339: Property 'user' does not exist on type 'AuthResponse'.
+lib/api/v2/index.ts(7,15): error TS2459: Module '"./events.service"' declares 'Event' locally, but it is not exported.
+lib/api/v2/index.ts(7,22): error TS2459: Module '"./events.service"' declares 'EventDetail' locally, but it is not exported.
+lib/api/v2/index.ts(7,35): error TS2459: Module '"./events.service"' declares 'EventFilters' locally, but it is not exported.
+lib/api/v2/index.ts(7,49): error TS2459: Module '"./events.service"' declares 'EventListResponse' locally, but it is not exported.
+lib/api/v2/index.ts(8,15): error TS2614: Module '"./competitions.service"' has no exported member 'Competition'. Did you mean to use 'import Competition from "./competitions.service"' instead?
+lib/api/v2/index.ts(9,15): error TS2614: Module '"./editions.service"' has no exported member 'Edition'. Did you mean to use 'import Edition from "./editions.service"' instead?
+lib/api/v2/index.ts(9,24): error TS2614: Module '"./editions.service"' has no exported member 'EditionStats'. Did you mean to use 'import EditionStats from "./editions.service"' instead?
+types/edition.ts(3,10): error TS2305: Module '"./competition"' has no exported member 'EditionStatus'.
+types/edition.ts(3,25): error TS2305: Module '"./competition"' has no exported member 'RegistrationStatus'.
+types/edition.ts(3,45): error TS2459: Module '"./competition"' declares 'Language' locally, but it is not exported.

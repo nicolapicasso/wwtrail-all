@@ -1,9 +1,18 @@
 // types/auth.ts
+
+export type UserRole = 'ADMIN' | 'ORGANIZER' | 'ATHLETE' | 'VIEWER';
+
 export interface User {
-  id: number;
+  id: string;
+  username: string;
   email: string;
-  name: string;
-  role: 'USER' | 'ADMIN';
+  role: UserRole;
+  firstName?: string;
+  lastName?: string;
+  avatar?: string;
+  bio?: string;
+  country?: string;
+  city?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,22 +23,25 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
+  username: string;
   email: string;
   password: string;
-  name: string;
+  role?: UserRole;
 }
 
 export interface AuthResponse {
-  token: string;
-  user: User;
+  status: string;
+  message: string;
+  data: {
+    user: User;
+    accessToken: string;
+    refreshToken: string;
+  };
 }
 
-export interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
-  logout: () => void;
+export interface RefreshTokenResponse {
+  status: string;
+  data: {
+    accessToken: string;
+  };
 }

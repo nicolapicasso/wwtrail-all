@@ -1,5 +1,3 @@
-// types/competition.ts - Competition types for API v2
-
 import { CompetitionType, Language } from './event';
 
 /**
@@ -20,6 +18,21 @@ export interface Competition {
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
+  
+  // Relación opcional con Event
+  event?: {
+    id: string;
+    slug: string;
+    name: string;
+    country: string;
+    city: string;
+    organizerId: string;
+  };
+  
+  // Contador de ediciones
+  _count?: {
+    editions: number;
+  };
 }
 
 /**
@@ -37,52 +50,34 @@ export interface CompetitionWithEvent extends Competition {
 }
 
 /**
- * Competition with counts
+ * Competition filters
  */
-export interface CompetitionWithCounts extends Competition {
-  _count: {
-    editions: number;
-    translations: number;
-  };
+export interface CompetitionFilters {
+  page?: number;
+  limit?: number;
+  type?: CompetitionType;
+  country?: string;
+  search?: string;
+  minDistance?: number;
+  maxDistance?: number;
 }
 
 /**
- * Competition Detail (full info)
+ * Paginated response
  */
-export interface CompetitionDetail extends CompetitionWithEvent {
-  editions: Array<{
-    id: string;
-    slug: string;
-    year: number;
-    startDate: string;
-    status: EditionStatus;
-    registrationStatus: RegistrationStatus;
-  }>;
-  translations: Array<{
-    id: string;
-    language: Language;
-    name: string;
-    description?: string;
-  }>;
-  _count: {
-    editions: number;
-    translations: number;
+export interface PaginatedCompetitionsResponse {
+  data: Competition[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
   };
 }
 
-/**
- * Competition Translation
- */
-export interface CompetitionTranslation {
-  id: string;
-  competitionId: string;
-  language: Language;
-  name: string;
-  description?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW';
-  createdAt: string;
-  updatedAt: string;
-}
+// ============================================
+// ENUMS PARA EDITIONS
+// ============================================
 
 /**
  * Edition Status
@@ -91,7 +86,7 @@ export enum EditionStatus {
   UPCOMING = 'UPCOMING',
   ONGOING = 'ONGOING',
   FINISHED = 'FINISHED',
-  CANCELLED = 'CANCELLED',
+  CANCELLED = 'CANCELLED'
 }
 
 /**
@@ -100,49 +95,34 @@ export enum EditionStatus {
 export enum RegistrationStatus {
   NOT_OPEN = 'NOT_OPEN',
   OPEN = 'OPEN',
-  FULL = 'FULL',
   CLOSED = 'CLOSED',
+  FULL = 'FULL',
+  COMING_SOON = 'COMING_SOON'
+
 }
 
-/**
- * Create Competition Input
- */
-export interface CreateCompetitionInput {
-  name: string;
-  description?: string;
-  type: CompetitionType;
-  baseDistance?: number;
-  baseElevation?: number;
-  baseMaxParticipants?: number;
-  displayOrder?: number;
-}
+// ============================================
 
-/**
- * Update Competition Input
- */
-export interface UpdateCompetitionInput {
-  name?: string;
-  description?: string;
-  type?: CompetitionType;
-  baseDistance?: number;
-  baseElevation?: number;
-  baseMaxParticipants?: number;
-  isActive?: boolean;
-  displayOrder?: number;
-}
+export { Language } from './event';
 
-/**
- * Reorder Competitions Input
- */
-export interface ReorderCompetitionsInput {
-  order: string[]; // Array of competition IDs in new order
-}
 
-/**
- * Competition Filters
- */
-export interface CompetitionFilters {
-  eventId?: string;
-  type?: CompetitionType;
-  isActive?: boolean;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

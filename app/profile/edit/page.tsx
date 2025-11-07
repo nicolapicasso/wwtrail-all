@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import type { User } from '@/types/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +19,6 @@ export default function EditProfilePage() {
     lastName: user?.lastName || '',
     username: user?.username || '',
     email: user?.email || '',
-    phone: user?.phone || '',
     city: user?.city || '',
     country: user?.country || '',
     bio: user?.bio || '',
@@ -168,19 +168,6 @@ export default function EditProfilePage() {
                     placeholder="García"
                   />
                 </div>
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="+34 600 000 000"
-                />
               </div>
 
               {/* City & Country */}

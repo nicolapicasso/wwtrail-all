@@ -27,8 +27,16 @@ export function useEditions(competitionId: string | null, filters?: EditionFilte
     try {
       setLoading(true);
       setError(null);
-      const response = await editionsService.getByCompetition(competitionId, filters);
-      setData(response);
+const response = await editionsService.getByCompetition(competitionId, filters);
+setData({
+  data: response,
+  pagination: {
+    page: filters?.page || 1,
+    limit: filters?.limit || 20,
+    total: response.length,
+    pages: 1
+  }
+});
     } catch (err: any) {
       setError(err.message || 'Error loading editions');
       console.error('Error fetching editions:', err);
@@ -54,7 +62,8 @@ export function useEditions(competitionId: string | null, filters?: EditionFilte
  * Hook para obtener una edición por ID
  */
 export function useEdition(id: string | null) {
-  const [edition, setEdition] = useState<EditionDetail | null>(null);
+  const [edition, setEdition] = useState<Edition | null>(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,7 +103,7 @@ export function useEdition(id: string | null) {
  * Este es el hook principal para mostrar detalles de una edición
  */
 export function useEditionWithInheritance(id: string | null) {
-  const [edition, setEdition] = useState<EditionFull | null>(null);
+  const [edition, setEdition] = useState<Edition | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,7 +142,7 @@ export function useEditionWithInheritance(id: string | null) {
  * Hook para obtener edición por slug
  */
 export function useEditionBySlug(slug: string | null) {
-  const [edition, setEdition] = useState<EditionDetail | null>(null);
+  const [edition, setEdition] = useState<Edition | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

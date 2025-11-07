@@ -6,6 +6,7 @@ import { competitionsService } from '@/lib/api';
 import { Calendar, MapPin, TrendingUp, Users, ArrowLeft, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CompetitionActions } from '@/components/CompetitionActions';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -76,12 +77,14 @@ export default function CompetitionDetailPage() {
   }
 
   // Format date
-  const formattedDate = new Date(competition.startDate).toLocaleDateString('es-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const formattedDate = competition.startDate 
+    ? new Date(competition.startDate).toLocaleDateString('es-ES', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : 'Invalid Date';
 
   const typeColors: Record<string, string> = {
     TRAIL: 'bg-green-100 text-green-800',
@@ -261,10 +264,14 @@ export default function CompetitionDetailPage() {
                   </div>
                 )}
 
-                {/* Register Button */}
-                <Button className="w-full" size="lg">
-                  Inscribirse
-                </Button>
+                {/* ✅ CAMBIO: Usar CompetitionActions en lugar del botón hardcoded */}
+                <div className="pt-2">
+                  <CompetitionActions
+                    competitionId={competition.id}
+                    competitionName={competition.name}
+                    onStatusChange={loadCompetition}
+                  />
+                </div>
               </CardContent>
             </Card>
 

@@ -55,12 +55,12 @@ export default function EventDetailPage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <div className="relative h-80 overflow-hidden bg-gradient-to-br from-green-600 to-green-800">
-        {event.coverImage ? (
-          <img
-            src={event.coverImage}
-            alt={event.name}
-            className="h-full w-full object-cover opacity-50"
-          />
+           {(event.coverImage || event.imageUrl) ? (
+  <img 
+    src={event.coverImage || event.imageUrl} 
+    alt={event.name}
+    className="h-full w-full object-cover opacity-50"
+  />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="container relative mx-auto flex h-full items-end px-4 pb-8">

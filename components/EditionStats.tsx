@@ -82,7 +82,7 @@ export function EditionStats({ stats, loading, className = '' }: EditionStatsPro
               <p className="text-sm font-medium text-muted-foreground">Average Rating</p>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-4xl font-bold text-yellow-600">
-                  {stats.averageRating.toFixed(1)}
+                  {stats.averageRating?.toFixed(1) || '0.0'}
                 </span>
                 <span className="text-lg text-muted-foreground">/ 5.0</span>
               </div>
@@ -121,17 +121,17 @@ export function EditionStats({ stats, loading, className = '' }: EditionStatsPro
                 <div
                   className="h-full bg-green-600 transition-all"
                   style={{
-                    width: `${Math.min(
-                      (stats.currentParticipants / stats.maxParticipants) * 100,
-                      100
-                    )}%`,
+width: `${Math.min(
+  ((stats.currentParticipants || 0) / (stats.maxParticipants || 1)) * 100,
+  100
+)}%`,
                   }}
                 />
               </div>
             )}
             <p className="mt-2 text-xs text-muted-foreground">
               {stats.maxParticipants
-                ? `${stats.maxParticipants - stats.currentParticipants} spots remaining`
+                ? `${stats.maxParticipants - (stats.currentParticipants || 0)} spots remaining`
                 : 'Unlimited spots'}
             </p>
           </div>
@@ -147,7 +147,7 @@ export function EditionStats({ stats, loading, className = '' }: EditionStatsPro
                   : 'bg-gray-100 text-gray-800'
               }`}
             >
-              {stats.registrationStatus.replace('_', ' ')}
+              {stats.registrationStatus?.replace('_', ' ') || ''}
             </span>
           </div>
         </div>

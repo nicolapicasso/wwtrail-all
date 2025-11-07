@@ -1,41 +1,11 @@
 // lib/api/v2/competitions.service.ts
-
 import { apiClientV2 } from '../client';
+import { Competition, CompetitionFilters, PaginatedCompetitionsResponse } from '@/types/competition';
 
 /**
  * Competitions Service - USA V2
  * Usa apiClientV2 que tiene baseURL=/api/v2
  */
-
-export interface Competition {
-  id: string;
-  eventId: string;
-  slug: string;
-  name: string;
-  shortName?: string;
-  description?: string;
-  type: string;
-  baseDistance?: number;
-  baseElevation?: number;
-  baseMaxParticipants?: number;
-  baseTechnicalLevel?: number;
-  websiteUrl?: string;
-  displayOrder: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  _count?: {
-    editions: number;
-  };
-  event?: {
-    id: string;
-    name: string;
-    slug: string;
-    country: string;
-    city: string;
-  };
-  editions?: Edition[];
-}
 
 export interface Edition {
   id: string;

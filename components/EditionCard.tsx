@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { Edition, EditionFull } from '@/types/v2';
 import { Calendar, MapPin, Users, TrendingUp, Mountain, Info } from 'lucide-react';
+import { RegistrationStatus } from '@/types/competition';
+
 
 interface EditionCardProps {
   edition: Edition | EditionFull;
@@ -67,7 +69,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
                   ? 'bg-green-100 text-green-800'
                   : edition.registrationStatus === 'FULL'
                   ? 'bg-orange-100 text-orange-800'
-                  : edition.registrationStatus === 'COMING_SOON'
+                  : edition.registrationStatus === RegistrationStatus.COMING_SOON
                   ? 'bg-blue-100 text-blue-800'
                   : 'bg-gray-100 text-gray-800'
               }`}

@@ -135,16 +135,6 @@ export default function ProfilePage() {
                     <p className="font-medium">{user.email}</p>
                   </div>
                 </div>
-                
-                {user.phone && (
-                  <div className="flex items-center">
-                    <span className="w-5 h-5 mr-3 text-muted-foreground">📱</span>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Teléfono</p>
-                      <p className="font-medium">{user.phone}</p>
-                    </div>
-                  </div>
-                )}
 
                 {(user.city || user.country) && (
                   <div className="flex items-center">
@@ -160,7 +150,7 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {(!user.phone && !user.city && !user.country) && (
+                {(!user.city && !user.country) && (
                   <p className="text-sm text-muted-foreground text-center py-4">
                     No hay información de contacto adicional.
                     <br />
@@ -198,8 +188,7 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-
-           {/* Statistics */}
+            {/* Statistics */}
             <UserStatsCards />
           </div>
         </div>

@@ -1,84 +1,17 @@
-// lib/api/v2/editions.service.ts
+// lib/api/v2/editions.service.ts - VERSIÓN CORREGIDA
 
 import { apiClientV2 } from '../client';
+import { Edition, EditionStats } from '@/types/edition';
 
 /**
  * Editions Service - USA V2
- * Usa apiClientV2 que tiene baseURL=/api/v2
+ * CORREGIDO: Obtiene editions desde competition.editions
  */
-
-export interface Edition {
-  id: string;
-  competitionId: string;
-  year: number;
-  slug: string;
-  startDate?: string;
-  endDate?: string;
-  registrationOpenDate?: string;
-  registrationCloseDate?: string;
-  distance?: number;
-  elevation?: number;
-  maxParticipants?: number;
-  currentParticipants?: number;
-  price?: number;
-  city?: string;
-  status: 'UPCOMING' | 'ONGOING' | 'FINISHED' | 'CANCELLED';
-  registrationStatus: 'NOT_OPEN' | 'OPEN' | 'CLOSED' | 'FULL';
-  notes?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  
-  // Campos resueltos con herencia
-  resolvedDistance?: number;
-  resolvedElevation?: number;
-  resolvedMaxParticipants?: number;
-  resolvedCity?: string;
-  
-  // Relaciones
-  competition?: {
-    id: string;
-    name: string;
-    slug: string;
-    type: string;
-    baseDistance?: number;
-    baseElevation?: number;
-    baseMaxParticipants?: number;
-  };
-  
-  event?: {
-    id: string;
-    name: string;
-    slug: string;
-    country: string;
-    city: string;
-  };
-  
-  _count?: {
-    participants: number;
-    results: number;
-    reviews: number;
-  };
-}
-
-export interface EditionStats {
-  id: string;
-  competitionName: string;
-  year: number;
-  totalParticipants: number;
-  totalResults: number;
-  totalReviews: number;
-  averageRating?: number;
-  currentParticipants: number;
-  maxParticipants?: number;
-  status: string;
-  registrationStatus: string;
-}
 
 export const editionsService = {
   /**
    * Get editions by competition ID
-   * GET /competitions/:competitionId/editions
+   * CORREGIDO: Ahora obtiene la competición y extrae sus ediciones
    */
   async getByCompetition(
     competitionId: string,
@@ -87,18 +20,29 @@ export const editionsService = {
       sortOrder?: 'asc' | 'desc';
     }
   ): Promise<Edition[]> {
-    const params = {
-      includeInactive: options?.includeInactive,
-      sortBy: 'year',
-      sortOrder: options?.sortOrder || 'desc',
-    };
-    
-    const response = await apiClientV2.get<{
-      status: string;
-      data: Edition[];
-    }>(`/competitions/${competitionId}/editions`, { params });
-    
-    return response.data.data;
+    try {
+      // Obtener la competición con sus ediciones
+      const response = await apiClientV2.get<{
+        status: string;
+        data: {
+          id: string;
+          editions?: Edition[];
+        };
+      }>(`/competitions/${competitionId}`);
+      
+      let editions = response.data.data.editions || [];
+      
+      // Ordenar por año
+      const sortOrder = options?.sortOrder || 'desc';
+      editions = editions.sort((a, b) => 
+        sortOrder === 'desc' ? b.year - a.year : a.year - b.year
+      );
+      
+      return editions;
+    } catch (error) {
+      console.error('Error getting editions:', error);
+      return [];
+    }
   },
 
   /**
@@ -127,29 +71,12 @@ export const editionsService = {
 
   /**
    * Get edition by year
-   * GET /competitions/:competitionId/editions/year/:year
-   * NOTA: Este endpoint puede no existir en el backend
-   * En ese caso, usa getByCompetition y filtra por año
+   * Usa getByCompetition y filtra por año
    */
-  async getByYear(competitionId: string, year: number): Promise<Edition> {
-    try {
-      const response = await apiClientV2.get<{
-        status: string;
-        data: Edition;
-      }>(`/competitions/${competitionId}/editions/year/${year}`);
-      return response.data.data;
-    } catch (error: any) {
-      // Si el endpoint no existe, buscar manualmente
-      if (error.response?.status === 404) {
-        const editions = await this.getByCompetition(competitionId);
-        const edition = editions.find(e => e.year === year);
-        if (!edition) {
-          throw new Error(`Edition for year ${year} not found`);
-        }
-        return edition;
-      }
-      throw error;
-    }
+  async getByYear(competitionId: string, year: number): Promise<Edition | null> {
+    const editions = await this.getByCompetition(competitionId);
+    const edition = editions.find(e => e.year === year);
+    return edition || null;
   },
 
   /**
@@ -230,6 +157,24 @@ export const editionsService = {
       data: Edition;
     }>(`/editions/${id}/toggle-active`);
     return response.data.data;
+  },
+
+  /**
+   * Get available years for a competition
+   * CORREGIDO: Extrae años de las ediciones
+   */
+  async getAvailableYears(competitionId: string): Promise<number[]> {
+    const editions = await this.getByCompetition(competitionId);
+    return editions.map(e => e.year).sort((a, b) => b - a);
+  },
+
+  /**
+   * Get latest edition for a competition
+   * CORREGIDO: Obtiene la más reciente de las ediciones
+   */
+  async getLatestEdition(competitionId: string): Promise<Edition | null> {
+    const editions = await this.getByCompetition(competitionId, { sortOrder: 'desc' });
+    return editions.length > 0 ? editions[0] : null;
   },
 };
 

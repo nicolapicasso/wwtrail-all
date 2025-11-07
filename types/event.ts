@@ -49,6 +49,13 @@ export interface Event {
     latitude: number;
     longitude: number;
   };
+
+    // Imágenes del evento
+  imageUrl?: string;       // Imagen principal del evento (800x600 recomendado)
+  logoUrl?: string;        // Logo del evento (400x400 recomendado)
+  coverImage?: string;     // Imagen hero/banner (1920x600 recomendado)
+  thumbnailUrl?: string;   // Miniatura para listados (200x200 recomendado)
+  
   websiteUrl?: string;
   facebookUrl?: string;
   instagramUrl?: string;
@@ -63,6 +70,12 @@ export interface Event {
   organizerId: string;
   createdAt: string;
   updatedAt: string;
+
+  _count?: {
+    competitions?: number;
+    editions?: number;
+    reviews?: number;
+  };
 }
 
 /**
@@ -170,6 +183,13 @@ export interface CreateEventInput {
   city: string;
   latitude?: number;
   longitude?: number;
+
+// Imágenes
+  imageUrl?: string;
+  logoUrl?: string;
+  coverImage?: string;
+  thumbnailUrl?: string;
+
   websiteUrl?: string;
   facebookUrl?: string;
   instagramUrl?: string;
@@ -190,6 +210,13 @@ export interface UpdateEventInput {
   city?: string;
   latitude?: number;
   longitude?: number;
+  
+  // Imágenes
+  imageUrl?: string;
+  logoUrl?: string;
+  coverImage?: string;
+  thumbnailUrl?: string;
+
   websiteUrl?: string;
   facebookUrl?: string;
   instagramUrl?: string;

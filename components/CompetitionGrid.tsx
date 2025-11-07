@@ -1,22 +1,5 @@
 import { CompetitionCard } from './CompetitionCard';
-
-interface Competition {
-  id: string;
-  slug: string;
-  name: string;
-  type: string;
-  city: string;
-  country: string;
-  startDate: string;
-  distance?: number;
-  elevation?: number;
-  maxParticipants?: number;
-  _count?: {
-    participants: number;
-  };
-  imageUrl?: string;
-  isHighlighted?: boolean;
-}
+import { Competition } from '@/types/competition';
 
 interface CompetitionGridProps {
   competitions: Competition[];
@@ -40,19 +23,7 @@ export function CompetitionGrid({
       {competitions.map((competition) => (
         <CompetitionCard
           key={competition.id}
-          id={competition.id}
-          slug={competition.slug}
-          name={competition.name}
-          type={competition.type}
-          city={competition.city}
-          country={competition.country}
-          startDate={competition.startDate}
-          distance={competition.distance}
-          elevation={competition.elevation}
-          maxParticipants={competition.maxParticipants}
-          currentParticipants={competition._count?.participants}
-          imageUrl={competition.imageUrl}
-          isHighlighted={competition.isHighlighted}
+          competition={competition}
         />
       ))}
     </div>
