@@ -57,9 +57,6 @@ export class EventController {
 
   }
 
-
-
-
   /**
    * GET /api/v2/events/check-slug/:slug
    * Verificar si un slug está disponible
@@ -338,6 +335,7 @@ export class EventController {
       next(error);
     }
   }
+
   /**
    * Obtener mis eventos (solo los que he creado)
    * GET /api/v2/events/my-events
@@ -439,5 +437,41 @@ export class EventController {
       next(error);
     }
   }
-  
+
+  /**
+   * Actualizar estado de un evento
+   * PATCH /api/v1/events/:id/status
+   */
+  static async updateStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const userId = req.user!.id;
+
+      // Validar status
+      const validStatuses = ['PUBLISHED', 'DRAFT', 'CANCELLED'];
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid status. Must be PUBLISHED, DRAFT, or CANCELLED',
+        });
+      }
+
+      // Actualizar evento usando el service existente
+      const event = await EventService.update(id, { status }, userId);
+
+      logger.info(`Event status updated: ${id} → ${status} by user ${userId}`);
+
+      res.json({
+        status: 'success',
+        data: event,
+      });
+    } catch (error: any) {
+      logger.error(`Error updating event status: ${error.message}`);
+      res.status(error.message.includes('not found') ? 404 : 500).json({
+        status: 'error',
+        message: error.message || 'Error updating event status',
+      });
+    }
+  }
 }

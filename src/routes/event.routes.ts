@@ -145,6 +145,14 @@ router.patch(
   EventController.update
 );
 
+// Actualizar estado de evento (protegido - ORGANIZER/ADMIN)
+router.patch(
+  '/:id/status',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  EventController.updateStatus
+);
+
 // Eliminar evento (protegido - solo ADMIN)
 router.delete(
   '/:id',
@@ -208,6 +216,7 @@ export default router;
    POST   /events                  → Crear evento (ORGANIZER/ADMIN)
    PUT    /events/:id              → Actualizar evento (ORGANIZER/ADMIN + ownership)
    PATCH  /events/:id              → Actualizar parcial (ORGANIZER/ADMIN + ownership)
+   PATCH  /events/:id/status       → Actualizar estado (ORGANIZER/ADMIN)
    DELETE /events/:id              → Eliminar evento (ADMIN)
    GET    /events/my-events        → Mis eventos (ORGANIZER/ADMIN)
    GET    /events/stats            → Mis estadísticas (ORGANIZER/ADMIN)
