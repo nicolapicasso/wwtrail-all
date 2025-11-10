@@ -26,6 +26,9 @@ interface EventCardProps {
   onApprove?: (eventId: string) => void;
   onReject?: (eventId: string) => void;
   onToggleFeatured?: (eventId: string) => void;
+// Props para selección múltiple
+  isSelected?: boolean;
+  onSelect?: () => void;
 }
 
 const MONTHS = [
@@ -53,6 +56,9 @@ export default function EventCard({
   onApprove,
   onReject,
   onToggleFeatured,
+// Selection props
+  isSelected = false,
+  onSelect,
 }: EventCardProps) {
   
   const [imageError, setImageError] = useState(false);
@@ -130,9 +136,27 @@ export default function EventCard({
   };
 
   const content = (
-    <div className={`group relative overflow-hidden rounded-lg border text-card-foreground shadow-sm transition-all hover:shadow-md ${
+<div className={`group relative overflow-hidden rounded-lg border text-card-foreground shadow-sm transition-all hover:shadow-md ${
       managementMode ? statusConfig.borderColor + ' bg-white' : 'bg-white border-gray-200'
-    } ${viewMode === 'list' ? 'flex flex-col md:flex-row' : 'flex flex-col h-full'}`}>
+    } ${isSelected ? 'ring-2 ring-blue-500' : ''} ${viewMode === 'list' ? 'flex flex-col md:flex-row' : 'flex flex-col h-full'}`}>
+
+    {/* Checkbox de selección (esquina superior izquierda) */}
+      {managementMode && onSelect && (
+        <div className="absolute top-3 left-3 z-20">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-5 h-5 text-blue-600 border-2 border-white bg-white/90 backdrop-blur-sm rounded 
+                     focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer 
+                     shadow-lg hover:scale-110 transition-transform"
+          />
+        </div>
+      )}
       
       {/* Image Section */}
       <div className={`relative overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 ${
@@ -184,10 +208,9 @@ export default function EventCard({
           )}
         </div>
 
-        {/* Gallery Indicator */}
-        {hasGallery && (
+      {/* Gallery Indicator */}
+        {hasGallery && !managementMode && (
           <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1 z-10">
-            <ImageIcon className="h-3 w-3" />
             {event.gallery.length}
           </div>
         )}

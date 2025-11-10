@@ -6,7 +6,6 @@ import { Plus, Loader2 } from 'lucide-react';
 import EventStats from '@/components/EventStats';
 import EventFilters from '@/components/EventFilters';
 import EventCard from '@/components/EventCard';
-import BulkActionsBar from '@/components/BulkActionsBar';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import eventsService from '@/lib/api/v2/events.service';
 import { Event, EventStatus, EventStats as EventStatsType } from '@/lib/types/event';
@@ -26,9 +25,6 @@ export default function MyEventsPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
-
-  // Selection state
-  const [selectedEventIds, setSelectedEventIds] = useState<Set<string>>(new Set());
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,41 +55,6 @@ export default function MyEventsPage() {
   const isAdmin = user?.role === 'ADMIN';
 
   /**
-   * Toggle event selection
-   */
-  const toggleEventSelection = (eventId: string) => {
-    setSelectedEventIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(eventId)) {
-        newSet.delete(eventId);
-      } else {
-        newSet.add(eventId);
-      }
-      return newSet;
-    });
-  };
-
-  /**
-   * Select all events on current page
-   */
-  const selectAllEvents = () => {
-    if (selectedEventIds.size === events.length) {
-      // Deselect all
-      setSelectedEventIds(new Set());
-    } else {
-      // Select all
-      setSelectedEventIds(new Set(events.map((e) => e.id)));
-    }
-  };
-
-  /**
-   * Clear selection
-   */
-  const clearSelection = () => {
-    setSelectedEventIds(new Set());
-  };
-
-  /**
    * Fetch events
    */
   const fetchEvents = useCallback(async () => {
@@ -110,14 +71,11 @@ export default function MyEventsPage() {
       };
 
       const response = isAdmin && organizerFilter
-        ? await eventsService.getAll(filters)
+        ? await eventsService.getAll(filters) // Admin can filter by organizer
         : await eventsService.getMyEvents(filters);
 
       setEvents(response.data);
       setTotalPages(response.pagination.pages);
-      
-      // Clear selection when data changes
-      setSelectedEventIds(new Set());
     } catch (error: any) {
       console.error('Error fetching events:', error);
       alert(error.response?.data?.message || 'Error al cargar eventos');
@@ -151,7 +109,7 @@ export default function MyEventsPage() {
    */
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setPage(1);
+    setPage(1); // Reset to first page
   };
 
   /**
@@ -179,83 +137,6 @@ export default function MyEventsPage() {
   };
 
   /**
-   * Handle bulk status change
-   */
-  const handleBulkStatusChange = (newStatus: EventStatus) => {
-    const count = selectedEventIds.size;
-    const statusLabels = {
-      PUBLISHED: 'publicar',
-      DRAFT: 'cambiar a borrador',
-      CANCELLED: 'cancelar',
-    };
-
-    setConfirmDialog({
-      isOpen: true,
-      title: `${statusLabels[newStatus].charAt(0).toUpperCase() + statusLabels[newStatus].slice(1)} eventos`,
-      message: `¿Estás seguro de que quieres ${statusLabels[newStatus]} ${count} evento${count > 1 ? 's' : ''}? Esta acción también afectará a todas sus competiciones y ediciones.`,
-      variant: newStatus === 'CANCELLED' ? 'warning' : 'info',
-      action: async () => {
-        try {
-          setIsLoadingAction(true);
-          
-          // Execute bulk update
-          await Promise.all(
-            Array.from(selectedEventIds).map((eventId) =>
-              eventsService.updateStatus(eventId, newStatus)
-            )
-          );
-          
-          await fetchEvents();
-          await fetchStats();
-          clearSelection();
-          setConfirmDialog({ ...confirmDialog, isOpen: false });
-        } catch (error: any) {
-          console.error('Error updating status:', error);
-          alert(error.response?.data?.message || 'Error al actualizar estado');
-        } finally {
-          setIsLoadingAction(false);
-        }
-      },
-    });
-  };
-
-  /**
-   * Handle bulk delete
-   */
-  const handleBulkDelete = () => {
-    const count = selectedEventIds.size;
-
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Eliminar eventos',
-      message: `¿Estás seguro de que quieres eliminar ${count} evento${count > 1 ? 's' : ''}? Esta acción no se puede deshacer y eliminará todas sus competiciones y ediciones.`,
-      variant: 'danger',
-      action: async () => {
-        try {
-          setIsLoadingAction(true);
-          
-          // Execute bulk delete
-          await Promise.all(
-            Array.from(selectedEventIds).map((eventId) =>
-              eventsService.delete(eventId)
-            )
-          );
-          
-          await fetchEvents();
-          await fetchStats();
-          clearSelection();
-          setConfirmDialog({ ...confirmDialog, isOpen: false });
-        } catch (error: any) {
-          console.error('Error deleting events:', error);
-          alert(error.response?.data?.message || 'Error al eliminar eventos');
-        } finally {
-          setIsLoadingAction(false);
-        }
-      },
-    });
-  };
-
-  /**
    * Handle edit
    */
   const handleEdit = (eventId: string) => {
@@ -263,7 +144,7 @@ export default function MyEventsPage() {
   };
 
   /**
-   * Handle delete single
+   * Handle delete
    */
   const handleDelete = (eventId: string) => {
     const event = events.find((e) => e.id === eventId);
@@ -335,7 +216,7 @@ export default function MyEventsPage() {
     if (!event) return;
 
     const reason = prompt(`Motivo del rechazo de "${event.name}":`);
-    if (reason === null) return;
+    if (reason === null) return; // User cancelled
 
     setConfirmDialog({
       isOpen: true,
@@ -382,7 +263,7 @@ export default function MyEventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 pb-24">
+    <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -414,26 +295,10 @@ export default function MyEventsPage() {
           onFilterStatus={handleFilterStatus}
           onFilterCountry={handleFilterCountry}
           onFilterOrganizer={isAdmin ? handleFilterOrganizer : undefined}
-          showCountryFilter={false}
+          showCountryFilter={false} // Can be enabled if needed
           showOrganizerFilter={isAdmin}
           isLoading={isLoading}
         />
-
-        {/* Select All */}
-        {events.length > 0 && (
-          <div className="mb-4 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="select-all"
-              checked={selectedEventIds.size === events.length && events.length > 0}
-              onChange={selectAllEvents}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="select-all" className="text-sm text-gray-700 cursor-pointer">
-              Seleccionar todos ({events.length})
-            </label>
-          </div>
-        )}
 
         {/* Events List */}
         {isLoading && events.length === 0 ? (
@@ -457,10 +322,7 @@ export default function MyEventsPage() {
               <EventCard
                 key={event.id}
                 event={event}
-                managementMode={true} 
                 userRole={user?.role || 'ATHLETE'}
-                isSelected={selectedEventIds.has(event.id)}
-                onSelect={() => toggleEventSelection(event.id)}
                 onEdit={handleEdit}
                 onDelete={isAdmin ? handleDelete : undefined}
                 onAddCompetition={handleAddCompetition}
@@ -495,15 +357,6 @@ export default function MyEventsPage() {
           </div>
         )}
       </div>
-
-      {/* Bulk Actions Bar */}
-      <BulkActionsBar
-        selectedCount={selectedEventIds.size}
-        onChangeStatus={handleBulkStatusChange}
-        onDelete={handleBulkDelete}
-        onClearSelection={clearSelection}
-        isLoading={isLoadingAction}
-      />
 
       {/* Confirm Dialog */}
       <ConfirmDialog

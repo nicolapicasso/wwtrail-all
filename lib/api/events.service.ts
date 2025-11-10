@@ -3,8 +3,7 @@
  * ============================================
  * ✅ FIX: Agregado soporte para parámetro featured
  */
-
-import { apiClientV1 } from './client';
+import { apiClientV1, apiClientV2 } from './client';
 import { Event } from '@/types/api';
 
 // ============================================================================
@@ -38,6 +37,11 @@ export interface EventFilters {
   page?: number;
   limit?: number;
   featured?: boolean | string;  // ✅ AGREGADO
+}
+
+interface ApiResponse<T> {
+  status: string;
+  data: T;
 }
 
 // ============================================================================
@@ -117,19 +121,15 @@ export const eventsService = {
   async getUpcoming(): Promise<Event[]> {
     const { data } = await apiClientV1.get<{ data: { events: Event[] } }>('/events/upcoming');
     return data.data.events;
+  },
+
+  /**
+   * Actualizar estado de un evento
+   */
+  async updateStatus(eventId: string, status: string): Promise<ApiResponse<Event>> {
+    const response = await apiClientV2.patch(`/events/${eventId}/status`, { status });
+    return response.data;
   }
 };
 
 export type { EventsResponseV1, EventResponseV1, EventFilters };
-
-/*
-✅ CAMBIO APLICADO:
-- Agregado featured?: boolean | string en EventFilters
-- Agregado if (filters.featured) params.append('featured', ...)
-- Ahora getAll() pasa el parámetro featured al backend
-
-RESULTADO:
-- Featured events section funcionará correctamente
-- Backend recibirá: /api/v1/events?featured=true&limit=6
-- Devolverá solo 2 eventos featured
-*/

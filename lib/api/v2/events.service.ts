@@ -144,6 +144,14 @@ class EventsService {
     const response = await apiClientV2.patch<EventResponse>(`/events/${id}/featured`);
     return response.data;
   }
+
+  /**
+   * Update event status (admin/organizer)
+   */
+  async updateStatus(id: string, status: string): Promise<EventResponse> {
+    const response = await apiClientV2.patch<EventResponse>(`/events/${id}/status`, { status });
+    return response.data;
+  }
 }
 
 export default new EventsService();
