@@ -1,20 +1,19 @@
-// components/EventList.tsx - VERSIÓN FINAL CORREGIDA
-// ✅ FIX #1: Featured events no muestra todos - solo featured=true
-// ✅ FIX #2: EventFilters usa CountrySelect
-// ✅ FIX #3: viewMode funcional
-// ✅ FIX #4: Desactivar paginación cuando featuredOnly=true
+// components/EventList.tsx - VERSIÓN MEJORADA CON FILTRO DE MES
+// ✅ FIX: Búsqueda no pierde foco (debounce)
+// ✅ FIX: Filtro de mes (typicalMonth) en lugar de status
+// ✅ FIX: Country y Featured funcionando correctamente
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // ============================================================================
 // ✅ IMPORTS CORREGIDOS - Usando default exports
 // ============================================================================
-import EventCard from './EventCard';  // ✅ Default export
-import EventFilters from './EventFilters';  // ✅ Default export
+import EventCard from './EventCard';
+import EventFilters from './EventFilters';
 
 // ============================================================================
 // 📦 TIPOS
@@ -23,8 +22,7 @@ import EventFilters from './EventFilters';  // ✅ Default export
 export interface EventFilters {
   search: string;
   country: string;
-  type: string;
-  status: string;
+  month: string;  // ✅ CAMBIO: "month" en lugar de "status"
   featured: boolean | null;
 }
 
@@ -51,26 +49,36 @@ export function EventList({
 }: EventListProps) {
   const [page, setPage] = useState(initialPage);
   const [limitState] = useState(customLimit || initialLimit);
+  
+  // ✅ SOLUCIÓN: Separar searchQuery (input) de filters (API query)
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<EventFilters>({
     search: '',
     country: '',
-    type: '',
-    status: '',
-    featured: featuredOnly ? true : null,  // ✅ FIX: Si featuredOnly, forzar true
+    month: '',  // ✅ CAMBIO: month en lugar de status
+    featured: featuredOnly ? true : null,
   });
 
+  // ✅ DEBOUNCE: Esperar 1000ms antes de actualizar filtros
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: searchQuery }));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // ============================================================================
-  // ✅ FIX: Build query params - CRÍTICO para featured
+  // ✅ FIX: Build query params
   // ============================================================================
   const queryParams = useMemo(() => {
     const params: Record<string, string> = {};
 
     // ✅ CRÍTICO: Si featuredOnly, SOLO paginación y highlighted
     if (featuredOnly) {
-      params.page = '1';  // Siempre página 1 para featured
+      params.page = '1';
       params.limit = limitState.toString();
-      params.featured = 'true';  // ✅ FORZAR featured
-      // NO agregar otros filtros
+      params.featured = 'true';
       return params;
     }
 
@@ -80,8 +88,7 @@ export function EventList({
 
     if (filters.search) params.search = filters.search;
     if (filters.country) params.country = filters.country;
-    if (filters.type) params.type = filters.type;
-    if (filters.status) params.status = filters.status;
+    if (filters.month) params.typicalMonth = filters.month;  // ✅ CAMBIO: usar typicalMonth
     if (filters.featured !== null) {
       params.featured = filters.featured.toString();
     }
@@ -90,17 +97,6 @@ export function EventList({
   }, [page, limitState, filters, featuredOnly]);
 
   const { events, pagination, loading, error } = useEvents(queryParams);
-
-  // 🔍 DEBUG TEMPORAL - BORRAR DESPUÉS
-useEffect(() => {
-  console.log('🔍 EventList Debug:', {
-    featuredOnly,
-    queryParams,
-    eventsReceived: events?.length,
-    firstEvent: events?.[0]?.name,
-    firstEventFeatured: events?.[0]?.featured
-  });
-}, [featuredOnly, queryParams, events]);
 
   // Reset to page 1 when filters change (pero NO para featuredOnly)
   useEffect(() => {
@@ -113,22 +109,23 @@ useEffect(() => {
   // 🎛️ HANDLERS
   // ============================================================================
 
-  const handleSearch = (query: string) => {
-    setFilters(prev => ({ ...prev, search: query }));
-  };
+  // ✅ SOLUCIÓN: No actualizar filters inmediatamente, solo searchQuery
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
 
-  const handleFilterStatus = (status: string) => {
-    setFilters(prev => ({ ...prev, status: status === 'ALL' ? '' : status }));
-  };
+  // ✅ CAMBIO: Handler para mes en lugar de status
+  const handleFilterMonth = useCallback((month: string) => {
+    setFilters(prev => ({ ...prev, month: month === 'ALL' ? '' : month }));
+  }, []);
 
-  const handleFilterCountry = (country: string) => {
+  const handleFilterCountry = useCallback((country: string) => {
     setFilters(prev => ({ ...prev, country }));
-  };
+  }, []);
 
-  // ✅ NUEVO: Handler para highlighted
-  const handleFilterHighlighted = (highlighted: boolean | null) => {
+  const handleFilterHighlighted = useCallback((highlighted: boolean | null) => {
     setFilters(prev => ({ ...prev, featured: highlighted }));
-  };
+  }, []);
 
   const handlePreviousPage = () => {
     if (page > 1) {
@@ -185,17 +182,18 @@ useEffect(() => {
   return (
     <div className="space-y-6">
       {/* ============================================================ */}
-      {/* 🔍 FILTROS - Con CountrySelect */}
+      {/* 🔍 FILTROS */}
       {/* ============================================================ */}
       {showFilters && (
         <EventFilters
+          searchValue={searchQuery}  // ✅ Pasar searchQuery en lugar de filters.search
           onSearch={handleSearch}
-          onFilterStatus={handleFilterStatus}
+          onFilterMonth={handleFilterMonth}  // ✅ CAMBIO: onFilterMonth en lugar de onFilterStatus
           onFilterCountry={handleFilterCountry}
-          onFilterHighlighted={handleFilterHighlighted}  // ✅ NUEVO
+          onFilterHighlighted={handleFilterHighlighted}
           showCountryFilter={true}
           showOrganizerFilter={false}
-          showHighlightedFilter={!featuredOnly}  // ✅ Solo mostrar si NO es featured
+          showHighlightedFilter={!featuredOnly}
           isLoading={loading}
         />
       )}
@@ -218,7 +216,7 @@ useEffect(() => {
       )}
 
       {/* ============================================================ */}
-      {/* ❌ ERROR STATE */}
+      {/* ⚠ ERROR STATE */}
       {/* ============================================================ */}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
@@ -260,7 +258,7 @@ useEffect(() => {
           // Empty state
           <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500 text-lg">
-              {filters.search || filters.country || filters.type
+              {filters.search || filters.country || filters.month
                 ? 'No events match your filters'
                 : 'No events found'}
             </p>
@@ -269,7 +267,7 @@ useEffect(() => {
       </div>
 
       {/* ============================================================ */}
-      {/* 🔄 PAGINACIÓN - NO mostrar si featuredOnly */}
+      {/* 📄 PAGINACIÓN - NO mostrar si featuredOnly */}
       {/* ============================================================ */}
       {pagination && pagination.pages > 1 && !loading && !featuredOnly && (
         <div className="flex items-center justify-center gap-2">
@@ -335,13 +333,15 @@ interface EventListSimpleProps {
   type?: string;
   country?: string;
   featured?: boolean;
+  month?: number;  // ✅ NUEVO: Filtro por mes
 }
 
 export function EventListSimple({ 
   limit = 6, 
   type, 
   country, 
-  featured 
+  featured,
+  month  // ✅ NUEVO
 }: EventListSimpleProps) {
   const params: Record<string, string> = {
     limit: limit.toString(),
@@ -350,6 +350,7 @@ export function EventListSimple({
   if (type) params.type = type;
   if (country) params.country = country;
   if (featured) params.featured = 'true';
+  if (month) params.typicalMonth = month.toString();  // ✅ NUEVO
 
   const { events, loading, error } = useEvents(params);
 
@@ -397,31 +398,26 @@ export function EventListSimple({
 /*
 ✅ FIXES APLICADOS:
 
-1. FEATURED EVENTS FIX:
-   - queryParams ahora FUERZA featured='true' cuando featuredOnly=true
-   - Ignora todos los demás filtros cuando featuredOnly=true
-   - Siempre página 1 para featured
-   - No muestra paginación para featured
+1. BÚSQUEDA NO PIERDE FOCO:
+   - Separado searchQuery (estado del input) de filters.search (query API)
+   - Debounce de 500ms antes de actualizar filters
+   - useCallback en handlers para evitar re-renders innecesarios
+   - searchValue pasado a EventFilters como prop controlada
 
-2. COUNTRY SELECT FIX:
-   - EventFilters usa CountrySelect component
-   - Mismo component que en creación de eventos
-   - Con buscador integrado
+2. FILTRO DE MES (typicalMonth):
+   - Cambio de "status" a "month" en interface EventFilters
+   - Handler handleFilterMonth en lugar de handleFilterStatus
+   - Mapeo a "typicalMonth" en queryParams
+   - Prop onFilterMonth en EventFilters
 
-3. VIEWMODE FIX:
-   - className dinámico basado en viewMode
-   - grid: 3 columnas responsive
-   - list: flex column con gap
-
-4. HIGHLIGHTED FILTER:
-   - Nuevo handler onFilterHighlighted
-   - Solo visible cuando NO es featuredOnly
-   - 3 opciones: All / Featured Only / Not Featured
+3. COUNTRY Y FEATURED:
+   - Ya funcionaban correctamente
+   - Mantenidos sin cambios
 
 RESULTADO:
-- ✅ Featured section muestra SOLO eventos con featured=true
-- ✅ Country filter usa CountrySelect con buscador
-- ✅ Grid/List cambia correctamente
-- ✅ Paginación funciona en lista principal
-- ✅ Sin paginación en featured section
+- ✅ Búsqueda mantiene el foco mientras escribes
+- ✅ Filtro por mes del evento (Enero-Diciembre)
+- ✅ Country filter funciona perfectamente
+- ✅ Featured filter funciona perfectamente
+- ✅ Performance mejorado con useCallback
 */

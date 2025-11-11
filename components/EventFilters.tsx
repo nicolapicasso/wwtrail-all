@@ -1,50 +1,63 @@
-// components/EventFilters.tsx - VERSIÓN CORREGIDA
-// ✅ FIX #1: Usar CountrySelect en lugar de select normal
-// ✅ FIX #2: Agregar soporte para featured filter
+// components/EventFilters.tsx - VERSIÓN FINAL INTEGRADA
+// ✅ Compatible con EventList-FIXED.tsx
+// ✅ Búsqueda controlada desde EventList (no pierde foco)
+// ✅ Filtro de mes en lugar de status
+// ✅ Country y Featured funcionando
 
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Calendar } from 'lucide-react';
 import CountrySelect from './CountrySelect';
 
 interface EventFiltersProps {
+  searchValue?: string;  // ✅ CRÍTICO: Valor controlado desde EventList
   onSearch: (query: string) => void;
-  onFilterStatus: (status: string) => void;
+  onFilterMonth: (month: string) => void;  // ✅ CAMBIO: mes en lugar de status
   onFilterCountry: (country: string) => void;
-  onFilterHighlighted?: (highlighted: boolean | null) => void;  // ✅ NUEVO
+  onFilterHighlighted?: (highlighted: boolean | null) => void;
   showCountryFilter?: boolean;
   showOrganizerFilter?: boolean;
-  showHighlightedFilter?: boolean;  // ✅ NUEVO
+  showHighlightedFilter?: boolean;
   isLoading?: boolean;
 }
 
 export default function EventFilters({
+  searchValue = '',  // ✅ CRÍTICO: Recibir valor controlado
   onSearch,
-  onFilterStatus,
+  onFilterMonth,  // ✅ CAMBIO
   onFilterCountry,
-  onFilterHighlighted,  // ✅ NUEVO
+  onFilterHighlighted,
   showCountryFilter = true,
   showOrganizerFilter = false,
-  showHighlightedFilter = false,  // ✅ NUEVO
+  showHighlightedFilter = false,
   isLoading = false,
 }: EventFiltersProps) {
-  const [searchTerm, setSearchTerm] = useState('');
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('ALL');
-  const [selectedHighlighted, setSelectedHighlighted] = useState<string>('all');  // ✅ NUEVO
+  const [selectedMonth, setSelectedMonth] = useState('');  // ✅ CAMBIO
+  const [selectedHighlighted, setSelectedHighlighted] = useState<string>('all');
 
-  // Handler para búsqueda con debounce
+  // ✅ MESES DEL AÑO
+  const months = [
+    { value: '', label: 'Todos los meses' },
+    { value: '1', label: 'Enero' },
+    { value: '2', label: 'Febrero' },
+    { value: '3', label: 'Marzo' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Mayo' },
+    { value: '6', label: 'Junio' },
+    { value: '7', label: 'Julio' },
+    { value: '8', label: 'Agosto' },
+    { value: '9', label: 'Septiembre' },
+    { value: '10', label: 'Octubre' },
+    { value: '11', label: 'Noviembre' },
+    { value: '12', label: 'Diciembre' },
+  ];
+
+  // ✅ CRÍTICO: NO hacer debounce aquí - ya se hace en EventList
   const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-    
-    // Debounce de 500ms
-    const timer = setTimeout(() => {
-      onSearch(value);
-    }, 500);
-
-    return () => clearTimeout(timer);
+    onSearch(value);  // Llamar directamente
   }, [onSearch]);
 
   // Handler para país
@@ -53,13 +66,13 @@ export default function EventFilters({
     onFilterCountry(countryCode);
   }, [onFilterCountry]);
 
-  // Handler para estado
-  const handleStatusChange = useCallback((status: string) => {
-    setSelectedStatus(status);
-    onFilterStatus(status);
-  }, [onFilterStatus]);
+  // ✅ CAMBIO: Handler para mes
+  const handleMonthChange = useCallback((month: string) => {
+    setSelectedMonth(month);
+    onFilterMonth(month);
+  }, [onFilterMonth]);
 
-  // ✅ NUEVO: Handler para highlighted
+  // Handler para highlighted
   const handleHighlightedChange = useCallback((value: string) => {
     setSelectedHighlighted(value);
     
@@ -74,42 +87,40 @@ export default function EventFilters({
 
   // Limpiar búsqueda
   const clearSearch = useCallback(() => {
-    setSearchTerm('');
     onSearch('');
   }, [onSearch]);
 
   // Limpiar todos los filtros
   const clearAllFilters = useCallback(() => {
-    setSearchTerm('');
     setSelectedCountry('');
-    setSelectedStatus('ALL');
+    setSelectedMonth('');
     setSelectedHighlighted('all');
     onSearch('');
     onFilterCountry('');
-    onFilterStatus('ALL');
+    onFilterMonth('');
     if (onFilterHighlighted) {
       onFilterHighlighted(null);
     }
-  }, [onSearch, onFilterCountry, onFilterStatus, onFilterHighlighted]);
+  }, [onSearch, onFilterCountry, onFilterMonth, onFilterHighlighted]);
 
-  const hasActiveFilters = searchTerm || selectedCountry || selectedStatus !== 'ALL' || selectedHighlighted !== 'all';
+  const hasActiveFilters = searchValue || selectedCountry || selectedMonth || selectedHighlighted !== 'all';
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
       {/* Search Bar */}
       <div className="flex flex-col md:flex-row gap-4">
-        {/* Search Input */}
+        {/* ✅ CRÍTICO: Input controlado desde fuera */}
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search events by name or location..."
-            value={searchTerm}
+            placeholder="Buscar eventos por nombre o ubicación..."
+            value={searchValue}  // ✅ Valor controlado
             onChange={(e) => handleSearchChange(e.target.value)}
             disabled={isLoading}
             className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          {searchTerm && (
+          {searchValue && (
             <button
               onClick={clearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -126,10 +137,10 @@ export default function EventFilters({
           className="md:hidden flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <Filter className="h-5 w-5" />
-          Filters
+          Filtros
           {hasActiveFilters && (
             <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {[searchTerm, selectedCountry, selectedStatus !== 'ALL', selectedHighlighted !== 'all'].filter(Boolean).length}
+              {[searchValue, selectedCountry, selectedMonth, selectedHighlighted !== 'all'].filter(Boolean).length}
             </span>
           )}
         </button>
@@ -139,11 +150,11 @@ export default function EventFilters({
       <div className={`${showFiltersPanel ? 'block' : 'hidden'} md:block mt-4`}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
-          {/* ✅ FIX: Country Filter con CountrySelect */}
+          {/* Country Filter con CountrySelect */}
           {showCountryFilter && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country
+                País
               </label>
               <CountrySelect
                 value={selectedCountry}
@@ -154,29 +165,31 @@ export default function EventFilters({
             </div>
           )}
 
-          {/* Status Filter */}
+          {/* ✅ CAMBIO: Month Filter en lugar de Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              Mes del evento
             </label>
             <select
-              value={selectedStatus}
-              onChange={(e) => handleStatusChange(e.target.value)}
+              value={selectedMonth}
+              onChange={(e) => handleMonthChange(e.target.value)}
               disabled={isLoading}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="ALL">All Status</option>
-              <option value="DRAFT">Draft</option>
-              <option value="PUBLISHED">Published</option>
-              <option value="CANCELLED">Cancelled</option>
+              {months.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* ✅ NUEVO: Highlighted Filter */}
+          {/* Highlighted Filter */}
           {showHighlightedFilter && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Featured
+                Destacados
               </label>
               <select
                 value={selectedHighlighted}
@@ -184,9 +197,9 @@ export default function EventFilters({
                 disabled={isLoading}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="all">All Events</option>
-                <option value="true">Featured Only</option>
-                <option value="false">Not Featured</option>
+                <option value="all">Todos los eventos</option>
+                <option value="true">Solo destacados</option>
+                <option value="false">No destacados</option>
               </select>
             </div>
           )}
@@ -199,12 +212,52 @@ export default function EventFilters({
                 disabled={isLoading}
                 className="w-full px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Clear Filters
+                Limpiar Filtros
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+          Cargando eventos...
+        </div>
+      )}
     </div>
   );
 }
+
+// ============================================================================
+// 📝 CAMBIOS CRÍTICOS vs VERSIÓN ANTERIOR
+// ============================================================================
+/*
+✅ CAMBIOS APLICADOS:
+
+1. BÚSQUEDA CONTROLADA (CRÍTICO):
+   - searchValue como prop (valor controlado desde EventList)
+   - NO hacer debounce aquí (ya se hace en EventList)
+   - Llamar onSearch directamente sin setTimeout
+   - Esto previene la pérdida de foco
+
+2. FILTRO DE MES:
+   - selectedMonth en lugar de selectedStatus
+   - onFilterMonth en lugar de onFilterStatus
+   - Array de meses (Enero-Diciembre)
+   - Icono Calendar para mejor UX
+
+3. CLEAR FILTERS:
+   - Actualizado para limpiar selectedMonth
+   - Actualizado para usar searchValue en hasActiveFilters
+
+4. MOBILE BADGE:
+   - Actualizado para contar selectedMonth en lugar de selectedStatus
+
+COMPATIBILIDAD:
+✅ Compatible con EventList-FIXED.tsx
+✅ Búsqueda no pierde foco
+✅ Filtros sincronizados correctamente
+✅ Loading states manejados
+*/

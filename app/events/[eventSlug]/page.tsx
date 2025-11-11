@@ -1,15 +1,16 @@
 /**
- * 🔧 app/events/[eventSlug]/page.tsx - VERSIÓN MEJORADA
+ * 🔧 app/events/[eventSlug]/page.tsx - VERSIÓN CON REDES SOCIALES
  * ======================================================
  * ✅ Logo destacado en sidebar
  * ✅ Mapa interactivo con Leaflet
  * ✅ Eventos cercanos en el mapa
+ * ✅ Redes sociales completas (Instagram, Facebook, Twitter, YouTube)
  */
 
 import { eventsService } from '@/lib/api/events.service';
 import { Event } from '@/types/api';
 import { 
-  MapPin, Calendar, Globe, Mail, Phone, Facebook, Instagram,
+  MapPin, Calendar, Globe, Mail, Phone, Facebook, Instagram, Twitter, Youtube,
   Trophy, Eye, Clock, Image as ImageIcon
 } from 'lucide-react';
 import Link from 'next/link';
@@ -212,39 +213,18 @@ export default async function EventDetailPage({
                   <InfoRow label="Primera Edición" value={event.firstEditionYear.toString()} />
                 )}
                 
-                {event.typicalMonth && (
-                  <InfoRow label="Mes Típico" value={getMonthName(event.typicalMonth)} />
-                )}
-                
-                {event.originalLanguage && (
-                  <InfoRow label="Idioma Original" value={getLanguageName(event.originalLanguage)} />
+                {event.organizer && (
+                  <InfoRow 
+                    label="Organizador" 
+                    value={`${event.organizer.firstName || ''} ${event.organizer.lastName || ''}`.trim() || event.organizer.username}
+                  />
                 )}
               </div>
             </div>
-
-            {/* Organizador */}
-            {event.organizer && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold mb-4">Organizador</h2>
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white text-2xl font-bold">
-                    {event.organizer.firstName?.[0] || event.organizer.username[0].toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-lg">
-                      {event.organizer.firstName && event.organizer.lastName
-                        ? `${event.organizer.firstName} ${event.organizer.lastName}`
-                        : event.organizer.username}
-                    </p>
-                    <p className="text-sm text-gray-600">{event.organizer.email}</p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ============================================================ */}
-          {/* 📊 SIDEBAR - Logo, Mapa, Estadísticas y Contacto */}
+          {/* 📊 SIDEBAR DERECHO - Logo, Mapa, Contacto */}
           {/* ============================================================ */}
           <div className="space-y-6">
             
@@ -312,47 +292,86 @@ export default async function EventDetailPage({
               </div>
             </div>
 
-            {/* Contacto y Redes Sociales */}
+            {/* ✅ CONTACTO Y REDES SOCIALES - ACTUALIZADO */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-bold text-lg mb-4">Contacto</h3>
+              <h3 className="font-bold text-lg mb-4">Contacto y Redes</h3>
               <div className="space-y-3">
+                {/* Sitio Web */}
                 {event.website && (
                   <ContactLink
                     href={event.website}
                     icon={<Globe className="h-5 w-5" />}
                     label="Sitio Web"
+                    color="text-blue-600"
                   />
                 )}
                 
+                {/* Email */}
                 {event.email && (
                   <ContactLink
                     href={`mailto:${event.email}`}
                     icon={<Mail className="h-5 w-5" />}
                     label={event.email}
+                    color="text-gray-600"
                   />
                 )}
                 
+                {/* Teléfono */}
                 {event.phone && (
                   <ContactLink
                     href={`tel:${event.phone}`}
                     icon={<Phone className="h-5 w-5" />}
                     label={event.phone}
+                    color="text-gray-600"
                   />
                 )}
-                
-                {event.facebook && (
-                  <ContactLink
-                    href={event.facebook}
-                    icon={<Facebook className="h-5 w-5" />}
-                    label="Facebook"
-                  />
+
+                {/* Separador visual si hay redes sociales */}
+                {(event.instagramUrl || event.facebookUrl || event.twitterUrl || event.youtubeUrl) && (
+                  <div className="pt-3 mt-3 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide">
+                      Redes Sociales
+                    </p>
+                  </div>
                 )}
                 
-                {event.instagram && (
+                {/* Instagram */}
+                {event.instagramUrl && (
                   <ContactLink
-                    href={event.instagram}
+                    href={event.instagramUrl}
                     icon={<Instagram className="h-5 w-5" />}
                     label="Instagram"
+                    color="text-pink-600"
+                  />
+                )}
+                
+                {/* Facebook */}
+                {event.facebookUrl && (
+                  <ContactLink
+                    href={event.facebookUrl}
+                    icon={<Facebook className="h-5 w-5" />}
+                    label="Facebook"
+                    color="text-blue-700"
+                  />
+                )}
+
+                {/* Twitter */}
+                {event.twitterUrl && (
+                  <ContactLink
+                    href={event.twitterUrl}
+                    icon={<Twitter className="h-5 w-5" />}
+                    label="Twitter"
+                    color="text-sky-500"
+                  />
+                )}
+
+                {/* YouTube */}
+                {event.youtubeUrl && (
+                  <ContactLink
+                    href={event.youtubeUrl}
+                    icon={<Youtube className="h-5 w-5" />}
+                    label="YouTube"
+                    color="text-red-600"
                   />
                 )}
               </div>
@@ -420,7 +439,17 @@ function StatItem({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function ContactLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
+function ContactLink({ 
+  href, 
+  icon, 
+  label, 
+  color = "text-green-600" 
+}: { 
+  href: string; 
+  icon: React.ReactNode; 
+  label: string;
+  color?: string;
+}) {
   return (
     <a
       href={href}
@@ -428,7 +457,7 @@ function ContactLink({ href, icon, label }: { href: string; icon: React.ReactNod
       rel="noopener noreferrer"
       className="flex items-center gap-3 text-gray-700 hover:text-green-600 transition-colors group"
     >
-      <div className="text-green-600 group-hover:scale-110 transition-transform">
+      <div className={`${color} group-hover:scale-110 transition-transform`}>
         {icon}
       </div>
       <span className="text-sm group-hover:underline">{label}</span>
