@@ -53,6 +53,7 @@ interface EventFilters {
   country?: string;
   featured?: boolean;
   status?: EventStatus;
+  typicalMonth?: number | string;  // ✅ NUEVO: Filtro por mes típico del evento
   sortBy?: 'name' | 'createdAt' | 'viewCount' | 'firstEditionYear';
   sortOrder?: 'asc' | 'desc';
 }
@@ -244,6 +245,12 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       if (data.typicalMonth) eventData.typicalMonth = data.typicalMonth;
       if (data.gallery && Array.isArray(data.gallery)) eventData.gallery = data.gallery;
 
+      // Redes sociales
+      if (data.instagramUrl) eventData.instagramUrl = data.instagramUrl;
+      if (data.facebookUrl) eventData.facebookUrl = data.facebookUrl;
+      if (data.twitterUrl) eventData.twitterUrl = data.twitterUrl;
+      if (data.youtubeUrl) eventData.youtubeUrl = data.youtubeUrl;
+
       // Crear evento
       const event = await prisma.event.create({
         data: eventData,
@@ -326,6 +333,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     const country = filters.country;
     const featured = filters.featured;
     const status = filters.status;
+    const typicalMonth = filters.typicalMonth;  // ✅ NUEVO
     const sortBy = filters.sortBy || 'createdAt';
     const sortOrder = filters.sortOrder || 'desc';
 
@@ -363,6 +371,14 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
     if (status) {
       where.status = status;
+    }
+
+    // ✅ NUEVO: Filtro por mes típico del evento
+    if (typicalMonth !== undefined && typicalMonth !== null && typicalMonth !== '') {
+      const month = Number(typicalMonth);
+      if (month >= 1 && month <= 12) {
+        where.typicalMonth = month;
+      }
     }
 
     // Ejecutar query
@@ -558,10 +574,20 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       throw new Error('Unauthorized: Only the organizer or admin can update this event');
     }
 
+    // ✅ TRANSFORMACIÓN: Mapear websiteUrl a website si viene en data
+    const transformedData: any = { ...data };
+    if (transformedData.websiteUrl) {
+      transformedData.website = transformedData.websiteUrl;
+      delete transformedData.websiteUrl;
+    }
+
+    // ✅ EXTRAER latitude y longitude ANTES de actualizar
+    const { latitude, longitude, ...updateData } = transformedData;
+
     // Actualizar
     const updated = await prisma.event.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
         organizer: {
           select: {
@@ -575,10 +601,10 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     });
 
     // Si se actualizan coordenadas, actualizar PostGIS
-    if (data.latitude !== undefined && data.longitude !== undefined) {
+    if (latitude !== undefined && longitude !== undefined) {
       try {
-        const lat = Number(data.latitude);
-        const lon = Number(data.longitude);
+        const lat = Number(latitude);
+        const lon = Number(longitude);
         
         await prisma.$executeRawUnsafe(
           'UPDATE events SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3',
