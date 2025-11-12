@@ -176,6 +176,12 @@ model Event {
   email   String? @db.VarChar(255)
   phone   String? @db.VarChar(20)
 
+    // Redes sociales
+  instagramUrl String? @db.Text
+  facebookUrl  String? @db.Text
+  twitterUrl   String? @db.Text
+  youtubeUrl   String? @db.Text
+
   // Imágenes
   logo          String?     @db.Text
   coverImage    String?     @db.Text

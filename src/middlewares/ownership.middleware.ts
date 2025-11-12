@@ -4,7 +4,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/database';
 import { ForbiddenError, NotFoundError } from '../utils/errors';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 
 /**
  * Verifica que el usuario es el organizador del evento
