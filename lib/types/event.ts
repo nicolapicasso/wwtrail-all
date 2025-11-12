@@ -31,6 +31,7 @@ export interface Event {
     name?: string;
     email: string;
   };
+
   approvedBy?: string;
   approvedAt?: string;
   rejectionReason?: string;
@@ -40,6 +41,12 @@ export interface Event {
   _count?: {
     competitions: number;
   };
+
+    // ✅ NUEVOS CAMPOS - Redes Sociales
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  twitterUrl?: string | null;
+  youtubeUrl?: string | null;
 }
 
 // Event Stats Interface

@@ -259,7 +259,7 @@ export default function MyEventsPage() {
    * Handle edit
    */
   const handleEdit = (eventId: string) => {
-    router.push(`/organizer/events/${eventId}/edit`);
+    router.push(`/organizer/events/edit/${eventId}`);
   };
 
   /**
