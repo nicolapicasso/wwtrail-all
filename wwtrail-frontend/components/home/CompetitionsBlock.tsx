@@ -23,9 +23,10 @@ export function CompetitionsBlock({ config }: CompetitionsBlockProps) {
     const fetchCompetitions = async () => {
       try {
         const data = await competitionsService.getAll({ limit });
-        setCompetitions(data.competitions);
+        setCompetitions(data?.competitions || []);
       } catch (error) {
         console.error('Error fetching competitions:', error);
+        setCompetitions([]);
       } finally {
         setLoading(false);
       }

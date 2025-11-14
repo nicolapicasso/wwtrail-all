@@ -23,9 +23,10 @@ export function EditionsBlock({ config }: EditionsBlockProps) {
     const fetchEditions = async () => {
       try {
         const data = await editionsService.getAll({ limit });
-        setEditions(data.editions);
+        setEditions(data?.editions || []);
       } catch (error) {
         console.error('Error fetching editions:', error);
+        setEditions([]);
       } finally {
         setLoading(false);
       }

@@ -23,9 +23,10 @@ export function EventsBlock({ config }: EventsBlockProps) {
     const fetchEvents = async () => {
       try {
         const data = await eventsService.getAll({ limit });
-        setEvents(data.events);
+        setEvents(data?.events || []);
       } catch (error) {
         console.error('Error fetching events:', error);
+        setEvents([]);
       } finally {
         setLoading(false);
       }
