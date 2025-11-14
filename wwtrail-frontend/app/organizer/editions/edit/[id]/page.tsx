@@ -4,15 +4,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Trophy, Plus, Edit2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import EditionForm from '@/components/forms/EditionForm';
 import WeatherCard from '@/components/WeatherCard';
+import PodiumCard from '@/components/PodiumCard';
+import PodiumForm from '@/components/PodiumForm';
 import editionsService from '@/lib/api/v2/editions.service';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import { useWeather } from '@/hooks/useWeather';
+import { usePodiums } from '@/hooks/usePodiums';
 import type { Edition } from '@/types/edition';
 import type { Competition } from '@/types/competition';
+import type { EditionPodium } from '@/types/podium';
 
 interface EditEditionPageProps {
   params: {
@@ -35,6 +39,20 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
     fetching: weatherFetching,
     fetchWeather,
   } = useWeather(params.id);
+
+  // Podium state
+  const [showPodiumForm, setShowPodiumForm] = useState(false);
+  const [editingPodium, setEditingPodium] = useState<EditionPodium | null>(null);
+
+  // Podiums hook
+  const {
+    podiums,
+    podiumsByType,
+    loading: podiumsLoading,
+    createPodium,
+    updatePodium,
+    deletePodium,
+  } = usePodiums(params.id);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,6 +179,105 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
             canFetch={true}
             onFetch={fetchWeather}
           />
+        </div>
+
+        {/* Podiums Section */}
+        <div className="mt-8 bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                Clasificaciones
+              </h2>
+              <p className="text-sm text-gray-600">
+                Gestiona las clasificaciones y podios de esta edición. Puedes añadir clasificaciones generales, por género y por categorías.
+              </p>
+            </div>
+            {!showPodiumForm && (
+              <button
+                onClick={() => {
+                  setEditingPodium(null);
+                  setShowPodiumForm(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Nueva Clasificación
+              </button>
+            )}
+          </div>
+
+          {/* Podium Form */}
+          {showPodiumForm && (
+            <div className="mb-6">
+              <PodiumForm
+                editionId={params.id}
+                podium={editingPodium || undefined}
+                onSubmit={async (data) => {
+                  if (editingPodium) {
+                    await updatePodium(editingPodium.id, data);
+                  } else {
+                    await createPodium(data);
+                  }
+                  setShowPodiumForm(false);
+                  setEditingPodium(null);
+                }}
+                onCancel={() => {
+                  setShowPodiumForm(false);
+                  setEditingPodium(null);
+                }}
+              />
+            </div>
+          )}
+
+          {/* Podiums List */}
+          {podiumsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            </div>
+          ) : podiums.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <p className="text-sm">
+                No hay clasificaciones registradas para esta edición.
+              </p>
+              <p className="text-xs mt-1">
+                Haz clic en "Nueva Clasificación" para añadir una.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {podiums.map((podium) => (
+                <div key={podium.id} className="relative">
+                  <PodiumCard podium={podium} />
+
+                  {/* Action buttons overlay */}
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingPodium(podium);
+                        setShowPodiumForm(true);
+                      }}
+                      className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                      title="Editar clasificación"
+                    >
+                      <Edit2 className="w-4 h-4 text-gray-700" />
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (window.confirm('¿Estás seguro de que quieres eliminar esta clasificación?')) {
+                          await deletePodium(podium.id);
+                        }
+                      }}
+                      className="p-2 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors shadow-sm"
+                      title="Eliminar clasificación"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
