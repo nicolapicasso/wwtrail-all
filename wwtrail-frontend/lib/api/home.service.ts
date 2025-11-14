@@ -1,6 +1,6 @@
 // lib/api/home.service.ts - Home Configuration API Service
 
-import { apiClientV2V2 } from './client';
+import { apiClientV2 } from './client';
 import type {
   HomeConfiguration,
   UpdateHomeConfigurationDTO,
@@ -15,7 +15,7 @@ class HomeService {
    * Obtener la configuración activa de la home (público)
    */
   async getActiveConfiguration(): Promise<HomeConfiguration> {
-    const response = await apiClientV2V2.get<{ data: HomeConfiguration }>('/home/config');
+    const response = await apiClientV2.get<{ data: HomeConfiguration }>('/home/config');
     return response.data.data;
   }
 
