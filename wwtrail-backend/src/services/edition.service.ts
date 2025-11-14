@@ -232,8 +232,6 @@ export class EditionService {
                 country: true,
                 city: true,
                 logoUrl: true,
-                latitude: true,
-                longitude: true,
               },
             },
           },
@@ -254,7 +252,34 @@ export class EditionService {
       throw new Error('Edition not found');
     }
 
-    return edition;
+    // Extraer coordenadas PostGIS del Event
+    let coordinates: { lat: number; lon: number } | null = null;
+    try {
+      const coords = await prisma.$queryRawUnsafe<Array<{ lat: number; lon: number }>>(
+        `SELECT ST_Y(location::geometry) as lat, ST_X(location::geometry) as lon
+         FROM events
+         WHERE id::text = $1 AND location IS NOT NULL`,
+        edition.competition.event.id
+      );
+      if (coords && coords.length > 0) {
+        coordinates = coords[0];
+      }
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+    }
+
+    // Añadir coordenadas al objeto event
+    return {
+      ...edition,
+      competition: {
+        ...edition.competition,
+        event: {
+          ...edition.competition.event,
+          latitude: coordinates?.lat,
+          longitude: coordinates?.lon,
+        },
+      },
+    };
   }
 
   /**
@@ -274,8 +299,6 @@ export class EditionService {
                 country: true,
                 city: true,
                 logoUrl: true,
-                latitude: true,
-                longitude: true,
               },
             },
           },
@@ -296,7 +319,34 @@ export class EditionService {
       throw new Error('Edition not found');
     }
 
-    return edition;
+    // Extraer coordenadas PostGIS del Event
+    let coordinates: { lat: number; lon: number } | null = null;
+    try {
+      const coords = await prisma.$queryRawUnsafe<Array<{ lat: number; lon: number }>>(
+        `SELECT ST_Y(location::geometry) as lat, ST_X(location::geometry) as lon
+         FROM events
+         WHERE id::text = $1 AND location IS NOT NULL`,
+        edition.competition.event.id
+      );
+      if (coords && coords.length > 0) {
+        coordinates = coords[0];
+      }
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+    }
+
+    // Añadir coordenadas al objeto event
+    return {
+      ...edition,
+      competition: {
+        ...edition.competition,
+        event: {
+          ...edition.competition.event,
+          latitude: coordinates?.lat,
+          longitude: coordinates?.lon,
+        },
+      },
+    };
   }
 
   /**
