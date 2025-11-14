@@ -19,24 +19,8 @@ import { editionWeatherRouter } from './weather.routes';
 const router = Router();
 console.log('✅ Edition routes file loaded!');
 
-// Ruta raíz para listar todas las ediciones (opcional)
-router.get('/', (req, res) => {
-  res.json({
-    status: 'success',
-    message: 'Editions API v2 - Working!',
-    data: [],
-    endpoints: [
-      'GET /api/v2/editions/:id',
-      'GET /api/v2/editions/slug/:slug',
-      'GET /api/v2/editions/slug/:slug/with-inheritance',
-      'GET /api/v2/editions/:id/full',
-      'GET /api/v2/editions/:id/with-inheritance',
-      'GET /api/v2/editions/:id/stats',
-      'PUT /api/v2/editions/:id (auth)',
-      'DELETE /api/v2/editions/:id (auth)',
-    ],
-  });
-});
+// Ruta raíz para listar todas las ediciones
+router.get('/', EditionController.getAll);
 
 /**
  * RUTAS ANIDADAS BAJO COMPETICIONES

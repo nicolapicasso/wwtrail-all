@@ -177,6 +177,72 @@ export class EditionService {
   }
 
   /**
+   * Obtener todas las ediciones con herencia (para home page)
+   */
+  static async findAllWithInheritance(options: { limit?: number; offset?: number } = {}) {
+    const { limit = 50, offset = 0 } = options;
+
+    const editions = await prisma.edition.findMany({
+      where: { isActive: true },
+      take: limit,
+      skip: offset,
+      orderBy: {
+        year: 'desc',
+      },
+      include: {
+        competition: {
+          include: {
+            event: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                country: true,
+                city: true,
+                logoUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Extraer coordenadas para todos los eventos
+    const editionsWithCoords = await Promise.all(
+      editions.map(async (edition) => {
+        let coordinates: { lat: number; lon: number } | null = null;
+        try {
+          const coords = await prisma.$queryRawUnsafe<Array<{ lat: number; lon: number }>>(
+            `SELECT ST_Y(location::geometry) as lat, ST_X(location::geometry) as lon
+             FROM events
+             WHERE id::text = $1 AND location IS NOT NULL`,
+            edition.competition.event.id
+          );
+          if (coords && coords.length > 0) {
+            coordinates = coords[0];
+          }
+        } catch (error) {
+          console.error('Error extracting coordinates:', error);
+        }
+
+        return {
+          ...edition,
+          competition: {
+            ...edition.competition,
+            event: {
+              ...edition.competition.event,
+              latitude: coordinates?.lat,
+              longitude: coordinates?.lon,
+            },
+          },
+        };
+      })
+    );
+
+    return editionsWithCoords;
+  }
+
+  /**
    * Obtener todas las ediciones de una competición
    */
   static async findByCompetition(competitionId: string, options: any = {}) {

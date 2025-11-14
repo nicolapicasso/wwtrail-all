@@ -87,6 +87,28 @@ export class EditionController {
   }
 
   /**
+   * GET /api/v2/editions
+   * Obtener todas las ediciones con paginación
+   * @auth No requerida
+   */
+  static async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+
+      const editions = await EditionService.findAllWithInheritance({ limit, offset });
+
+      res.json({
+        status: 'success',
+        data: { editions },
+        count: editions.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * GET /api/v2/editions/:id
    * Obtener una edición por ID
    * @auth No requerida
