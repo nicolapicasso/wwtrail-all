@@ -844,3 +844,67 @@ model EditionPhoto {
   @@index([isFeatured])
   @@map("edition_photos")
 }
+
+// ===================================
+// HOME CONFIGURATION - CMS Home Page
+// ===================================
+
+enum HomeBlockType {
+  EVENTS
+  COMPETITIONS
+  EDITIONS
+  TEXT
+  LINKS
+}
+
+enum HomeBlockViewType {
+  LIST
+  CARDS
+}
+
+enum HomeTextSize {
+  SM
+  MD
+  LG
+  XL
+}
+
+enum HomeTextVariant {
+  PARAGRAPH
+  HEADING
+}
+
+model HomeConfiguration {
+  id           String   @id @default(uuid())
+  heroImage    String?  @db.Text // URL de la imagen del hero
+  heroTitle    String?  @db.Text // Título principal del hero
+  heroSubtitle String?  @db.Text // Subtítulo del hero
+  isActive     Boolean  @default(true) // Solo una configuración activa a la vez
+
+  blocks HomeBlock[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("home_configurations")
+}
+
+model HomeBlock {
+  id              String        @id @default(uuid())
+  configurationId String
+  configuration   HomeConfiguration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
+
+  type    HomeBlockType
+  order   Int           @default(0) // Orden de aparición
+  visible Boolean       @default(true)
+
+  // Configuración específica por tipo (JSON)
+  config Json? // Almacena configuración específica por tipo de bloque
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([configurationId])
+  @@index([order])
+  @@map("home_blocks")
+}
