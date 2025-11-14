@@ -23,8 +23,8 @@ export function EventsBlock({ config }: EventsBlockProps) {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const data = await eventsService.getAll({ limit });
-        setEvents(data?.events || []);
+        const response = await eventsService.getAll({ limit });
+        setEvents(response?.data || []);
       } catch (error) {
         console.error('Error fetching events:', error);
         setEvents([]);
