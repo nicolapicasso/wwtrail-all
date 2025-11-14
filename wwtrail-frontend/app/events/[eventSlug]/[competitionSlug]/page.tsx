@@ -6,11 +6,14 @@
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { useCompetition } from '@/hooks/useCompetitions';
+import { useEditions } from '@/hooks/useEditions';
 import { EditionSelector } from '@/components/EditionSelector';
 import { EditionCard } from '@/components/EditionCard';
 import { Edition } from '@/types/v2';
-import { Mountain, TrendingUp, Users, ArrowLeft } from 'lucide-react';
+import { Mountain, TrendingUp, Users, ArrowLeft, Calendar, MapPin, Info } from 'lucide-react';
 import Link from 'next/link';
+import EventMap from '@/components/EventMap';
+import EventGallery from '@/components/EventGallery';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -18,6 +21,7 @@ export default function CompetitionDetailPage() {
   const eventSlug = params?.eventSlug as string;
 
   const { competition, loading, error } = useCompetition(competitionSlug);
+  const { editions, loading: editionsLoading } = useEditions(competition?.id || '');
   const [selectedEdition, setSelectedEdition] = useState<Edition | null>(null);
 
   if (loading) {
@@ -55,29 +59,49 @@ export default function CompetitionDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="border-b bg-white">
-        <div className="container mx-auto px-4 py-6">
+      {/* Hero Section with Cover Image */}
+      <div className="relative h-96 bg-gradient-to-r from-blue-600 to-green-600">
+        {competition.coverImage && (
+          <img
+            src={competition.coverImage}
+            alt={competition.name}
+            className="w-full h-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-black/40"></div>
+
+        {/* Back Button */}
+        <div className="absolute top-4 left-4 z-10">
           <Link
             href={`/events/${eventSlug}`}
-            className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            className="text-white hover:text-gray-200 flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to {competition.event?.name}
+            Volver a {competition.event?.name}
           </Link>
+        </div>
 
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">{competition.name}</h1>
-              {competition.description && (
-                <p className="mt-2 text-muted-foreground">{competition.description}</p>
+        {/* Title Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
+          <div className="container mx-auto">
+            <div className="flex items-end justify-between">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                  {competition.name}
+                </h1>
+                {competition.event && (
+                  <div className="flex items-center gap-2 mt-4 text-white/90">
+                    <MapPin className="h-5 w-5" />
+                    <span>{competition.event.city}, {competition.event.country}</span>
+                  </div>
+                )}
+              </div>
+              {!competition.isActive && (
+                <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+                  Inactiva
+                </span>
               )}
             </div>
-            {!competition.isActive && (
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
-                Inactive
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -87,6 +111,19 @@ export default function CompetitionDetailPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Description */}
+            {competition.description && (
+              <div className="rounded-lg border bg-white p-6 shadow-sm">
+                <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
+                  <Info className="h-6 w-6 text-blue-600" />
+                  Acerca de
+                </h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {competition.description}
+                </p>
+              </div>
+            )}
+
             {/* Edition Selector */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-xl font-bold">Select Edition</h2>
@@ -105,23 +142,151 @@ export default function CompetitionDetailPage() {
               </div>
             )}
 
+            {/* Gallery */}
+            {competition.gallery && competition.gallery.length > 0 && (
+              <div className="rounded-lg border bg-white p-6 shadow-sm">
+                <EventGallery
+                  images={competition.gallery}
+                  eventName={competition.name}
+                />
+              </div>
+            )}
+
             {/* All Editions List */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-xl font-bold">All Editions</h2>
-              <p className="text-sm text-muted-foreground mb-4">
+              <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
+                <Calendar className="h-6 w-6 text-blue-600" />
+                All Editions ({editions.length})
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
                 Browse all available editions of this competition
               </p>
-              {/* Here you would list all editions - needs another hook */}
-              <div className="rounded-lg border border-dashed p-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Use the selector above to view edition details
-                </p>
-              </div>
+
+              {editionsLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse" />
+                  ))}
+                </div>
+              ) : editions.length > 0 ? (
+                <div className="space-y-3">
+                  {editions.map((edition) => (
+                    <Link
+                      key={edition.id}
+                      href={`/editions/${edition.slug}`}
+                      className="block p-4 border rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl font-bold text-blue-600">
+                              {edition.year}
+                            </span>
+                            {edition.specificDate && (
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <Calendar className="h-4 w-4" />
+                                {new Date(edition.specificDate).toLocaleDateString('es-ES', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                })}
+                              </div>
+                            )}
+                          </div>
+
+                          {edition.city && (
+                            <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                              <MapPin className="h-3 w-3" />
+                              {edition.city}
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                            {edition.distance && (
+                              <span>{edition.distance} km</span>
+                            )}
+                            {edition.elevation && (
+                              <span>{edition.elevation} m D+</span>
+                            )}
+                            {edition.currentParticipants !== undefined && (
+                              <span>{edition.currentParticipants} participantes</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {edition.status && (
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              edition.status === 'FINISHED' ? 'bg-gray-100 text-gray-700' :
+                              edition.status === 'UPCOMING' ? 'bg-blue-100 text-blue-700' :
+                              edition.status === 'ONGOING' ? 'bg-green-100 text-green-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {edition.status === 'FINISHED' ? 'Finalizada' :
+                               edition.status === 'UPCOMING' ? 'Próxima' :
+                               edition.status === 'ONGOING' ? 'En curso' :
+                               edition.status}
+                            </span>
+                          )}
+                          <span className="text-blue-600 font-semibold">→</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
+                  <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600">
+                    No hay ediciones disponibles aún
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Logo with Inheritance */}
+            {(competition.logoUrl || competition.event?.logoUrl) && (
+              <div className="rounded-lg border bg-white p-6 shadow-sm">
+                <div className="flex justify-center">
+                  <img
+                    src={competition.logoUrl || competition.event?.logoUrl}
+                    alt={`${competition.name} logo`}
+                    className="max-h-32 w-auto object-contain"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Map */}
+            {competition.event?.latitude && competition.event?.longitude && (
+              <div className="rounded-lg border bg-white p-6 shadow-sm">
+                <h3 className="mb-4 font-semibold flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-green-600" />
+                  Ubicación
+                </h3>
+                <EventMap
+                  event={{
+                    ...competition.event,
+                    name: competition.name,
+                  }}
+                  nearbyEvents={[]}
+                />
+                <div className="mt-4">
+                  <a
+                    href={`https://www.google.com/maps?q=${competition.event.latitude},${competition.event.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline flex items-center gap-2"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    Ver en Google Maps
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* Base Information */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
               <h3 className="mb-4 font-semibold">Base Information</h3>

@@ -1,17 +1,65 @@
 // lib/api/v2/editions.service.ts - VERSIÓN CORREGIDA
 
 import { apiClientV2 } from '../client';
-import { Edition, EditionStats } from '@/types/edition';
+import { Edition, EditionFull, EditionStats } from '@/types/edition';
 
 /**
  * Editions Service - USA V2
  * CORREGIDO: Obtiene editions desde competition.editions
  */
 
+// Backend response structure (flat fields)
+interface EditionWithInheritanceResponse extends Edition {
+  // Resolved fields
+  distance: number;
+  elevation: number;
+  maxParticipants: number;
+  city: string;
+
+  // Flat fields from backend
+  eventName: string;
+  eventSlug: string;
+  eventCountry: string;
+  eventId: string;
+  competitionName: string;
+  competitionSlug: string;
+  competitionType: string;
+  baseDistance?: number;
+  baseElevation?: number;
+  baseMaxParticipants?: number;
+}
+
+// Transform backend response to EditionFull format
+function transformToEditionFull(response: EditionWithInheritanceResponse): EditionFull {
+  return {
+    ...response,
+    resolvedDistance: response.distance,
+    resolvedElevation: response.elevation,
+    resolvedMaxParticipants: response.maxParticipants,
+    resolvedCity: response.city,
+    competition: {
+      id: response.competitionId,
+      slug: response.competitionSlug,
+      name: response.competitionName,
+      type: response.competitionType,
+      baseDistance: response.baseDistance,
+      baseElevation: response.baseElevation,
+      baseMaxParticipants: response.baseMaxParticipants,
+    },
+    event: {
+      id: response.eventId,
+      slug: response.eventSlug,
+      name: response.eventName,
+      country: response.eventCountry,
+      city: response.city,
+    },
+  };
+}
+
 export const editionsService = {
   /**
    * Get editions by competition ID
-   * CORREGIDO: Ahora obtiene la competición y extrae sus ediciones
+   * GET /competitions/:competitionId/editions
    */
   async getByCompetition(
     competitionId: string,
@@ -21,23 +69,20 @@ export const editionsService = {
     }
   ): Promise<Edition[]> {
     try {
-      // Obtener la competición con sus ediciones
+      // Usar el endpoint dedicado para obtener ediciones
       const response = await apiClientV2.get<{
         status: string;
-        data: {
-          id: string;
-          editions?: Edition[];
-        };
-      }>(`/competitions/${competitionId}`);
-      
-      let editions = response.data.data.editions || [];
-      
+        data: Edition[];
+      }>(`/competitions/${competitionId}/editions`);
+
+      let editions = response.data.data || [];
+
       // Ordenar por año
       const sortOrder = options?.sortOrder || 'desc';
-      editions = editions.sort((a, b) => 
+      editions = editions.sort((a, b) =>
         sortOrder === 'desc' ? b.year - a.year : a.year - b.year
       );
-      
+
       return editions;
     } catch (error) {
       console.error('Error getting editions:', error);
@@ -70,6 +115,18 @@ export const editionsService = {
   },
 
   /**
+   * Get edition by slug with inheritance (resolved fields)
+   * GET /editions/slug/:slug/with-inheritance
+   */
+  async getBySlugWithInheritance(slug: string): Promise<EditionFull> {
+    const response = await apiClientV2.get<{
+      status: string;
+      data: EditionWithInheritanceResponse;
+    }>(`/editions/slug/${slug}/with-inheritance`);
+    return transformToEditionFull(response.data.data);
+  },
+
+  /**
    * Get edition by year
    * Usa getByCompetition y filtra por año
    */
@@ -83,12 +140,12 @@ export const editionsService = {
    * Get edition with inheritance (resolved fields)
    * GET /editions/:id/with-inheritance
    */
-  async getWithInheritance(id: string): Promise<Edition> {
+  async getWithInheritance(id: string): Promise<EditionFull> {
     const response = await apiClientV2.get<{
       status: string;
-      data: Edition;
+      data: EditionWithInheritanceResponse;
     }>(`/editions/${id}/with-inheritance`);
-    return response.data.data;
+    return transformToEditionFull(response.data.data);
   },
 
   /**
