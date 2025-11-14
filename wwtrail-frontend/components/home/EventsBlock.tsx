@@ -8,7 +8,8 @@ import { MapPin, ArrowRight } from 'lucide-react';
 import EventCard from '@/components/EventCard';
 import eventsService from '@/lib/api/v2/events.service';
 import type { Event } from '@/types/api';
-import type { ContentBlockConfig, HomeBlockViewType } from '@/types/home';
+import type { ContentBlockConfig } from '@/types/home';
+import { HomeBlockViewType } from '@/types/home';
 
 interface EventsBlockProps {
   config: ContentBlockConfig;

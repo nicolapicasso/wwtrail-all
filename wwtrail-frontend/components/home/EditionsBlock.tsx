@@ -8,7 +8,8 @@ import { Calendar, ArrowRight } from 'lucide-react';
 import { EditionCard } from '@/components/EditionCard';
 import editionsService from '@/lib/api/v2/editions.service';
 import type { EditionFull } from '@/types/edition';
-import type { ContentBlockConfig, HomeBlockViewType } from '@/types/home';
+import type { ContentBlockConfig } from '@/types/home';
+import { HomeBlockViewType } from '@/types/home';
 
 interface EditionsBlockProps {
   config: ContentBlockConfig;
