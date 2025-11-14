@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { homeService } from '@/lib/api/home.service';
+import FileUpload from '@/components/FileUpload';
 import type {
   HomeBlock,
   HomeBlockType,
@@ -35,6 +36,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   // Content block config (EVENTS, COMPETITIONS, EDITIONS)
   const [limit, setLimit] = useState(6);
   const [viewType, setViewType] = useState<HomeBlockViewType>('CARDS');
+  const [featuredOnly, setFeaturedOnly] = useState(false);
 
   // Text block config
   const [textContent, setTextContent] = useState('');
@@ -55,6 +57,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         const contentConfig = config as ContentBlockConfig;
         setLimit(contentConfig.limit);
         setViewType(contentConfig.viewType);
+        setFeaturedOnly(contentConfig.featuredOnly || false);
       } else if (block.type === 'TEXT') {
         const textConfig = config as TextBlockConfig;
         setTextContent(textConfig.content);
@@ -69,10 +72,15 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
   const buildConfig = () => {
     if (blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS') {
-      return {
+      const config: ContentBlockConfig = {
         limit,
         viewType,
-      } as ContentBlockConfig;
+      };
+      // Only include featuredOnly for EVENTS blocks
+      if (blockType === 'EVENTS') {
+        config.featuredOnly = featuredOnly;
+      }
+      return config;
     } else if (blockType === 'TEXT') {
       return {
         content: textContent,
@@ -229,6 +237,21 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                   <option value="LIST">Lista</option>
                 </select>
               </div>
+
+              {blockType === 'EVENTS' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="featuredOnly"
+                    checked={featuredOnly}
+                    onChange={(e) => setFeaturedOnly(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="featuredOnly" className="text-sm font-medium text-gray-700">
+                    Solo eventos destacados
+                  </label>
+                </div>
+              )}
             </div>
           )}
 
@@ -304,29 +327,39 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                     </button>
                   </div>
 
-                  <input
-                    type="text"
-                    placeholder="Título"
-                    value={item.title}
-                    onChange={(e) => updateLink(index, 'title', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Título</label>
+                    <input
+                      type="text"
+                      placeholder="Título del enlace"
+                      value={item.title}
+                      onChange={(e) => updateLink(index, 'title', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    />
+                  </div>
 
-                  <input
-                    type="text"
-                    placeholder="URL"
-                    value={item.url}
-                    onChange={(e) => updateLink(index, 'url', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">URL</label>
+                    <input
+                      type="text"
+                      placeholder="https://ejemplo.com"
+                      value={item.url}
+                      onChange={(e) => updateLink(index, 'url', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    />
+                  </div>
 
-                  <input
-                    type="text"
-                    placeholder="URL de la imagen"
-                    value={item.imageUrl}
-                    onChange={(e) => updateLink(index, 'imageUrl', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Imagen</label>
+                    <FileUpload
+                      onUpload={(url) => updateLink(index, 'imageUrl', url)}
+                      currentUrl={item.imageUrl}
+                      buttonText="Subir imagen"
+                      fieldname="link"
+                      maxSizeMB={5}
+                      showPreview={true}
+                    />
+                  </div>
                 </div>
               ))}
 

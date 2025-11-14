@@ -3,6 +3,7 @@
 'use client';
 
 import { Save } from 'lucide-react';
+import FileUpload from '@/components/FileUpload';
 
 interface HeroConfigFormProps {
   heroImage: string;
@@ -29,24 +30,16 @@ export function HeroConfigForm({
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Imagen de Fondo (URL)
+          Imagen de Fondo
         </label>
-        <input
-          type="text"
-          value={heroImage}
-          onChange={(e) => onImageChange(e.target.value)}
-          placeholder="https://ejemplo.com/imagen.jpg"
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        <FileUpload
+          onUpload={onImageChange}
+          currentUrl={heroImage}
+          buttonText="Subir imagen de fondo"
+          fieldname="hero"
+          maxSizeMB={10}
+          showPreview={true}
         />
-        {heroImage && (
-          <div className="mt-2">
-            <img
-              src={heroImage}
-              alt="Preview"
-              className="h-32 w-full object-cover rounded-md"
-            />
-          </div>
-        )}
       </div>
 
       <div>

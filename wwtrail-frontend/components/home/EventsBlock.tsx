@@ -16,14 +16,17 @@ interface EventsBlockProps {
 }
 
 export function EventsBlock({ config }: EventsBlockProps) {
-  const { limit, viewType } = config;
+  const { limit, viewType, featuredOnly } = config;
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await eventsService.getAll({ limit });
+        const response = await eventsService.getAll({
+          limit,
+          isFeatured: featuredOnly
+        });
         setEvents(response?.data || []);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -34,7 +37,7 @@ export function EventsBlock({ config }: EventsBlockProps) {
     };
 
     fetchEvents();
-  }, [limit]);
+  }, [limit, featuredOnly]);
 
   if (loading) {
     return (

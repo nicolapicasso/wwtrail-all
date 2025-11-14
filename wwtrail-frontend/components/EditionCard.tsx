@@ -1,6 +1,10 @@
 // components/EditionCard.tsx - Card for displaying edition details
 
+'use client';
+
 import Link from 'next/link';
+import Image from 'next/image';
+import { useState } from 'react';
 import { Edition, EditionFull } from '@/types/v2';
 import { Calendar, MapPin, Users, TrendingUp, Mountain, Info } from 'lucide-react';
 import { RegistrationStatus } from '@/types/competition';
@@ -14,6 +18,9 @@ interface EditionCardProps {
 }
 
 export function EditionCard({ edition, showInheritance = false, linkTo, onClick }: EditionCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+
   // Check if edition has resolved fields (EditionFull)
   const editionFull = edition as EditionFull;
   const hasInheritance = 'resolvedDistance' in editionFull;
@@ -25,73 +32,116 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
     : edition.maxParticipants;
   const city = hasInheritance ? editionFull.resolvedCity : edition.city;
 
-  const content = (
-    <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md">
-      {/* Header */}
-      <div className="border-b bg-gradient-to-r from-green-50 to-blue-50 p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-green-600">{edition.year}</span>
-              {edition.year === new Date().getFullYear() && (
-                <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">
-                  Current
-                </span>
-              )}
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {new Date(edition.startDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
-          </div>
+  // Get images
+  const mainImage = edition.coverImage || (edition as any).competition?.coverImage;
+  const logoImage = (edition as any).competition?.logoUrl || (edition as any).competition?.event?.logoUrl;
+  const competitionName = (edition as any).competition?.name || '';
 
-          {/* Status Badges */}
-          <div className="flex flex-col gap-1">
-            <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                edition.status === 'UPCOMING'
-                  ? 'bg-blue-100 text-blue-800'
-                  : edition.status === 'ONGOING'
-                  ? 'bg-green-100 text-green-800'
-                  : edition.status === 'FINISHED'
-                  ? 'bg-gray-100 text-gray-800'
-                  : 'bg-red-100 text-red-800'
-              }`}
-            >
-              {edition.status}
-            </span>
-            <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                edition.registrationStatus === 'OPEN'
-                  ? 'bg-green-100 text-green-800'
-                  : edition.registrationStatus === 'FULL'
-                  ? 'bg-orange-100 text-orange-800'
-                  : edition.registrationStatus === RegistrationStatus.COMING_SOON
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
-            >
-              {edition.registrationStatus.replace('_', ' ')}
-            </span>
+  const renderImage = () => {
+    if (mainImage && !imageError) {
+      return (
+        <Image
+          src={mainImage}
+          alt={`${competitionName} ${edition.year}`}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={() => setImageError(true)}
+        />
+      );
+    } else {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+          <Calendar className="h-20 w-20 text-gray-300" />
+        </div>
+      );
+    }
+  };
+
+  const content = (
+    <div className="group relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md flex flex-col h-full">
+      {/* Image Section */}
+      <div className="relative w-full h-48 overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50">
+        {renderImage()}
+
+        {/* Overlay Gradient */}
+        {mainImage && !imageError && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+        )}
+
+        {/* Logo Overlay */}
+        {logoImage && !logoError && (
+          <div className="absolute bottom-3 left-3 bg-white rounded-lg p-2 shadow-lg z-10">
+            <div className="relative w-12 h-12">
+              <Image
+                src={logoImage}
+                alt={`${competitionName} logo`}
+                fill
+                className="object-contain"
+                onError={() => setLogoError(true)}
+              />
+            </div>
           </div>
+        )}
+
+        {/* Status Badges */}
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
+              edition.status === 'UPCOMING'
+                ? 'bg-blue-500 text-white'
+                : edition.status === 'ONGOING'
+                ? 'bg-green-500 text-white'
+                : edition.status === 'FINISHED'
+                ? 'bg-gray-500 text-white'
+                : 'bg-red-500 text-white'
+            }`}
+          >
+            {edition.status}
+          </span>
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
+              edition.registrationStatus === 'OPEN'
+                ? 'bg-green-500 text-white'
+                : edition.registrationStatus === 'FULL'
+                ? 'bg-orange-500 text-white'
+                : edition.registrationStatus === RegistrationStatus.COMING_SOON
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-500 text-white'
+            }`}
+          >
+            {edition.registrationStatus.replace('_', ' ')}
+          </span>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="p-4">
-        <div className="grid grid-cols-2 gap-4">
+      {/* Content Section */}
+      <div className="p-4 flex flex-col flex-1">
+        {/* Title */}
+        <h3 className="text-lg font-semibold group-hover:text-purple-600 transition-colors mb-2">
+          {competitionName} {edition.year}
+        </h3>
+
+        {/* Date */}
+        <p className="text-sm text-muted-foreground mb-3">
+          {new Date(edition.startDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </p>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-3 border-t pt-3">
           {/* Distance */}
           {distance && (
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                <TrendingUp className="h-4 w-4 text-green-600" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Distance</p>
-                <p className="font-semibold">
+                <p className="text-sm font-semibold">
                   {distance}km
                   {showInheritance && hasInheritance && !edition.distance && (
                     <span className="ml-1 text-xs text-green-600">*</span>
@@ -103,13 +153,13 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
 
           {/* Elevation */}
           {elevation && (
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
-                <Mountain className="h-5 w-5 text-orange-600" />
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
+                <Mountain className="h-4 w-4 text-orange-600" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Elevation</p>
-                <p className="font-semibold">
+                <p className="text-sm font-semibold">
                   {elevation}m D+
                   {showInheritance && hasInheritance && !edition.elevation && (
                     <span className="ml-1 text-xs text-green-600">*</span>
@@ -121,13 +171,13 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
 
           {/* Location */}
           {city && (
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                <MapPin className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                <MapPin className="h-4 w-4 text-blue-600" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Location</p>
-                <p className="font-semibold">
+                <p className="text-sm font-semibold">
                   {city}
                   {showInheritance && hasInheritance && !edition.city && (
                     <span className="ml-1 text-xs text-green-600">*</span>
@@ -139,13 +189,13 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
 
           {/* Participants */}
           {maxParticipants && (
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-                <Users className="h-5 w-5 text-purple-600" />
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
+                <Users className="h-4 w-4 text-purple-600" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Participants</p>
-                <p className="font-semibold">
+                <p className="text-sm font-semibold">
                   {edition.currentParticipants || 0} / {maxParticipants}
                   {showInheritance && hasInheritance && !edition.maxParticipants && (
                     <span className="ml-1 text-xs text-green-600">*</span>
@@ -173,7 +223,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
               href={edition.registrationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              className="inline-flex w-full items-center justify-center rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               onClick={(e) => e.stopPropagation()}
             >
               Register Now
@@ -181,9 +231,6 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
           </div>
         )}
       </div>
-
-      {/* Hover effect */}
-      <div className="absolute inset-0 bg-green-500/0 transition-colors group-hover:bg-green-500/5 pointer-events-none" />
     </div>
   );
 
@@ -197,7 +244,17 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
 
   if (linkTo) {
     return (
-      <Link href={linkTo} className="block">
+      <Link href={linkTo}>
+        {content}
+      </Link>
+    );
+  }
+
+  // Default: link to edition detail page
+  const competitionSlug = (edition as any).competition?.slug || '';
+  if (competitionSlug) {
+    return (
+      <Link href={`/competitions/${competitionSlug}/editions/${edition.id}`}>
         {content}
       </Link>
     );

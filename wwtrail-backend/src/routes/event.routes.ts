@@ -153,6 +153,14 @@ router.patch(
   EventController.updateStatus
 );
 
+// Toggle featured status (protegido - solo ADMIN)
+router.patch(
+  '/:id/featured',
+  authenticate,
+  authorize('ADMIN'),
+  EventController.toggleFeatured
+);
+
 // Eliminar evento (protegido - solo ADMIN)
 router.delete(
   '/:id',

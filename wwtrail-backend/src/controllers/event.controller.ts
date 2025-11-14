@@ -474,4 +474,46 @@ export class EventController {
       });
     }
   }
+
+  /**
+   * Toggle featured status
+   * PATCH /events/:id/featured
+   */
+  static async toggleFeatured(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+
+      // Get current event
+      const currentEvent = await EventService.findById(id);
+      if (!currentEvent) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Event not found',
+        });
+      }
+
+      // Toggle featured status
+      const event = await EventService.update(
+        id,
+        { isFeatured: !currentEvent.isFeatured },
+        userId
+      );
+
+      logger.info(
+        `Event featured status toggled: ${id} → ${event.isFeatured} by user ${userId}`
+      );
+
+      res.json({
+        status: 'success',
+        data: event,
+      });
+    } catch (error: any) {
+      logger.error(`Error toggling event featured status: ${error.message}`);
+      res.status(error.message.includes('not found') ? 404 : 500).json({
+        status: 'error',
+        message: error.message || 'Error toggling featured status',
+      });
+    }
+  }
 }

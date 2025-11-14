@@ -29,6 +29,7 @@ export enum HomeTextVariant {
 export interface ContentBlockConfig {
   limit: number;
   viewType: HomeBlockViewType;
+  featuredOnly?: boolean; // Only for EVENTS blocks
 }
 
 export interface TextBlockConfig {
