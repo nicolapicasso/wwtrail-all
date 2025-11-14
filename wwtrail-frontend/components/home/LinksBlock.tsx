@@ -11,7 +11,8 @@ interface LinksBlockProps {
 }
 
 export function LinksBlock({ config }: LinksBlockProps) {
-  const { items } = config;
+  // Backward compatibility: aceptar tanto 'items' como 'links'
+  const items = (config as any).items || (config as any).links || [];
 
   if (!items || items.length === 0) {
     return null;
@@ -32,7 +33,7 @@ export function LinksBlock({ config }: LinksBlockProps) {
               {/* Imagen */}
               <div className="relative h-48 w-full overflow-hidden">
                 <Image
-                  src={item.imageUrl}
+                  src={(item as any).imageUrl || (item as any).image}
                   alt={item.title}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
