@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
+  Home,
   Award,
   MapPin,
   Flag,
@@ -33,6 +34,12 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    label: 'Configuración Home',
+    href: '/dashboard/home-config',
+    icon: Home,
+    adminOnly: true,
   },
   {
     label: 'Gestión de Organizadores',
