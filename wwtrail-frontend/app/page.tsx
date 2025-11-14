@@ -54,6 +54,10 @@ export default function HomePage() {
   // Ordenar bloques por order
   const sortedBlocks = [...config.blocks].sort((a, b) => a.order - b.order);
 
+  // Debug: Log configuration
+  console.log('Home Config:', config);
+  console.log('Sorted Blocks:', sortedBlocks);
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -65,9 +69,10 @@ export default function HomePage() {
 
       {/* Bloques dinámicos */}
       <div className="relative">
-        {sortedBlocks.map((block) => (
-          <HomeBlockRenderer key={block.id} block={block} />
-        ))}
+        {sortedBlocks.map((block) => {
+          console.log('Rendering block:', block.id, block.type, 'visible:', block.visible, 'config:', block.config);
+          return <HomeBlockRenderer key={block.id} block={block} />;
+        })}
       </div>
 
       {/* Fallback si no hay bloques */}
