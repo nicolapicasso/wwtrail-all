@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-// Regex para validar formato de tiempo HH:MM:SS
-const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+// Regex para validar formato de tiempo HH:MM:SS (permite más de 24h para ultra trails)
+const timeRegex = /^(\d{1,3}):[0-5][0-9]:[0-5][0-9]$/;
 
 // Schema para crear un podio
 export const createPodiumSchema = z.object({
