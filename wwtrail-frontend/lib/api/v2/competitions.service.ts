@@ -30,6 +30,22 @@ export interface Edition {
 
 export const competitionsService = {
   /**
+   * Get all competitions with optional filters
+   * GET /competitions
+   */
+  async getAll(filters?: { limit?: number; offset?: number }): Promise<{ competitions: Competition[] }> {
+    const params = new URLSearchParams();
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.offset) params.append('offset', filters.offset.toString());
+
+    const response = await apiClientV2.get<{
+      status: string;
+      data: { competitions: Competition[] };
+    }>(`/competitions${params.toString() ? `?${params.toString()}` : ''}`);
+    return response.data.data;
+  },
+
+  /**
    * Get competitions by event ID
    * GET /events/:eventId/competitions
    */

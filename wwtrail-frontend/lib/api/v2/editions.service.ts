@@ -66,6 +66,25 @@ function transformToEditionFull(response: EditionWithInheritanceResponse): Editi
 
 export const editionsService = {
   /**
+   * Get all editions with optional filters
+   * GET /editions
+   */
+  async getAll(filters?: { limit?: number; offset?: number }): Promise<{ editions: EditionFull[] }> {
+    const params = new URLSearchParams();
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.offset) params.append('offset', filters.offset.toString());
+
+    const response = await apiClientV2.get<{
+      status: string;
+      data: { editions: EditionWithInheritanceResponse[] };
+    }>(`/editions${params.toString() ? `?${params.toString()}` : ''}`);
+
+    // Transform all editions to EditionFull format
+    const editions = (response.data.data?.editions || []).map(transformToEditionFull);
+    return { editions };
+  },
+
+  /**
    * Get editions by competition ID
    * GET /competitions/:competitionId/editions
    */
