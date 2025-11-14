@@ -42,7 +42,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   const [textVariant, setTextVariant] = useState<HomeTextVariant>('PARAGRAPH');
 
   // Links block config
-  const [links, setLinks] = useState<LinkItem[]>([]);
+  const [items, setItems] = useState<LinkItem[]>([]);
 
   const [saving, setSaving] = useState(false);
 
@@ -62,7 +62,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         setTextVariant(textConfig.variant);
       } else if (block.type === 'LINKS') {
         const linksConfig = config as LinksBlockConfig;
-        setLinks(linksConfig.links);
+        setItems(linksConfig.items);
       }
     }
   }, [block]);
@@ -81,7 +81,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
       } as TextBlockConfig;
     } else if (blockType === 'LINKS') {
       return {
-        links,
+        items,
       } as LinksBlockConfig;
     }
     return {};
@@ -120,17 +120,17 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   };
 
   const addLink = () => {
-    setLinks([...links, { title: '', url: '', image: '' }]);
+    setItems([...items, { title: '', url: '', imageUrl: '' }]);
   };
 
   const updateLink = (index: number, field: keyof LinkItem, value: string) => {
-    const newLinks = [...links];
-    newLinks[index][field] = value;
-    setLinks(newLinks);
+    const newItems = [...items];
+    newItems[index][field] = value;
+    setItems(newItems);
   };
 
   const removeLink = (index: number) => {
-    setLinks(links.filter((_, i) => i !== index));
+    setItems(items.filter((_, i) => i !== index));
   };
 
   return (
@@ -292,7 +292,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                 </button>
               </div>
 
-              {links.map((link, index) => (
+              {items.map((item, index) => (
                 <div key={index} className="border rounded-md p-4 space-y-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Enlace {index + 1}</span>
@@ -307,7 +307,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                   <input
                     type="text"
                     placeholder="Título"
-                    value={link.title}
+                    value={item.title}
                     onChange={(e) => updateLink(index, 'title', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
@@ -315,7 +315,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                   <input
                     type="text"
                     placeholder="URL"
-                    value={link.url}
+                    value={item.url}
                     onChange={(e) => updateLink(index, 'url', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
@@ -323,14 +323,14 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                   <input
                     type="text"
                     placeholder="URL de la imagen"
-                    value={link.image}
-                    onChange={(e) => updateLink(index, 'image', e.target.value)}
+                    value={item.imageUrl}
+                    onChange={(e) => updateLink(index, 'imageUrl', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
                 </div>
               ))}
 
-              {links.length === 0 && (
+              {items.length === 0 && (
                 <p className="text-sm text-gray-500 text-center py-4">
                   No hay enlaces. Agrega al menos uno.
                 </p>
