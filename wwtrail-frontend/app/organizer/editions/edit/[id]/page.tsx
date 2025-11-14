@@ -154,10 +154,10 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
           competition={competition}
           edition={edition}
           onSuccess={(updatedEdition) => {
-            router.push(`/organizer/events/${competition.eventId}`);
+            router.push('/organizer/editions');
           }}
           onCancel={() => {
-            router.push(`/organizer/events/${competition.eventId}`);
+            router.push('/organizer/editions');
           }}
         />
 

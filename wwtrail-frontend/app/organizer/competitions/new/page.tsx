@@ -82,10 +82,10 @@ function NewCompetitionContent() {
         <CompetitionForm
           eventId={eventId}
           onSuccess={(competition) => {
-            router.push(`/organizer/events/${eventId}`);
+            router.push('/organizer/competitions');
           }}
           onCancel={() => {
-            router.push(`/organizer/events/${eventId}`);
+            router.push('/organizer/competitions');
           }}
         />
       </div>

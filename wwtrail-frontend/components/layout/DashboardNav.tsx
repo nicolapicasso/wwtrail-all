@@ -1,63 +1,91 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  LayoutDashboard,
+  Award,
+  MapPin,
+  Flag,
+  Calendar,
+  Building2,
+  FileText,
+  Tag,
+  Users,
+  BarChart3,
+  ChevronRight,
+  ChevronDown,
+} from 'lucide-react';
 
 interface NavItem {
   label: string;
   href: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
+  badge?: string;
+  children?: NavItem[];
 }
 
 const navItems: NavItem[] = [
   {
     label: 'Dashboard',
     href: '/dashboard',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
+    icon: LayoutDashboard,
   },
   {
-    label: 'Mis Eventos',
-    href: '/my-events',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
+    label: 'Gestión de Organizadores',
+    href: '/organizer',
+    icon: Award,
+    children: [
+      {
+        label: 'Eventos',
+        href: '/organizer/events',
+        icon: MapPin,
+      },
+      {
+        label: 'Competiciones',
+        href: '/organizer/competitions',
+        icon: Flag,
+      },
+      {
+        label: 'Ediciones',
+        href: '/organizer/editions',
+        icon: Calendar,
+      },
+    ],
   },
   {
-    label: 'Crear Evento',
-    href: '/events/create',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      </svg>
-    ),
+    label: 'Alojamientos',
+    href: '/accommodations',
+    icon: Building2,
+    badge: 'Pronto',
   },
   {
-    label: 'Admin Panel',
-    href: '/admin/dashboard',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
+    label: 'Blog y Artículos',
+    href: '/blog',
+    icon: FileText,
+    badge: 'Pronto',
+  },
+  {
+    label: 'Ofertas y Cupones',
+    href: '/offers',
+    icon: Tag,
+    badge: 'Pronto',
+  },
+  {
+    label: 'Usuarios',
+    href: '/users',
+    icon: Users,
+    badge: 'Pronto',
     adminOnly: true,
   },
   {
-    label: 'Eventos Pendientes',
-    href: '/admin/pending-events',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    label: 'Estadísticas',
+    href: '/stats',
+    icon: BarChart3,
+    badge: 'Pronto',
     adminOnly: true,
   },
 ];
@@ -65,6 +93,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
+  const [expandedItems, setExpandedItems] = useState<string[]>(['/organizer']);
 
   const filteredItems = navItems.filter((item) => {
     if (item.adminOnly) {
@@ -73,28 +102,131 @@ export function DashboardNav() {
     return true;
   });
 
+  const toggleExpand = (href: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(href) ? prev.filter((h) => h !== href) : [...prev, href]
+    );
+  };
+
+  const isActive = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  };
+
+  const isChildActive = (children?: NavItem[]) => {
+    if (!children) return false;
+    return children.some((child) => pathname.startsWith(child.href));
+  };
+
   return (
     <nav className="space-y-1">
       {filteredItems.map((item) => {
-        const isActive = pathname === item.href;
-        
+        const Icon = item.icon;
+        const active = isActive(item.href);
+        const childActive = isChildActive(item.children);
+        const hasChildren = item.children && item.children.length > 0;
+        const isExpanded = expandedItems.includes(item.href);
+        const disabled = !!item.badge;
+
         return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`
-              flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg
-              transition-colors
-              ${
-                isActive
-                  ? 'bg-primary-50 text-primary-700'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-              }
-            `}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </Link>
+          <div key={item.href}>
+            {/* Main Item */}
+            {disabled ? (
+              <div
+                className={`
+                  flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg
+                  opacity-60 cursor-not-allowed text-gray-500
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-medium">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+            ) : hasChildren ? (
+              <button
+                onClick={() => toggleExpand(item.href)}
+                className={`
+                  flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-lg
+                  transition-colors
+                  ${
+                    active || childActive
+                      ? 'bg-primary-50 text-primary-700'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </div>
+                {isExpanded ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
+            ) : (
+              <Link
+                href={item.href}
+                className={`
+                  flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg
+                  transition-colors
+                  ${
+                    active
+                      ? 'bg-primary-50 text-primary-700'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-medium">
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            {/* Children */}
+            {hasChildren && isExpanded && (
+              <div className="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 pl-4">
+                {item.children!.map((child) => {
+                  const ChildIcon = child.icon;
+                  const childIsActive = pathname.startsWith(child.href);
+
+                  return (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      className={`
+                        flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg
+                        transition-colors
+                        ${
+                          childIsActive
+                            ? 'bg-primary-50 text-primary-700'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        }
+                      `}
+                    >
+                      <ChildIcon className="w-4 h-4" />
+                      <span>{child.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         );
       })}
     </nav>

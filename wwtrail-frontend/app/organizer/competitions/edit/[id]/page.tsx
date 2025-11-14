@@ -102,10 +102,10 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
           eventId={competition.eventId}
           competition={competition}
           onSuccess={(updatedCompetition) => {
-            router.push(`/organizer/events/${competition.eventId}`);
+            router.push('/organizer/competitions');
           }}
           onCancel={() => {
-            router.push(`/organizer/events/${competition.eventId}`);
+            router.push('/organizer/competitions');
           }}
         />
       </div>

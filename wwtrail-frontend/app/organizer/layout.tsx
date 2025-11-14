@@ -1,20 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Users, 
-  Trophy,
-  Settings,
-  LogOut,
-  Menu,
-  X
-} from 'lucide-react';
-import { useState } from 'react';
+import { Trophy, LogOut, Menu, X } from 'lucide-react';
+import { DashboardNav } from '@/components/layout/DashboardNav';
 
 export default function OrganizerLayout({
   children,
@@ -50,37 +41,6 @@ export default function OrganizerLayout({
     return null;
   }
 
-  const navigation = [
-    {
-      name: 'Dashboard',
-      href: '/organizer',
-      icon: LayoutDashboard,
-      exact: true,
-    },
-    {
-      name: 'Mis Eventos',
-      href: '/organizer/events',
-      icon: Calendar,
-    },
-    {
-      name: 'Competiciones',
-      href: '/organizer/competitions',
-      icon: Trophy,
-    },
-    {
-      name: 'Ediciones',
-      href: '/organizer/editions',
-      icon: Users,
-    },
-  ];
-
-  const isActive = (href: string, exact: boolean = false) => {
-    if (exact) {
-      return pathname === href;
-    }
-    return pathname.startsWith(href);
-  };
-
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar Desktop */}
@@ -88,7 +48,7 @@ export default function OrganizerLayout({
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="border-b border-gray-200 p-6">
-            <Link href="/organizer" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-600">
                 <Trophy className="h-6 w-6 text-white" />
               </div>
@@ -101,27 +61,9 @@ export default function OrganizerLayout({
             </Link>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href, item.exact);
-              
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                    active
-                      ? 'bg-purple-50 text-purple-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  {item.name}
-                </Link>
-              );
-            })}
+          {/* Navigation - Using unified DashboardNav */}
+          <nav className="flex-1 p-4 overflow-y-auto">
+            <DashboardNav />
           </nav>
 
           {/* User Info + Logout */}
@@ -155,7 +97,7 @@ export default function OrganizerLayout({
             <div className="flex h-full flex-col">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-200 p-4">
-                <Link href="/organizer" className="flex items-center gap-2">
+                <Link href="/dashboard" className="flex items-center gap-2">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-600">
                     <Trophy className="h-6 w-6 text-white" />
                   </div>
@@ -174,28 +116,9 @@ export default function OrganizerLayout({
                 </button>
               </div>
 
-              {/* Navigation */}
-              <nav className="flex-1 space-y-1 p-4">
-                {navigation.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href, item.exact);
-                  
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                        active
-                          ? 'bg-purple-50 text-purple-700'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
+              {/* Navigation - Using unified DashboardNav */}
+              <nav className="flex-1 p-4 overflow-y-auto">
+                <DashboardNav />
               </nav>
 
               {/* User Info + Logout */}

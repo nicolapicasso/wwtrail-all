@@ -96,10 +96,10 @@ function NewEditionContent() {
           competitionId={competitionId}
           competition={competition}
           onSuccess={(edition) => {
-            router.push(`/organizer/events/${competition.eventId}`);
+            router.push('/organizer/editions');
           }}
           onCancel={() => {
-            router.push(`/organizer/events/${competition.eventId}`);
+            router.push('/organizer/editions');
           }}
         />
       </div>
