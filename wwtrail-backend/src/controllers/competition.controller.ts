@@ -24,7 +24,7 @@ export class CompetitionController {
 
       res.json({
         status: 'success',
-        data: competitions,
+        data: { competitions },
         count: competitions.length,
       });
     } catch (error) {
