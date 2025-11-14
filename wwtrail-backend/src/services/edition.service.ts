@@ -183,7 +183,6 @@ export class EditionService {
     const { limit = 50, offset = 0 } = options;
 
     const editions = await prisma.edition.findMany({
-      where: { isActive: true },
       take: limit,
       skip: offset,
       orderBy: {
