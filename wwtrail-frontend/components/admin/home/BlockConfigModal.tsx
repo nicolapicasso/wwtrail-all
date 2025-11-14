@@ -75,11 +75,8 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
       const config: ContentBlockConfig = {
         limit,
         viewType,
+        featuredOnly,
       };
-      // Only include featuredOnly for EVENTS blocks
-      if (blockType === 'EVENTS') {
-        config.featuredOnly = featuredOnly;
-      }
       return config;
     } else if (blockType === 'TEXT') {
       return {
@@ -238,20 +235,18 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                 </select>
               </div>
 
-              {blockType === 'EVENTS' && (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="featuredOnly"
-                    checked={featuredOnly}
-                    onChange={(e) => setFeaturedOnly(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="featuredOnly" className="text-sm font-medium text-gray-700">
-                    Solo eventos destacados
-                  </label>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="featuredOnly"
+                  checked={featuredOnly}
+                  onChange={(e) => setFeaturedOnly(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="featuredOnly" className="text-sm font-medium text-gray-700">
+                  Solo {blockType === 'EVENTS' ? 'eventos' : blockType === 'COMPETITIONS' ? 'competiciones' : 'ediciones'} destacados
+                </label>
+              </div>
             </div>
           )}
 

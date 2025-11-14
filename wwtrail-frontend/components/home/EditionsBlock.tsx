@@ -16,14 +16,17 @@ interface EditionsBlockProps {
 }
 
 export function EditionsBlock({ config }: EditionsBlockProps) {
-  const { limit, viewType } = config;
+  const { limit, viewType, featuredOnly } = config;
   const [editions, setEditions] = useState<EditionFull[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEditions = async () => {
       try {
-        const data = await editionsService.getAll({ limit });
+        const data = await editionsService.getAll({
+          limit,
+          isFeatured: featuredOnly
+        });
         setEditions(data?.editions || []);
       } catch (error) {
         console.error('Error fetching editions:', error);
@@ -34,7 +37,7 @@ export function EditionsBlock({ config }: EditionsBlockProps) {
     };
 
     fetchEditions();
-  }, [limit]);
+  }, [limit, featuredOnly]);
 
   if (loading) {
     return (

@@ -69,10 +69,11 @@ export const editionsService = {
    * Get all editions with optional filters
    * GET /editions
    */
-  async getAll(filters?: { limit?: number; offset?: number }): Promise<{ editions: EditionFull[] }> {
+  async getAll(filters?: { limit?: number; offset?: number; isFeatured?: boolean }): Promise<{ editions: EditionFull[] }> {
     const params = new URLSearchParams();
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.offset) params.append('offset', filters.offset.toString());
+    if (filters?.isFeatured !== undefined) params.append('isFeatured', filters.isFeatured.toString());
 
     const response = await apiClientV2.get<{
       status: string;

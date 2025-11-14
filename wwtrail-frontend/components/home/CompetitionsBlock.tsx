@@ -16,14 +16,17 @@ interface CompetitionsBlockProps {
 }
 
 export function CompetitionsBlock({ config }: CompetitionsBlockProps) {
-  const { limit, viewType } = config;
+  const { limit, viewType, featuredOnly } = config;
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCompetitions = async () => {
       try {
-        const data = await competitionsService.getAll({ limit });
+        const data = await competitionsService.getAll({
+          limit,
+          isFeatured: featuredOnly
+        });
         setCompetitions(data?.competitions || []);
       } catch (error) {
         console.error('Error fetching competitions:', error);
@@ -34,7 +37,7 @@ export function CompetitionsBlock({ config }: CompetitionsBlockProps) {
     };
 
     fetchCompetitions();
-  }, [limit]);
+  }, [limit, featuredOnly]);
 
   if (loading) {
     return (

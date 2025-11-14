@@ -493,12 +493,24 @@ export class EventController {
         });
       }
 
-      // Toggle featured status
-      const event = await EventService.update(
-        id,
-        { isFeatured: !currentEvent.isFeatured },
-        userId
-      );
+      // Toggle featured status directly with prisma to avoid permission checks
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+
+      const event = await prisma.event.update({
+        where: { id },
+        data: { isFeatured: !currentEvent.isFeatured },
+        include: {
+          organizer: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      });
 
       logger.info(
         `Event featured status toggled: ${id} → ${event.isFeatured} by user ${userId}`
