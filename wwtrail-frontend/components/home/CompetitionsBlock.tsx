@@ -60,7 +60,7 @@ export function CompetitionsBlock({ config }: CompetitionsBlockProps) {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Flag className="w-8 h-8 text-green-600" />
-              Competiciones Destacadas
+              Últimas Competiciones
             </h2>
             <p className="text-gray-600 mt-2">Las mejores carreras de trail y ultra trail</p>
           </div>

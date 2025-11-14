@@ -60,7 +60,7 @@ export function EditionsBlock({ config }: EditionsBlockProps) {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Calendar className="w-8 h-8 text-purple-600" />
-              Próximas Ediciones
+              Últimas Ediciones
             </h2>
             <p className="text-gray-600 mt-2">Inscríbete en las próximas carreras</p>
           </div>
