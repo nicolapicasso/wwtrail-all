@@ -231,6 +231,9 @@ export class EditionService {
                 slug: true,
                 country: true,
                 city: true,
+                logoUrl: true,
+                latitude: true,
+                longitude: true,
               },
             },
           },
@@ -270,6 +273,9 @@ export class EditionService {
                 slug: true,
                 country: true,
                 city: true,
+                logoUrl: true,
+                latitude: true,
+                longitude: true,
               },
             },
           },
@@ -351,12 +357,20 @@ export class EditionService {
       city: edition.city ?? edition.competition.event.city,
 
       // Información adicional útil
+      eventId: edition.competition.event.id,
       eventName: edition.competition.event.name,
       eventSlug: edition.competition.event.slug,
       eventCountry: edition.competition.event.country,
+      eventLogoUrl: edition.competition.event.logoUrl,
+      eventLatitude: edition.competition.event.latitude,
+      eventLongitude: edition.competition.event.longitude,
       competitionName: edition.competition.name,
       competitionSlug: edition.competition.slug,
       competitionType: edition.competition.type,
+      competitionLogoUrl: edition.competition.logoUrl,
+      baseDistance: edition.competition.baseDistance,
+      baseElevation: edition.competition.baseElevation,
+      baseMaxParticipants: edition.competition.baseMaxParticipants,
     };
   }
 
@@ -384,12 +398,20 @@ export class EditionService {
       city: edition.city ?? edition.competition.event.city,
 
       // Información adicional útil
+      eventId: edition.competition.event.id,
       eventName: edition.competition.event.name,
       eventSlug: edition.competition.event.slug,
       eventCountry: edition.competition.event.country,
+      eventLogoUrl: edition.competition.event.logoUrl,
+      eventLatitude: edition.competition.event.latitude,
+      eventLongitude: edition.competition.event.longitude,
       competitionName: edition.competition.name,
       competitionSlug: edition.competition.slug,
       competitionType: edition.competition.type,
+      competitionLogoUrl: edition.competition.logoUrl,
+      baseDistance: edition.competition.baseDistance,
+      baseElevation: edition.competition.baseElevation,
+      baseMaxParticipants: edition.competition.baseMaxParticipants,
     };
   }
 

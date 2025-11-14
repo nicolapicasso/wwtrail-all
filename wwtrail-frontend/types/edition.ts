@@ -100,7 +100,7 @@ export interface EditionFull extends Edition {
   resolvedElevation: number; // edition.elevation ?? competition.baseElevation
   resolvedMaxParticipants: number; // edition.maxParticipants ?? competition.baseMaxParticipants
   resolvedCity: string; // edition.city ?? event.city
-  
+
   // Related entities
   competition: {
     id: string;
@@ -110,6 +110,7 @@ export interface EditionFull extends Edition {
     baseDistance?: number;
     baseElevation?: number;
     baseMaxParticipants?: number;
+    logoUrl?: string;
   };
   event: {
     id: string;
@@ -117,6 +118,9 @@ export interface EditionFull extends Edition {
     name: string;
     country: string;
     city: string;
+    logoUrl?: string;
+    latitude?: number;
+    longitude?: number;
   };
 }
 

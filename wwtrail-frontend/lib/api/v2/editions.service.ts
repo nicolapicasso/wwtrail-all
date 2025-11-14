@@ -17,13 +17,17 @@ interface EditionWithInheritanceResponse extends Edition {
   city: string;
 
   // Flat fields from backend
+  eventId: string;
   eventName: string;
   eventSlug: string;
   eventCountry: string;
-  eventId: string;
+  eventLogoUrl?: string;
+  eventLatitude?: number;
+  eventLongitude?: number;
   competitionName: string;
   competitionSlug: string;
   competitionType: string;
+  competitionLogoUrl?: string;
   baseDistance?: number;
   baseElevation?: number;
   baseMaxParticipants?: number;
@@ -45,6 +49,7 @@ function transformToEditionFull(response: EditionWithInheritanceResponse): Editi
       baseDistance: response.baseDistance,
       baseElevation: response.baseElevation,
       baseMaxParticipants: response.baseMaxParticipants,
+      logoUrl: response.competitionLogoUrl,
     },
     event: {
       id: response.eventId,
@@ -52,6 +57,9 @@ function transformToEditionFull(response: EditionWithInheritanceResponse): Editi
       name: response.eventName,
       country: response.eventCountry,
       city: response.city,
+      logoUrl: response.eventLogoUrl,
+      latitude: response.eventLatitude,
+      longitude: response.eventLongitude,
     },
   };
 }
