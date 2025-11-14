@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Flag, ArrowRight } from 'lucide-react';
-import CompetitionCard from '@/components/CompetitionCard';
+import { CompetitionCard } from '@/components/CompetitionCard';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import type { Competition } from '@/types/competition';
 import type { ContentBlockConfig, HomeBlockViewType } from '@/types/home';

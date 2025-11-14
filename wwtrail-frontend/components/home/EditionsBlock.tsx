@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Calendar, ArrowRight } from 'lucide-react';
-import EditionCard from '@/components/EditionCard';
+import { EditionCard } from '@/components/EditionCard';
 import editionsService from '@/lib/api/v2/editions.service';
 import type { EditionFull } from '@/types/edition';
 import type { ContentBlockConfig, HomeBlockViewType } from '@/types/home';
