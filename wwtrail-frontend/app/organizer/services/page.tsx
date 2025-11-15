@@ -18,7 +18,7 @@ export default function OrganizerServicesPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      router.push('/auth/login');
       return;
     }
 

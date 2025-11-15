@@ -14,7 +14,7 @@ export default function NewServicePage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      router.push('/auth/login');
     }
 
     if (!loading && user && user.role !== 'ORGANIZER' && user.role !== 'ADMIN') {
