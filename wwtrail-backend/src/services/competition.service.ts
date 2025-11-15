@@ -309,6 +309,10 @@ export class CompetitionService {
         baseDistance: data.baseDistance,
         baseElevation: data.baseElevation,
         baseMaxParticipants: data.baseMaxParticipants,
+        // Image fields
+        logoUrl: data.logoUrl,
+        coverImage: data.coverImage,
+        gallery: data.gallery,
       },
       include: {
         event: {

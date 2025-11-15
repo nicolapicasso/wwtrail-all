@@ -251,10 +251,9 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
   }
 
   // Default: link to edition detail page
-  const competitionSlug = (edition as any).competition?.slug || '';
-  if (competitionSlug) {
+  if (edition.slug) {
     return (
-      <Link href={`/competitions/${competitionSlug}/editions/${edition.id}`}>
+      <Link href={`/editions/${edition.slug}`}>
         {content}
       </Link>
     );

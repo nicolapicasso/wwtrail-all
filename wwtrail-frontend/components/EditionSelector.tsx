@@ -158,7 +158,7 @@ export function EditionSelector({
         <div className="rounded-lg border bg-card p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <h4 className="font-semibold">{competitionName}</h4>
+              <h4 className="font-semibold text-2xl">{selectedYear}</h4>
               <p className="text-sm text-muted-foreground">
                 {new Date(edition.startDate).toLocaleDateString('en-US', {
                   year: 'numeric',
