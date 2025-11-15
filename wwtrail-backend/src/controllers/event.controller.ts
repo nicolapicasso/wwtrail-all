@@ -499,7 +499,7 @@ export class EventController {
 
       const event = await prisma.event.update({
         where: { id },
-        data: { isFeatured: !currentEvent.isFeatured },
+        data: { featured: !currentEvent.featured },
         include: {
           organizer: {
             select: {
@@ -513,7 +513,7 @@ export class EventController {
       });
 
       logger.info(
-        `Event featured status toggled: ${id} → ${event.isFeatured} by user ${userId}`
+        `Event featured status toggled: ${id} → ${event.featured} by user ${userId}`
       );
 
       res.json({
