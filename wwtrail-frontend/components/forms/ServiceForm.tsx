@@ -11,6 +11,18 @@ import { ArrowLeft, MapPin, Save, Loader2, Tag } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import FileUpload from '@/components/FileUpload';
 
+// Helper para normalizar URLs de imágenes
+const normalizeImageUrl = (url: string | undefined): string => {
+  if (!url) return '';
+  // Si ya es una URL absoluta, devolverla tal cual
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Si es una ruta relativa, agregar el dominio del backend
+  const backendUrl = 'http://localhost:3001';
+  return `${backendUrl}${url.startsWith('/') ? url : '/' + url}`;
+};
+
 interface ServiceFormProps {
   mode: 'create' | 'edit';
   initialData?: any;
@@ -39,6 +51,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
     coverImage: initialData?.coverImage || '',
     gallery: initialData?.gallery || [],
     featured: initialData?.featured || false,
+    status: initialData?.status || 'DRAFT',
   });
 
   // Load categories on mount
@@ -127,6 +140,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
         coverImage: formData.coverImage || undefined,
         gallery: formData.gallery.length > 0 ? formData.gallery : undefined,
         featured: formData.featured,
+        status: formData.status,
       };
 
       if (mode === 'edit' && serviceId) {
@@ -231,6 +245,25 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
               </datalist>
               <p className="mt-1 text-xs text-muted-foreground">
                 Selecciona de la lista o crea una nueva categoría escribiéndola
+              </p>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Estado
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+              >
+                <option value="DRAFT">Borrador</option>
+                <option value="PUBLISHED">Publicado</option>
+                <option value="CANCELLED">Cancelado</option>
+              </select>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Los servicios en borrador no son visibles públicamente
               </p>
             </div>
 
@@ -397,7 +430,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                   {formData.gallery.map((url: string, index: number) => (
                     <div key={index} className="relative group">
                       <img
-                        src={url}
+                        src={normalizeImageUrl(url)}
                         alt={`Gallery ${index + 1}`}
                         className="w-full h-24 object-cover rounded"
                       />
