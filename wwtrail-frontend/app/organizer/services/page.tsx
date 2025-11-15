@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { servicesService } from '@/lib/api/v2';
 import { Service } from '@/types/v2';
 import ServiceCard from '@/components/ServiceCard';
@@ -12,32 +12,32 @@ import { Plus, Loader2 } from 'lucide-react';
 
 export default function OrganizerServicesPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!loading && !user) {
       router.push('/auth/login');
       return;
     }
 
-    if (!authLoading && user && (user.role === 'ORGANIZER' || user.role === 'ADMIN')) {
+    if (!loading && user && (user.role === 'ORGANIZER' || user.role === 'ADMIN')) {
       fetchServices();
     }
-  }, [user, authLoading, router]);
+  }, [user, loading, router]);
 
   const fetchServices = async () => {
     if (!user) return;
 
-    setLoading(true);
+    setIsLoading(true);
     try {
       const response = await servicesService.getByOrganizer(user.id);
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -65,7 +65,7 @@ export default function OrganizerServicesPage() {
     }
   };
 
-  if (authLoading || loading) {
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />

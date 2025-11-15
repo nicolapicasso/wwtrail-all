@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { servicesService } from '@/lib/api/v2';
 import { Service } from '@/types/v2';
 import ServiceForm from '@/components/forms/ServiceForm';
@@ -13,23 +13,23 @@ import { Loader2 } from 'lucide-react';
 export default function EditServicePage() {
   const params = useParams();
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading } = useAuth();
   const [service, setService] = useState<Service | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const serviceId = params?.id as string;
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!loading && !user) {
       router.push('/auth/login');
       return;
     }
 
-    if (!authLoading && user && serviceId) {
+    if (!loading && user && serviceId) {
       fetchService();
     }
-  }, [user, authLoading, serviceId, router]);
+  }, [user, loading, serviceId, router]);
 
   const fetchService = async () => {
     try {
@@ -47,11 +47,11 @@ export default function EditServicePage() {
       console.error('Error fetching service:', err);
       setError(err.response?.data?.message || 'Error al cargar el servicio');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  if (authLoading || loading) {
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />

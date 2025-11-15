@@ -4,7 +4,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import ServiceForm from '@/components/forms/ServiceForm';
 import { Loader2 } from 'lucide-react';
 
