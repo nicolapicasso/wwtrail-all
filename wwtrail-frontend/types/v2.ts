@@ -8,11 +8,14 @@
 // Event types
 export * from './event';
 
-// Competition types  
+// Competition types
 export * from './competition';
 
 // Edition types
 export * from './edition';
+
+// Service types
+export * from './service';
 
 // API Response types
 export interface ApiResponse<T> {

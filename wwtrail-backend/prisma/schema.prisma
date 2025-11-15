@@ -131,6 +131,7 @@ model User {
   refreshTokens         RefreshToken[]
   organizedEvents       Event[]           @relation("EventOrganizer")
   organizedCompetitions Competition[]     @relation("CompetitionOrganizer")
+  organizedServices     Service[]         @relation("ServiceOrganizer")
   reviews               Review[]
   favorites             Favorite[]
   uploadedFiles         File[]            @relation("FileUploader")
@@ -907,4 +908,43 @@ model HomeBlock {
   @@index([configurationId])
   @@index([order])
   @@map("home_blocks")
+}
+
+// SERVICIOS (Alojamientos, Restaurantes, Tiendas, Puntos de Información, etc.)
+model Service {
+  id          String  @id @default(uuid())
+  name        String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
+  description String? @db.Text
+  category    String  @db.VarChar(100) // Categoría de creación libre (alojamientos, restaurantes, tiendas, etc.)
+
+  // Ubicación
+  country  String                                @db.VarChar(2)
+  city     String                                @db.VarChar(100)
+  location Unsupported("geometry(Point, 4326)")?
+
+  // Imágenes
+  logoUrl    String?  @db.Text
+  coverImage String?  @db.Text
+  gallery    String[] // Array de URLs para galería de fotos
+
+  // Meta
+  organizerId String
+  organizer   User         @relation("ServiceOrganizer", fields: [organizerId], references: [id])
+  status      EventStatus  @default(DRAFT) // Reutilizamos EventStatus (DRAFT, PUBLISHED, CANCELLED)
+
+  viewCount Int     @default(0)
+  featured  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([country])
+  @@index([city])
+  @@index([category])
+  @@index([status])
+  @@index([organizerId])
+  @@index([featured])
+  @@map("services")
 }

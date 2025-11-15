@@ -5,5 +5,6 @@
 export { default as eventsService } from './events.service';
 export { default as competitionsService } from './competitions.service';
 export { default as editionsService } from './editions.service';
+export { default as servicesService } from './services.service';
 
 // Types should be imported from @/types/v2 instead
