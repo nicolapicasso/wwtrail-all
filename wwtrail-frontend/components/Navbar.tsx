@@ -76,6 +76,12 @@ export default function Navbar() {
               >
                 Competiciones
               </Link>
+              <Link
+                href="/services"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
+              >
+                Servicios
+              </Link>
               {isAuthenticated && (
                 <>
                   <Link
@@ -158,6 +164,13 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Competiciones
+            </Link>
+            <Link
+              href="/services"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Servicios
             </Link>
             {isAuthenticated && (
               <>

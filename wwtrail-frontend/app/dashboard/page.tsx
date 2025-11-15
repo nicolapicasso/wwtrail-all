@@ -59,18 +59,18 @@ export default function DashboardPage() {
         { name: 'Eventos', href: '/organizer/events' },
         { name: 'Competiciones', href: '/organizer/competitions' },
         { name: 'Ediciones', href: '/organizer/editions' },
+        { name: 'Servicios', href: '/organizer/services' },
       ],
     },
     {
-      title: 'Alojamientos',
-      description: 'Gestiona los alojamientos para las carreras',
+      title: 'Servicios',
+      description: 'Gestiona servicios (alojamientos, restaurantes, tiendas, etc.)',
       icon: Building2,
-      href: '/accommodations',
+      href: '/organizer/services',
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       borderColor: 'border-green-200',
-      available: false,
-      badge: 'Próximamente',
+      available: true,
     },
     {
       title: 'Blog y Artículos',
@@ -142,11 +142,11 @@ export default function DashboardPage() {
       hoverColor: 'hover:bg-purple-600',
     },
     {
-      title: 'Panel Organizador',
-      icon: HomeIcon,
-      href: '/organizer',
-      color: 'bg-gray-500',
-      hoverColor: 'hover:bg-gray-600',
+      title: 'Servicios',
+      icon: Building2,
+      href: '/organizer/services',
+      color: 'bg-orange-500',
+      hoverColor: 'hover:bg-orange-600',
     },
   ];
 
@@ -276,7 +276,7 @@ export default function DashboardPage() {
               </p>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• <strong>Gestión de Organizadores</strong>: Eventos deportivos y sus competiciones/ediciones</li>
-                <li>• <strong>Alojamientos</strong>: Hoteles y opciones de hospedaje para participantes</li>
+                <li>• <strong>Servicios</strong>: Alojamientos, restaurantes, tiendas y puntos de información</li>
                 <li>• <strong>Blog</strong>: Contenido editorial, noticias y artículos</li>
                 <li>• <strong>Ofertas</strong>: Sistema de descuentos y promociones</li>
                 <li>• <strong>Usuarios</strong>: Gestión de cuentas y permisos</li>

@@ -61,13 +61,12 @@ const navItems: NavItem[] = [
         href: '/organizer/editions',
         icon: Calendar,
       },
+      {
+        label: 'Servicios',
+        href: '/organizer/services',
+        icon: Building2,
+      },
     ],
-  },
-  {
-    label: 'Alojamientos',
-    href: '/accommodations',
-    icon: Building2,
-    badge: 'Pronto',
   },
   {
     label: 'Blog y Artículos',
