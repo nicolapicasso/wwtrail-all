@@ -95,8 +95,13 @@ export class EditionController {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      const isFeatured = req.query.isFeatured === 'true';
 
-      const editions = await EditionService.findAllWithInheritance({ limit, offset });
+      const editions = await EditionService.findAllWithInheritance({
+        limit,
+        offset,
+        isFeatured
+      });
 
       res.json({
         status: 'success',

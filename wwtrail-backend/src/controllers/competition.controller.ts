@@ -15,11 +15,12 @@ export class CompetitionController {
    */
   static async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const { limit = 50, sortBy = 'name' } = req.query;
+      const { limit = 50, sortBy = 'name', isFeatured } = req.query;
 
       const competitions = await CompetitionService.findAll({
         limit: parseInt(limit as string),
         sortBy: sortBy as string,
+        isFeatured: isFeatured === 'true',
       });
 
       res.json({

@@ -179,12 +179,13 @@ export class EditionService {
   /**
    * Obtener todas las ediciones con herencia (para home page)
    */
-  static async findAllWithInheritance(options: { limit?: number; offset?: number } = {}) {
-    const { limit = 50, offset = 0 } = options;
+  static async findAllWithInheritance(options: { limit?: number; offset?: number; isFeatured?: boolean } = {}) {
+    const { limit = 50, offset = 0, isFeatured } = options;
 
     const editions = await prisma.edition.findMany({
       take: limit,
       skip: offset,
+      where: isFeatured ? { featured: true } : undefined,
       orderBy: {
         year: 'desc',
       },

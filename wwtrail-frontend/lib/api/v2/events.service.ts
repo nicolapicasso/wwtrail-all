@@ -16,13 +16,13 @@ class EventsService {
    */
   async getAll(filters?: EventFilters): Promise<EventsResponse> {
     const params = new URLSearchParams();
-    
+
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.search) params.append('search', filters.search);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.country) params.append('country', filters.country);
-    if (filters?.isFeatured !== undefined) params.append('isFeatured', filters.isFeatured.toString());
+    if (filters?.isFeatured !== undefined) params.append('featured', filters.isFeatured.toString());
 
     const response = await apiClientV2.get<EventsResponse>(`/events?${params.toString()}`);
     return response.data;

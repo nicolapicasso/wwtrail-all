@@ -18,10 +18,11 @@ export class CompetitionService {
    * Listar todas las competiciones
    */
   static async findAll(options: any = {}) {
-    const { limit = 50, sortBy = 'name' } = options;
+    const { limit = 50, sortBy = 'name', isFeatured } = options;
 
     const competitions = await prisma.competition.findMany({
       take: limit,
+      where: isFeatured ? { featured: true } : undefined,
       include: {
         event: {
           select: {
