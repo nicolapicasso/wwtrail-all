@@ -4,6 +4,7 @@ export enum HomeBlockType {
   EVENTS = 'EVENTS',
   COMPETITIONS = 'COMPETITIONS',
   EDITIONS = 'EDITIONS',
+  SERVICES = 'SERVICES',
   TEXT = 'TEXT',
   LINKS = 'LINKS',
 }

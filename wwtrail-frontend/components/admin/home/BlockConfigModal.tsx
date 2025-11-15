@@ -53,7 +53,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
     if (block?.config) {
       const config = block.config;
 
-      if (block.type === 'EVENTS' || block.type === 'COMPETITIONS' || block.type === 'EDITIONS') {
+      if (block.type === 'EVENTS' || block.type === 'COMPETITIONS' || block.type === 'EDITIONS' || block.type === 'SERVICES') {
         const contentConfig = config as ContentBlockConfig;
         setLimit(contentConfig.limit);
         setViewType(contentConfig.viewType);
@@ -71,7 +71,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   }, [block]);
 
   const buildConfig = () => {
-    if (blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS') {
+    if (blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES') {
       const config: ContentBlockConfig = {
         limit,
         viewType,
@@ -170,6 +170,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               <option value="EVENTS">Eventos</option>
               <option value="COMPETITIONS">Competiciones</option>
               <option value="EDITIONS">Ediciones</option>
+              <option value="SERVICES">Servicios</option>
               <option value="TEXT">Texto</option>
               <option value="LINKS">Enlaces</option>
             </select>
@@ -203,7 +204,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
           </div>
 
           {/* Config específica por tipo */}
-          {(blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS') && (
+          {(blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES') && (
             <div className="space-y-4 border-t pt-4">
               <h3 className="font-semibold text-gray-900">Configuración de Contenido</h3>
 

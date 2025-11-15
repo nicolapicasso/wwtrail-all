@@ -854,6 +854,7 @@ enum HomeBlockType {
   EVENTS
   COMPETITIONS
   EDITIONS
+  SERVICES
   TEXT
   LINKS
 }
