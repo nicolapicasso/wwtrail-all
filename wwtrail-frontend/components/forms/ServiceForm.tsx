@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import servicesService from '@/lib/api/v2/services.service';
@@ -23,6 +23,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
   const [loading, setLoading] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -39,6 +40,19 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
     gallery: initialData?.gallery || [],
     featured: initialData?.featured || false,
   });
+
+  // Load categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await servicesService.getCategories();
+        setCategories(cats);
+      } catch (err) {
+        console.error('Error loading categories:', err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   // Auto-generate slug from name
   const generateSlug = (name: string) => {
@@ -203,14 +217,20 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
               </label>
               <input
                 type="text"
+                list="categories-datalist"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 required
                 className="w-full rounded-md border border-input bg-background px-3 py-2"
-                placeholder="Ej: alojamiento, restaurante, tienda, punto de información"
+                placeholder="Selecciona una categoría o escribe una nueva"
               />
+              <datalist id="categories-datalist">
+                {categories.map((cat) => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
               <p className="mt-1 text-xs text-muted-foreground">
-                Puedes usar cualquier categoría: alojamiento, restaurante, tienda, etc.
+                Selecciona de la lista o crea una nueva categoría escribiéndola
               </p>
             </div>
 
@@ -329,8 +349,8 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                 Logo
               </label>
               <FileUpload
-                onUploadComplete={(url) => setFormData({ ...formData, logoUrl: url })}
-                currentFile={formData.logoUrl}
+                onUpload={(url) => setFormData({ ...formData, logoUrl: url })}
+                currentUrl={formData.logoUrl}
                 accept="image/*"
                 maxSizeMB={2}
               />
@@ -342,8 +362,8 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                 Imagen de Portada
               </label>
               <FileUpload
-                onUploadComplete={(url) => setFormData({ ...formData, coverImage: url })}
-                currentFile={formData.coverImage}
+                onUpload={(url) => setFormData({ ...formData, coverImage: url })}
+                currentUrl={formData.coverImage}
                 accept="image/*"
                 maxSizeMB={5}
               />
@@ -355,12 +375,19 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                 Galería
               </label>
               <FileUpload
-                onUploadComplete={(url) => {
+                onUpload={(url) => {
                   setFormData({
                     ...formData,
                     gallery: [...formData.gallery, url],
                   });
                 }}
+                onUploadMultiple={(urls) => {
+                  setFormData({
+                    ...formData,
+                    gallery: [...formData.gallery, ...urls],
+                  });
+                }}
+                currentUrls={formData.gallery}
                 accept="image/*"
                 maxSizeMB={5}
                 multiple

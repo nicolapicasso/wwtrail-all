@@ -261,4 +261,22 @@ export class ServiceController {
       next(error);
     }
   }
+
+  /**
+   * GET /api/v2/services/categories
+   * Obtener todas las categorías únicas de servicios
+   * @auth Public
+   */
+  static async getCategories(req: Request, res: Response, next: NextFunction) {
+    try {
+      const categories = await ServiceService.getCategories();
+
+      res.json({
+        status: 'success',
+        data: categories,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

@@ -96,43 +96,68 @@ export class ServiceService {
     try {
       const slug = await generateUniqueSlug(data.name, 'service');
 
-      let locationValue = null;
+      // Build the SQL query dynamically based on whether location is provided
+      let query: string;
+      let params: any[];
+
       if (data.latitude && data.longitude) {
-        locationValue = prisma.$queryRawUnsafe(
-          `ST_SetSRID(ST_MakePoint($1, $2), 4326)`,
+        query = `
+          INSERT INTO services (
+            id, name, slug, description, category, country, city, location,
+            "logoUrl", "coverImage", gallery, "organizerId", status, featured, "createdAt", "updatedAt"
+          )
+          VALUES (
+            gen_random_uuid()::text,
+            $1, $2, $3, $4, $5, $6,
+            ST_SetSRID(ST_MakePoint($7, $8), 4326),
+            $9, $10, $11, $12, 'DRAFT', $13, NOW(), NOW()
+          )
+          RETURNING *
+        `;
+        params = [
+          data.name,
+          slug,
+          data.description || null,
+          data.category,
+          data.country,
+          data.city,
           data.longitude,
-          data.latitude
-        );
+          data.latitude,
+          data.logoUrl || null,
+          data.coverImage || null,
+          data.gallery || [],
+          data.organizerId,
+          data.featured || false,
+        ];
+      } else {
+        query = `
+          INSERT INTO services (
+            id, name, slug, description, category, country, city, location,
+            "logoUrl", "coverImage", gallery, "organizerId", status, featured, "createdAt", "updatedAt"
+          )
+          VALUES (
+            gen_random_uuid()::text,
+            $1, $2, $3, $4, $5, $6, NULL,
+            $7, $8, $9, $10, 'DRAFT', $11, NOW(), NOW()
+          )
+          RETURNING *
+        `;
+        params = [
+          data.name,
+          slug,
+          data.description || null,
+          data.category,
+          data.country,
+          data.city,
+          data.logoUrl || null,
+          data.coverImage || null,
+          data.gallery || [],
+          data.organizerId,
+          data.featured || false,
+        ];
       }
 
-      const service = await prisma.$queryRaw`
-        INSERT INTO services (
-          id, name, slug, description, category, country, city, location,
-          "logoUrl", "coverImage", gallery, "organizerId", status, featured, "createdAt", "updatedAt"
-        )
-        VALUES (
-          gen_random_uuid()::text,
-          ${data.name},
-          ${slug},
-          ${data.description || null},
-          ${data.category},
-          ${data.country},
-          ${data.city},
-          ${data.latitude && data.longitude ?
-            prisma.$queryRawUnsafe(`ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)`) :
-            null
-          },
-          ${data.logoUrl || null},
-          ${data.coverImage || null},
-          ${data.gallery ? `{${data.gallery.join(',')}}` : '{}'},
-          ${data.organizerId},
-          'DRAFT',
-          ${data.featured || false},
-          NOW(),
-          NOW()
-        )
-        RETURNING *
-      `;
+      await prisma.$queryRawUnsafe(query, ...params);
 
       // Obtener el servicio creado
       const createdService = await prisma.service.findUnique({
