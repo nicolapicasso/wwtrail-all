@@ -244,6 +244,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       if (data.coverImage) eventData.coverImage = data.coverImage;
       if (data.typicalMonth) eventData.typicalMonth = data.typicalMonth;
       if (data.gallery && Array.isArray(data.gallery)) eventData.gallery = data.gallery;
+      if (data.images && Array.isArray(data.images)) eventData.gallery = data.images; // Frontend envía 'images'
 
       // Redes sociales
       if (data.instagramUrl) eventData.instagramUrl = data.instagramUrl;
@@ -579,6 +580,12 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     if (transformedData.websiteUrl) {
       transformedData.website = transformedData.websiteUrl;
       delete transformedData.websiteUrl;
+    }
+
+    // ✅ TRANSFORMACIÓN: Mapear images a gallery si viene en data
+    if (transformedData.images) {
+      transformedData.gallery = transformedData.images;
+      delete transformedData.images;
     }
 
     // ✅ EXTRAER latitude y longitude ANTES de actualizar
