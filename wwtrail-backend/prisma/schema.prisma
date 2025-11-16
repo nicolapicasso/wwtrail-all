@@ -49,6 +49,13 @@ enum EventStatus {
   CANCELLED
 }
 
+enum UTMBIndex {
+  INDEX_20K
+  INDEX_50K
+  INDEX_100K
+  INDEX_100M
+}
+
 enum EditionStatus {
   UPCOMING
   REGISTRATION_OPEN
@@ -131,6 +138,7 @@ model User {
   refreshTokens         RefreshToken[]
   createdEvents         Event[]           @relation("EventCreator")
   createdOrganizers     Organizer[]       @relation("OrganizerCreator")
+  createdSpecialSeries  SpecialSeries[]   @relation("SpecialSeriesCreator")
   organizedCompetitions Competition[]     @relation("CompetitionOrganizer")
   organizedServices     Service[]         @relation("ServiceOrganizer")
   reviews               Review[]
@@ -313,6 +321,16 @@ model Competition {
   coverImage String?  @db.Text // Imagen de cabecera/hero
   gallery    String[] // Array de URLs para galería
 
+  // ✅ CLASIFICACIÓN Y SERIES
+  terrainTypeId String?
+  terrainType   TerrainType? @relation(fields: [terrainTypeId], references: [id], onDelete: SetNull)
+
+  specialSeriesId String?
+  specialSeries   SpecialSeries? @relation("SpecialSeriesCompetitions", fields: [specialSeriesId], references: [id], onDelete: SetNull)
+
+  itraPoints Int? // Puntos ITRA (0-6)
+  utmbIndex  UTMBIndex? // Índice UTMB
+
   // Meta
   organizerId String
   organizer   User        @relation("CompetitionOrganizer", fields: [organizerId], references: [id])
@@ -339,6 +357,8 @@ model Competition {
   @@index([status])
   @@index([type])
   @@index([organizerId])
+  @@index([terrainTypeId])
+  @@index([specialSeriesId])
   @@map("competitions")
 }
 
@@ -772,7 +792,8 @@ model TerrainType {
   sortOrder   Int     @default(0)
   isActive    Boolean @default(true)
 
-  events Event[]
+  events       Event[]
+  competitions Competition[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -784,21 +805,41 @@ model TerrainType {
 
 model SpecialSeries {
   id          String  @id @default(uuid())
-  name        String  @unique @db.VarChar(100)
-  slug        String  @unique @db.VarChar(100)
-  logoUrl     String? @db.Text
-  websiteUrl  String? @db.Text
+  name        String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
   description String? @db.Text
-  sortOrder   Int     @default(0)
-  isActive    Boolean @default(true)
 
-  events Event[]
+  // Ubicación
+  country String @db.VarChar(2)
+
+  // Información de contacto
+  website String? @db.Text
+
+  // Redes sociales
+  instagramUrl String? @db.Text
+  facebookUrl  String? @db.Text
+  twitterUrl   String? @db.Text
+  youtubeUrl   String? @db.Text
+
+  // Imágenes
+  logoUrl String? @db.Text
+
+  // Estado (DRAFT hasta que admin apruebe)
+  status EventStatus @default(DRAFT)
+
+  // Usuario que creó esta special series
+  createdById String
+  createdBy   User   @relation("SpecialSeriesCreator", fields: [createdById], references: [id])
+
+  // Relaciones
+  competitions Competition[] @relation("SpecialSeriesCompetitions")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([slug])
-  @@index([isActive])
+  @@index([status])
+  @@index([createdById])
   @@map("special_series")
 }
 
