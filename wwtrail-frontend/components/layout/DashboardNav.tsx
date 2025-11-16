@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ChevronDown,
   Briefcase,
+  Sparkles,
 } from 'lucide-react';
 
 interface NavItem {
@@ -66,6 +67,11 @@ const navItems: NavItem[] = [
         label: 'Organizadores',
         href: '/organizer/organizers',
         icon: Briefcase,
+      },
+      {
+        label: 'Series Especiales',
+        href: '/organizer/special-series',
+        icon: Sparkles,
       },
       {
         label: 'Servicios',
