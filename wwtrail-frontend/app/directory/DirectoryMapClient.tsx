@@ -131,7 +131,7 @@ export default function DirectoryMapClient() {
             search: filters.search || undefined,
           });
 
-          const eventsWithLocation = eventsData.events.filter(
+          const eventsWithLocation = eventsData.data.filter(
             (e: any) => e.latitude && e.longitude
           );
 
