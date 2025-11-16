@@ -14,6 +14,7 @@ import { Mountain, TrendingUp, Users, ArrowLeft, Calendar, MapPin, Info } from '
 import Link from 'next/link';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
+import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -63,7 +64,7 @@ export default function CompetitionDetailPage() {
       <div className="relative h-96 bg-gradient-to-r from-blue-600 to-green-600">
         {competition.coverImage && (
           <img
-            src={competition.coverImage}
+            src={normalizeImageUrl(competition.coverImage)}
             alt={competition.name}
             className="w-full h-full object-cover"
           />
@@ -251,7 +252,7 @@ export default function CompetitionDetailPage() {
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <div className="flex justify-center">
                   <img
-                    src={competition.logoUrl || competition.event?.logoUrl}
+                    src={normalizeImageUrl(competition.logoUrl || competition.event?.logoUrl)}
                     alt={`${competition.name} logo`}
                     className="max-h-32 w-auto object-contain"
                   />

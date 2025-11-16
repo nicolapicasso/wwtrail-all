@@ -11,6 +11,7 @@ import { Service } from '@/types/v2';
 import { MapPin, ArrowLeft, Eye, Tag, Star, Loader2 } from 'lucide-react';
 import EventGallery from '@/components/EventGallery';
 import EventMap from '@/components/EventMap';
+import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 export default function ServiceDetailPage() {
   const params = useParams();
@@ -72,7 +73,7 @@ export default function ServiceDetailPage() {
       <div className="relative h-96 bg-gradient-to-r from-blue-600 to-green-600">
         {service.coverImage && (
           <img
-            src={service.coverImage}
+            src={normalizeImageUrl(service.coverImage)}
             alt={service.name}
             className="w-full h-full object-cover"
           />
@@ -162,7 +163,7 @@ export default function ServiceDetailPage() {
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <div className="flex justify-center">
                   <Image
-                    src={service.logoUrl}
+                    src={normalizeImageUrl(service.logoUrl)}
                     alt={`${service.name} logo`}
                     width={128}
                     height={128}

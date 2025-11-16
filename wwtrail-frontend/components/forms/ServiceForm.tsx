@@ -11,18 +11,7 @@ import { ArrowLeft, MapPin, Save, Loader2, Tag } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import CategorySelect from '@/components/CategorySelect';
 import FileUpload from '@/components/FileUpload';
-
-// Helper para normalizar URLs de imágenes
-const normalizeImageUrl = (url: string | undefined): string => {
-  if (!url) return '';
-  // Si ya es una URL absoluta, devolverla tal cual
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
-  // Si es una ruta relativa, agregar el dominio del backend
-  const backendUrl = 'http://localhost:3001';
-  return `${backendUrl}${url.startsWith('/') ? url : '/' + url}`;
-};
+import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 interface ServiceFormProps {
   mode: 'create' | 'edit';

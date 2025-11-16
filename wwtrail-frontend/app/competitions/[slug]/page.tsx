@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CompetitionActions } from '@/components/CompetitionActions';
 import EventGallery from '@/components/EventGallery';
 import EventMap from '@/components/EventMap';
+import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -94,7 +95,7 @@ export default function CompetitionDetailPage() {
       <div className="relative h-96 bg-gray-200">
         {competition.coverImage ? (
           <img
-            src={competition.coverImage}
+            src={normalizeImageUrl(competition.coverImage)}
             alt={competition.name}
             className="w-full h-full object-cover"
           />
@@ -228,7 +229,7 @@ export default function CompetitionDetailPage() {
                 <CardContent className="pt-6">
                   <div className="flex justify-center">
                     <img
-                      src={competition.logoUrl || competition.event?.logoUrl}
+                      src={normalizeImageUrl(competition.logoUrl || competition.event?.logoUrl)}
                       alt={`${competition.name} logo`}
                       className="max-h-32 w-auto object-contain"
                     />

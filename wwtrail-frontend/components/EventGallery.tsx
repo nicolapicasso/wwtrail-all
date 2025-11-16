@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { ImageIcon } from 'lucide-react';
+import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 interface EventGalleryProps {
   images: string[];
@@ -19,8 +20,11 @@ export default function EventGallery({ images, eventName }: EventGalleryProps) {
     return null;
   }
 
+  // Normalizar URLs de imágenes para que apunten al backend
+  const normalizedImages = images.map(normalizeImageUrl);
+
   // Preparar slides para el lightbox
-  const slides = images.map((url) => ({
+  const slides = normalizedImages.map((url) => ({
     src: url,
     alt: eventName,
   }));
@@ -39,14 +43,14 @@ export default function EventGallery({ images, eventName }: EventGalleryProps) {
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {images.map((image, index) => (
+          {normalizedImages.map((image, index) => (
             <button
               key={index}
               onClick={() => openLightbox(index)}
-              className="relative aspect-square overflow-hidden rounded-lg group cursor-pointer 
+              className="relative aspect-square overflow-hidden rounded-lg group cursor-pointer
                          hover:ring-2 hover:ring-green-500 transition-all duration-200
                          focus:outline-none focus:ring-2 focus:ring-green-500"
-              aria-label={`Ver imagen ${index + 1} de ${images.length}`}
+              aria-label={`Ver imagen ${index + 1} de ${normalizedImages.length}`}
             >
               <Image
                 src={image}
@@ -55,19 +59,19 @@ export default function EventGallery({ images, eventName }: EventGalleryProps) {
                 className="object-cover group-hover:scale-105 transition-transform duration-200"
                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
-              
+
               {/* Overlay en hover */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20
                             transition-colors duration-200 flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <ImageIcon className="w-8 h-8 text-white drop-shadow-lg" />
                 </div>
               </div>
-              
+
               {/* Número de imagen */}
-              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs 
+              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs
                             px-2 py-1 rounded-full font-medium">
-                {index + 1}/{images.length}
+                {index + 1}/{normalizedImages.length}
               </div>
             </button>
           ))}
@@ -87,11 +91,11 @@ export default function EventGallery({ images, eventName }: EventGalleryProps) {
           closeOnBackdropClick: true,
         }}
         carousel={{
-          finite: images.length <= 1,
+          finite: normalizedImages.length <= 1,
         }}
         render={{
-          buttonPrev: images.length <= 1 ? () => null : undefined,
-          buttonNext: images.length <= 1 ? () => null : undefined,
+          buttonPrev: normalizedImages.length <= 1 ? () => null : undefined,
+          buttonNext: normalizedImages.length <= 1 ? () => null : undefined,
         }}
       />
     </>

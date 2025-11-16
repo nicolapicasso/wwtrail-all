@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
+import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 // ============================================================================
 // 📋 METADATA
@@ -85,7 +86,7 @@ export default async function EventDetailPage({
       <div className="relative h-96 bg-gradient-to-r from-blue-600 to-green-600">
         {(event.coverImage || event.coverImageUrl) ? (
           <img
-            src={event.coverImage || event.coverImageUrl}
+            src={normalizeImageUrl(event.coverImage || event.coverImageUrl)}
             alt={event.name}
             className="w-full h-full object-cover"
           />
@@ -233,7 +234,7 @@ export default async function EventDetailPage({
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-center">
                   <img
-                    src={event.logo || event.logoUrl}
+                    src={normalizeImageUrl(event.logo || event.logoUrl)}
                     alt={`${event.name} logo`}
                     className="max-h-32 w-auto object-contain"
                   />
