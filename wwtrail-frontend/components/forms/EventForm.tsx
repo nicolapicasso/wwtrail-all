@@ -7,7 +7,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import eventsService from '@/lib/api/v2/events.service';
-import { ArrowLeft, MapPin, Calendar, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2 } from 'lucide-react';
+import { organizersService } from '@/lib/api/v2';
+import { ArrowLeft, MapPin, Calendar, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2, Building2 } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import FileUpload from '@/components/FileUpload';
 
@@ -23,6 +24,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
   const [loading, setLoading] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [organizers, setOrganizers] = useState<Array<{ id: string; name: string }>>([]);
 
   // Form state - inicializar con datos existentes si es modo edición
   const [formData, setFormData] = useState({
@@ -40,6 +42,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
     coverImage: initialData?.coverImageUrl || initialData?.coverImage || '',
     gallery: initialData?.images || initialData?.gallery || [],
     featured: initialData?.featured || initialData?.isFeatured || false,
+    organizerId: initialData?.organizerId || '',
     // Redes sociales
     instagramUrl: initialData?.instagramUrl || '',
     facebookUrl: initialData?.facebookUrl || '',
@@ -57,6 +60,19 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
     isAvailable: null,
     error: null,
   });
+
+  // Load organizers list on mount
+  useEffect(() => {
+    const loadOrganizers = async () => {
+      try {
+        const response = await organizersService.getAll({ status: 'PUBLISHED' });
+        setOrganizers(response.data.map(org => ({ id: org.id, name: org.name })));
+      } catch (error) {
+        console.error('Error loading organizers:', error);
+      }
+    };
+    loadOrganizers();
+  }, []);
 
   // Auto-generate slug from name
   const generateSlug = (name: string) => {
@@ -263,6 +279,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         coverImageUrl: formData.coverImage || undefined,
         images: formData.gallery.length > 0 ? formData.gallery : undefined,
         featured: formData.featured,
+        organizerId: formData.organizerId || undefined,
         // Redes Sociales
         instagramUrl: formData.instagramUrl.trim() || undefined,
         facebookUrl: formData.facebookUrl.trim() || undefined,
@@ -625,6 +642,29 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
                 placeholder="https://www.ejemplo.com"
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
+            </div>
+
+            {/* Organizer */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <span className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Entidad Organizadora (opcional)
+                </span>
+              </label>
+              <select
+                value={formData.organizerId}
+                onChange={(e) => handleChange('organizerId', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="">Sin organizador</option>
+                {organizers.map((org) => (
+                  <option key={org.id} value={org.id}>{org.name}</option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Selecciona la entidad organizadora de este evento (club, sociedad, etc.)
+              </p>
             </div>
           </div>
         </div>
