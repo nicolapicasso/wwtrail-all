@@ -272,9 +272,6 @@ model Event {
   terrainTypeId String?
   terrainType   TerrainType? @relation(fields: [terrainTypeId], references: [id], onDelete: SetNull)
 
-  specialSeriesId String?
-  specialSeries   SpecialSeries? @relation(fields: [specialSeriesId], references: [id], onDelete: SetNull)
-
   itraPoints Int?
   utmbPoints Int?
 
@@ -296,7 +293,6 @@ model Event {
   @@index([typicalMonth])
   @@index([competitionTypeId])
   @@index([terrainTypeId])
-  @@index([specialSeriesId])
   @@map("events")
 }
 
