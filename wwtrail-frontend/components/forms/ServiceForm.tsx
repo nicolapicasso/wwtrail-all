@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import servicesService from '@/lib/api/v2/services.service';
 import { ArrowLeft, MapPin, Save, Loader2, Tag } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
+import CategorySelect from '@/components/CategorySelect';
 import FileUpload from '@/components/FileUpload';
 
 // Helper para normalizar URLs de imágenes
@@ -229,22 +230,14 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
               <label className="block text-sm font-medium mb-2">
                 Categoría *
               </label>
-              <input
-                type="text"
-                list="categories-datalist"
+              <CategorySelect
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                required
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
-                placeholder="Selecciona una categoría o escribe una nueva"
+                onChange={(value) => setFormData({ ...formData, category: value })}
+                categories={categories}
+                placeholder="Selecciona o crea una categoría"
               />
-              <datalist id="categories-datalist">
-                {categories.map((cat) => (
-                  <option key={cat} value={cat} />
-                ))}
-              </datalist>
               <p className="mt-1 text-xs text-muted-foreground">
-                Selecciona de la lista o crea una nueva categoría escribiéndola
+                Escribe para buscar o crear una nueva categoría
               </p>
             </div>
 
@@ -408,22 +401,14 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                 Galería
               </label>
               <FileUpload
-                onUpload={(url) => {
-                  setFormData({
-                    ...formData,
-                    gallery: [...formData.gallery, url],
-                  });
-                }}
-                onUploadMultiple={(urls) => {
-                  setFormData({
-                    ...formData,
-                    gallery: [...formData.gallery, ...urls],
-                  });
-                }}
+                fieldname="gallery"
+                multiple={true}
+                onUploadMultiple={(urls) => setFormData({ ...formData, gallery: urls })}
                 currentUrls={formData.gallery}
-                accept="image/*"
+                buttonText="Subir fotos"
                 maxSizeMB={5}
-                multiple
+                accept="image/*"
+                showPreview={true}
               />
               {formData.gallery.length > 0 && (
                 <div className="mt-2 grid grid-cols-4 gap-2">
