@@ -2,7 +2,7 @@
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, MapPin, Mountain, TrendingUp, Users, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Mountain, TrendingUp, Users, Clock, Award, Sparkles } from 'lucide-react';
 import editionsService from '@/lib/api/v2/editions.service';
 import EditionDetailTabs from '@/components/EditionDetailTabs';
 import EventGallery from '@/components/EventGallery';
@@ -215,6 +215,83 @@ export default async function EditionDetailPage({
                     <MapPin className="h-4 w-4" />
                     Ver en Google Maps
                   </a>
+                </div>
+              </div>
+            )}
+
+            {/* Classification & Certifications (from Competition) */}
+            {(competition.terrainType || competition.specialSeries || competition.itraPoints !== undefined || competition.utmbIndex) && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Award className="h-5 w-5 text-purple-600" />
+                  Clasificación
+                </h3>
+                <div className="space-y-4 text-sm">
+                  {/* Terrain Type */}
+                  {competition.terrainType && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+                        <Mountain className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Tipo de Terreno</p>
+                        <p className="font-semibold">{competition.terrainType.name}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Special Series */}
+                  {competition.specialSeries && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+                        <Sparkles className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-500">Serie Especial</p>
+                        <Link
+                          href={`/special-series/${competition.specialSeries.slug}`}
+                          className="font-semibold hover:text-purple-600 transition-colors"
+                        >
+                          {competition.specialSeries.name}
+                        </Link>
+                      </div>
+                      {competition.specialSeries.logoUrl && (
+                        <img
+                          src={competition.specialSeries.logoUrl}
+                          alt={competition.specialSeries.name}
+                          className="h-8 w-8 object-contain"
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* ITRA Points */}
+                  {competition.itraPoints !== undefined && competition.itraPoints !== null && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                        <Award className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Puntos ITRA</p>
+                        <p className="font-semibold">{competition.itraPoints} {competition.itraPoints === 1 ? 'punto' : 'puntos'}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* UTMB Index */}
+                  {competition.utmbIndex && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
+                        <TrendingUp className="h-5 w-5 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Índice UTMB</p>
+                        <p className="font-semibold">
+                          {competition.utmbIndex.replace('INDEX_', '')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
