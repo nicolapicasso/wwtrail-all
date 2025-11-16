@@ -32,8 +32,6 @@ export class CompetitionService {
             country: true,
             city: true,
             typicalMonth: true,
-            latitude: true,
-            longitude: true,
           },
         },
         terrainType: {
@@ -58,6 +56,32 @@ export class CompetitionService {
         },
       },
     });
+
+    // Extract coordinates from events using PostGIS
+    if (competitions.length > 0) {
+      try {
+        const eventIds = competitions.map(c => c.event.id);
+        const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number; lon: number }>>(
+          `SELECT id::text, ST_Y(location::geometry) as lat, ST_X(location::geometry) as lon
+           FROM events
+           WHERE id::text = ANY($1)
+           AND location IS NOT NULL`,
+          eventIds
+        );
+
+        const coordMap = new Map(coordinates.map(c => [c.id, { lat: c.lat, lon: c.lon }]));
+
+        competitions.forEach(comp => {
+          const coords = coordMap.get(comp.event.id);
+          if (coords) {
+            (comp.event as any).latitude = coords.lat;
+            (comp.event as any).longitude = coords.lon;
+          }
+        });
+      } catch (error) {
+        logger.error('Error extracting coordinates for competitions:', error);
+      }
+    }
 
     // Ordenar según el campo
     if (sortBy === 'startDate' || sortBy === 'typicalMonth') {
