@@ -32,6 +32,8 @@ export class CompetitionService {
             country: true,
             city: true,
             typicalMonth: true,
+            latitude: true,
+            longitude: true,
           },
         },
         terrainType: {
