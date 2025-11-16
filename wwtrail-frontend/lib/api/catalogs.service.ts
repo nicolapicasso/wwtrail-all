@@ -27,7 +27,7 @@ class CatalogService<T> {
       params: { isActive: activeOnly ? 'true' : undefined },
     });
     return response.data.data;
-  },
+  }
 
   /**
    * Obtener por ID
@@ -36,7 +36,7 @@ class CatalogService<T> {
   async getById(id: string): Promise<T> {
     const response = await apiClientV2.get(`/${this.endpoint}/${id}`);
     return response.data.data;
-  },
+  }
 
   /**
    * Crear (admin)
@@ -45,7 +45,7 @@ class CatalogService<T> {
   async create(data: CreateCatalogDTO | CreateSpecialSeriesDTO): Promise<T> {
     const response = await apiClientV2.post(`/admin/${this.endpoint}`, data);
     return response.data.data;
-  },
+  }
 
   /**
    * Actualizar (admin)
@@ -54,7 +54,7 @@ class CatalogService<T> {
   async update(id: string, data: UpdateCatalogDTO | UpdateSpecialSeriesDTO): Promise<T> {
     const response = await apiClientV2.put(`/admin/${this.endpoint}/${id}`, data);
     return response.data.data;
-  },
+  }
 
   /**
    * Eliminar (admin)
@@ -62,7 +62,7 @@ class CatalogService<T> {
    */
   async delete(id: string): Promise<void> {
     await apiClientV2.delete(`/admin/${this.endpoint}/${id}`);
-  },
+  }
 
   /**
    * Obtener todos (admin)
@@ -71,7 +71,7 @@ class CatalogService<T> {
   async getAllAdmin(): Promise<T[]> {
     const response = await apiClientV2.get(`/admin/${this.endpoint}`);
     return response.data.data;
-  },
+  }
 }
 
 /**
