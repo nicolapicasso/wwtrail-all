@@ -17,6 +17,9 @@ export * from './edition';
 // Service types
 export * from './service';
 
+// Organizer types
+export * from './organizer';
+
 // API Response types
 export interface ApiResponse<T> {
   status: 'success' | 'error';

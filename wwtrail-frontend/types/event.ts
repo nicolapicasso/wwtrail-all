@@ -68,7 +68,19 @@ export interface Event {
   viewCount: number;
   firstEditionYear?: number;
   originalLanguage: Language;
-  organizerId: string;
+
+  // User who created the event
+  userId: string;
+
+  // Optional organizer entity (club/society)
+  organizerId?: string;
+  organizer?: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl?: string;
+  };
+
   createdAt: string;
   updatedAt: string;
 

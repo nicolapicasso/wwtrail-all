@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
+import OrganizerCard from '@/components/OrganizerCard';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 // ============================================================================
@@ -240,6 +241,11 @@ export default async function EventDetailPage({
                   />
                 </div>
               </div>
+            )}
+
+            {/* ✅ ORGANIZADOR */}
+            {event.organizer && (
+              <OrganizerCard organizer={event.organizer} />
             )}
 
             {/* ✅ MAPA INTERACTIVO */}

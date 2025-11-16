@@ -14,6 +14,7 @@ import { Mountain, TrendingUp, Users, ArrowLeft, Calendar, MapPin, Info } from '
 import Link from 'next/link';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
+import OrganizerCard from '@/components/OrganizerCard';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 export default function CompetitionDetailPage() {
@@ -258,6 +259,11 @@ export default function CompetitionDetailPage() {
                   />
                 </div>
               </div>
+            )}
+
+            {/* Organizer */}
+            {competition.event?.organizer && (
+              <OrganizerCard organizer={competition.event.organizer} />
             )}
 
             {/* Map */}
