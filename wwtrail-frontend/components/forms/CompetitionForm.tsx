@@ -4,10 +4,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react';
+import { Save, Loader2, AlertCircle, Image as ImageIcon, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import competitionsService from '@/lib/api/v2/competitions.service';
-import type { Competition } from '@/types/competition';
+import specialSeriesService from '@/lib/api/v2/specialSeries.service';
+import { terrainTypesService } from '@/lib/api/catalogs.service';
+import type { Competition, UTMBIndex } from '@/types/competition';
+import type { TerrainType, SpecialSeriesListItem } from '@/types/v2';
 import { CompetitionType } from '@/types/event';
 import FileUpload from '@/components/FileUpload';
 
@@ -30,6 +33,11 @@ export default function CompetitionForm({
 
   const isEditMode = !!competition;
 
+  // Catalog data
+  const [terrainTypes, setTerrainTypes] = useState<TerrainType[]>([]);
+  const [specialSeriesList, setSpecialSeriesList] = useState<SpecialSeriesListItem[]>([]);
+  const [loadingCatalogs, setLoadingCatalogs] = useState(true);
+
   // Form state
   const [formData, setFormData] = useState({
     name: competition?.name || '',
@@ -41,13 +49,39 @@ export default function CompetitionForm({
     baseMaxParticipants: competition?.baseMaxParticipants?.toString() || '',
     displayOrder: competition?.displayOrder?.toString() || '0',
     isActive: competition?.isActive ?? true,
-    // New fields
+    // Media fields
     logoUrl: competition?.logoUrl || '',
     coverImage: competition?.coverImage || '',
     gallery: competition?.gallery || [],
     status: competition?.status || 'DRAFT',
     featured: competition?.featured || false,
+    // Classification fields
+    terrainTypeId: competition?.terrainTypeId || '',
+    specialSeriesId: competition?.specialSeriesId || '',
+    itraPoints: competition?.itraPoints?.toString() || '',
+    utmbIndex: competition?.utmbIndex || '',
   });
+
+  // Load catalogs on mount
+  useEffect(() => {
+    const loadCatalogs = async () => {
+      try {
+        const [terrainTypesData, specialSeriesData] = await Promise.all([
+          terrainTypesService.getAll(true), // Only active terrain types
+          specialSeriesService.getAll({ status: 'PUBLISHED', limit: 100 }), // Only published special series
+        ]);
+        setTerrainTypes(terrainTypesData);
+        setSpecialSeriesList(specialSeriesData.data);
+      } catch (err) {
+        console.error('Error loading catalogs:', err);
+        toast.error('Error al cargar los catálogos');
+      } finally {
+        setLoadingCatalogs(false);
+      }
+    };
+
+    loadCatalogs();
+  }, []);
 
   // Auto-generate slug from name
   const generateSlug = (name: string) => {
@@ -104,12 +138,17 @@ export default function CompetitionForm({
           : undefined,
         displayOrder: parseInt(formData.displayOrder) || 0,
         isActive: formData.isActive,
-        // New fields
+        // Media fields
         logoUrl: formData.logoUrl.trim() || undefined,
         coverImage: formData.coverImage.trim() || undefined,
         gallery: formData.gallery.length > 0 ? formData.gallery : undefined,
         status: formData.status,
         featured: formData.featured,
+        // Classification fields
+        terrainTypeId: formData.terrainTypeId || undefined,
+        specialSeriesId: formData.specialSeriesId || undefined,
+        itraPoints: formData.itraPoints ? parseInt(formData.itraPoints) : undefined,
+        utmbIndex: (formData.utmbIndex as UTMBIndex) || undefined,
       };
 
       let result: Competition;
@@ -320,6 +359,121 @@ export default function CompetitionForm({
             />
           </div>
         </div>
+      </div>
+
+      {/* Classification Section */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Tag className="h-5 w-5 text-purple-600" />
+          <h3 className="text-lg font-semibold text-gray-900">
+            Clasificación y Certificaciones
+          </h3>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Información adicional para filtros y búsqueda en el directorio
+        </p>
+
+        {loadingCatalogs ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            <span className="ml-2 text-gray-500">Cargando catálogos...</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Terrain Type */}
+            <div>
+              <label htmlFor="terrainTypeId" className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Terreno
+              </label>
+              <select
+                id="terrainTypeId"
+                value={formData.terrainTypeId}
+                onChange={(e) => setFormData({ ...formData, terrainTypeId: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">-- Sin especificar --</option>
+                {terrainTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Ej: Alta montaña, Costa, Desierto
+              </p>
+            </div>
+
+            {/* Special Series */}
+            <div>
+              <label htmlFor="specialSeriesId" className="block text-sm font-medium text-gray-700 mb-1">
+                Serie Especial
+              </label>
+              <select
+                id="specialSeriesId"
+                value={formData.specialSeriesId}
+                onChange={(e) => setFormData({ ...formData, specialSeriesId: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">-- No pertenece a ninguna serie --</option>
+                {specialSeriesList.map((series) => (
+                  <option key={series.id} value={series.id}>
+                    {series.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Ej: UTMB World Series, Golden Trail Series
+              </p>
+            </div>
+
+            {/* ITRA Points */}
+            <div>
+              <label htmlFor="itraPoints" className="block text-sm font-medium text-gray-700 mb-1">
+                Puntos ITRA
+              </label>
+              <select
+                id="itraPoints"
+                value={formData.itraPoints}
+                onChange={(e) => setFormData({ ...formData, itraPoints: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">-- Sin especificar --</option>
+                <option value="0">0 puntos</option>
+                <option value="1">1 punto</option>
+                <option value="2">2 puntos</option>
+                <option value="3">3 puntos</option>
+                <option value="4">4 puntos</option>
+                <option value="5">5 puntos</option>
+                <option value="6">6 puntos</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Certificación ITRA (0-6 puntos)
+              </p>
+            </div>
+
+            {/* UTMB Index */}
+            <div>
+              <label htmlFor="utmbIndex" className="block text-sm font-medium text-gray-700 mb-1">
+                Índice UTMB
+              </label>
+              <select
+                id="utmbIndex"
+                value={formData.utmbIndex}
+                onChange={(e) => setFormData({ ...formData, utmbIndex: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">-- Sin especificar --</option>
+                <option value="INDEX_20K">20K</option>
+                <option value="INDEX_50K">50K</option>
+                <option value="INDEX_100K">100K</option>
+                <option value="INDEX_100M">100M</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Categoría según distancia UTMB
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Media Section */}
