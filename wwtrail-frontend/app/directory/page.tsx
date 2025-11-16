@@ -12,14 +12,6 @@ import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { terrainTypesService } from '@/lib/api/catalogs.service';
 import CountrySelect from '@/components/CountrySelect';
 
-// Fix para iconos de Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
-
 type ItemType = 'events' | 'competitions' | 'services' | 'all';
 
 interface DirectoryFilters {
@@ -73,6 +65,14 @@ export default function DirectoryPage() {
   // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
+
+    // Fix para iconos de Leaflet
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    });
 
     const map = L.map(mapContainerRef.current).setView([40.4637, -3.7492], 6); // Spain center
     mapRef.current = map;
