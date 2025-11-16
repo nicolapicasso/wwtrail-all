@@ -118,9 +118,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       // Base where clause
       const where: any = {};
 
-      // Si es ORGANIZER, solo ve los suyos
+      // Si es ORGANIZER, solo ve los suyos (eventos creados por él)
       if (userRole !== 'ADMIN') {
-        where.organizerId = userId;
+        where.userId = userId;
       }
 
       // Filtro de status si se proporciona
@@ -139,9 +139,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
             organizer: {
               select: {
                 id: true,
-                username: true,
-                firstName: true,
-                lastName: true,
+                name: true,
+                slug: true,
+                logoUrl: true,
               },
             },
             _count: {
@@ -406,9 +406,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
           organizer: {
             select: {
               id: true,
-              username: true,
-              firstName: true,
-              lastName: true,
+              name: true,
+              slug: true,
+              logoUrl: true,
             },
           },
           _count: {
@@ -458,10 +458,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
         organizer: {
           select: {
             id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
           },
         },
         competitions: {
@@ -522,10 +521,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
         organizer: {
           select: {
             id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
           },
         },
         competitions: {
@@ -612,9 +610,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
         organizer: {
           select: {
             id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
           },
         },
       },
@@ -794,7 +792,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
         organizer: {
           select: {
             id: true,
-            username: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
           },
         },
         _count: {
@@ -840,7 +840,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
           organizer: {
             select: {
               id: true,
-              username: true,
+              name: true,
+              slug: true,
+              logoUrl: true,
             },
           },
           _count: {
