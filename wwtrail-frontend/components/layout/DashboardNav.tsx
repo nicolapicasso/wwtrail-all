@@ -18,6 +18,7 @@ import {
   BarChart3,
   ChevronRight,
   ChevronDown,
+  Briefcase,
 } from 'lucide-react';
 
 interface NavItem {
@@ -60,6 +61,11 @@ const navItems: NavItem[] = [
         label: 'Ediciones',
         href: '/organizer/editions',
         icon: Calendar,
+      },
+      {
+        label: 'Organizadores',
+        href: '/organizer/organizers',
+        icon: Briefcase,
       },
       {
         label: 'Servicios',
