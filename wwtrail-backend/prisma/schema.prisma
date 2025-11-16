@@ -129,7 +129,8 @@ model User {
 
   // Relaciones
   refreshTokens         RefreshToken[]
-  organizedEvents       Event[]           @relation("EventOrganizer")
+  createdEvents         Event[]           @relation("EventCreator")
+  createdOrganizers     Organizer[]       @relation("OrganizerCreator")
   organizedCompetitions Competition[]     @relation("CompetitionOrganizer")
   organizedServices     Service[]         @relation("ServiceOrganizer")
   reviews               Review[]
@@ -165,6 +166,50 @@ model RefreshToken {
 }
 
 // ===================================
+// ORGANIZER (Entidad Organizadora)
+// ===================================
+
+model Organizer {
+  id          String  @id @default(uuid())
+  name        String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
+  description String? @db.Text
+
+  // Ubicación
+  country String @db.VarChar(2)
+
+  // Información de contacto
+  website String? @db.Text
+
+  // Redes sociales
+  instagramUrl String? @db.Text
+  facebookUrl  String? @db.Text
+  twitterUrl   String? @db.Text
+  youtubeUrl   String? @db.Text
+
+  // Imágenes
+  logoUrl String? @db.Text
+
+  // Estado (DRAFT hasta que admin apruebe)
+  status EventStatus @default(DRAFT)
+
+  // Usuario que creó este organizador
+  createdById String
+  createdBy   User   @relation("OrganizerCreator", fields: [createdById], references: [id])
+
+  // Relaciones
+  events Event[] @relation("OrganizerEvents")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([createdById])
+  @@map("organizers")
+}
+
+// ===================================
 // EVENT SYSTEM (3 niveles)
 // ===================================
 
@@ -197,10 +242,16 @@ model Event {
   gallery       String[] // ✅ Ya existe
   logoUrl       String? // ✅ Agregado por ti
   coverImageUrl String?
+
   // Meta
-  organizerId   String
-  organizer     User        @relation("EventOrganizer", fields: [organizerId], references: [id])
-  status        EventStatus @default(DRAFT)
+  userId      String // Usuario que creó el evento
+  user        User   @relation("EventCreator", fields: [userId], references: [id])
+
+  // Entidad organizadora (opcional)
+  organizerId String?
+  organizer   Organizer? @relation("OrganizerEvents", fields: [organizerId], references: [id], onDelete: SetNull)
+
+  status      EventStatus @default(DRAFT)
 
   // Temporalidad
   typicalMonth     Int? // 1-12 para ordenar/filtrar
@@ -232,6 +283,7 @@ model Event {
   @@index([country])
   @@index([city])
   @@index([status])
+  @@index([userId])
   @@index([organizerId])
   @@index([typicalMonth])
   @@index([competitionTypeId])

@@ -23,7 +23,7 @@ interface CreateEventInput {
   firstEditionYear?: number;
   featured?: boolean;
   originalLanguage?: string;
-  organizerId: string;
+  organizerId?: string; // Entidad organizadora (opcional)
 }
 
 interface UpdateEventInput {
@@ -213,7 +213,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
    * - ADMIN: crea con status PUBLISHED
    * - ORGANIZER: crea con status DRAFT (pendiente aprobación)
    */
-  static async create(data: any, organizerId: string, userRole: string) {
+  static async create(data: any, userId: string, userRole: string) {
     try {
       // Determinar status según rol
       const status = userRole === 'ADMIN' ? 'PUBLISHED' : 'DRAFT';
@@ -227,11 +227,16 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
         slug,
         city: data.city,
         country: data.country,
-        organizerId,
+        userId, // Usuario que crea el evento
         status,
         firstEditionYear: data.firstEditionYear,
         featured: data.featured || false,
       };
+
+      // Entidad organizadora (opcional)
+      if (data.organizerId) {
+        eventData.organizerId = data.organizerId;
+      }
 
       // Campos opcionales que SÍ existen en el schema
       if (data.description) eventData.description = data.description;
@@ -256,12 +261,20 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       const event = await prisma.event.create({
         data: eventData,
         include: {
-          organizer: {
+          user: {
             select: {
               id: true,
               username: true,
               firstName: true,
               lastName: true,
+            },
+          },
+          organizer: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logoUrl: true,
             },
           },
         },
