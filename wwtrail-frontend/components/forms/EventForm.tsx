@@ -447,9 +447,10 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
                 Galería de Fotos
               </label>
               <FileUpload
-                fieldname="gallery" 
+                fieldname="gallery"
                 multiple={true}
                 onUploadMultiple={(urls) => handleChange('gallery', urls)}
+                currentUrls={formData.gallery}
                 buttonText="Subir fotos"
                 maxSizeMB={3}
                 accept="image/*"
