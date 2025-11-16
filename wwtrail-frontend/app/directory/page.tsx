@@ -4,9 +4,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Search, MapPin, Calendar, Mountain, Sparkles, Award, Filter, X } from 'lucide-react';
+import { Search, MapPin, Mountain, Sparkles, Award, Filter, X, Building2, Flag } from 'lucide-react';
 import eventsService from '@/lib/api/v2/events.service';
 import competitionsService from '@/lib/api/v2/competitions.service';
+import servicesService from '@/lib/api/v2/services.service';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { terrainTypesService } from '@/lib/api/catalogs.service';
 import CountrySelect from '@/components/CountrySelect';
@@ -24,13 +25,16 @@ type ItemType = 'events' | 'competitions' | 'services' | 'all';
 interface DirectoryFilters {
   itemType: ItemType;
   country: string;
-  city: string;
   search: string;
   competitionType: string;
-  terrainTypeId: string;
+  terrainTypeIds: string[]; // Multiple selection
   specialSeriesId: string;
   itraPoints: string;
   utmbIndex: string;
+  minDistance: string;
+  maxDistance: string;
+  minElevation: string;
+  maxElevation: string;
 }
 
 export default function DirectoryPage() {
@@ -48,18 +52,22 @@ export default function DirectoryPage() {
   // Map data
   const [events, setEvents] = useState<any[]>([]);
   const [competitions, setCompetitions] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
 
   // Filters
   const [filters, setFilters] = useState<DirectoryFilters>({
     itemType: 'all',
     country: '',
-    city: '',
     search: '',
     competitionType: '',
-    terrainTypeId: '',
+    terrainTypeIds: [],
     specialSeriesId: '',
     itraPoints: '',
     utmbIndex: '',
+    minDistance: '',
+    maxDistance: '',
+    minElevation: '',
+    maxElevation: '',
   });
 
   // Initialize map
@@ -137,6 +145,9 @@ export default function DirectoryPage() {
               .bindPopup(
                 `
                 <div class="p-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-green-600 font-semibold text-xs">EVENTO</span>
+                  </div>
                   <h3 class="font-bold text-sm mb-1">${event.name}</h3>
                   <p class="text-xs text-gray-600">${event.city}, ${event.country}</p>
                   <a href="/events/${event.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver evento →</a>
@@ -158,7 +169,6 @@ export default function DirectoryPage() {
         try {
           const competitionsData = await competitionsService.getAll({
             limit: 1000,
-            isFeatured: filters.search ? undefined : true,
           });
 
           const competitionsWithLocation = competitionsData.data.filter(
@@ -180,9 +190,9 @@ export default function DirectoryPage() {
             );
           }
 
-          if (filters.terrainTypeId) {
+          if (filters.terrainTypeIds.length > 0) {
             filteredCompetitions = filteredCompetitions.filter(
-              (c: any) => c.terrainTypeId === filters.terrainTypeId
+              (c: any) => filters.terrainTypeIds.includes(c.terrainTypeId)
             );
           }
 
@@ -201,6 +211,30 @@ export default function DirectoryPage() {
           if (filters.utmbIndex) {
             filteredCompetitions = filteredCompetitions.filter(
               (c: any) => c.utmbIndex === filters.utmbIndex
+            );
+          }
+
+          // Distance range filter
+          if (filters.minDistance) {
+            filteredCompetitions = filteredCompetitions.filter(
+              (c: any) => c.baseDistance >= parseFloat(filters.minDistance)
+            );
+          }
+          if (filters.maxDistance) {
+            filteredCompetitions = filteredCompetitions.filter(
+              (c: any) => c.baseDistance <= parseFloat(filters.maxDistance)
+            );
+          }
+
+          // Elevation range filter
+          if (filters.minElevation) {
+            filteredCompetitions = filteredCompetitions.filter(
+              (c: any) => c.baseElevation >= parseInt(filters.minElevation)
+            );
+          }
+          if (filters.maxElevation) {
+            filteredCompetitions = filteredCompetitions.filter(
+              (c: any) => c.baseElevation <= parseInt(filters.maxElevation)
             );
           }
 
@@ -223,6 +257,9 @@ export default function DirectoryPage() {
               .bindPopup(
                 `
                 <div class="p-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-blue-600 font-semibold text-xs">COMPETICIÓN</span>
+                  </div>
                   <h3 class="font-bold text-sm mb-1">${comp.name}</h3>
                   <p class="text-xs text-gray-600">${comp.event.city}, ${comp.event.country}</p>
                   ${comp.baseDistance ? `<p class="text-xs text-gray-500">${comp.baseDistance} km</p>` : ''}
@@ -238,6 +275,50 @@ export default function DirectoryPage() {
           });
         } catch (err) {
           console.error('Error loading competitions:', err);
+        }
+      }
+
+      // Load services if needed
+      if (filters.itemType === 'all' || filters.itemType === 'services') {
+        try {
+          const servicesData = await servicesService.getAll({
+            status: 'PUBLISHED',
+            limit: 1000,
+            country: filters.country || undefined,
+            search: filters.search || undefined,
+          });
+
+          const servicesWithLocation = servicesData.data.filter(
+            (s: any) => s.latitude && s.longitude
+          );
+
+          setServices(servicesWithLocation);
+
+          // Add service markers
+          servicesWithLocation.forEach((service: any) => {
+            const marker = L.marker([service.latitude, service.longitude], {
+              icon: createServiceIcon(),
+            })
+              .bindPopup(
+                `
+                <div class="p-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-orange-600 font-semibold text-xs">SERVICIO</span>
+                  </div>
+                  <h3 class="font-bold text-sm mb-1">${service.name}</h3>
+                  <p class="text-xs text-gray-600">${service.city}, ${service.country}</p>
+                  <p class="text-xs text-gray-500">${service.type}</p>
+                  <a href="/services/${service.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver servicio →</a>
+                </div>
+              `
+              )
+              .addTo(mapRef.current!);
+
+            markersRef.current.push(marker);
+            bounds.extend([service.latitude, service.longitude]);
+          });
+        } catch (err) {
+          console.error('Error loading services:', err);
         }
       }
 
@@ -263,12 +344,12 @@ export default function DirectoryPage() {
       html: `
         <div style="
           background-color: #16a34a;
-          width: 32px;
-          height: 32px;
+          width: 36px;
+          height: 36px;
           border-radius: 50% 50% 50% 0;
           transform: rotate(-45deg);
-          border: 2px solid white;
-          box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+          border: 3px solid white;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.3);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -276,13 +357,14 @@ export default function DirectoryPage() {
           <div style="
             transform: rotate(45deg);
             color: white;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: bold;
           ">📍</div>
         </div>
       `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -36],
     });
   };
 
@@ -292,12 +374,12 @@ export default function DirectoryPage() {
       html: `
         <div style="
           background-color: #3b82f6;
-          width: 32px;
-          height: 32px;
+          width: 36px;
+          height: 36px;
           border-radius: 50% 50% 50% 0;
           transform: rotate(-45deg);
-          border: 2px solid white;
-          box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+          border: 3px solid white;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.3);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -305,31 +387,72 @@ export default function DirectoryPage() {
           <div style="
             transform: rotate(45deg);
             color: white;
-            font-size: 16px;
+            font-size: 18px;
           ">🏃</div>
         </div>
       `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -36],
     });
   };
 
-  const handleFilterChange = (key: keyof DirectoryFilters, value: string) => {
+  const createServiceIcon = () => {
+    return L.divIcon({
+      className: 'custom-marker-service',
+      html: `
+        <div style="
+          background-color: #f97316;
+          width: 36px;
+          height: 36px;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          border: 3px solid white;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <div style="
+            transform: rotate(45deg);
+            color: white;
+            font-size: 18px;
+          ">🏪</div>
+        </div>
+      `,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -36],
+    });
+  };
+
+  const handleFilterChange = (key: keyof DirectoryFilters, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleTerrainTypeToggle = (terrainTypeId: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      terrainTypeIds: prev.terrainTypeIds.includes(terrainTypeId)
+        ? prev.terrainTypeIds.filter((id) => id !== terrainTypeId)
+        : [...prev.terrainTypeIds, terrainTypeId],
+    }));
   };
 
   const clearFilters = () => {
     setFilters({
       itemType: 'all',
       country: '',
-      city: '',
       search: '',
       competitionType: '',
-      terrainTypeId: '',
+      terrainTypeIds: [],
       specialSeriesId: '',
       itraPoints: '',
       utmbIndex: '',
+      minDistance: '',
+      maxDistance: '',
+      minElevation: '',
+      maxElevation: '',
     });
   };
 
@@ -384,7 +507,7 @@ export default function DirectoryPage() {
                   type="text"
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
-                  placeholder="Nombre de evento o competición..."
+                  placeholder="Nombre..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
                 />
               </div>
@@ -403,6 +526,7 @@ export default function DirectoryPage() {
                 <option value="all">Todos</option>
                 <option value="events">Eventos</option>
                 <option value="competitions">Competiciones</option>
+                <option value="services">Servicios</option>
               </select>
             </div>
 
@@ -440,25 +564,89 @@ export default function DirectoryPage() {
               </div>
             )}
 
-            {/* Terrain Type */}
+            {/* Distance Range */}
             {(filters.itemType === 'all' || filters.itemType === 'competitions') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Distancia (km)
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    value={filters.minDistance}
+                    onChange={(e) => handleFilterChange('minDistance', e.target.value)}
+                    placeholder="Desde"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  />
+                  <input
+                    type="number"
+                    value={filters.maxDistance}
+                    onChange={(e) => handleFilterChange('maxDistance', e.target.value)}
+                    placeholder="Hasta"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Elevation Range */}
+            {(filters.itemType === 'all' || filters.itemType === 'competitions') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Desnivel (m D+)
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    value={filters.minElevation}
+                    onChange={(e) => handleFilterChange('minElevation', e.target.value)}
+                    placeholder="Desde"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  />
+                  <input
+                    type="number"
+                    value={filters.maxElevation}
+                    onChange={(e) => handleFilterChange('maxElevation', e.target.value)}
+                    placeholder="Hasta"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Terrain Type - Multiple Selection */}
+            {(filters.itemType === 'all' || filters.itemType === 'competitions') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                   <Mountain className="h-4 w-4" />
                   Tipo de Terreno
                 </label>
-                <select
-                  value={filters.terrainTypeId}
-                  onChange={(e) => handleFilterChange('terrainTypeId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
-                >
-                  <option value="">Todos</option>
-                  {terrainTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
-                      {type.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                  {terrainTypes.length === 0 ? (
+                    <p className="text-xs text-gray-500 p-2">No hay tipos de terreno disponibles</p>
+                  ) : (
+                    terrainTypes.map((type) => (
+                      <label key={type.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input
+                          type="checkbox"
+                          checked={filters.terrainTypeIds.includes(type.id)}
+                          onChange={() => handleTerrainTypeToggle(type.id)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">{type.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {filters.terrainTypeIds.length > 0 && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    {filters.terrainTypeIds.length} seleccionado(s)
+                  </p>
+                )}
               </div>
             )}
 
@@ -539,6 +727,10 @@ export default function DirectoryPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full bg-blue-600"></div>
                   <span className="text-gray-600">Competiciones</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-orange-600"></div>
+                  <span className="text-gray-600">Servicios</span>
                 </div>
               </div>
             </div>
