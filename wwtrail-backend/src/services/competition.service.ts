@@ -34,6 +34,21 @@ export class CompetitionService {
             typicalMonth: true,
           },
         },
+        terrainType: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        specialSeries: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+          },
+        },
         _count: {
           select: {
             editions: true,
@@ -93,6 +108,10 @@ export class CompetitionService {
         baseDistance: data.baseDistance,
         baseElevation: data.baseElevation,
         baseMaxParticipants: data.baseMaxParticipants,
+        terrainTypeId: data.terrainTypeId,
+        specialSeriesId: data.specialSeriesId,
+        itraPoints: data.itraPoints,
+        utmbIndex: data.utmbIndex,
         organizerId: userId,
         status: EventStatus.PUBLISHED,
       },
@@ -104,6 +123,21 @@ export class CompetitionService {
             slug: true,
             country: true,
             city: true,
+          },
+        },
+        terrainType: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        specialSeries: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
           },
         },
         _count: {
@@ -135,6 +169,21 @@ export class CompetitionService {
             slug: true,
           },
         },
+        terrainType: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        specialSeries: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+          },
+        },
         _count: {
           select: {
             editions: true,
@@ -164,6 +213,21 @@ export class CompetitionService {
             country: true,
             city: true,
             organizerId: true,
+            logoUrl: true,
+          },
+        },
+        terrainType: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        specialSeries: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
             logoUrl: true,
           },
         },
@@ -227,6 +291,21 @@ export class CompetitionService {
             country: true,
             city: true,
             organizerId: true,
+            logoUrl: true,
+          },
+        },
+        terrainType: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        specialSeries: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
             logoUrl: true,
           },
         },
@@ -310,6 +389,10 @@ export class CompetitionService {
         baseDistance: data.baseDistance,
         baseElevation: data.baseElevation,
         baseMaxParticipants: data.baseMaxParticipants,
+        terrainTypeId: data.terrainTypeId,
+        specialSeriesId: data.specialSeriesId,
+        itraPoints: data.itraPoints,
+        utmbIndex: data.utmbIndex,
         // Image fields
         logoUrl: data.logoUrl,
         coverImage: data.coverImage,
@@ -321,6 +404,21 @@ export class CompetitionService {
             id: true,
             name: true,
             slug: true,
+          },
+        },
+        terrainType: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        specialSeries: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
           },
         },
         _count: {

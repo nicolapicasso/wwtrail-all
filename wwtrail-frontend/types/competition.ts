@@ -1,4 +1,16 @@
 import { CompetitionType, Language } from './event';
+import { TerrainType } from './terrainType';
+import { SpecialSeries } from './specialSeries';
+
+/**
+ * UTMB Index - Índice UTMB para clasificación
+ */
+export enum UTMBIndex {
+  INDEX_20K = 'INDEX_20K',
+  INDEX_50K = 'INDEX_50K',
+  INDEX_100K = 'INDEX_100K',
+  INDEX_100M = 'INDEX_100M'
+}
 
 /**
  * Competition - Distance/modality of an event
@@ -23,6 +35,14 @@ export interface Competition {
   logoUrl?: string;        // Logo de la competición
   coverImage?: string;     // Imagen de portada/hero
   gallery?: string[];      // Galería de fotos
+
+  // Nuevos campos de clasificación
+  terrainTypeId?: string;
+  terrainType?: TerrainType;
+  specialSeriesId?: string;
+  specialSeries?: SpecialSeries;
+  itraPoints?: number;     // Puntos ITRA (0-6)
+  utmbIndex?: UTMBIndex;   // Índice UTMB
 
   // Relación opcional con Event
   event?: {

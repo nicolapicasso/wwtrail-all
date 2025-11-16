@@ -20,6 +20,12 @@ export * from './service';
 // Organizer types
 export * from './organizer';
 
+// SpecialSeries types
+export * from './specialSeries';
+
+// TerrainType types
+export * from './terrainType';
+
 // API Response types
 export interface ApiResponse<T> {
   status: 'success' | 'error';
