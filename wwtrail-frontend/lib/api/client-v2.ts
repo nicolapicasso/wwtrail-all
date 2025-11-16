@@ -64,7 +64,10 @@ apiClientV2.interceptors.response.use(
         // Refresh failed - logout
         Cookies.remove('accessToken');
         Cookies.remove('refreshToken');
-        window.location.href = '/auth/login';
+        // Only redirect in browser environment
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
         return Promise.reject(refreshError);
       }
     }

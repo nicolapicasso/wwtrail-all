@@ -59,7 +59,10 @@ apiClientV1.interceptors.response.use(
       } catch (refreshError) {
         Cookies.remove('accessToken');
         Cookies.remove('refreshToken');
-        window.location.href = '/auth/login';
+        // Only redirect in browser environment
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
         return Promise.reject(refreshError);
       }
     }
@@ -124,7 +127,10 @@ apiClientV2.interceptors.response.use(
       } catch (refreshError) {
         Cookies.remove('accessToken');
         Cookies.remove('refreshToken');
-        window.location.href = '/auth/login';
+        // Only redirect in browser environment
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
         return Promise.reject(refreshError);
       }
     }
