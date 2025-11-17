@@ -51,6 +51,7 @@ interface EventFilters {
   limit?: number | string;
   search?: string;
   country?: string;
+  city?: string;  // Filtro por ciudad
   featured?: boolean;
   status?: EventStatus;
   typicalMonth?: number | string;  // ✅ NUEVO: Filtro por mes típico del evento
@@ -345,6 +346,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     const limit = Number(filters.limit) || 20;
     const search = filters.search;
     const country = filters.country;
+    const city = filters.city;  // Filtro por ciudad
     const featured = filters.featured;
     const status = filters.status;
     const typicalMonth = filters.typicalMonth;  // ✅ NUEVO
@@ -375,6 +377,10 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
     if (country) {
       where.country = country;
+    }
+
+    if (city) {
+      where.city = city;
     }
 
     if (featured !== undefined && featured !== null && featured !== '') {
