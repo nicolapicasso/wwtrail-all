@@ -96,6 +96,10 @@ export function EventList({
       params.featured = filters.featured.toString();
     }
 
+    // Debug: Log params to console
+    console.log('🔍 EventList queryParams:', params);
+    console.log('🔍 filters.city:', filters.city);
+
     return params;
   }, [page, limitState, filters, featuredOnly]);
 
@@ -127,6 +131,7 @@ export function EventList({
   }, []);
 
   const handleFilterCity = useCallback((city: string) => {
+    console.log('🏙️ handleFilterCity called with:', city);
     setFilters(prev => ({ ...prev, city }));
   }, []);
 

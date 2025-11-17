@@ -102,6 +102,7 @@ export default function EventFilters({
 
   // Handler para ciudad
   const handleCityChange = useCallback((city: string) => {
+    console.log('🌆 EventFilters handleCityChange:', city);
     if (onFilterCity) {
       onFilterCity(city);
     }

@@ -32,6 +32,7 @@ export interface EventResponseV1 {
 
 export interface EventFilters {
   country?: string;
+  city?: string;  // Filtro por ciudad
   type?: 'TRAIL' | 'ULTRA' | 'SKYRUNNING' | 'VERTICAL' | 'OTHERS';
   search?: string;
   page?: number;
@@ -58,6 +59,7 @@ export const eventsService = {
     const params = new URLSearchParams();
 
     if (filters.country) params.append('country', filters.country);
+    if (filters.city) params.append('city', filters.city);  // Filtro por ciudad
     if (filters.type) params.append('type', filters.type);
     if (filters.search) params.append('search', filters.search);
     if (filters.page) params.append('page', filters.page.toString());
