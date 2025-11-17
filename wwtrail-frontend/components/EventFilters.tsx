@@ -73,15 +73,11 @@ export default function EventFilters({
           params.country = selectedCountry;
         }
 
-        console.log('Loading cities with params:', params);
         const response = await eventsService.getAll(params);
-        console.log('Events response:', response);
         const events = response.data || [];
-        console.log('Events data:', events);
 
         // Extraer ciudades únicas
         const cities = [...new Set(events.map(event => event.city).filter(Boolean))].sort();
-        console.log('Extracted cities:', cities);
         setAvailableCities(cities as string[]);
       } catch (error) {
         console.error('Error loading cities:', error);
@@ -217,15 +213,17 @@ export default function EventFilters({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                Ciudad
+                Ciudad {availableCities.length > 0 && `(${availableCities.length})`}
               </label>
               <select
                 value={selectedCity}
                 onChange={(e) => handleCityChange(e.target.value)}
-                disabled={isLoading || availableCities.length === 0}
+                disabled={availableCities.length === 0}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Todas las ciudades</option>
+                <option value="">
+                  {availableCities.length === 0 ? 'Cargando ciudades...' : 'Todas las ciudades'}
+                </option>
                 {availableCities.map((city) => (
                   <option key={city} value={city}>
                     {city}
