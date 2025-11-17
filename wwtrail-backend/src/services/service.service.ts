@@ -529,4 +529,40 @@ export class ServiceService {
       throw error;
     }
   }
+
+  /**
+   * Obtener servicios cercanos por coordenadas
+   */
+  static async findNearby(lat: number, lon: number, radiusKm: number = 50) {
+    const radiusMeters = radiusKm * 1000;
+
+    // Query PostGIS
+    const services = await prisma.$queryRaw`
+      SELECT
+        id, name, slug, city, country, category,
+        ST_X(location::geometry) as longitude,
+        ST_Y(location::geometry) as latitude,
+        ST_Distance(
+          location::geography,
+          ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography
+        ) / 1000 as distance_km
+      FROM services
+      WHERE
+        location IS NOT NULL
+        AND status = 'PUBLISHED'
+        AND ST_DWithin(
+          location::geography,
+          ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography,
+          ${radiusMeters}
+        )
+      ORDER BY distance_km
+      LIMIT 20
+    `;
+
+    logger.info(
+      `Services nearby (${lat}, ${lon}) within ${radiusKm}km: ${(services as any[]).length} found`
+    );
+
+    return services;
+  }
 }

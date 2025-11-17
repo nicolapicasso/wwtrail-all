@@ -21,6 +21,7 @@ const router = Router();
 // ===================================
 
 router.get('/categories', ServiceController.getCategories);
+router.get('/nearby', ServiceController.getNearby);
 
 // ===================================
 // PASO 2: RUTAS CON PARÁMETROS SLUG
