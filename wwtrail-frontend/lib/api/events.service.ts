@@ -102,13 +102,13 @@ export const eventsService = {
   },
 
   async getNearby(lat: number, lon: number, radius: number = 50): Promise<Event[]> {
-    const { data } = await apiClientV1.get<{ data: { events: Event[] } }>(
+    const { data } = await apiClientV1.get<{ data: Event[] }>(
       '/events/nearby',
       {
         params: { lat, lon, radius }
       }
     );
-    return data.data.events;
+    return Array.isArray(data.data) ? data.data : [];
   },
 
   async search(query: string): Promise<Event[]> {

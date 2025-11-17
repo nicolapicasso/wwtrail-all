@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import competitionsService from '@/lib/api/v2/competitions.service';
+import { eventsService } from '@/lib/api/events.service';
 import { Calendar, MapPin, TrendingUp, Users, ArrowLeft, Share2, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ export default function CompetitionDetailPage() {
   const slug = params.slug as string;
 
   const [competition, setCompetition] = useState<any>(null);
+  const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +34,21 @@ export default function CompetitionDetailPage() {
       setError(null);
       const comp = await competitionsService.getBySlug(slug);
       setCompetition(comp);
+
+      // Cargar eventos cercanos si hay coordenadas
+      if (comp.event?.latitude && comp.event?.longitude) {
+        try {
+          const nearby = await eventsService.getNearby(
+            comp.event.latitude,
+            comp.event.longitude,
+            50 // 50km radius
+          );
+          setNearbyEvents(nearby);
+        } catch (err) {
+          console.error('Error loading nearby events:', err);
+          // No bloqueamos si falla la carga de eventos cercanos
+        }
+      }
     } catch (err: any) {
       console.error('Error loading competition:', err);
       setError(err.message || 'Error al cargar la competición');
@@ -253,7 +270,7 @@ export default function CompetitionDetailPage() {
                       ...competition.event,
                       name: competition.name,
                     }}
-                    nearbyEvents={[]}
+                    nearbyEvents={nearbyEvents}
                   />
                   <div className="mt-4">
                     <a
