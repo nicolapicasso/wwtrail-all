@@ -9,7 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Search, Filter, X, Calendar, MapPin } from 'lucide-react';
 import CountrySelect from './CountrySelect';
-import { eventsService } from '@/lib/api/v2/events.service';
+import { eventsService } from '@/lib/api/v2';
 
 interface EventFiltersProps {
   searchValue?: string;  // ✅ CRÍTICO: Valor controlado desde EventList
@@ -68,16 +68,20 @@ export default function EventFilters({
   useEffect(() => {
     const loadCities = async () => {
       try {
-        const params: Record<string, string> = { limit: '1000' };
+        const params: any = { limit: 1000 };
         if (selectedCountry) {
           params.country = selectedCountry;
         }
 
+        console.log('Loading cities with params:', params);
         const response = await eventsService.getAll(params);
+        console.log('Events response:', response);
         const events = response.data || [];
+        console.log('Events data:', events);
 
         // Extraer ciudades únicas
         const cities = [...new Set(events.map(event => event.city).filter(Boolean))].sort();
+        console.log('Extracted cities:', cities);
         setAvailableCities(cities as string[]);
       } catch (error) {
         console.error('Error loading cities:', error);
