@@ -102,12 +102,7 @@ export default function Navbar() {
               >
                 Mapa
               </Link>
-              <Link
-                href="/ventajas"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
-              >
-                Ventajas
-              </Link>
+              {/* Ventajas - Próximamente */}
             </div>
           </div>
 
@@ -131,12 +126,7 @@ export default function Navbar() {
                       <span>Mi cuenta</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/my-registrations" className="flex items-center cursor-pointer">
-                      <Award className="mr-2 h-4 w-4" />
-                      <span>Mis participaciones</span>
-                    </Link>
-                  </DropdownMenuItem>
+                  {/* Mis participaciones - Próximamente */}
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard" className="flex items-center cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
@@ -212,13 +202,7 @@ export default function Navbar() {
             >
               Mapa
             </Link>
-            <Link
-              href="/ventajas"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Ventajas
-            </Link>
+            {/* Ventajas - Próximamente */}
           </div>
 
           {/* Private Menu Items (only if authenticated) */}
@@ -237,16 +221,7 @@ export default function Navbar() {
                   Mi cuenta
                 </div>
               </Link>
-              <Link
-                href="/my-registrations"
-                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <div className="flex items-center">
-                  <Award className="mr-2 h-4 w-4" />
-                  Mis participaciones
-                </div>
-              </Link>
+              {/* Mis participaciones - Próximamente */}
               <Link
                 href="/dashboard"
                 className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"

@@ -37,7 +37,7 @@ export default function CompetitionsPage() {
       if (filters.country) params.country = filters.country;
       
       const response = await competitionsService.getAll(params);
-      setCompetitions(response.competitions || []);
+      setCompetitions(response.data || []);
     } catch (err: any) {
       console.error('Error loading competitions:', err);
       setError(err.message || 'Error al cargar las competiciones');
