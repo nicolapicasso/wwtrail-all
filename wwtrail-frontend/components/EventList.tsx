@@ -22,6 +22,7 @@ import EventFilters from './EventFilters';
 export interface EventFilters {
   search: string;
   country: string;
+  city: string;  // Filtro de ciudad
   month: string;  // ✅ CAMBIO: "month" en lugar de "status"
   featured: boolean | null;
 }
@@ -55,6 +56,7 @@ export function EventList({
   const [filters, setFilters] = useState<EventFilters>({
     search: '',
     country: '',
+    city: '',  // Filtro de ciudad
     month: '',  // ✅ CAMBIO: month en lugar de status
     featured: featuredOnly ? true : null,
   });
@@ -88,6 +90,7 @@ export function EventList({
 
     if (filters.search) params.search = filters.search;
     if (filters.country) params.country = filters.country;
+    if (filters.city) params.city = filters.city;  // Filtro de ciudad
     if (filters.month) params.typicalMonth = filters.month;  // ✅ CAMBIO: usar typicalMonth
     if (filters.featured !== null) {
       params.featured = filters.featured.toString();
@@ -120,7 +123,11 @@ export function EventList({
   }, []);
 
   const handleFilterCountry = useCallback((country: string) => {
-    setFilters(prev => ({ ...prev, country }));
+    setFilters(prev => ({ ...prev, country, city: '' }));  // Limpiar ciudad al cambiar país
+  }, []);
+
+  const handleFilterCity = useCallback((city: string) => {
+    setFilters(prev => ({ ...prev, city }));
   }, []);
 
   const handleFilterHighlighted = useCallback((highlighted: boolean | null) => {
@@ -190,8 +197,12 @@ export function EventList({
           onSearch={handleSearch}
           onFilterMonth={handleFilterMonth}  // ✅ CAMBIO: onFilterMonth en lugar de onFilterStatus
           onFilterCountry={handleFilterCountry}
+          onFilterCity={handleFilterCity}  // Nuevo handler de ciudad
+          selectedCountry={filters.country}  // Pasar país seleccionado para filtrar ciudades
+          selectedCity={filters.city}  // Pasar ciudad seleccionada
           onFilterHighlighted={handleFilterHighlighted}
           showCountryFilter={true}
+          showCityFilter={true}  // Nuevo filtro de ciudad
           showOrganizerFilter={false}
           showHighlightedFilter={!featuredOnly}
           isLoading={loading}
@@ -227,10 +238,12 @@ export function EventList({
       {/* ============================================================ */}
       {/* 🎴 GRID/LIST DE EVENTOS */}
       {/* ============================================================ */}
-      <div 
+      <div
         className={
           viewMode === 'grid'
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+            ? featuredOnly
+              ? 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6'
+              : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
             : 'flex flex-col gap-4'
         }
       >
