@@ -112,7 +112,6 @@ export class ServiceService {
             ST_SetSRID(ST_MakePoint($7, $8), 4326),
             $9, $10, $11, $12, 'DRAFT', $13, NOW(), NOW()
           )
-          RETURNING *
         `;
         params = [
           data.name,
@@ -140,7 +139,6 @@ export class ServiceService {
             $1, $2, $3, $4, $5, $6, NULL,
             $7, $8, $9, $10, 'DRAFT', $11, NOW(), NOW()
           )
-          RETURNING *
         `;
         params = [
           data.name,
