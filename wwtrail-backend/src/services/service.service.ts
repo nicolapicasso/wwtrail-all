@@ -175,6 +175,7 @@ export class ServiceService {
       await cache.del('services:all');
       await cache.del(`services:organizer:${data.organizerId}`);
       await cache.del('services:categories'); // Invalidar caché de categorías
+      await cache.del('services:categories:count'); // Invalidar caché de categorías con conteo
 
       logger.info(`Service created: ${slug} by user ${data.organizerId}`);
 
@@ -395,6 +396,7 @@ export class ServiceService {
       await cache.del(`service:${service.slug}`);
       await cache.del('services:all');
       await cache.del('services:categories'); // Invalidar caché de categorías
+      await cache.del('services:categories:count'); // Invalidar caché de categorías con conteo
 
       logger.info(`Service updated: ${id}`);
 
@@ -424,6 +426,7 @@ export class ServiceService {
       }
       await cache.del('services:all');
       await cache.del('services:categories'); // Invalidar caché de categorías
+      await cache.del('services:categories:count'); // Invalidar caché de categorías con conteo
 
       logger.info(`Service deleted: ${id}`);
 
@@ -526,6 +529,66 @@ export class ServiceService {
       return categoryList;
     } catch (error) {
       logger.error('Error fetching service categories:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener categorías con conteo de servicios
+   */
+  static async getCategoriesWithCount() {
+    try {
+      const cacheKey = 'services:categories:count';
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+
+      const result = await prisma.service.groupBy({
+        by: ['category'],
+        _count: {
+          category: true,
+        },
+        orderBy: {
+          category: 'asc',
+        },
+      });
+
+      const categoriesWithCount = result.map(r => ({
+        name: r.category,
+        count: r._count.category,
+      }));
+
+      await cache.set(cacheKey, JSON.stringify(categoriesWithCount), CACHE_TTL_LONG);
+
+      return categoriesWithCount;
+    } catch (error) {
+      logger.error('Error fetching service categories with count:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Eliminar una categoría (actualiza todos los servicios con esa categoría a null)
+   */
+  static async deleteCategory(category: string) {
+    try {
+      // Actualizar todos los servicios con esta categoría a null
+      const result = await prisma.service.updateMany({
+        where: { category },
+        data: { category: 'Sin categoría' },
+      });
+
+      // Invalidar cachés
+      await cache.del('services:categories');
+      await cache.del('services:categories:count');
+      await cache.del('services:all');
+
+      logger.info(`Category deleted: ${category} (${result.count} services updated)`);
+
+      return { success: true, updatedCount: result.count };
+    } catch (error) {
+      logger.error(`Error deleting category ${category}:`, error);
       throw error;
     }
   }

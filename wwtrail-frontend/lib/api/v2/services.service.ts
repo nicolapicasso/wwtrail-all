@@ -40,6 +40,22 @@ class ServicesService {
   }
 
   /**
+   * Get all service categories with count (admin only)
+   */
+  async getCategoriesWithCount(): Promise<Array<{ name: string; count: number }>> {
+    const response = await apiClientV2.get<{ status: string; data: Array<{ name: string; count: number }> }>('/services/categories/count');
+    return response.data.data;
+  }
+
+  /**
+   * Delete a service category (admin only)
+   */
+  async deleteCategory(category: string): Promise<{ status: string; message: string; data: { success: boolean; updatedCount: number } }> {
+    const response = await apiClientV2.delete<{ status: string; message: string; data: { success: boolean; updatedCount: number } }>(`/services/categories/${encodeURIComponent(category)}`);
+    return response.data;
+  }
+
+  /**
    * Get service by ID
    */
   async getById(id: string): Promise<ServiceResponse> {

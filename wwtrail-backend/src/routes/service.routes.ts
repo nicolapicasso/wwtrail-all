@@ -20,7 +20,9 @@ const router = Router();
 // PASO 1: RUTAS PÚBLICAS ESPECÍFICAS
 // ===================================
 
+router.get('/categories/count', authenticate, authorize('ADMIN'), ServiceController.getCategoriesWithCount);
 router.get('/categories', ServiceController.getCategories);
+router.delete('/categories/:category', authenticate, authorize('ADMIN'), ServiceController.deleteCategory);
 router.get('/nearby', ServiceController.getNearby);
 
 // ===================================

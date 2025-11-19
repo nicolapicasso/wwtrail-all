@@ -10,6 +10,7 @@ import servicesService from '@/lib/api/v2/services.service';
 import { ArrowLeft, MapPin, Save, Loader2, Tag } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import CategorySelect from '@/components/CategorySelect';
+import CategoryManager from '@/components/CategoryManager';
 import FileUpload from '@/components/FileUpload';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
@@ -427,6 +428,11 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
             </div>
           </div>
         </div>
+
+        {/* Admin Only - Category Manager */}
+        {user?.role === 'ADMIN' && (
+          <CategoryManager />
+        )}
 
         {/* Admin Only - Featured */}
         {user?.role === 'ADMIN' && (
