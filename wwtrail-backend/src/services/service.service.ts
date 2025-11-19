@@ -174,6 +174,7 @@ export class ServiceService {
 
       await cache.del('services:all');
       await cache.del(`services:organizer:${data.organizerId}`);
+      await cache.del('services:categories'); // Invalidar caché de categorías
 
       logger.info(`Service created: ${slug} by user ${data.organizerId}`);
 
@@ -393,6 +394,7 @@ export class ServiceService {
 
       await cache.del(`service:${service.slug}`);
       await cache.del('services:all');
+      await cache.del('services:categories'); // Invalidar caché de categorías
 
       logger.info(`Service updated: ${id}`);
 
@@ -421,6 +423,7 @@ export class ServiceService {
         await cache.del(`service:${service.slug}`);
       }
       await cache.del('services:all');
+      await cache.del('services:categories'); // Invalidar caché de categorías
 
       logger.info(`Service deleted: ${id}`);
 
