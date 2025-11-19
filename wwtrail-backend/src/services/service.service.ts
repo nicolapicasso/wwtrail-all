@@ -8,7 +8,7 @@ import { EventStatus } from '@prisma/client';
 interface CreateServiceInput {
   name: string;
   description?: string;
-  category: string;
+  categoryId?: string; // Ahora es ID de categoría (opcional)
   country: string;
   city: string;
   latitude?: number;
@@ -23,7 +23,7 @@ interface CreateServiceInput {
 interface UpdateServiceInput {
   name?: string;
   description?: string;
-  category?: string;
+  categoryId?: string; // Ahora es ID de categoría
   country?: string;
   city?: string;
   latitude?: number;
@@ -41,10 +41,10 @@ interface ServiceFilters {
   search?: string;
   country?: string;
   city?: string;
-  category?: string;
+  categoryId?: string; // Ahora es ID de categoría
   featured?: boolean;
   status?: EventStatus;
-  sortBy?: 'name' | 'createdAt' | 'viewCount' | 'category';
+  sortBy?: 'name' | 'createdAt' | 'viewCount';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -103,7 +103,7 @@ export class ServiceService {
       if (data.latitude && data.longitude) {
         query = `
           INSERT INTO services (
-            id, name, slug, description, category, country, city, location,
+            id, name, slug, description, "categoryId", country, city, location,
             "logoUrl", "coverImage", gallery, "organizerId", status, featured, "createdAt", "updatedAt"
           )
           VALUES (
@@ -117,7 +117,7 @@ export class ServiceService {
           data.name,
           slug,
           data.description || null,
-          data.category,
+          data.categoryId || null,
           data.country,
           data.city,
           data.longitude,
@@ -131,7 +131,7 @@ export class ServiceService {
       } else {
         query = `
           INSERT INTO services (
-            id, name, slug, description, category, country, city, location,
+            id, name, slug, description, "categoryId", country, city, location,
             "logoUrl", "coverImage", gallery, "organizerId", status, featured, "createdAt", "updatedAt"
           )
           VALUES (
@@ -144,7 +144,7 @@ export class ServiceService {
           data.name,
           slug,
           data.description || null,
-          data.category,
+          data.categoryId || null,
           data.country,
           data.city,
           data.logoUrl || null,
@@ -167,6 +167,14 @@ export class ServiceService {
               username: true,
               firstName: true,
               lastName: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
             },
           },
         },
@@ -215,8 +223,8 @@ export class ServiceService {
         where.city = { contains: filters.city, mode: 'insensitive' };
       }
 
-      if (filters.category) {
-        where.category = { contains: filters.category, mode: 'insensitive' };
+      if (filters.categoryId) {
+        where.categoryId = filters.categoryId;
       }
 
       if (filters.featured !== undefined) {
@@ -240,6 +248,14 @@ export class ServiceService {
                 username: true,
                 firstName: true,
                 lastName: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                icon: true,
               },
             },
           },
@@ -283,6 +299,14 @@ export class ServiceService {
               lastName: true,
             },
           },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+            },
+          },
         },
       });
 
@@ -321,6 +345,14 @@ export class ServiceService {
               username: true,
               firstName: true,
               lastName: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
             },
           },
         },
@@ -372,7 +404,7 @@ export class ServiceService {
           name: data.name,
           slug,
           description: data.description,
-          category: data.category,
+          categoryId: data.categoryId,
           country: data.country,
           city: data.city,
           logoUrl: data.logoUrl,
@@ -388,6 +420,14 @@ export class ServiceService {
               username: true,
               firstName: true,
               lastName: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
             },
           },
         },
@@ -463,6 +503,14 @@ export class ServiceService {
               lastName: true,
             },
           },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+            },
+          },
         },
       });
 
@@ -495,100 +543,20 @@ export class ServiceService {
               lastName: true,
             },
           },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+            },
+          },
         },
       });
 
       return await this.enrichWithCoordinates(services);
     } catch (error) {
       logger.error(`Error fetching services for organizer ${organizerId}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Obtener categorías únicas
-   */
-  static async getCategories() {
-    try {
-      const cacheKey = 'services:categories';
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return JSON.parse(cached);
-      }
-
-      const categories = await prisma.service.findMany({
-        select: { category: true },
-        distinct: ['category'],
-        orderBy: { category: 'asc' },
-      });
-
-      const categoryList = categories.map(c => c.category);
-
-      await cache.set(cacheKey, JSON.stringify(categoryList), CACHE_TTL_LONG);
-
-      return categoryList;
-    } catch (error) {
-      logger.error('Error fetching service categories:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Obtener categorías con conteo de servicios
-   */
-  static async getCategoriesWithCount() {
-    try {
-      const cacheKey = 'services:categories:count';
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return JSON.parse(cached);
-      }
-
-      const result = await prisma.service.groupBy({
-        by: ['category'],
-        _count: {
-          category: true,
-        },
-        orderBy: {
-          category: 'asc',
-        },
-      });
-
-      const categoriesWithCount = result.map(r => ({
-        name: r.category,
-        count: r._count.category,
-      }));
-
-      await cache.set(cacheKey, JSON.stringify(categoriesWithCount), CACHE_TTL_LONG);
-
-      return categoriesWithCount;
-    } catch (error) {
-      logger.error('Error fetching service categories with count:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Eliminar una categoría (actualiza todos los servicios con esa categoría a null)
-   */
-  static async deleteCategory(category: string) {
-    try {
-      // Actualizar todos los servicios con esta categoría a null
-      const result = await prisma.service.updateMany({
-        where: { category },
-        data: { category: 'Sin categoría' },
-      });
-
-      // Invalidar cachés
-      await cache.del('services:categories');
-      await cache.del('services:categories:count');
-      await cache.del('services:all');
-
-      logger.info(`Category deleted: ${category} (${result.count} services updated)`);
-
-      return { success: true, updatedCount: result.count };
-    } catch (error) {
-      logger.error(`Error deleting category ${category}:`, error);
       throw error;
     }
   }
@@ -602,19 +570,21 @@ export class ServiceService {
     // Query PostGIS
     const services = await prisma.$queryRaw`
       SELECT
-        id, name, slug, city, country, category,
-        ST_X(location::geometry) as longitude,
-        ST_Y(location::geometry) as latitude,
+        s.id, s.name, s.slug, s.city, s.country, s."categoryId",
+        sc.name as category_name, sc.icon as category_icon,
+        ST_X(s.location::geometry) as longitude,
+        ST_Y(s.location::geometry) as latitude,
         ST_Distance(
-          location::geography,
+          s.location::geography,
           ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography
         ) / 1000 as distance_km
-      FROM services
+      FROM services s
+      LEFT JOIN service_categories sc ON s."categoryId" = sc.id
       WHERE
-        location IS NOT NULL
-        AND status = 'PUBLISHED'
+        s.location IS NOT NULL
+        AND s.status = 'PUBLISHED'
         AND ST_DWithin(
-          location::geography,
+          s.location::geography,
           ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography,
           ${radiusMeters}
         )

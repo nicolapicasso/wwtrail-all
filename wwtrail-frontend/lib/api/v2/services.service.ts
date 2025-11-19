@@ -22,36 +22,12 @@ class ServicesService {
     if (filters?.status) params.append('status', filters.status);
     if (filters?.country) params.append('country', filters.country);
     if (filters?.city) params.append('city', filters.city);
-    if (filters?.category) params.append('category', filters.category);
+    if (filters?.categoryId) params.append('categoryId', filters.categoryId);
     if (filters?.featured !== undefined) params.append('featured', filters.featured.toString());
     if (filters?.sortBy) params.append('sortBy', filters.sortBy);
     if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const response = await apiClientV2.get<ServicesResponse>(`/services?${params.toString()}`);
-    return response.data;
-  }
-
-  /**
-   * Get all service categories (public)
-   */
-  async getCategories(): Promise<string[]> {
-    const response = await apiClientV2.get<CategoriesResponse>('/services/categories');
-    return response.data.data;
-  }
-
-  /**
-   * Get all service categories with count (admin only)
-   */
-  async getCategoriesWithCount(): Promise<Array<{ name: string; count: number }>> {
-    const response = await apiClientV2.get<{ status: string; data: Array<{ name: string; count: number }> }>('/services/categories/count');
-    return response.data.data;
-  }
-
-  /**
-   * Delete a service category (admin only)
-   */
-  async deleteCategory(category: string): Promise<{ status: string; message: string; data: { success: boolean; updatedCount: number } }> {
-    const response = await apiClientV2.delete<{ status: string; message: string; data: { success: boolean; updatedCount: number } }>(`/services/categories/${encodeURIComponent(category)}`);
     return response.data;
   }
 

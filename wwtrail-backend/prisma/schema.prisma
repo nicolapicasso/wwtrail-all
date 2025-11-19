@@ -1000,13 +1000,34 @@ model HomeBlock {
   @@map("home_blocks")
 }
 
+// CATEGORÍAS DE SERVICIOS
+model ServiceCategory {
+  id   String @id @default(uuid())
+  name String @unique @db.VarChar(100)
+  slug String @unique @db.VarChar(100)
+  icon String @db.VarChar(10) // Emoji para mostrar en mapas y UI
+
+  // Relaciones
+  services Service[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([name])
+  @@map("service_categories")
+}
+
 // SERVICIOS (Alojamientos, Restaurantes, Tiendas, Puntos de Información, etc.)
 model Service {
   id          String  @id @default(uuid())
   name        String  @db.VarChar(255)
   slug        String  @unique @db.VarChar(255)
   description String? @db.Text
-  category    String  @db.VarChar(100) // Categoría de creación libre (alojamientos, restaurantes, tiendas, etc.)
+
+  // Categoría (relación con ServiceCategory)
+  categoryId String?
+  category   ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   // Ubicación
   country  String                                @db.VarChar(2)
@@ -1032,7 +1053,7 @@ model Service {
   @@index([slug])
   @@index([country])
   @@index([city])
-  @@index([category])
+  @@index([categoryId])
   @@index([status])
   @@index([organizerId])
   @@index([featured])
