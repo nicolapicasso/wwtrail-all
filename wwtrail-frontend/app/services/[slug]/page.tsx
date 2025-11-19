@@ -6,12 +6,22 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { servicesService } from '@/lib/api/v2';
 import { Service } from '@/types/v2';
 import { MapPin, ArrowLeft, Eye, Tag, Star, Loader2 } from 'lucide-react';
 import EventGallery from '@/components/EventGallery';
-import EventMap from '@/components/EventMap';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
+
+// Import EventMap dynamically to avoid SSR issues with Leaflet
+const EventMap = dynamic(() => import('@/components/EventMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+    </div>
+  ),
+});
 
 export default function ServiceDetailPage() {
   const params = useParams();

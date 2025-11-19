@@ -32,12 +32,23 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
   useEffect(() => {
     if (!mapContainerRef.current || !event.latitude || !event.longitude) return;
 
-    // Evitar reinicializar si ya existe
-    if (mapRef.current) return;
+    // Validar que las coordenadas sean números válidos
+    const lat = Number(event.latitude);
+    const lon = Number(event.longitude);
+    if (isNaN(lat) || isNaN(lon)) {
+      console.error('Invalid coordinates:', event.latitude, event.longitude);
+      return;
+    }
+
+    // Limpiar mapa existente si existe
+    if (mapRef.current) {
+      mapRef.current.remove();
+      mapRef.current = null;
+    }
 
     // Inicializar mapa
     const map = L.map(mapContainerRef.current).setView(
-      [event.latitude, event.longitude],
+      [lat, lon],
       12 // zoom level
     );
 
@@ -113,7 +124,7 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
     // ============================================
     // 📍 MARKER PRINCIPAL (Evento actual)
     // ============================================
-    const mainMarker = L.marker([event.latitude, event.longitude], {
+    const mainMarker = L.marker([lat, lon], {
       icon: mainIcon,
       title: event.name,
     }).addTo(map);
@@ -145,8 +156,13 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
     nearbyEvents.forEach((nearbyEvent) => {
       if (!nearbyEvent.latitude || !nearbyEvent.longitude) return;
 
+      // Validar coordenadas
+      const nearbyLat = Number(nearbyEvent.latitude);
+      const nearbyLon = Number(nearbyEvent.longitude);
+      if (isNaN(nearbyLat) || isNaN(nearbyLon)) return;
+
       const nearbyMarker = L.marker(
-        [nearbyEvent.latitude, nearbyEvent.longitude],
+        [nearbyLat, nearbyLon],
         {
           icon: nearbyIcon,
           title: nearbyEvent.name,
@@ -179,14 +195,24 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
     // 🗺️ AJUSTAR VISTA PARA MOSTRAR TODOS LOS MARKERS
     // ============================================
     if (nearbyEvents.length > 0) {
-      const bounds = L.latLngBounds([
-        [event.latitude, event.longitude],
-        ...nearbyEvents
-          .filter(e => e.latitude && e.longitude)
-          .map(e => [e.latitude!, e.longitude!] as [number, number])
-      ]);
-      
-      map.fitBounds(bounds, { padding: [50, 50] });
+      // Filtrar y validar coordenadas de eventos cercanos
+      const validNearbyCoords = nearbyEvents
+        .filter(e => e.latitude && e.longitude)
+        .map(e => {
+          const nLat = Number(e.latitude);
+          const nLon = Number(e.longitude);
+          return !isNaN(nLat) && !isNaN(nLon) ? [nLat, nLon] as [number, number] : null;
+        })
+        .filter((coords): coords is [number, number] => coords !== null);
+
+      if (validNearbyCoords.length > 0) {
+        const bounds = L.latLngBounds([
+          [lat, lon],
+          ...validNearbyCoords
+        ]);
+
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
 
     // Cleanup
