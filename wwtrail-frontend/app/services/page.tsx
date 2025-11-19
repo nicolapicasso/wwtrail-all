@@ -3,8 +3,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { servicesService } from '@/lib/api/v2';
-import { Service, ServiceFilters } from '@/types/v2';
+import { servicesService, serviceCategoriesService } from '@/lib/api/v2';
+import { Service, ServiceCategory, ServiceFilters } from '@/types/v2';
 import ServiceCard from '@/components/ServiceCard';
 import { Search, Filter, MapPin, Tag, Loader2 } from 'lucide-react';
 
@@ -13,13 +13,13 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
 
   const [filters, setFilters] = useState<ServiceFilters>({
     page: 1,
     limit: 12,
     search: '',
-    category: '',
+    categoryId: '',
     country: '',
     featured: undefined,
     sortBy: 'createdAt',
@@ -48,7 +48,7 @@ export default function ServicesPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const cats = await servicesService.getCategories();
+        const cats = await serviceCategoriesService.getAll();
         setCategories(cats);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -102,14 +102,14 @@ export default function ServicesPage() {
                   Categoría
                 </label>
                 <select
-                  value={filters.category}
-                  onChange={(e) => setFilters({ ...filters, category: e.target.value, page: 1 })}
+                  value={filters.categoryId}
+                  onChange={(e) => setFilters({ ...filters, categoryId: e.target.value, page: 1 })}
                   className="w-full px-3 py-2 border border-input rounded-md"
                 >
                   <option value="">Todas las categorías</option>
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                    <option key={cat.id} value={cat.id}>
+                      {cat.icon} {cat.name}
                     </option>
                   ))}
                 </select>
@@ -128,7 +128,6 @@ export default function ServicesPage() {
                   <option value="createdAt">Más recientes</option>
                   <option value="name">Nombre</option>
                   <option value="viewCount">Más vistos</option>
-                  <option value="category">Categoría</option>
                 </select>
               </div>
 

@@ -7,10 +7,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import servicesService from '@/lib/api/v2/services.service';
+import serviceCategoriesService from '@/lib/api/v2/serviceCategories.service';
+import { ServiceCategory } from '@/types/v2';
 import { ArrowLeft, MapPin, Save, Loader2, Tag } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
-import CategorySelect from '@/components/CategorySelect';
-import CategoryManager from '@/components/CategoryManager';
 import FileUpload from '@/components/FileUpload';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
@@ -26,13 +26,13 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
   const [loading, setLoading] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     slug: initialData?.slug || '',
-    category: initialData?.category || '',
+    categoryId: initialData?.categoryId || '',
     city: initialData?.city || '',
     country: initialData?.country || '',
     description: initialData?.description || '',
@@ -49,7 +49,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const cats = await servicesService.getCategories();
+        const cats = await serviceCategoriesService.getAll();
         setCategories(cats);
       } catch (err) {
         console.error('Error loading categories:', err);
@@ -121,7 +121,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
     try {
       const data = {
         name: formData.name,
-        category: formData.category,
+        categoryId: formData.categoryId || undefined,
         city: formData.city,
         country: formData.country,
         description: formData.description || undefined,
@@ -218,17 +218,28 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
             {/* Category */}
             <div>
               <label className="block text-sm font-medium mb-2">
-                Categoría *
+                Categoría
               </label>
-              <CategorySelect
-                value={formData.category}
-                onChange={(value) => setFormData({ ...formData, category: value })}
-                categories={categories}
-                placeholder="Selecciona o crea una categoría"
-              />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Escribe para buscar o crear una nueva categoría
-              </p>
+              <select
+                value={formData.categoryId}
+                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+              >
+                <option value="">Sin categoría</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.icon} {cat.name}
+                  </option>
+                ))}
+              </select>
+              {user?.role === 'ADMIN' && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Puedes gestionar las categorías desde{' '}
+                  <a href="/admin/services/categories" className="text-blue-600 hover:underline">
+                    Admin → Categorías
+                  </a>
+                </p>
+              )}
             </div>
 
             {/* Status */}
@@ -428,11 +439,6 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
             </div>
           </div>
         </div>
-
-        {/* Admin Only - Category Manager */}
-        {user?.role === 'ADMIN' && (
-          <CategoryManager />
-        )}
 
         {/* Admin Only - Featured */}
         {user?.role === 'ADMIN' && (

@@ -4,10 +4,12 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
+import {
+  LayoutDashboard,
+  Users,
+  Calendar,
+  MapPin,
+  Tag,
   BarChart3,
   Settings,
   LogOut
@@ -36,6 +38,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       title: 'Eventos',
       href: '/admin/events',
       icon: Calendar,
+    },
+    {
+      title: 'Servicios',
+      href: '/admin/services',
+      icon: MapPin,
+      subItems: [
+        {
+          title: 'Categorías',
+          href: '/admin/services/categories',
+          icon: Tag,
+        },
+      ],
     },
     {
       title: 'Estadísticas',
@@ -106,23 +120,53 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
-            
+            const hasSubItems = item.subItems && item.subItems.length > 0;
+
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors
-                  ${
-                    active
-                      ? 'bg-purple-50 text-purple-600'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                  }
-                `}
-              >
-                <Icon className={`mr-3 h-5 w-5 ${active ? 'text-purple-600' : 'text-gray-400'}`} />
-                {item.title}
-              </Link>
+              <div key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`
+                    flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                    ${
+                      active
+                        ? 'bg-purple-50 text-purple-600'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }
+                  `}
+                >
+                  <Icon className={`mr-3 h-5 w-5 ${active ? 'text-purple-600' : 'text-gray-400'}`} />
+                  {item.title}
+                </Link>
+
+                {/* Sub Items */}
+                {hasSubItems && (
+                  <div className="ml-8 mt-1 space-y-1">
+                    {item.subItems!.map((subItem) => {
+                      const SubIcon = subItem.icon;
+                      const subActive = isActive(subItem.href);
+
+                      return (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={`
+                            flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                            ${
+                              subActive
+                                ? 'bg-purple-50 text-purple-600'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            }
+                          `}
+                        >
+                          <SubIcon className={`mr-3 h-4 w-4 ${subActive ? 'text-purple-600' : 'text-gray-400'}`} />
+                          {subItem.title}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
