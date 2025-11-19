@@ -206,15 +206,18 @@ export default function ServiceDetailPage() {
                     latitude: service.latitude,
                     longitude: service.longitude,
                   }}
-                  nearbyEvents={nearbyServices.map(s => ({
-                    id: s.id,
-                    name: s.name,
-                    slug: s.slug,
-                    city: s.city,
-                    country: s.country,
-                    latitude: s.latitude,
-                    longitude: s.longitude,
-                  }))}
+                  nearbyEvents={nearbyServices
+                    .filter(s => s.latitude && s.longitude) // Filtrar servicios con coordenadas válidas
+                    .map(s => ({
+                      id: s.id,
+                      name: s.name,
+                      slug: s.slug,
+                      city: s.city,
+                      country: s.country,
+                      latitude: s.latitude!,
+                      longitude: s.longitude!,
+                    }))}
+                  nearbyLinkPrefix="/services/"
                 />
                 <div className="mt-4">
                   <a

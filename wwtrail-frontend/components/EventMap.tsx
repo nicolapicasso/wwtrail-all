@@ -22,9 +22,10 @@ L.Icon.Default.mergeOptions({
 interface EventMapProps {
   event: Event;
   nearbyEvents?: Event[];
+  nearbyLinkPrefix?: string; // Prefijo para links de nearby (default: '/events/')
 }
 
-export default function EventMap({ event, nearbyEvents = [] }: EventMapProps) {
+export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = '/events/' }: EventMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -163,11 +164,11 @@ export default function EventMap({ event, nearbyEvents = [] }: EventMapProps) {
           </p>
           ${nearbyEvent.type ? `<p style="font-size: 11px; color: #888;">Tipo: ${nearbyEvent.type}</p>` : ''}
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">
-            <a 
-              href="/events/${nearbyEvent.slug}" 
+            <a
+              href="${nearbyLinkPrefix}${nearbyEvent.slug}"
               style="color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 12px;"
             >
-              Ver evento →
+              Ver detalles →
             </a>
           </div>
         </div>
@@ -195,7 +196,7 @@ export default function EventMap({ event, nearbyEvents = [] }: EventMapProps) {
         mapRef.current = null;
       }
     };
-  }, [event, nearbyEvents]);
+  }, [event, nearbyEvents, nearbyLinkPrefix]);
 
   if (!event.latitude || !event.longitude) {
     return (
