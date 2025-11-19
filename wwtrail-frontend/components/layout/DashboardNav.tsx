@@ -73,17 +73,17 @@ const navItems: NavItem[] = [
         href: '/organizer/special-series',
         icon: Sparkles,
       },
+    ],
+  },
+  {
+    label: 'Servicios',
+    href: '/organizer/services',
+    icon: Building2,
+    children: [
       {
-        label: 'Servicios',
-        href: '/organizer/services',
-        icon: Building2,
-        children: [
-          {
-            label: 'Categorías',
-            href: '/organizer/services/categories',
-            icon: Tag,
-          },
-        ],
+        label: 'Categorías',
+        href: '/organizer/services/categories',
+        icon: Tag,
       },
     ],
   },
@@ -118,7 +118,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['/organizer']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['/organizer', '/organizer/services']);
 
   const filteredItems = navItems.filter((item) => {
     if (item.adminOnly) {

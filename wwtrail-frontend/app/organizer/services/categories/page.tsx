@@ -4,7 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import serviceCategoriesService from '@/lib/api/v2/serviceCategories.service';
 import { ServiceCategoryWithCount } from '@/lib/api/v2/serviceCategories.service';
@@ -28,10 +28,10 @@ export default function ServiceCategoriesAdminPage() {
   });
   const [formLoading, setFormLoading] = useState(false);
 
-  // Redirect if not admin
+  // Redirect if not organizer or admin
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.push('/');
+    if (!authLoading && (!user || (user.role !== 'ORGANIZER' && user.role !== 'ADMIN'))) {
+      router.push('/auth/login');
     }
   }, [user, authLoading, router]);
 
@@ -49,7 +49,7 @@ export default function ServiceCategoriesAdminPage() {
   };
 
   useEffect(() => {
-    if (user?.role === 'ADMIN') {
+    if (user && (user.role === 'ORGANIZER' || user.role === 'ADMIN')) {
       loadCategories();
     }
   }, [user]);
@@ -138,7 +138,7 @@ export default function ServiceCategoriesAdminPage() {
     );
   }
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || (user.role !== 'ORGANIZER' && user.role !== 'ADMIN')) {
     return null;
   }
 
