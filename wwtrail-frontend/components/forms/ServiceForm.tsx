@@ -232,11 +232,11 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                   </option>
                 ))}
               </select>
-              {user?.role === 'ADMIN' && (
+              {(user?.role === 'ADMIN' || user?.role === 'ORGANIZER') && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Puedes gestionar las categorías desde{' '}
-                  <a href="/admin/services/categories" className="text-blue-600 hover:underline">
-                    Admin → Categorías
+                  <a href="/organizer/services/categories" className="text-blue-600 hover:underline">
+                    Categorías
                   </a>
                 </p>
               )}

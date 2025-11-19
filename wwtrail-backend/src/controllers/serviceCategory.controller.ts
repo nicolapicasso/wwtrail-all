@@ -9,7 +9,7 @@ export class ServiceCategoryController {
   /**
    * POST /api/v2/service-categories
    * Crear una nueva categoría de servicio
-   * @auth Required (ADMIN)
+   * @auth Required (ORGANIZER or ADMIN)
    */
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
@@ -115,7 +115,7 @@ export class ServiceCategoryController {
   /**
    * PUT /api/v2/service-categories/:id
    * Actualizar una categoría de servicio
-   * @auth Required (ADMIN)
+   * @auth Required (ORGANIZER or ADMIN)
    */
   static async update(req: Request, res: Response, next: NextFunction) {
     try {
@@ -149,7 +149,7 @@ export class ServiceCategoryController {
   /**
    * DELETE /api/v2/service-categories/:id
    * Eliminar una categoría de servicio
-   * @auth Required (ADMIN)
+   * @auth Required (ORGANIZER or ADMIN)
    */
   static async delete(req: Request, res: Response, next: NextFunction) {
     try {

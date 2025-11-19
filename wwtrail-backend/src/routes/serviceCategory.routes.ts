@@ -3,7 +3,7 @@
 import { Router } from 'express';
 import { ServiceCategoryController } from '../controllers/serviceCategory.controller';
 import { authenticate } from '../middlewares/auth.middleware';
-import { authorize } from '../middlewares/authorize.middleware';
+import { requireOrganizer } from '../middlewares/authorize.middleware';
 
 const router = Router();
 
@@ -24,30 +24,30 @@ router.get('/with-count', ServiceCategoryController.getCategoriesWithCount);
 router.get('/slug/:slug', ServiceCategoryController.getBySlug);
 
 // ===================================
-// PASO 2: RUTAS PROTEGIDAS (ADMIN)
+// PASO 2: RUTAS PROTEGIDAS (ORGANIZER/ADMIN)
 // ===================================
 
-// Crear categoría (ADMIN)
+// Crear categoría (ORGANIZER/ADMIN)
 router.post(
   '/',
   authenticate,
-  authorize('ADMIN'),
+  requireOrganizer,
   ServiceCategoryController.create
 );
 
-// Actualizar categoría (ADMIN)
+// Actualizar categoría (ORGANIZER/ADMIN)
 router.put(
   '/:id',
   authenticate,
-  authorize('ADMIN'),
+  requireOrganizer,
   ServiceCategoryController.update
 );
 
-// Eliminar categoría (ADMIN)
+// Eliminar categoría (ORGANIZER/ADMIN)
 router.delete(
   '/:id',
   authenticate,
-  authorize('ADMIN'),
+  requireOrganizer,
   ServiceCategoryController.delete
 );
 
@@ -76,7 +76,7 @@ export default router;
    GET  /service-categories/:id            → Categoría por ID
    GET  /service-categories/slug/:slug     → Categoría por slug
 
-✅ RUTAS PROTEGIDAS (requieren login de ADMIN):
+✅ RUTAS PROTEGIDAS (requieren login de ORGANIZER o ADMIN):
    POST   /service-categories              → Crear categoría
    PUT    /service-categories/:id          → Actualizar categoría
    DELETE /service-categories/:id          → Eliminar categoría

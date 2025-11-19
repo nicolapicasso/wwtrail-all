@@ -32,6 +32,7 @@ export class ServiceCategoryService {
 
       // Invalidar cachés
       await cache.del('service-categories:all');
+      await cache.del('service-categories:with-count');
 
       logger.info(`Service category created: ${slug}`);
 
@@ -145,6 +146,7 @@ export class ServiceCategoryService {
 
       // Invalidar cachés
       await cache.del('service-categories:all');
+      await cache.del('service-categories:with-count');
       await cache.del('services:all');
       await cache.del('services:categories');
       await cache.del('services:categories:count');
@@ -180,6 +182,7 @@ export class ServiceCategoryService {
 
       // Invalidar cachés
       await cache.del('service-categories:all');
+      await cache.del('service-categories:with-count');
       await cache.del('services:categories');
       await cache.del('services:categories:count');
 
