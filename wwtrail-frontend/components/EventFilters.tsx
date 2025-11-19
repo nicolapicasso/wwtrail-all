@@ -6,17 +6,22 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Search, Filter, X, Calendar } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { Search, Filter, X, Calendar, MapPin } from 'lucide-react';
 import CountrySelect from './CountrySelect';
+import { eventsService } from '@/lib/api/v2';
 
 interface EventFiltersProps {
   searchValue?: string;  // ✅ CRÍTICO: Valor controlado desde EventList
   onSearch: (query: string) => void;
   onFilterMonth: (month: string) => void;  // ✅ CAMBIO: mes en lugar de status
   onFilterCountry: (country: string) => void;
+  onFilterCity?: (city: string) => void;  // Nuevo filtro de ciudad
+  selectedCountry?: string;  // País seleccionado para filtrar ciudades
+  selectedCity?: string;  // Ciudad seleccionada
   onFilterHighlighted?: (highlighted: boolean | null) => void;
   showCountryFilter?: boolean;
+  showCityFilter?: boolean;  // Mostrar filtro de ciudad
   showOrganizerFilter?: boolean;
   showHighlightedFilter?: boolean;
   isLoading?: boolean;
@@ -27,16 +32,20 @@ export default function EventFilters({
   onSearch,
   onFilterMonth,  // ✅ CAMBIO
   onFilterCountry,
+  onFilterCity,  // Nuevo
+  selectedCountry = '',  // País seleccionado desde EventList
+  selectedCity = '',  // Ciudad seleccionada desde EventList
   onFilterHighlighted,
   showCountryFilter = true,
+  showCityFilter = false,  // Nuevo
   showOrganizerFilter = false,
   showHighlightedFilter = false,
   isLoading = false,
 }: EventFiltersProps) {
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');  // ✅ CAMBIO
   const [selectedHighlighted, setSelectedHighlighted] = useState<string>('all');
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
 
   // ✅ MESES DEL AÑO
   const months = [
@@ -55,6 +64,32 @@ export default function EventFilters({
     { value: '12', label: 'Diciembre' },
   ];
 
+  // Cargar ciudades disponibles según el país seleccionado
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const params: any = { limit: 1000 };
+        if (selectedCountry) {
+          params.country = selectedCountry;
+        }
+
+        const response = await eventsService.getAll(params);
+        const events = response.data || [];
+
+        // Extraer ciudades únicas
+        const cities = [...new Set(events.map(event => event.city).filter(Boolean))].sort();
+        setAvailableCities(cities as string[]);
+      } catch (error) {
+        console.error('Error loading cities:', error);
+        setAvailableCities([]);
+      }
+    };
+
+    if (showCityFilter) {
+      loadCities();
+    }
+  }, [selectedCountry, showCityFilter]);
+
   // ✅ CRÍTICO: NO hacer debounce aquí - ya se hace en EventList
   const handleSearchChange = useCallback((value: string) => {
     onSearch(value);  // Llamar directamente
@@ -62,9 +97,15 @@ export default function EventFilters({
 
   // Handler para país
   const handleCountryChange = useCallback((countryCode: string) => {
-    setSelectedCountry(countryCode);
-    onFilterCountry(countryCode);
+    onFilterCountry(countryCode);  // EventList manejará el estado y limpiará la ciudad
   }, [onFilterCountry]);
+
+  // Handler para ciudad
+  const handleCityChange = useCallback((city: string) => {
+    if (onFilterCity) {
+      onFilterCity(city);
+    }
+  }, [onFilterCity]);
 
   // ✅ CAMBIO: Handler para mes
   const handleMonthChange = useCallback((month: string) => {
@@ -92,18 +133,20 @@ export default function EventFilters({
 
   // Limpiar todos los filtros
   const clearAllFilters = useCallback(() => {
-    setSelectedCountry('');
     setSelectedMonth('');
     setSelectedHighlighted('all');
     onSearch('');
     onFilterCountry('');
+    if (onFilterCity) {
+      onFilterCity('');
+    }
     onFilterMonth('');
     if (onFilterHighlighted) {
       onFilterHighlighted(null);
     }
-  }, [onSearch, onFilterCountry, onFilterMonth, onFilterHighlighted]);
+  }, [onSearch, onFilterCountry, onFilterCity, onFilterMonth, onFilterHighlighted]);
 
-  const hasActiveFilters = searchValue || selectedCountry || selectedMonth || selectedHighlighted !== 'all';
+  const hasActiveFilters = searchValue || selectedCountry || selectedCity || selectedMonth || selectedHighlighted !== 'all';
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -140,7 +183,7 @@ export default function EventFilters({
           Filtros
           {hasActiveFilters && (
             <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {[searchValue, selectedCountry, selectedMonth, selectedHighlighted !== 'all'].filter(Boolean).length}
+              {[searchValue, selectedCountry, selectedCity, selectedMonth, selectedHighlighted !== 'all'].filter(Boolean).length}
             </span>
           )}
         </button>
@@ -148,8 +191,8 @@ export default function EventFilters({
 
       {/* Filter Controls */}
       <div className={`${showFiltersPanel ? 'block' : 'hidden'} md:block mt-4`}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
           {/* Country Filter con CountrySelect */}
           {showCountryFilter && (
             <div>
@@ -162,6 +205,31 @@ export default function EventFilters({
                 showAllOption={true}
                 disabled={isLoading}
               />
+            </div>
+          )}
+
+          {/* City Filter */}
+          {showCityFilter && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                Ciudad {availableCities.length > 0 && `(${availableCities.length})`}
+              </label>
+              <select
+                value={selectedCity}
+                onChange={(e) => handleCityChange(e.target.value)}
+                disabled={availableCities.length === 0}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {availableCities.length === 0 ? 'Cargando ciudades...' : 'Todas las ciudades'}
+                </option>
+                {availableCities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 

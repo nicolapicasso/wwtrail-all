@@ -96,6 +96,16 @@ class ServicesService {
     const response = await apiClientV2.patch<ServiceResponse>(`/services/${id}/featured`);
     return response.data;
   }
+
+  /**
+   * Get nearby services by coordinates
+   */
+  async getNearby(lat: number, lon: number, radius: number = 50): Promise<Service[]> {
+    const response = await apiClientV2.get<{ status: string; data: Service[] }>(
+      `/services/nearby?lat=${lat}&lon=${lon}&radius=${radius}`
+    );
+    return Array.isArray(response.data.data) ? response.data.data : [];
+  }
 }
 
 export default new ServicesService();

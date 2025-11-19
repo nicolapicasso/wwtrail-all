@@ -3,7 +3,15 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Mountain, User, LogOut, Menu } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Mountain, User, LogOut, Menu, ChevronDown, MapPin, Award, Settings } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Navbar() {
@@ -68,8 +76,14 @@ export default function Navbar() {
               <span className="text-xl font-bold text-primary">WWTRAIL</span>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Public Menu */}
             <div className="hidden md:flex md:ml-10 md:space-x-8">
+              <Link
+                href="/events"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
+              >
+                Eventos
+              </Link>
               <Link
                 href="/competitions"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
@@ -82,49 +96,50 @@ export default function Navbar() {
               >
                 Servicios
               </Link>
-              {isAuthenticated && (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/profile"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
-                  >
-                    Mi Perfil
-                  </Link>
-                  <Link
-                    href="/my-participations"
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
-                  >
-                    Mis Participaciones
-                  </Link>
-                </>
-              )}
+              <Link
+                href="/directory"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary"
+              >
+                Mapa
+              </Link>
+              {/* Ventajas - Próximamente */}
             </div>
           </div>
 
           {/* User Menu */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             {isAuthenticated ? (
-              <>
-                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <User className="h-5 w-5" />
-                  <span>{user?.username || user?.email}</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="flex items-center gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Cerrar Sesión
-                </Button>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    <span>{user?.username || user?.email}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Mi cuenta</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  {/* Mis participaciones - Próximamente */}
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Administración</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 dark:text-red-400">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Cerrar sesión</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 <Link href="/auth/login">
@@ -157,7 +172,15 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden">
+          {/* Public Menu Items */}
           <div className="pt-2 pb-3 space-y-1">
+            <Link
+              href="/events"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Eventos
+            </Link>
             <Link
               href="/competitions"
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -172,32 +195,46 @@ export default function Navbar() {
             >
               Servicios
             </Link>
-            {isAuthenticated && (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/profile"
-                  className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Mi Perfil
-                </Link>
-                <Link
-                  href="/my-participations"
-                  className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Mis Participaciones
-                </Link>
-              </>
-            )}
+            <Link
+              href="/directory"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Mapa
+            </Link>
+            {/* Ventajas - Próximamente */}
           </div>
+
+          {/* Private Menu Items (only if authenticated) */}
+          {isAuthenticated && (
+            <div className="pt-2 pb-3 border-t border-gray-200 dark:border-gray-700 space-y-1">
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Mi cuenta
+              </div>
+              <Link
+                href="/profile"
+                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  Mi cuenta
+                </div>
+              </Link>
+              {/* Mis participaciones - Próximamente */}
+              <Link
+                href="/dashboard"
+                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="flex items-center">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Administración
+                </div>
+              </Link>
+            </div>
+          )}
+          {/* Auth Section */}
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
             {isAuthenticated ? (
               <div className="space-y-1">
@@ -207,9 +244,12 @@ export default function Navbar() {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left pl-3 pr-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="block w-full text-left pl-3 pr-4 py-2 text-base font-medium text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
-                  Cerrar Sesión
+                  <div className="flex items-center">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar sesión
+                  </div>
                 </button>
               </div>
             ) : (

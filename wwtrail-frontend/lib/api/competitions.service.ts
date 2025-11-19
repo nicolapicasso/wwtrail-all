@@ -15,9 +15,9 @@ export const competitionsService = {
 
     // ✅ Adaptar respuesta del backend al formato esperado
     const backendData = response.data;
-    
+
     return {
-      data: backendData.data || [],
+      data: backendData.data?.competitions || [],
       pagination: {
         page: 1,
         limit: filters?.limit || 50,

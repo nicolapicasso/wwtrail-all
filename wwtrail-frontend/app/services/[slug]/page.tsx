@@ -18,6 +18,7 @@ export default function ServiceDetailPage() {
   const slug = params?.slug as string;
 
   const [service, setService] = useState<Service | null>(null);
+  const [nearbyServices, setNearbyServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [logoError, setLogoError] = useState(false);
@@ -30,6 +31,21 @@ export default function ServiceDetailPage() {
       try {
         const response = await servicesService.getBySlug(slug);
         setService(response.data);
+
+        // Cargar servicios cercanos si hay coordenadas
+        if (response.data.latitude && response.data.longitude) {
+          try {
+            const nearby = await servicesService.getNearby(
+              response.data.latitude,
+              response.data.longitude,
+              50 // 50km radius
+            );
+            setNearbyServices(nearby);
+          } catch (err) {
+            console.error('Error loading nearby services:', err);
+            // No bloqueamos si falla la carga de servicios cercanos
+          }
+        }
       } catch (err: any) {
         console.error('Error fetching service:', err);
         setError(err.response?.data?.message || 'Error al cargar el servicio');
@@ -190,7 +206,18 @@ export default function ServiceDetailPage() {
                     latitude: service.latitude,
                     longitude: service.longitude,
                   }}
-                  nearbyEvents={[]}
+                  nearbyEvents={nearbyServices
+                    .filter(s => s.latitude && s.longitude) // Filtrar servicios con coordenadas válidas
+                    .map(s => ({
+                      id: s.id,
+                      name: s.name,
+                      slug: s.slug,
+                      city: s.city,
+                      country: s.country,
+                      latitude: s.latitude!,
+                      longitude: s.longitude!,
+                    }))}
+                  nearbyLinkPrefix="/services/"
                 />
                 <div className="mt-4">
                   <a

@@ -65,6 +65,7 @@ export interface EventFilters {
   search?: string;
   status?: EventStatus;
   country?: string;
+  city?: string;  // Filtro por ciudad
   organizerId?: string;
   isFeatured?: boolean;
 }

@@ -279,4 +279,52 @@ export class ServiceController {
       next(error);
     }
   }
+
+  /**
+   * GET /api/v2/services/nearby
+   * Obtener servicios cercanos por coordenadas
+   * @auth No requerida
+   */
+  static async getNearby(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { lat, lon, radius } = req.query;
+
+      // Validar coordenadas
+      if (!lat || !lon) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Query parameters "lat" and "lon" are required',
+        });
+      }
+
+      const latitude = parseFloat(lat as string);
+      const longitude = parseFloat(lon as string);
+      const radiusKm = radius ? parseFloat(radius as string) : 50;
+
+      // Validar rangos
+      if (latitude < -90 || latitude > 90) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Latitude must be between -90 and 90',
+        });
+      }
+
+      if (longitude < -180 || longitude > 180) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Longitude must be between -180 and 180',
+        });
+      }
+
+      const services = await ServiceService.findNearby(latitude, longitude, radiusKm);
+
+      res.json({
+        status: 'success',
+        data: services,
+        count: services.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

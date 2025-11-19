@@ -22,6 +22,7 @@ class EventsService {
     if (filters?.search) params.append('search', filters.search);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.country) params.append('country', filters.country);
+    if (filters?.city) params.append('city', filters.city);  // Filtro por ciudad
     if (filters?.isFeatured !== undefined) params.append('featured', filters.isFeatured.toString());
 
     const response = await apiClientV2.get<EventsResponse>(`/events?${params.toString()}`);
@@ -33,12 +34,13 @@ class EventsService {
    */
   async getMyEvents(filters?: EventFilters): Promise<EventsResponse> {
     const params = new URLSearchParams();
-    
+
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.search) params.append('search', filters.search);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.country) params.append('country', filters.country);
+    if (filters?.city) params.append('city', filters.city);  // Filtro por ciudad
 
     const response = await apiClientV2.get<EventsResponse>(`/events/my-events?${params.toString()}`);
     return response.data;
@@ -49,11 +51,12 @@ class EventsService {
    */
   async getPendingEvents(filters?: EventFilters): Promise<EventsResponse> {
     const params = new URLSearchParams();
-    
+
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.search) params.append('search', filters.search);
     if (filters?.country) params.append('country', filters.country);
+    if (filters?.city) params.append('city', filters.city);  // Filtro por ciudad
     if (filters?.organizerId) params.append('organizerId', filters.organizerId);
 
     const response = await apiClientV2.get<EventsResponse>(`/events/pending?${params.toString()}`);
