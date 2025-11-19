@@ -77,6 +77,13 @@ const navItems: NavItem[] = [
         label: 'Servicios',
         href: '/organizer/services',
         icon: Building2,
+        children: [
+          {
+            label: 'Categorías',
+            href: '/organizer/services/categories',
+            icon: Tag,
+          },
+        ],
       },
     ],
   },

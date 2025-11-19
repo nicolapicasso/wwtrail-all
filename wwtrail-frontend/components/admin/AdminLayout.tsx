@@ -8,11 +8,11 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  MapPin,
-  Tag,
   BarChart3,
   Settings,
-  LogOut
+  LogOut,
+  MapPin,
+  Tag
 } from 'lucide-react';
 
 interface AdminLayoutProps {

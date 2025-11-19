@@ -78,10 +78,17 @@ class CompetitionAdminService {
               organizer: {
                 select: {
                   id: true,
-                  email: true,
-                  username: true,
-                  firstName: true,
-                  lastName: true,
+                  name: true,
+                  slug: true,
+                  createdBy: {
+                    select: {
+                      id: true,
+                      email: true,
+                      username: true,
+                      firstName: true,
+                      lastName: true,
+                    },
+                  },
                 },
               },
             },
