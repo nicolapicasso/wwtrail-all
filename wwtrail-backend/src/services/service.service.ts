@@ -513,7 +513,6 @@ export class ServiceService {
       const categories = await prisma.service.findMany({
         select: { category: true },
         distinct: ['category'],
-        where: { status: 'PUBLISHED' },
         orderBy: { category: 'asc' },
       });
 
