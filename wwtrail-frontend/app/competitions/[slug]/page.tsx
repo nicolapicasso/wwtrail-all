@@ -2,15 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import { eventsService } from '@/lib/api/events.service';
-import { Calendar, MapPin, TrendingUp, Users, ArrowLeft, Share2, Image as ImageIcon } from 'lucide-react';
+import { Calendar, MapPin, TrendingUp, Users, ArrowLeft, Share2, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CompetitionActions } from '@/components/CompetitionActions';
 import EventGallery from '@/components/EventGallery';
-import EventMap from '@/components/EventMap';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
+
+// Import EventMap dynamically to avoid SSR issues with Leaflet
+const EventMap = dynamic(() => import('@/components/EventMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+    </div>
+  ),
+});
 
 export default function CompetitionDetailPage() {
   const params = useParams();
