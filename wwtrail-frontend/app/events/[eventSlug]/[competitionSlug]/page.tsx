@@ -107,22 +107,29 @@ export default function CompetitionDetailPage() {
         )}
         <div className="absolute inset-0 bg-black/40"></div>
 
-        {/* Back Button */}
-        <div className="absolute top-4 left-4 z-10">
-          <Link
-            href={`/events/${eventSlug}`}
-            className="text-white hover:text-gray-200 flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver a {competition.event?.name}
-          </Link>
-        </div>
-
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
           <div className="container mx-auto">
             <div className="flex items-end justify-between">
               <div>
+                {/* Breadcrumbs */}
+                <div className="mb-4">
+                  <nav className="flex items-center gap-2 text-sm text-white/80">
+                    <Link href="/events" className="hover:text-white transition-colors">
+                      Eventos
+                    </Link>
+                    <span>/</span>
+                    <Link
+                      href={`/events/${eventSlug}`}
+                      className="hover:text-white transition-colors"
+                    >
+                      {competition.event?.name}
+                    </Link>
+                    <span>/</span>
+                    <span className="text-white font-semibold">{competition.name}</span>
+                  </nav>
+                </div>
+
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
                   {competition.name}
                 </h1>

@@ -47,6 +47,11 @@ export interface UserCompetition {
       participants: number;
       reviews: number;
     };
+    event?: {
+      id: string;
+      slug: string;
+      name: string;
+    };
   };
 }
 

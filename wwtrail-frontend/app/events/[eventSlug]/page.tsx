@@ -107,21 +107,22 @@ export default async function EventDetailPage({
         ) : null}
         <div className="absolute inset-0 bg-black/40"></div>
         
-        {/* Breadcrumb */}
-        <div className="absolute top-4 left-4 z-10">
-          <Link 
-            href="/events" 
-            className="text-white hover:text-gray-200 flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm"
-          >
-            ← Volver a eventos
-          </Link>
-        </div>
-
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
           <div className="container mx-auto">
             <div className="flex items-end justify-between">
               <div>
+                {/* Breadcrumbs */}
+                <div className="mb-4">
+                  <nav className="flex items-center gap-2 text-sm text-white/80">
+                    <Link href="/events" className="hover:text-white transition-colors">
+                      Eventos
+                    </Link>
+                    <span>/</span>
+                    <span className="text-white font-semibold">{event.name}</span>
+                  </nav>
+                </div>
+
                 {event.featured && (
                   <div className="mb-2">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-semibold">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import { eventsService } from '@/lib/api/events.service';
@@ -39,6 +40,14 @@ export default function CompetitionDetailPage() {
       loadCompetition();
     }
   }, [slug]);
+
+  // Redirect to hierarchical route when competition data is loaded
+  useEffect(() => {
+    if (competition?.event?.slug) {
+      console.log('🔄 Redirecting to hierarchical route:', `/events/${competition.event.slug}/${competition.slug}`);
+      router.replace(`/events/${competition.event.slug}/${competition.slug}`);
+    }
+  }, [competition, router]);
 
   const loadCompetition = async () => {
     try {
@@ -173,6 +182,26 @@ export default function CompetitionDetailPage() {
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           <div className="container mx-auto">
+            {/* Breadcrumbs */}
+            {competition.event && (
+              <div className="mb-4">
+                <nav className="flex items-center gap-2 text-sm text-white/80">
+                  <Link href="/events" className="hover:text-white transition-colors">
+                    Eventos
+                  </Link>
+                  <span>/</span>
+                  <Link
+                    href={`/events/${competition.event.slug}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {competition.event.name}
+                  </Link>
+                  <span>/</span>
+                  <span className="text-white font-semibold">{competition.name}</span>
+                </nav>
+              </div>
+            )}
+
             <div className="flex items-center gap-3 mb-3">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${typeColors[competition.type] || typeColors.OTHER}`}>
                 {competition.type}
@@ -192,16 +221,6 @@ export default function CompetitionDetailPage() {
             )}
           </div>
         </div>
-
-        {/* Back Button */}
-        <Button
-          variant="secondary"
-          onClick={() => router.back()}
-          className="absolute top-4 left-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver
-        </Button>
 
         {/* Share Button */}
         <Button

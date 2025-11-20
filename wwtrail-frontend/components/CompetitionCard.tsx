@@ -172,15 +172,18 @@ export function CompetitionCard({
     );
   }
 
-  if (eventSlug) {
+  // Use hierarchical route if eventSlug is available (from prop or competition.event)
+  const finalEventSlug = eventSlug || competition.event?.slug;
+
+  if (finalEventSlug) {
     return (
-      <Link href={`/events/${eventSlug}/${competition.slug}`}>
+      <Link href={`/events/${finalEventSlug}/${competition.slug}`}>
         {content}
       </Link>
     );
   }
 
-  // Default: link to competition detail page
+  // Fallback: link to standalone competition detail page (deprecated route)
   return (
     <Link href={`/competitions/${competition.slug}`}>
       {content}
