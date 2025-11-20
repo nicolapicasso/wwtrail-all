@@ -130,10 +130,12 @@ export default function ServiceDetailPage() {
                     <MapPin className="h-5 w-5" />
                     <span>{service.city}, {service.country}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Tag className="h-5 w-5" />
-                    <span className="capitalize">{service.category}</span>
-                  </div>
+                  {service.category && (
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-5 w-5" />
+                      <span>{service.category.icon} {service.category.name}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               {service.featured && (
@@ -244,13 +246,15 @@ export default function ServiceDetailPage() {
             )}
 
             {/* Category Info */}
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="mb-4 font-semibold">Categoría</h3>
-              <div className="flex items-center gap-2">
-                <Tag className="h-5 w-5 text-blue-600" />
-                <span className="capitalize font-medium">{service.category}</span>
+            {service.category && (
+              <div className="rounded-lg border bg-white p-6 shadow-sm">
+                <h3 className="mb-4 font-semibold">Categoría</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{service.category.icon}</span>
+                  <span className="font-medium">{service.category.name}</span>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Organizer */}
             {service.organizer && (
