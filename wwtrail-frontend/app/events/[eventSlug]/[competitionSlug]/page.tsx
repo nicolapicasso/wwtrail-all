@@ -4,9 +4,11 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCompetition } from '@/hooks/useCompetitions';
 import { useEditions } from '@/hooks/useEditions';
+import { eventsService } from '@/lib/api/events.service';
+import servicesService from '@/lib/api/v2/services.service';
 import { EditionSelector } from '@/components/EditionSelector';
 import { EditionCard } from '@/components/EditionCard';
 import { Edition } from '@/types/v2';
@@ -25,6 +27,39 @@ export default function CompetitionDetailPage() {
   const { competition, loading, error } = useCompetition(competitionSlug);
   const { editions, loading: editionsLoading } = useEditions(competition?.id || '');
   const [selectedEdition, setSelectedEdition] = useState<Edition | null>(null);
+  const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
+  const [nearbyServices, setNearbyServices] = useState<any[]>([]);
+
+  // Fetch nearby events and services when competition data is available
+  useEffect(() => {
+    if (competition?.event?.latitude && competition?.event?.longitude) {
+      const fetchNearby = async () => {
+        try {
+          const events = await eventsService.getNearby(
+            competition.event.latitude,
+            competition.event.longitude,
+            50 // 50km radius
+          );
+          setNearbyEvents(events);
+        } catch (err) {
+          console.error('Error loading nearby events:', err);
+        }
+
+        try {
+          const services = await servicesService.getNearby(
+            competition.event.latitude,
+            competition.event.longitude,
+            50 // 50km radius
+          );
+          setNearbyServices(services);
+        } catch (err) {
+          console.error('Error loading nearby services:', err);
+        }
+      };
+
+      fetchNearby();
+    }
+  }, [competition]);
 
   if (loading) {
     return (
@@ -278,7 +313,19 @@ export default function CompetitionDetailPage() {
                     ...competition.event,
                     name: competition.name,
                   }}
-                  nearbyEvents={[]}
+                  nearbyEvents={nearbyEvents}
+                  nearbyServices={nearbyServices
+                    .filter((s: any) => s.latitude && s.longitude)
+                    .map((s: any) => ({
+                      id: s.id,
+                      name: s.name,
+                      slug: s.slug,
+                      city: s.city,
+                      country: s.country,
+                      latitude: s.latitude,
+                      longitude: s.longitude,
+                      categoryIcon: s.category?.icon || '🏪',
+                    }))}
                 />
                 <div className="mt-4">
                   <a
