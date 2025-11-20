@@ -14,6 +14,59 @@ import CountrySelect from '@/components/CountrySelect';
 
 type ItemType = 'events' | 'competitions' | 'services' | 'all';
 
+/**
+ * Ajusta coordenadas de marcadores que se solapan, distribuyéndolos en círculo
+ */
+function spreadOverlappingMarkers<T extends { latitude: number; longitude: number }>(
+  items: T[],
+  radius: number = 0.003
+): (T & { originalLat?: number; originalLon?: number })[] {
+  if (items.length === 0) return [];
+
+  // Agrupar items por coordenadas
+  const groups = new Map<string, T[]>();
+
+  items.forEach(item => {
+    const lat = Number(item.latitude);
+    const lon = Number(item.longitude);
+    const key = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(item);
+  });
+
+  const result: (T & { originalLat?: number; originalLon?: number })[] = [];
+
+  // Procesar cada grupo
+  groups.forEach((groupItems, key) => {
+    if (groupItems.length === 1) {
+      // Si solo hay un item, no necesita ajuste
+      result.push(groupItems[0]);
+    } else {
+      // Si hay múltiples items en la misma posición, distribuirlos en círculo
+      groupItems.forEach((item, index) => {
+        const angle = (360 / groupItems.length) * index;
+        const angleRad = (angle * Math.PI) / 180;
+
+        const newLat = Number(item.latitude) + radius * Math.cos(angleRad);
+        const newLon = Number(item.longitude) + radius * Math.sin(angleRad);
+
+        result.push({
+          ...item,
+          originalLat: Number(item.latitude),
+          originalLon: Number(item.longitude),
+          latitude: newLat,
+          longitude: newLon,
+        } as T & { originalLat?: number; originalLon?: number });
+      });
+    }
+  });
+
+  return result;
+}
+
 interface DirectoryFilters {
   itemType: ItemType;
   country: string;
@@ -137,8 +190,11 @@ export default function DirectoryMapClient() {
 
           setEvents(eventsWithLocation);
 
+          // Ajustar coordenadas de eventos solapados
+          const adjustedEvents = spreadOverlappingMarkers(eventsWithLocation, 0.003);
+
           // Add event markers with green icon
-          eventsWithLocation.forEach((event: any) => {
+          adjustedEvents.forEach((event: any) => {
             const marker = L.marker([event.latitude, event.longitude], {
               icon: createEventIcon(),
             })
@@ -247,9 +303,19 @@ export default function DirectoryMapClient() {
 
           setCompetitions(filteredCompetitions);
 
+          // Transform competitions to have their event coordinates
+          const competitionsWithCoords = filteredCompetitions.map((comp: any) => ({
+            ...comp,
+            latitude: comp.event.latitude,
+            longitude: comp.event.longitude,
+          }));
+
+          // Ajustar coordenadas de competiciones solapadas
+          const adjustedCompetitions = spreadOverlappingMarkers(competitionsWithCoords, 0.003);
+
           // Add competition markers
-          filteredCompetitions.forEach((comp: any) => {
-            const marker = L.marker([comp.event.latitude, comp.event.longitude], {
+          adjustedCompetitions.forEach((comp: any) => {
+            const marker = L.marker([comp.latitude, comp.longitude], {
               icon: createCompetitionIcon(),
             })
               .bindPopup(
@@ -269,7 +335,7 @@ export default function DirectoryMapClient() {
               .addTo(mapRef.current!);
 
             markersRef.current.push(marker);
-            bounds.extend([comp.event.latitude, comp.event.longitude]);
+            bounds.extend([comp.latitude, comp.longitude]);
           });
         } catch (err) {
           console.error('Error loading competitions:', err);
@@ -292,8 +358,11 @@ export default function DirectoryMapClient() {
 
           setServices(servicesWithLocation);
 
+          // Ajustar coordenadas de servicios solapados
+          const adjustedServices = spreadOverlappingMarkers(servicesWithLocation, 0.003);
+
           // Add service markers with category-specific icons
-          servicesWithLocation.forEach((service: any) => {
+          adjustedServices.forEach((service: any) => {
             const categoryIcon = service.category?.icon;
             const categoryName = service.category?.name || service.type;
 

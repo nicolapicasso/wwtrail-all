@@ -19,6 +19,66 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
+/**
+ * Ajusta coordenadas de marcadores que se solapan, distribuyéndolos en círculo
+ * @param items Array de items con latitude y longitude
+ * @param centerLat Latitud del centro (evento principal)
+ * @param centerLon Longitud del centro (evento principal)
+ * @param radius Radio del círculo en grados (~0.003 = 300m)
+ * @returns Array de items con coordenadas ajustadas
+ */
+function spreadOverlappingMarkers<T extends { latitude: number; longitude: number }>(
+  items: T[],
+  centerLat: number,
+  centerLon: number,
+  radius: number = 0.003
+): (T & { originalLat?: number; originalLon?: number })[] {
+  if (items.length === 0) return [];
+
+  // Agrupar items por coordenadas
+  const groups = new Map<string, T[]>();
+
+  items.forEach(item => {
+    const lat = Number(item.latitude);
+    const lon = Number(item.longitude);
+    const key = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(item);
+  });
+
+  const result: (T & { originalLat?: number; originalLon?: number })[] = [];
+
+  // Procesar cada grupo
+  groups.forEach((groupItems, key) => {
+    if (groupItems.length === 1) {
+      // Si solo hay un item, no necesita ajuste
+      result.push(groupItems[0]);
+    } else {
+      // Si hay múltiples items en la misma posición, distribuirlos en círculo
+      groupItems.forEach((item, index) => {
+        const angle = (360 / groupItems.length) * index;
+        const angleRad = (angle * Math.PI) / 180;
+
+        const newLat = Number(item.latitude) + radius * Math.cos(angleRad);
+        const newLon = Number(item.longitude) + radius * Math.sin(angleRad);
+
+        result.push({
+          ...item,
+          originalLat: Number(item.latitude),
+          originalLon: Number(item.longitude),
+          latitude: newLat,
+          longitude: newLon,
+        } as T & { originalLat?: number; originalLon?: number });
+      });
+    }
+  });
+
+  return result;
+}
+
 interface EventMapProps {
   event: Event & { categoryIcon?: string }; // Agregamos soporte para icono de categoría
   nearbyEvents?: Event[];
@@ -166,7 +226,15 @@ export default function EventMap({
       // ============================================
       // 📌 MARKERS DE EVENTOS CERCANOS (Azul)
       // ============================================
-      filteredNearbyEvents.forEach((nearbyEvent) => {
+      // Ajustar coordenadas de eventos solapados antes de crear marcadores
+      const adjustedNearbyEvents = spreadOverlappingMarkers(
+        filteredNearbyEvents,
+        lat,
+        lon,
+        0.003 // ~300 metros
+      );
+
+      adjustedNearbyEvents.forEach((nearbyEvent) => {
         if (!nearbyEvent.latitude || !nearbyEvent.longitude) return;
 
         // Validar coordenadas
@@ -211,7 +279,15 @@ export default function EventMap({
       // ============================================
       // 🏪 MARKERS DE SERVICIOS CERCANOS (Naranja)
       // ============================================
-      filteredNearbyServices.forEach((nearbyService) => {
+      // Ajustar coordenadas de servicios solapados antes de crear marcadores
+      const adjustedNearbyServices = spreadOverlappingMarkers(
+        filteredNearbyServices,
+        lat,
+        lon,
+        0.003 // ~300 metros
+      );
+
+      adjustedNearbyServices.forEach((nearbyService) => {
         if (!nearbyService.latitude || !nearbyService.longitude) return;
 
         // Validar coordenadas
