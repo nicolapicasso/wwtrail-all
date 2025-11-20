@@ -229,8 +229,14 @@ export default async function EditionDetailPage({
                 </h3>
                 <EventMap
                   event={{
-                    ...event,
+                    id: edition.id,
                     name: `${competition.name} ${edition.year}`,
+                    city: event.city,
+                    country: event.country,
+                    latitude: event.latitude,
+                    longitude: event.longitude,
+                    categoryIcon: '🏃', // Icon for edition
+                    type: competition.type,
                   }}
                   nearbyEvents={nearbyEvents}
                   nearbyServices={nearbyServices

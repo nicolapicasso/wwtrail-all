@@ -310,8 +310,14 @@ export default function CompetitionDetailPage() {
                 </h3>
                 <EventMap
                   event={{
-                    ...competition.event,
+                    id: competition.id,
                     name: competition.name,
+                    city: competition.event.city,
+                    country: competition.event.country,
+                    latitude: competition.event.latitude,
+                    longitude: competition.event.longitude,
+                    categoryIcon: '🏃', // Icon for competition
+                    type: competition.type,
                   }}
                   nearbyEvents={nearbyEvents}
                   nearbyServices={nearbyServices
