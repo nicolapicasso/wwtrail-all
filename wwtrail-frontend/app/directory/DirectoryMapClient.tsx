@@ -292,10 +292,13 @@ export default function DirectoryMapClient() {
 
           setServices(servicesWithLocation);
 
-          // Add service markers with orange icon
+          // Add service markers with category-specific icons
           servicesWithLocation.forEach((service: any) => {
+            const categoryIcon = service.category?.icon;
+            const categoryName = service.category?.name || service.type;
+
             const marker = L.marker([service.latitude, service.longitude], {
-              icon: createServiceIcon(),
+              icon: createServiceIcon(categoryIcon),
             })
               .bindPopup(`
                 <div class="p-2">
@@ -304,7 +307,7 @@ export default function DirectoryMapClient() {
                   </div>
                   <h3 class="font-bold text-sm mb-1">${service.name}</h3>
                   <p class="text-xs text-gray-600">${service.city}, ${service.country}</p>
-                  <p class="text-xs text-gray-500">${service.type}</p>
+                  <p class="text-xs text-gray-500">${categoryName}</p>
                   <a href="/services/${service.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver servicio →</a>
                 </div>
               `)
@@ -384,7 +387,8 @@ export default function DirectoryMapClient() {
     });
   };
 
-  const createServiceIcon = () => {
+  const createServiceIcon = (categoryIcon?: string) => {
+    const icon = categoryIcon || '🏪'; // Fallback to generic icon
     return L.divIcon({
       className: 'custom-marker-service',
       html: `
@@ -404,7 +408,7 @@ export default function DirectoryMapClient() {
             transform: rotate(45deg);
             color: white;
             font-size: 18px;
-          ">🏪</div>
+          ">${icon}</div>
         </div>
       `,
       iconSize: [36, 36],
