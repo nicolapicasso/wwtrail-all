@@ -50,7 +50,12 @@ export default function ServiceDetailPage() {
               response.data.longitude,
               50 // 50km radius
             );
-            setNearbyServices(nearby);
+            // Mapear category_icon a categoryIcon para los servicios cercanos
+            const mappedNearby = nearby.map((s: any) => ({
+              ...s,
+              categoryIcon: s.category_icon,
+            }));
+            setNearbyServices(mappedNearby);
           } catch (err) {
             console.error('Error loading nearby services:', err);
             // No bloqueamos si falla la carga de servicios cercanos
@@ -217,6 +222,7 @@ export default function ServiceDetailPage() {
                     country: service.country,
                     latitude: service.latitude,
                     longitude: service.longitude,
+                    categoryIcon: service.category?.icon,
                   }}
                   nearbyEvents={nearbyServices
                     .filter(s => s.latitude && s.longitude) // Filtrar servicios con coordenadas válidas
@@ -228,6 +234,7 @@ export default function ServiceDetailPage() {
                       country: s.country,
                       latitude: s.latitude!,
                       longitude: s.longitude!,
+                      categoryIcon: (s as any).categoryIcon,
                     }))}
                   nearbyLinkPrefix="/services/"
                 />
