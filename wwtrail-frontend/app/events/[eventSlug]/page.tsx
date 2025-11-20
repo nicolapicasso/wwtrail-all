@@ -8,7 +8,9 @@
  */
 
 import { eventsService } from '@/lib/api/events.service';
+import servicesService from '@/lib/api/v2/services.service';
 import { Event } from '@/types/api';
+import { Service } from '@/types/v2';
 import { 
   MapPin, Calendar, Globe, Mail, Phone, Facebook, Instagram, Twitter, Youtube,
   Trophy, Eye, Clock, Image as ImageIcon
@@ -56,22 +58,33 @@ export default async function EventDetailPage({
 }) {
   let event: Event;
   let nearbyEvents: Event[] = [];
+  let nearbyServices: Service[] = [];
 
   try {
     event = await eventsService.getBySlug(params.eventSlug);
-    
-    // ✅ Obtener eventos cercanos para el mapa
+
+    // ✅ Obtener eventos y servicios cercanos para el mapa
     if (event.latitude && event.longitude) {
       try {
         nearbyEvents = await eventsService.getNearby(
-          event.latitude, 
-          event.longitude, 
+          event.latitude,
+          event.longitude,
           50 // 50km radius
         );
         // Filtrar el evento actual
         nearbyEvents = nearbyEvents.filter(e => e.id !== event.id);
       } catch (error) {
         console.error('Error loading nearby events:', error);
+      }
+
+      try {
+        nearbyServices = await servicesService.getNearby(
+          event.latitude,
+          event.longitude,
+          50 // 50km radius
+        );
+      } catch (error) {
+        console.error('Error loading nearby services:', error);
       }
     }
   } catch (error) {
@@ -255,9 +268,21 @@ export default async function EventDetailPage({
                   <MapPin className="h-5 w-5 text-green-600" />
                   Ubicación
                 </h3>
-                <EventMap 
+                <EventMap
                   event={event}
                   nearbyEvents={nearbyEvents}
+                  nearbyServices={nearbyServices
+                    .filter(s => s.latitude && s.longitude)
+                    .map(s => ({
+                      id: s.id,
+                      name: s.name,
+                      slug: s.slug,
+                      city: s.city,
+                      country: s.country,
+                      latitude: s.latitude!,
+                      longitude: s.longitude!,
+                      categoryIcon: s.category?.icon || '🏪',
+                    } as any))}
                 />
                 <div className="mt-4">
                   <a 

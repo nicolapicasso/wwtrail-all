@@ -22,10 +22,16 @@ L.Icon.Default.mergeOptions({
 interface EventMapProps {
   event: Event & { categoryIcon?: string }; // Agregamos soporte para icono de categoría
   nearbyEvents?: Event[];
+  nearbyServices?: Event[]; // Services passed as Event-like objects with categoryIcon
   nearbyLinkPrefix?: string; // Prefijo para links de nearby (default: '/events/')
 }
 
-export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = '/events/' }: EventMapProps) {
+export default function EventMap({
+  event,
+  nearbyEvents = [],
+  nearbyServices = [],
+  nearbyLinkPrefix = '/events/'
+}: EventMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -40,8 +46,9 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
       return;
     }
 
-    // Filtrar el evento principal de la lista de eventos cercanos para evitar duplicación
+    // Filtrar el evento principal de ambas listas para evitar duplicación
     const filteredNearbyEvents = nearbyEvents.filter(e => e.id !== event.id);
+    const filteredNearbyServices = nearbyServices.filter(s => s.id !== event.id);
 
     // Pequeño delay para asegurar que el DOM esté listo
     const timer = setTimeout(() => {
@@ -99,12 +106,12 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
         popupAnchor: [0, -40],
       });
 
-      // Helper function to create nearby icon with emoji
-      const createNearbyIcon = (emoji: string = '📌') => L.divIcon({
+      // Helper function to create nearby icon with emoji and color
+      const createNearbyIcon = (emoji: string = '📌', color: string = '#3b82f6') => L.divIcon({
         className: 'custom-marker-nearby',
         html: `
           <div style="
-            background-color: #3b82f6;
+            background-color: ${color};
             width: 28px;
             height: 28px;
             border-radius: 50% 50% 50% 0;
@@ -157,7 +164,7 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
       `);
 
       // ============================================
-      // 📌 MARKERS DE EVENTOS CERCANOS
+      // 📌 MARKERS DE EVENTOS CERCANOS (Azul)
       // ============================================
       filteredNearbyEvents.forEach((nearbyEvent) => {
         if (!nearbyEvent.latitude || !nearbyEvent.longitude) return;
@@ -169,7 +176,7 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
 
         // Usar el emoji de categoría si está disponible
         const nearbyIconEmoji = (nearbyEvent as any).categoryIcon || '📌';
-        const nearbyIcon = createNearbyIcon(nearbyIconEmoji);
+        const nearbyIcon = createNearbyIcon(nearbyIconEmoji, '#3b82f6'); // Azul para eventos
 
         const nearbyMarker = L.marker(
           [nearbyLat, nearbyLon],
@@ -191,8 +198,52 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
             ${nearbyEvent.type ? `<p style="font-size: 11px; color: #888;">Tipo: ${nearbyEvent.type}</p>` : ''}
             <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">
               <a
-                href="${nearbyLinkPrefix}${nearbyEvent.slug}"
+                href="/events/${nearbyEvent.slug}"
                 style="color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 12px;"
+              >
+                Ver detalles →
+              </a>
+            </div>
+          </div>
+        `);
+      });
+
+      // ============================================
+      // 🏪 MARKERS DE SERVICIOS CERCANOS (Naranja)
+      // ============================================
+      filteredNearbyServices.forEach((nearbyService) => {
+        if (!nearbyService.latitude || !nearbyService.longitude) return;
+
+        // Validar coordenadas
+        const nearbyLat = Number(nearbyService.latitude);
+        const nearbyLon = Number(nearbyService.longitude);
+        if (isNaN(nearbyLat) || isNaN(nearbyLon)) return;
+
+        // Usar el emoji de categoría si está disponible
+        const nearbyIconEmoji = (nearbyService as any).categoryIcon || '🏪';
+        const nearbyIcon = createNearbyIcon(nearbyIconEmoji, '#f97316'); // Naranja para servicios
+
+        const nearbyMarker = L.marker(
+          [nearbyLat, nearbyLon],
+          {
+            icon: nearbyIcon,
+            title: nearbyService.name,
+          }
+        ).addTo(map);
+
+        // Popup de servicio cercano
+        nearbyMarker.bindPopup(`
+          <div style="min-width: 180px;">
+            <h4 style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #f97316;">
+              ${nearbyService.name}
+            </h4>
+            <p style="font-size: 12px; color: #666; margin-bottom: 4px;">
+              📍 ${nearbyService.city}, ${nearbyService.country}
+            </p>
+            <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">
+              <a
+                href="/services/${nearbyService.slug}"
+                style="color: #f97316; text-decoration: none; font-weight: 600; font-size: 12px;"
               >
                 Ver detalles →
               </a>
@@ -204,9 +255,12 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
       // ============================================
       // 🗺️ AJUSTAR VISTA PARA MOSTRAR TODOS LOS MARKERS
       // ============================================
-      if (filteredNearbyEvents.length > 0) {
-        // Filtrar y validar coordenadas de eventos cercanos
-        const validNearbyCoords = filteredNearbyEvents
+      if (filteredNearbyEvents.length > 0 || filteredNearbyServices.length > 0) {
+        // Combinar y validar coordenadas de eventos y servicios cercanos
+        const validNearbyCoords = [
+          ...filteredNearbyEvents,
+          ...filteredNearbyServices
+        ]
           .filter(e => e.latitude && e.longitude)
           .map(e => {
             const nLat = Number(e.latitude);
@@ -234,7 +288,7 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
         mapRef.current = null;
       }
     };
-  }, [event, nearbyEvents, nearbyLinkPrefix]);
+  }, [event, nearbyEvents, nearbyServices, nearbyLinkPrefix]);
 
   if (!event.latitude || !event.longitude) {
     return (

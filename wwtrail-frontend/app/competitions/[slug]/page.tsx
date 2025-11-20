@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import { eventsService } from '@/lib/api/events.service';
+import servicesService from '@/lib/api/v2/services.service';
 import { Calendar, MapPin, TrendingUp, Users, ArrowLeft, Share2, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,7 @@ export default function CompetitionDetailPage() {
 
   const [competition, setCompetition] = useState<any>(null);
   const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
+  const [nearbyServices, setNearbyServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +47,7 @@ export default function CompetitionDetailPage() {
       const comp = await competitionsService.getBySlug(slug);
       setCompetition(comp);
 
-      // Cargar eventos cercanos si hay coordenadas
+      // Cargar eventos y servicios cercanos si hay coordenadas
       if (comp.event?.latitude && comp.event?.longitude) {
         try {
           const nearby = await eventsService.getNearby(
@@ -57,6 +59,18 @@ export default function CompetitionDetailPage() {
         } catch (err) {
           console.error('Error loading nearby events:', err);
           // No bloqueamos si falla la carga de eventos cercanos
+        }
+
+        try {
+          const services = await servicesService.getNearby(
+            comp.event.latitude,
+            comp.event.longitude,
+            50 // 50km radius
+          );
+          setNearbyServices(services);
+        } catch (err) {
+          console.error('Error loading nearby services:', err);
+          // No bloqueamos si falla la carga de servicios cercanos
         }
       }
     } catch (err: any) {
@@ -281,6 +295,18 @@ export default function CompetitionDetailPage() {
                       name: competition.name,
                     }}
                     nearbyEvents={nearbyEvents}
+                    nearbyServices={nearbyServices
+                      .filter((s: any) => s.latitude && s.longitude)
+                      .map((s: any) => ({
+                        id: s.id,
+                        name: s.name,
+                        slug: s.slug,
+                        city: s.city,
+                        country: s.country,
+                        latitude: s.latitude,
+                        longitude: s.longitude,
+                        categoryIcon: s.category?.icon || '🏪',
+                      }))}
                   />
                   <div className="mt-4">
                     <a

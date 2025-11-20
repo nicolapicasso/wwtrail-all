@@ -8,7 +8,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { servicesService } from '@/lib/api/v2';
+import { eventsService } from '@/lib/api/events.service';
 import { Service } from '@/types/v2';
+import { Event } from '@/types/api';
 import { MapPin, ArrowLeft, Eye, Tag, Star, Loader2 } from 'lucide-react';
 import EventGallery from '@/components/EventGallery';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
@@ -29,6 +31,7 @@ export default function ServiceDetailPage() {
 
   const [service, setService] = useState<Service | null>(null);
   const [nearbyServices, setNearbyServices] = useState<Service[]>([]);
+  const [nearbyEvents, setNearbyEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [logoError, setLogoError] = useState(false);
@@ -42,9 +45,10 @@ export default function ServiceDetailPage() {
         const response = await servicesService.getBySlug(slug);
         setService(response.data);
 
-        // Cargar servicios cercanos si hay coordenadas
+        // Cargar servicios y eventos cercanos si hay coordenadas
         if (response.data.latitude && response.data.longitude) {
           try {
+            // Fetch nearby services
             const nearby = await servicesService.getNearby(
               response.data.latitude,
               response.data.longitude,
@@ -59,6 +63,19 @@ export default function ServiceDetailPage() {
           } catch (err) {
             console.error('Error loading nearby services:', err);
             // No bloqueamos si falla la carga de servicios cercanos
+          }
+
+          try {
+            // Fetch nearby events
+            const events = await eventsService.getNearby(
+              response.data.latitude,
+              response.data.longitude,
+              50 // 50km radius
+            );
+            setNearbyEvents(events);
+          } catch (err) {
+            console.error('Error loading nearby events:', err);
+            // No bloqueamos si falla la carga de eventos cercanos
           }
         }
       } catch (err: any) {
@@ -224,8 +241,20 @@ export default function ServiceDetailPage() {
                     longitude: service.longitude,
                     categoryIcon: service.category?.icon,
                   }}
-                  nearbyEvents={nearbyServices
-                    .filter(s => s.latitude && s.longitude) // Filtrar servicios con coordenadas válidas
+                  nearbyEvents={nearbyEvents
+                    .filter(e => e.latitude && e.longitude)
+                    .map(e => ({
+                      id: e.id,
+                      name: e.name,
+                      slug: e.slug,
+                      city: e.city,
+                      country: e.country,
+                      latitude: e.latitude!,
+                      longitude: e.longitude!,
+                      categoryIcon: '🏃', // Icon for events
+                    }))}
+                  nearbyServices={nearbyServices
+                    .filter(s => s.latitude && s.longitude)
                     .map(s => ({
                       id: s.id,
                       name: s.name,
