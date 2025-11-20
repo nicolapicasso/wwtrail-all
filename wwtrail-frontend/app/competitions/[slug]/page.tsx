@@ -45,10 +45,21 @@ export default function CompetitionDetailPage() {
       setLoading(true);
       setError(null);
       const comp = await competitionsService.getBySlug(slug);
+
+      console.log('🔍 Competition loaded:', {
+        name: comp.name,
+        hasEvent: !!comp.event,
+        eventHasCoordinates: !!(comp.event?.latitude && comp.event?.longitude),
+        latitude: comp.event?.latitude,
+        longitude: comp.event?.longitude,
+      });
+
       setCompetition(comp);
 
       // Cargar eventos y servicios cercanos si hay coordenadas
       if (comp.event?.latitude && comp.event?.longitude) {
+        console.log('✅ Fetching nearby elements with coordinates:', comp.event.latitude, comp.event.longitude);
+
         try {
           const nearby = await eventsService.getNearby(
             comp.event.latitude,
@@ -72,6 +83,14 @@ export default function CompetitionDetailPage() {
           console.error('Error loading nearby services:', err);
           // No bloqueamos si falla la carga de servicios cercanos
         }
+      } else {
+        console.warn('⚠️ No coordinates available for competition:', {
+          competitionName: comp.name,
+          eventId: comp.event?.id,
+          eventName: comp.event?.name,
+          latitude: comp.event?.latitude,
+          longitude: comp.event?.longitude,
+        });
       }
     } catch (err: any) {
       console.error('Error loading competition:', err);
