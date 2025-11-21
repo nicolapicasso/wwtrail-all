@@ -55,6 +55,21 @@ export const cache = {
     }
   },
 
+  async delPattern(pattern: string): Promise<void> {
+    try {
+      // Buscar todas las claves que coincidan con el patrón
+      const keys = await redisClient.keys(pattern);
+
+      if (keys.length > 0) {
+        // Borrar todas las claves encontradas
+        await redisClient.del(keys);
+        logger.info(`Deleted ${keys.length} cache keys matching pattern: ${pattern}`);
+      }
+    } catch (error) {
+      logger.error(`Cache delete pattern error for pattern ${pattern}:`, error);
+    }
+  },
+
   async flush(): Promise<void> {
     try {
       await redisClient.flushAll();
