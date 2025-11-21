@@ -98,14 +98,14 @@ export default function AdminPromotionsPage() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => router.push('/admin/promotions/analytics')}
+                onClick={() => router.push('/organizer/promotions/analytics')}
                 className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
               >
                 <BarChart className="h-5 w-5" />
                 Analítica
               </button>
               <button
-                onClick={() => router.push('/admin/promotions/new')}
+                onClick={() => router.push('/organizer/promotions/new')}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 <Plus className="h-5 w-5" />
@@ -198,7 +198,7 @@ export default function AdminPromotionsPage() {
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <p className="text-gray-600 mb-4">No se encontraron promociones</p>
             <button
-              onClick={() => router.push('/admin/promotions/new')}
+              onClick={() => router.push('/organizer/promotions/new')}
               className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
               <Plus className="h-5 w-5" />
@@ -213,7 +213,7 @@ export default function AdminPromotionsPage() {
                   key={promotion.id}
                   promotion={promotion}
                   showActions
-                  onEdit={(id) => router.push(`/admin/promotions/${id}/edit`)}
+                  onEdit={(id) => router.push(`/organizer/promotions/${id}`)}
                   onDelete={handleDelete}
                 />
               ))}

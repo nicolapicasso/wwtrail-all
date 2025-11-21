@@ -51,7 +51,7 @@ export default function NewPromotionPage() {
 
         {/* Form */}
         <div className="bg-white rounded-lg shadow p-6">
-          <PromotionForm onSuccess={() => router.push('/admin/promotions')} />
+          <PromotionForm onSuccess={() => router.push('/organizer/promotions')} />
         </div>
       </div>
     </div>

@@ -233,7 +233,7 @@ export default function PromotionsAnalyticsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                           <button
-                            onClick={() => router.push(`/admin/promotions/${item.id}`)}
+                            onClick={() => router.push(`/organizer/promotions/${item.id}`)}
                             className="text-blue-600 hover:text-blue-900 font-medium"
                           >
                             Ver
