@@ -121,4 +121,20 @@
     outline: 2px solid #B5751A;
     outline-offset: 2px;
   }
+
+  /* Leaflet Popup Styles - Ángulos rectos y borde negro */
+  .leaflet-popup-content-wrapper {
+    border-radius: 0px !important;
+    border: 2px solid #000 !important;
+    padding: 0 !important;
+  }
+
+  .leaflet-popup-tip {
+    border: 2px solid #000 !important;
+    background: white !important;
+  }
+
+  .leaflet-popup-content {
+    margin: 0 !important;
+  }
 }
