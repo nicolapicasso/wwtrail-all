@@ -44,7 +44,6 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-<<<<<<< HEAD
 
         // WW Trail Running Brand Colors (Guía de Estilo)
         'brand': {
@@ -56,12 +55,12 @@ const config: Config = {
           'success': '#28A745',       // Verde oscuro (éxito)
           'danger': '#DC3545',        // Rojo oscuro (error/alerta)
         },
+
+        // Color hover naranja
+        hover: "#B66916",
       },
       fontFamily: {
         sans: ['Montserrat', 'sans-serif'],  // Tipografía principal
-=======
-        hover: "#B66916",
->>>>>>> b6bb0bf35168abf5e3fdd9e937d201a3c5e8e1ff
       },
       borderRadius: {
         lg: "0px",      // Ángulos rectos por defecto
