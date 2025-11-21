@@ -21,6 +21,7 @@ import {
   Briefcase,
   Sparkles,
   BookOpen,
+  Ticket,
 } from 'lucide-react';
 
 interface NavItem {
@@ -99,9 +100,8 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Ofertas y Cupones',
-    href: '/offers',
-    icon: Tag,
-    badge: 'Pronto',
+    href: '/admin/promotions',
+    icon: Ticket,
   },
   {
     label: 'Usuarios',
