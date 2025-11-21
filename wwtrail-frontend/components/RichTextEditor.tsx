@@ -73,7 +73,6 @@ export function RichTextEditor({
         allowBase64: true,
         HTMLAttributes: {
           class: 'rounded-lg cursor-pointer',
-          style: null, // Permitir estilos inline
         },
       }),
       TextStyle,
@@ -159,16 +158,27 @@ export function RichTextEditor({
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   };
 
-  const setImageWidth = (width: string) => {
-    // Obtener la imagen actual
-    const { src, alt } = editor.getAttributes('image');
+  const setImageWidth = (size: 'small' | 'medium' | 'large' | 'full') => {
+    const sizeClasses = {
+      small: 'w-1/3',
+      medium: 'w-1/2',
+      large: 'w-3/4',
+      full: 'w-full',
+    };
 
-    // Eliminar la imagen actual y reinsertarla con el nuevo estilo
+    // Obtener la imagen actual
+    const attrs = editor.getAttributes('image');
+    const { src, alt } = attrs;
+
+    // Eliminar la imagen actual
+    editor.chain().focus().deleteSelection().run();
+
+    // Insertar imagen con la clase de tamaño
+    const className = `${sizeClasses[size]} h-auto rounded-lg cursor-pointer`;
     editor
       .chain()
       .focus()
-      .deleteSelection()
-      .insertContent(`<img src="${src}" alt="${alt || ''}" style="width: ${width}; height: auto;" class="rounded-lg cursor-pointer" />`)
+      .insertContent(`<img src="${src}" alt="${alt || ''}" class="${className}" />`)
       .run();
   };
 
@@ -362,7 +372,7 @@ export function RichTextEditor({
           <>
             <button
               type="button"
-              onClick={() => setImageWidth('33%')}
+              onClick={() => setImageWidth('small')}
               className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
               title="Pequeño (33%)"
             >
@@ -370,7 +380,7 @@ export function RichTextEditor({
             </button>
             <button
               type="button"
-              onClick={() => setImageWidth('50%')}
+              onClick={() => setImageWidth('medium')}
               className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
               title="Mediano (50%)"
             >
@@ -378,7 +388,7 @@ export function RichTextEditor({
             </button>
             <button
               type="button"
-              onClick={() => setImageWidth('75%')}
+              onClick={() => setImageWidth('large')}
               className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
               title="Grande (75%)"
             >
@@ -386,7 +396,7 @@ export function RichTextEditor({
             </button>
             <button
               type="button"
-              onClick={() => setImageWidth('100%')}
+              onClick={() => setImageWidth('full')}
               className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
               title="Ancho completo (100%)"
             >
