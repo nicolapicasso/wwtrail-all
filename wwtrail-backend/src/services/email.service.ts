@@ -12,18 +12,39 @@ interface SendCouponEmailParams {
 }
 
 export class EmailService {
-  private static transporter = (typeof nodemailer.createTransporter === 'function'
-    ? nodemailer
-    : (nodemailer as any).default
-  ).createTransporter({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+  private static _transporter: nodemailer.Transporter | null = null;
+
+  private static getTransporter(): nodemailer.Transporter {
+    if (!this._transporter) {
+      // Try different ways to access createTransporter
+      let createTransporter: any;
+
+      if (typeof nodemailer.createTransporter === 'function') {
+        createTransporter = nodemailer.createTransporter;
+      } else if (typeof (nodemailer as any).default?.createTransporter === 'function') {
+        createTransporter = (nodemailer as any).default.createTransporter;
+      } else {
+        // Last resort: require it directly
+        const nm = require('nodemailer');
+        createTransporter = nm.createTransporter || nm.default?.createTransporter;
+      }
+
+      if (!createTransporter) {
+        throw new Error('Could not find nodemailer.createTransporter function');
+      }
+
+      this._transporter = createTransporter({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+    }
+    return this._transporter;
+  }
 
   /**
    * Enviar email con código de cupón
@@ -54,7 +75,7 @@ export class EmailService {
         html,
       };
 
-      const info = await this.transporter.sendMail(mailOptions);
+      const info = await this.getTransporter().sendMail(mailOptions);
       logger.info(`Coupon email sent to ${to}: ${info.messageId}`);
 
       return { success: true, messageId: info.messageId };
@@ -250,7 +271,7 @@ export class EmailService {
    */
   static async verifyConnection() {
     try {
-      await this.transporter.verify();
+      await this.getTransporter().verify();
       logger.info('Email service connection verified');
       return true;
     } catch (error) {
