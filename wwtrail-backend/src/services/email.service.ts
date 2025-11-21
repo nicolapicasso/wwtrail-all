@@ -12,7 +12,10 @@ interface SendCouponEmailParams {
 }
 
 export class EmailService {
-  private static transporter = nodemailer.createTransporter({
+  private static transporter = (typeof nodemailer.createTransporter === 'function'
+    ? nodemailer
+    : (nodemailer as any).default
+  ).createTransporter({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false, // true for 465, false for other ports
