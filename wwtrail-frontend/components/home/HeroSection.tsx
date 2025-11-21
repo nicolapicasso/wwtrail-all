@@ -3,7 +3,6 @@
 'use client';
 
 import Image from 'next/image';
-import { MountainDivider } from '@/components/MountainDivider';
 
 interface HeroSectionProps {
   image?: string;
@@ -54,9 +53,6 @@ export function HeroSection({ image, title, subtitle }: HeroSectionProps) {
           )}
         </div>
       </div>
-
-      {/* Divisor de montaña */}
-      <MountainDivider fillColor="#000000" position="bottom" />
     </div>
   );
 }
