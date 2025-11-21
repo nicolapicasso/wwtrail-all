@@ -100,7 +100,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Ofertas y Cupones',
-    href: '/admin/promotions',
+    href: '/organizer/promotions',
     icon: Ticket,
   },
   {

@@ -1,5 +1,7 @@
 // types/post.ts - Post/Article entity types
 
+import { Language } from './event';
+
 /**
  * PostCategory - Categorías de artículos del magazine
  */
@@ -23,17 +25,8 @@ export enum PostStatus {
   ARCHIVED = 'ARCHIVED',
 }
 
-/**
- * Language - Idiomas disponibles
- */
-export enum Language {
-  ES = 'ES',
-  EN = 'EN',
-  IT = 'IT',
-  CA = 'CA',
-  FR = 'FR',
-  DE = 'DE',
-}
+// Re-export Language for convenience
+export { Language };
 
 /**
  * PostImage - Imagen de la galería de un post
