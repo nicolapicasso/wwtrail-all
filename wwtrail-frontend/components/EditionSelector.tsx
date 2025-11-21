@@ -74,7 +74,7 @@ export function EditionSelector({
           aria-label="Select edition year"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-none bg-green-100 text-green-600">
               <Calendar className="h-5 w-5" />
             </div>
             <div>
@@ -121,17 +121,17 @@ export function EditionSelector({
                       <span className="flex items-center gap-2">
                         <span className="font-semibold">{year}</span>
                         {isCurrent && (
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                          <span className="inline-flex items-center rounded-none bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
                             Current
                           </span>
                         )}
                         {isFuture && (
-                          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                          <span className="inline-flex items-center rounded-none bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
                             Upcoming
                           </span>
                         )}
                         {isPast && (
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                          <span className="inline-flex items-center rounded-none bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                             Past
                           </span>
                         )}
@@ -169,7 +169,7 @@ export function EditionSelector({
             </div>
             <div className="flex flex-col items-end gap-1">
               <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold ${
                   edition.status === 'UPCOMING'
                     ? 'bg-blue-100 text-blue-800'
                     : edition.status === 'ONGOING'
@@ -182,7 +182,7 @@ export function EditionSelector({
                 {edition.status}
               </span>
               <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold ${
                   edition.registrationStatus === 'OPEN'
                     ? 'bg-green-100 text-green-800'
                     : edition.registrationStatus === 'FULL'

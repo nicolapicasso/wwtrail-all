@@ -87,7 +87,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
         {/* Status Badges */}
         <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
+            className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
               edition.status === 'UPCOMING'
                 ? 'bg-blue-500 text-white'
                 : edition.status === 'ONGOING'
@@ -100,7 +100,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
             {edition.status}
           </span>
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
+            className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
               edition.registrationStatus === 'OPEN'
                 ? 'bg-green-500 text-white'
                 : edition.registrationStatus === 'FULL'

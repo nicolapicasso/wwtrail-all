@@ -113,7 +113,7 @@ export default function ServiceCard({
         <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
           {/* Featured Badge */}
           {service.featured && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
+            <span className="inline-flex items-center gap-1 rounded-none bg-yellow-500 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
               <Star className="h-3 w-3 fill-current" />
               Destacado
             </span>
@@ -121,7 +121,7 @@ export default function ServiceCard({
 
           {/* Status Badge (management mode) */}
           {managementMode && (
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg ${
+            <span className={`inline-flex items-center gap-1 rounded-none px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg ${
               service.status === 'PUBLISHED' ? 'bg-green-500' :
               service.status === 'DRAFT' ? 'bg-yellow-500' :
               'bg-gray-500'

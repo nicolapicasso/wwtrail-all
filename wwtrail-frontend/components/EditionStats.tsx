@@ -117,7 +117,7 @@ export function EditionStats({ stats, loading, className = '' }: EditionStatsPro
               </span>
             </div>
             {stats.maxParticipants && (
-              <div className="mt-2 h-2 w-48 overflow-hidden rounded-full bg-gray-200">
+              <div className="mt-2 h-2 w-48 overflow-hidden rounded-none bg-gray-200">
                 <div
                   className="h-full bg-green-600 transition-all"
                   style={{
@@ -137,7 +137,7 @@ width: `${Math.min(
           </div>
           <div>
             <span
-              className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ${
+              className={`inline-flex items-center rounded-none px-3 py-1 text-sm font-semibold ${
                 stats.registrationStatus === 'OPEN'
                   ? 'bg-green-100 text-green-800'
                   : stats.registrationStatus === 'FULL'
@@ -162,7 +162,7 @@ width: `${Math.min(
               key={stat.label}
               className="flex items-center gap-3 rounded-lg border bg-card p-4 shadow-sm"
             >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.bgColor}`}>
+              <div className={`flex h-12 w-12 items-center justify-center rounded-none ${stat.bgColor}`}>
                 <Icon className={`h-6 w-6 ${stat.iconColor}`} />
               </div>
               <div>
@@ -188,7 +188,7 @@ width: `${Math.min(
           <div>
             <p className="font-medium">Status</p>
             <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+              className={`inline-flex items-center rounded-none px-2 py-0.5 text-xs font-semibold ${
                 stats.status === 'UPCOMING'
                   ? 'bg-blue-100 text-blue-800'
                   : stats.status === 'ONGOING'

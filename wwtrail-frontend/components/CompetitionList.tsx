@@ -80,7 +80,7 @@ function CompetitionCard({ competition, eventSlug, onClick }: CompetitionCardPro
               {competition.name}
             </h3>
             {!competition.isActive && (
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+              <span className="inline-flex items-center rounded-none bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                 Inactive
               </span>
             )}
@@ -96,7 +96,7 @@ function CompetitionCard({ competition, eventSlug, onClick }: CompetitionCardPro
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {/* Type */}
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+              <div className="flex h-8 w-8 items-center justify-center rounded-none bg-blue-100">
                 <Mountain className="h-4 w-4 text-blue-600" />
               </div>
               <div>
@@ -108,7 +108,7 @@ function CompetitionCard({ competition, eventSlug, onClick }: CompetitionCardPro
             {/* Distance */}
             {competition.baseDistance && (
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                <div className="flex h-8 w-8 items-center justify-center rounded-none bg-green-100">
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </div>
                 <div>
@@ -121,7 +121,7 @@ function CompetitionCard({ competition, eventSlug, onClick }: CompetitionCardPro
             {/* Elevation */}
             {competition.baseElevation && (
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
+                <div className="flex h-8 w-8 items-center justify-center rounded-none bg-orange-100">
                   <Mountain className="h-4 w-4 text-orange-600" />
                 </div>
                 <div>
@@ -134,7 +134,7 @@ function CompetitionCard({ competition, eventSlug, onClick }: CompetitionCardPro
             {/* Max Participants */}
             {competition.baseMaxParticipants && (
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
+                <div className="flex h-8 w-8 items-center justify-center rounded-none bg-purple-100">
                   <Users className="h-4 w-4 text-purple-600" />
                 </div>
                 <div>
@@ -156,7 +156,7 @@ function CompetitionCard({ competition, eventSlug, onClick }: CompetitionCardPro
 
         {/* Arrow indicator */}
         <div className="flex-shrink-0 pl-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 transition-colors group-hover:bg-green-100">
+          <div className="flex h-8 w-8 items-center justify-center rounded-none bg-gray-100 transition-colors group-hover:bg-green-100">
             <svg
               className="h-4 w-4 text-gray-600 transition-colors group-hover:text-green-600"
               fill="none"
