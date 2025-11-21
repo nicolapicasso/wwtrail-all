@@ -277,6 +277,7 @@ model Event {
 
   // Relaciones
   competitions Competition[]
+  posts        Post[]
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -342,6 +343,7 @@ model Competition {
   reviews          Review[]
   favorites        Favorite[]
   userCompetitions UserCompetition[]
+  posts            Post[]
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -704,21 +706,32 @@ model Post {
   content       String  @db.Text
   featuredImage String? @db.Text
 
+  // SEO fields
+  metaTitle       String? @db.VarChar(255)
+  metaDescription String? @db.Text
+
   category PostCategory @default(GENERAL)
   status   PostStatus   @default(DRAFT)
+  language Language     @default(ES)
 
-  // Relación con edición específica
-  editionId String?
-  edition   Edition? @relation(fields: [editionId], references: [id], onDelete: SetNull)
+  // Relaciones con eventos, competiciones y ediciones (solo una de cada tipo)
+  eventId       String?
+  event         Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  competitionId String?
+  competition   Competition? @relation(fields: [competitionId], references: [id], onDelete: SetNull)
+  editionId     String?
+  edition       Edition?     @relation(fields: [editionId], references: [id], onDelete: SetNull)
 
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
 
-  viewCount   Int       @default(0)
-  publishedAt DateTime?
+  viewCount         Int       @default(0)
+  publishedAt       DateTime?
+  scheduledPublishAt DateTime?
 
   tags         PostTag[]
   translations PostTranslation[]
+  images       PostImage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -726,8 +739,13 @@ model Post {
   @@index([slug])
   @@index([status])
   @@index([category])
+  @@index([language])
   @@index([authorId])
+  @@index([eventId])
+  @@index([competitionId])
   @@index([editionId])
+  @@index([publishedAt])
+  @@index([scheduledPublishAt])
   @@map("posts")
 }
 
@@ -756,6 +774,22 @@ model PostTag {
   posts Post[]
 
   @@map("post_tags")
+}
+
+model PostImage {
+  id          String  @id @default(uuid())
+  postId      String
+  post        Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  imageUrl    String  @db.Text
+  caption     String? @db.Text
+  sortOrder   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([sortOrder])
+  @@map("post_images")
 }
 
 // ===================================
