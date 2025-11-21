@@ -34,6 +34,8 @@ import homeConfigurationRoutes from './routes/homeConfiguration.routes';
 import serviceRoutes from './routes/service.routes';
 import organizerRoutes from './routes/organizer.routes';
 import specialSeriesRoutes from './routes/specialSeries.routes';
+import postsRoutes from './routes/posts.routes';
+import promotionRoutes from './routes/promotion.routes';
 
 dotenv.config();
 
@@ -148,6 +150,7 @@ app.use('/api/v2/me/ratings', editionRatingRoutes);
 app.use('/api/v2/podiums', editionPodiumRoutes);
 app.use('/api/v2/photos', editionPhotoRoutes);
 app.use('/api/v2/home', homeConfigurationRoutes);
+app.use('/api/v2/promotions', promotionRoutes);
 app.use('/api/v2', catalogRoutes);
 
 // ============================================
