@@ -166,19 +166,32 @@ export function RichTextEditor({
       full: 'w-full',
     };
 
-    // Obtener la imagen actual
+    // Obtener el estado del editor
+    const { state } = editor;
+    const { selection } = state;
+    const { from, to } = selection;
+
+    // Obtener atributos de la imagen
     const attrs = editor.getAttributes('image');
     const { src, alt } = attrs;
 
-    // Eliminar la imagen actual
-    editor.chain().focus().deleteSelection().run();
+    if (!src) {
+      console.log('No image src found');
+      return;
+    }
 
-    // Insertar imagen con la clase de tamaño
+    console.log('Resizing image:', src, 'to size:', size);
+
+    // Construir nuevo HTML con la clase de tamaño
     const className = `${sizeClasses[size]} h-auto rounded-lg cursor-pointer`;
+    const newImageHTML = `<img src="${src}" alt="${alt || ''}" class="${className}" />`;
+
+    // Reemplazar el contenido en la posición actual
     editor
       .chain()
       .focus()
-      .insertContent(`<img src="${src}" alt="${alt || ''}" class="${className}" />`)
+      .deleteRange({ from, to })
+      .insertContentAt(from, newImageHTML)
       .run();
   };
 
