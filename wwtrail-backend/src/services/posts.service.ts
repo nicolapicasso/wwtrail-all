@@ -185,20 +185,6 @@ export class PostsService {
                 lastName: true,
               },
             },
-            event: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-            competition: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
             edition: {
               select: {
                 id: true,
@@ -206,6 +192,8 @@ export class PostsService {
                 slug: true,
               },
             },
+            tags: true,
+            images: true,
           },
         }),
         prisma.post.count({ where }),
@@ -414,8 +402,6 @@ export class PostsService {
               lastName: true,
             },
           },
-          event: true,
-          competition: true,
           edition: true,
           images: {
             orderBy: {
