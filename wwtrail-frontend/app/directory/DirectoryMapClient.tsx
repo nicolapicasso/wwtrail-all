@@ -199,13 +199,21 @@ export default function DirectoryMapClient() {
               icon: createEventIcon(),
             })
               .bindPopup(`
-                <div class="p-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-green-600 font-semibold text-xs">EVENTO</span>
+                <div style="min-width: 180px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
+                  <h3 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+                    ${event.name}
+                  </h3>
+                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                    <strong>Tipo:</strong> Evento
+                  </p>
+                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                    <strong>Lugar:</strong> ${event.city}, ${event.country}
+                  </p>
+                  <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
+                    <a href="/events/${event.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;">
+                      Ver evento →
+                    </a>
                   </div>
-                  <h3 class="font-bold text-sm mb-1">${event.name}</h3>
-                  <p class="text-xs text-gray-600">${event.city}, ${event.country}</p>
-                  <a href="/events/${event.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver evento →</a>
                 </div>
               `)
               .addTo(mapRef.current!);
@@ -320,15 +328,24 @@ export default function DirectoryMapClient() {
             })
               .bindPopup(
                 `
-                <div class="p-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-blue-600 font-semibold text-xs">COMPETICIÓN</span>
+                <div style="min-width: 200px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
+                  <h3 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+                    ${comp.name}
+                  </h3>
+                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                    <strong>Tipo:</strong> Competición
+                  </p>
+                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                    <strong>Lugar:</strong> ${comp.event.city}, ${comp.event.country}
+                  </p>
+                  ${comp.baseDistance ? `<p style="font-size: 13px; color: #000; margin-bottom: 4px;"><strong>Distancia:</strong> ${comp.baseDistance} km</p>` : ''}
+                  ${comp.baseElevation ? `<p style="font-size: 13px; color: #000; margin-bottom: 4px;"><strong>Desnivel +:</strong> ${comp.baseElevation}m+</p>` : ''}
+                  ${comp.specialSeries ? `<p style="font-size: 13px; color: #000; margin-bottom: 4px;"><strong>Special series:</strong> <a href="/special-series/${comp.specialSeries.slug}" style="color: #000; text-decoration: underline;">${comp.specialSeries.name}</a></p>` : ''}
+                  <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
+                    <a href="/events/${comp.event.slug}/${comp.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;">
+                      Ver competición →
+                    </a>
                   </div>
-                  <h3 class="font-bold text-sm mb-1">${comp.name}</h3>
-                  <p class="text-xs text-gray-600">${comp.event.city}, ${comp.event.country}</p>
-                  ${comp.baseDistance ? `<p class="text-xs text-gray-500">${comp.baseDistance} km</p>` : ''}
-                  ${comp.specialSeries ? `<p class="text-xs text-purple-600">${comp.specialSeries.name}</p>` : ''}
-                  <a href="/events/${comp.event.slug}/${comp.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver competición →</a>
                 </div>
               `
               )
@@ -370,14 +387,21 @@ export default function DirectoryMapClient() {
               icon: createServiceIcon(categoryIcon),
             })
               .bindPopup(`
-                <div class="p-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-orange-600 font-semibold text-xs">SERVICIO</span>
+                <div style="min-width: 180px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
+                  <h3 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+                    ${service.name}
+                  </h3>
+                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                    <strong>Categoría:</strong> ${categoryName}
+                  </p>
+                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                    ${service.city}, ${service.country}
+                  </p>
+                  <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
+                    <a href="/services/${service.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;">
+                      Ver →
+                    </a>
                   </div>
-                  <h3 class="font-bold text-sm mb-1">${service.name}</h3>
-                  <p class="text-xs text-gray-600">${service.city}, ${service.country}</p>
-                  <p class="text-xs text-gray-500">${categoryName}</p>
-                  <a href="/services/${service.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver servicio →</a>
                 </div>
               `)
               .addTo(mapRef.current!);
