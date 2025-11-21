@@ -68,7 +68,22 @@ export function RichTextEditor({
           class: 'text-green-600 hover:text-green-700 underline',
         },
       }),
-      Image.configure({
+      Image.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            'data-size': {
+              default: 'full',
+              parseHTML: (element) => element.getAttribute('data-size'),
+              renderHTML: (attributes) => {
+                return {
+                  'data-size': attributes['data-size'],
+                };
+              },
+            },
+          };
+        },
+      }).configure({
         inline: true,
         allowBase64: true,
         HTMLAttributes: {
@@ -159,44 +174,43 @@ export function RichTextEditor({
   };
 
   const setImageWidth = (size: 'small' | 'medium' | 'large' | 'full') => {
-    const sizeClasses = {
-      small: 'w-1/3',
-      medium: 'w-1/2',
-      large: 'w-3/4',
-      full: 'w-full',
-    };
-
-    // Obtener el estado del editor
-    const { state } = editor;
-    const { selection } = state;
-    const { from, to } = selection;
-
-    // Obtener atributos de la imagen
-    const attrs = editor.getAttributes('image');
-    const { src, alt } = attrs;
-
-    if (!src) {
-      console.log('No image src found');
+    if (!editor.isActive('image')) {
+      console.log('No image selected');
       return;
     }
 
-    console.log('Resizing image:', src, 'to size:', size);
+    console.log('Resizing image to size:', size);
 
-    // Construir nuevo HTML con la clase de tamaño
-    const className = `${sizeClasses[size]} h-auto rounded-lg cursor-pointer`;
-    const newImageHTML = `<img src="${src}" alt="${alt || ''}" class="${className}" />`;
-
-    // Reemplazar el contenido en la posición actual
-    editor
-      .chain()
-      .focus()
-      .deleteRange({ from, to })
-      .insertContentAt(from, newImageHTML)
-      .run();
+    // Actualizar el atributo data-size de la imagen seleccionada
+    editor.chain().focus().updateAttributes('image', { 'data-size': size }).run();
   };
 
   return (
-    <div className={`border rounded-lg bg-white ${className}`}>
+    <>
+      {/* Estilos para los tamaños de imagen */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .ProseMirror img[data-size="small"] {
+            width: 33.333333% !important;
+            height: auto !important;
+          }
+          .ProseMirror img[data-size="medium"] {
+            width: 50% !important;
+            height: auto !important;
+          }
+          .ProseMirror img[data-size="large"] {
+            width: 75% !important;
+            height: auto !important;
+          }
+          .ProseMirror img[data-size="full"] {
+            width: 100% !important;
+            height: auto !important;
+          }
+        `
+      }} />
+
+      <div className={`border rounded-lg bg-white ${className}`}>
+
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -446,6 +460,7 @@ export function RichTextEditor({
 
       {/* Editor */}
       <EditorContent editor={editor} />
-    </div>
+      </div>
+    </>
   );
 }
