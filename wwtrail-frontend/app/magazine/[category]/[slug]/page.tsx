@@ -268,30 +268,6 @@ export default function ArticleDetailPage() {
               </div>
             )}
           </article>
-
-          {/* Image Gallery */}
-          {article.images && article.images.length > 0 && (
-            <div className="bg-white rounded-lg border p-8">
-              <h2 className="text-2xl font-bold mb-6">Galería de Imágenes</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {article.images.map((image) => (
-                  <div key={image.id} className="relative aspect-video">
-                    <Image
-                      src={image.imageUrl}
-                      alt={image.caption || 'Gallery image'}
-                      fill
-                      className="object-cover rounded-lg"
-                    />
-                    {image.caption && (
-                      <p className="mt-2 text-sm text-muted-foreground italic">
-                        {image.caption}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

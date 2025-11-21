@@ -29,6 +29,8 @@ import {
   Upload,
   Undo,
   Redo,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -66,8 +68,10 @@ export function RichTextEditor({
         },
       }),
       Image.configure({
+        inline: true,
+        allowBase64: true,
         HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg',
+          class: 'rounded-lg cursor-pointer',
         },
       }),
       TextStyle,
@@ -148,6 +152,10 @@ export function RichTextEditor({
 
     // update link
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  };
+
+  const setImageWidth = (width: string) => {
+    editor.chain().focus().updateAttributes('image', { style: `width: ${width}; height: auto;` }).run();
   };
 
   return (
@@ -332,6 +340,48 @@ export function RichTextEditor({
         >
           <ImageIcon className="h-4 w-4" />
         </button>
+
+        <div className="w-px h-8 bg-gray-300 mx-1" />
+
+        {/* Image Size Controls */}
+        {editor.isActive('image') && (
+          <>
+            <button
+              type="button"
+              onClick={() => setImageWidth('33%')}
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
+              title="Pequeño"
+            >
+              S
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageWidth('50%')}
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
+              title="Mediano"
+            >
+              M
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageWidth('75%')}
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
+              title="Grande"
+            >
+              L
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageWidth('100%')}
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
+              title="Ancho completo"
+            >
+              XL
+            </button>
+
+            <div className="w-px h-8 bg-gray-300 mx-1" />
+          </>
+        )}
 
         <div className="w-px h-8 bg-gray-300 mx-1" />
 

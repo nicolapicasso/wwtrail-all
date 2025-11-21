@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Briefcase,
   Sparkles,
+  BookOpen,
 } from 'lucide-react';
 
 interface NavItem {
@@ -93,9 +94,8 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Blog y Artículos',
-    href: '/blog',
-    icon: FileText,
-    badge: 'Pronto',
+    href: '/organizer/posts',
+    icon: BookOpen,
   },
   {
     label: 'Ofertas y Cupones',
