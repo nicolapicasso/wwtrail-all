@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PromotionService } from '../services/promotion.service';
+import { EmailService } from '../services/email.service';
 import logger from '../utils/logger';
 
 /**
@@ -173,8 +174,20 @@ export class PromotionController {
         userEmail,
       });
 
-      // TODO: Enviar email con el código del cupón
-      // await EmailService.sendCouponEmail(redemption);
+      // Enviar email con el código del cupón
+      try {
+        await EmailService.sendCouponEmail({
+          to: userEmail,
+          userName,
+          couponCode: redemption.couponCode.code,
+          promotionTitle: redemption.promotion.title,
+          promotionDescription: redemption.promotion.description,
+          brandUrl: redemption.promotion.brandUrl || undefined,
+        });
+      } catch (emailError) {
+        logger.error('Error sending coupon email:', emailError);
+        // No fallar la petición si el email falla, pero loguearlo
+      }
 
       res.json({
         status: 'success',
