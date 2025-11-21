@@ -112,6 +112,12 @@ export default function Navbar() {
                 Special Series
               </Link>
               <Link
+                href="/magazine"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+              >
+                Magazine
+              </Link>
+              <Link
                 href="/services"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
               >
@@ -215,6 +221,13 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Special Series
+            </Link>
+            <Link
+              href="/magazine"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Magazine
             </Link>
             <Link
               href="/services"
