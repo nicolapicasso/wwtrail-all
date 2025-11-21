@@ -48,6 +48,7 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isImageSelected, setIsImageSelected] = useState(false);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -80,6 +81,9 @@ export function RichTextEditor({
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    onSelectionUpdate: ({ editor }) => {
+      setIsImageSelected(editor.isActive('image'));
     },
     editorProps: {
       attributes: {
@@ -344,37 +348,37 @@ export function RichTextEditor({
         <div className="w-px h-8 bg-gray-300 mx-1" />
 
         {/* Image Size Controls */}
-        {editor.isActive('image') && (
+        {isImageSelected && (
           <>
             <button
               type="button"
               onClick={() => setImageWidth('33%')}
-              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
-              title="Pequeño"
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
+              title="Pequeño (33%)"
             >
               S
             </button>
             <button
               type="button"
               onClick={() => setImageWidth('50%')}
-              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
-              title="Mediano"
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
+              title="Mediano (50%)"
             >
               M
             </button>
             <button
               type="button"
               onClick={() => setImageWidth('75%')}
-              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
-              title="Grande"
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
+              title="Grande (75%)"
             >
               L
             </button>
             <button
               type="button"
               onClick={() => setImageWidth('100%')}
-              className="px-2 py-1 text-xs rounded hover:bg-gray-200"
-              title="Ancho completo"
+              className="px-2 py-1 text-xs rounded hover:bg-gray-200 bg-blue-50 font-semibold"
+              title="Ancho completo (100%)"
             >
               XL
             </button>
