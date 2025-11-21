@@ -10,8 +10,6 @@ interface CreatePostInput {
   excerpt?: string;
   content: string;
   featuredImage?: string;
-  metaTitle?: string;
-  metaDescription?: string;
   category: PostCategory;
   language: Language;
   editionId?: string;
@@ -30,8 +28,6 @@ interface UpdatePostInput {
   excerpt?: string;
   content?: string;
   featuredImage?: string;
-  metaTitle?: string;
-  metaDescription?: string;
   category?: PostCategory;
   language?: Language;
   editionId?: string;
@@ -84,8 +80,6 @@ export class PostsService {
         excerpt: data.excerpt,
         content: data.content,
         featuredImage: data.featuredImage,
-        metaTitle: data.metaTitle || data.title,
-        metaDescription: data.metaDescription || data.excerpt,
         category: data.category,
         language: data.language,
         status,
@@ -368,9 +362,20 @@ export class PostsService {
         throw new Error('Unauthorized to update this post');
       }
 
-      // Preparar datos de actualización
-      const updateData: any = { ...data };
-      delete updateData.images; // No incluir images en el update directo
+      // Preparar datos de actualización - solo campos válidos del schema
+      const updateData: any = {};
+
+      // Campos opcionales que SÍ existen en el schema
+      if (data.title !== undefined) updateData.title = data.title;
+      if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
+      if (data.content !== undefined) updateData.content = data.content;
+      if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+      if (data.category !== undefined) updateData.category = data.category;
+      if (data.language !== undefined) updateData.language = data.language;
+      if (data.status !== undefined) updateData.status = data.status;
+      if (data.editionId !== undefined) updateData.editionId = data.editionId;
+      if (data.publishedAt !== undefined) updateData.publishedAt = data.publishedAt;
+      if (data.scheduledPublishAt !== undefined) updateData.scheduledPublishAt = data.scheduledPublishAt;
 
       // Si se cambia el título, regenerar slug
       if (data.title) {
