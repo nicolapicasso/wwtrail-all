@@ -14,6 +14,59 @@ import CountrySelect from '@/components/CountrySelect';
 
 type ItemType = 'events' | 'competitions' | 'services' | 'all';
 
+/**
+ * Ajusta coordenadas de marcadores que se solapan, distribuyéndolos en círculo
+ */
+function spreadOverlappingMarkers<T extends { latitude: number; longitude: number }>(
+  items: T[],
+  radius: number = 0.003
+): (T & { originalLat?: number; originalLon?: number })[] {
+  if (items.length === 0) return [];
+
+  // Agrupar items por coordenadas
+  const groups = new Map<string, T[]>();
+
+  items.forEach(item => {
+    const lat = Number(item.latitude);
+    const lon = Number(item.longitude);
+    const key = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(item);
+  });
+
+  const result: (T & { originalLat?: number; originalLon?: number })[] = [];
+
+  // Procesar cada grupo
+  groups.forEach((groupItems, key) => {
+    if (groupItems.length === 1) {
+      // Si solo hay un item, no necesita ajuste
+      result.push(groupItems[0]);
+    } else {
+      // Si hay múltiples items en la misma posición, distribuirlos en círculo
+      groupItems.forEach((item, index) => {
+        const angle = (360 / groupItems.length) * index;
+        const angleRad = (angle * Math.PI) / 180;
+
+        const newLat = Number(item.latitude) + radius * Math.cos(angleRad);
+        const newLon = Number(item.longitude) + radius * Math.sin(angleRad);
+
+        result.push({
+          ...item,
+          originalLat: Number(item.latitude),
+          originalLon: Number(item.longitude),
+          latitude: newLat,
+          longitude: newLon,
+        } as T & { originalLat?: number; originalLon?: number });
+      });
+    }
+  });
+
+  return result;
+}
+
 interface DirectoryFilters {
   itemType: ItemType;
   country: string;
@@ -137,19 +190,30 @@ export default function DirectoryMapClient() {
 
           setEvents(eventsWithLocation);
 
+          // Ajustar coordenadas de eventos solapados
+          const adjustedEvents = spreadOverlappingMarkers(eventsWithLocation, 0.003);
+
           // Add event markers with green icon
-          eventsWithLocation.forEach((event: any) => {
+          adjustedEvents.forEach((event: any) => {
             const marker = L.marker([event.latitude, event.longitude], {
               icon: createEventIcon(),
             })
               .bindPopup(`
-                <div class="p-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-green-600 font-semibold text-xs">EVENTO</span>
+                <div style="min-width: 180px; padding: 16px;">
+                  <h3 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
+                    ${event.name}
+                  </h3>
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+                    <strong>Tipo:</strong> Evento
+                  </p>
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+                    <strong>Lugar:</strong> ${event.city}, ${event.country}
+                  </p>
+                  <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+                    <a href="/events/${event.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
+                      Ver evento →
+                    </a>
                   </div>
-                  <h3 class="font-bold text-sm mb-1">${event.name}</h3>
-                  <p class="text-xs text-gray-600">${event.city}, ${event.country}</p>
-                  <a href="/events/${event.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver evento →</a>
                 </div>
               `)
               .addTo(mapRef.current!);
@@ -247,29 +311,48 @@ export default function DirectoryMapClient() {
 
           setCompetitions(filteredCompetitions);
 
+          // Transform competitions to have their event coordinates
+          const competitionsWithCoords = filteredCompetitions.map((comp: any) => ({
+            ...comp,
+            latitude: comp.event.latitude,
+            longitude: comp.event.longitude,
+          }));
+
+          // Ajustar coordenadas de competiciones solapadas
+          const adjustedCompetitions = spreadOverlappingMarkers(competitionsWithCoords, 0.003);
+
           // Add competition markers
-          filteredCompetitions.forEach((comp: any) => {
-            const marker = L.marker([comp.event.latitude, comp.event.longitude], {
+          adjustedCompetitions.forEach((comp: any) => {
+            const marker = L.marker([comp.latitude, comp.longitude], {
               icon: createCompetitionIcon(),
             })
               .bindPopup(
                 `
-                <div class="p-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-blue-600 font-semibold text-xs">COMPETICIÓN</span>
+                <div style="min-width: 200px; padding: 16px;">
+                  <h3 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
+                    ${comp.name}
+                  </h3>
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+                    <strong>Tipo:</strong> Competición
+                  </p>
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+                    <strong>Lugar:</strong> ${comp.event.city}, ${comp.event.country}
+                  </p>
+                  ${comp.baseDistance ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Distancia:</strong> ${comp.baseDistance} km</p>` : ''}
+                  ${comp.baseElevation ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Desnivel +:</strong> ${comp.baseElevation}m+</p>` : ''}
+                  ${comp.specialSeries ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Special series:</strong> <a href="/special-series/${comp.specialSeries.slug}" style="color: #000; text-decoration: underline;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">${comp.specialSeries.name}</a></p>` : ''}
+                  <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+                    <a href="/events/${comp.event.slug}/${comp.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
+                      Ver competición →
+                    </a>
                   </div>
-                  <h3 class="font-bold text-sm mb-1">${comp.name}</h3>
-                  <p class="text-xs text-gray-600">${comp.event.city}, ${comp.event.country}</p>
-                  ${comp.baseDistance ? `<p class="text-xs text-gray-500">${comp.baseDistance} km</p>` : ''}
-                  ${comp.specialSeries ? `<p class="text-xs text-purple-600">${comp.specialSeries.name}</p>` : ''}
-                  <a href="/events/${comp.event.slug}/${comp.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver competición →</a>
                 </div>
               `
               )
               .addTo(mapRef.current!);
 
             markersRef.current.push(marker);
-            bounds.extend([comp.event.latitude, comp.event.longitude]);
+            bounds.extend([comp.latitude, comp.longitude]);
           });
         } catch (err) {
           console.error('Error loading competitions:', err);
@@ -292,20 +375,33 @@ export default function DirectoryMapClient() {
 
           setServices(servicesWithLocation);
 
-          // Add service markers with orange icon
-          servicesWithLocation.forEach((service: any) => {
+          // Ajustar coordenadas de servicios solapados
+          const adjustedServices = spreadOverlappingMarkers(servicesWithLocation, 0.003);
+
+          // Add service markers with category-specific icons
+          adjustedServices.forEach((service: any) => {
+            const categoryIcon = service.category?.icon;
+            const categoryName = service.category?.name || service.type;
+
             const marker = L.marker([service.latitude, service.longitude], {
-              icon: createServiceIcon(),
+              icon: createServiceIcon(categoryIcon),
             })
               .bindPopup(`
-                <div class="p-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-orange-600 font-semibold text-xs">SERVICIO</span>
+                <div style="min-width: 180px; padding: 16px;">
+                  <h3 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
+                    ${service.name}
+                  </h3>
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+                    <strong>Categoría:</strong> ${categoryName}
+                  </p>
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+                    ${service.city}, ${service.country}
+                  </p>
+                  <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+                    <a href="/services/${service.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
+                      Ver →
+                    </a>
                   </div>
-                  <h3 class="font-bold text-sm mb-1">${service.name}</h3>
-                  <p class="text-xs text-gray-600">${service.city}, ${service.country}</p>
-                  <p class="text-xs text-gray-500">${service.type}</p>
-                  <a href="/services/${service.slug}" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver servicio →</a>
                 </div>
               `)
               .addTo(mapRef.current!);
@@ -384,7 +480,8 @@ export default function DirectoryMapClient() {
     });
   };
 
-  const createServiceIcon = () => {
+  const createServiceIcon = (categoryIcon?: string) => {
+    const icon = categoryIcon || '🏪'; // Fallback to generic icon
     return L.divIcon({
       className: 'custom-marker-service',
       html: `
@@ -404,7 +501,7 @@ export default function DirectoryMapClient() {
             transform: rotate(45deg);
             color: white;
             font-size: 18px;
-          ">🏪</div>
+          ">${icon}</div>
         </div>
       `,
       iconSize: [36, 36],

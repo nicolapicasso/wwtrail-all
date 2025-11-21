@@ -230,7 +230,7 @@ export default function EventCard({
 
         {/* Typical Month Badge */}
         {event.typicalMonth && (
-          <div className="absolute bottom-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10">
+          <div className="absolute bottom-3 right-3 bg-black text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10">
             {MONTHS[event.typicalMonth - 1]}
           </div>
         )}
@@ -240,7 +240,7 @@ export default function EventCard({
       <div className={`p-4 flex flex-col ${viewMode === 'list' ? 'flex-1' : 'flex-1'}`}>
         {/* Title */}
         <div className="flex items-start justify-between mb-2">
-          <h3 className={`font-semibold group-hover:text-blue-600 transition-colors flex-1 ${
+          <h3 className={`font-semibold group-hover:text-hover transition-colors flex-1 ${
             viewMode === 'list' ? 'text-xl' : 'text-lg line-clamp-2'
           }`}>
             {event.name}
@@ -297,7 +297,7 @@ export default function EventCard({
                 )}
                 
                 {event.website && (
-                  <div className="flex items-center gap-1 text-blue-600">
+                  <div className="flex items-center gap-1 text-hover">
                     <Globe className="h-3 w-3" />
                     <span>Website</span>
                   </div>
@@ -314,12 +314,12 @@ export default function EventCard({
             {/* Competitions count */}
             {competitionCount > 0 && (
               <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-blue-600 font-medium">
+                <div className="flex items-center gap-2 text-hover font-medium">
                   <Mountain className="h-4 w-4" />
                   <span>{competitionCount} {competitionCount === 1 ? 'race' : 'races'}</span>
                 </div>
                 {!managementMode && (
-                  <span className="text-xs text-gray-500 group-hover:text-blue-600 transition-colors">
+                  <span className="text-xs text-gray-500 group-hover:text-hover transition-colors">
                     View details →
                   </span>
                 )}
@@ -496,7 +496,7 @@ export default function EventCard({
       )}
 
       {/* Hover effect */}
-      <div className="absolute inset-0 bg-blue-500/0 transition-colors group-hover:bg-blue-500/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-hover/0 transition-colors group-hover:bg-hover/5 pointer-events-none" />
     </div>
   );
 

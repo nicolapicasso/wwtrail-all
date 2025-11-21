@@ -4,11 +4,16 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, MapPin, Mountain, TrendingUp, Users, Clock, Award, Sparkles } from 'lucide-react';
 import editionsService from '@/lib/api/v2/editions.service';
+import { eventsService } from '@/lib/api/events.service';
+import servicesService from '@/lib/api/v2/services.service';
 import EditionDetailTabs from '@/components/EditionDetailTabs';
 import EventGallery from '@/components/EventGallery';
 import EventMap from '@/components/EventMap';
+import { RelatedArticles } from '@/components/RelatedArticles';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Event } from '@/types/api';
+import { Service } from '@/types/v2';
 
 // ============================================================================
 // METADATA
@@ -39,9 +44,34 @@ export default async function EditionDetailPage({
   params: { slug: string }
 }) {
   let editionWithDetails;
+  let nearbyEvents: Event[] = [];
+  let nearbyServices: Service[] = [];
 
   try {
     editionWithDetails = await editionsService.getBySlugWithInheritance(params.slug);
+
+    // Fetch nearby events and services if coordinates are available
+    if (editionWithDetails.event.latitude && editionWithDetails.event.longitude) {
+      try {
+        nearbyEvents = await eventsService.getNearby(
+          editionWithDetails.event.latitude,
+          editionWithDetails.event.longitude,
+          50 // 50km radius
+        );
+      } catch (error) {
+        console.error('Error loading nearby events:', error);
+      }
+
+      try {
+        nearbyServices = await servicesService.getNearby(
+          editionWithDetails.event.latitude,
+          editionWithDetails.event.longitude,
+          50 // 50km radius
+        );
+      } catch (error) {
+        console.error('Error loading nearby services:', error);
+      }
+    }
   } catch (error) {
     console.error('Error loading edition:', error);
     notFound();
@@ -200,10 +230,28 @@ export default async function EditionDetailPage({
                 </h3>
                 <EventMap
                   event={{
-                    ...event,
+                    id: edition.id,
                     name: `${competition.name} ${edition.year}`,
+                    city: event.city,
+                    country: event.country,
+                    latitude: event.latitude,
+                    longitude: event.longitude,
+                    categoryIcon: '🏃', // Icon for edition
+                    type: competition.type,
                   }}
-                  nearbyEvents={[]}
+                  nearbyEvents={nearbyEvents}
+                  nearbyServices={nearbyServices
+                    .filter(s => s.latitude && s.longitude)
+                    .map(s => ({
+                      id: s.id,
+                      name: s.name,
+                      slug: s.slug,
+                      city: s.city,
+                      country: s.country,
+                      latitude: s.latitude!,
+                      longitude: s.longitude!,
+                      categoryIcon: s.category?.icon || '🏪',
+                    } as any))}
                 />
                 <div className="mt-4">
                   <a
@@ -414,6 +462,9 @@ export default async function EditionDetailPage({
             </div>
           </div>
         </div>
+
+        {/* Related Articles */}
+        <RelatedArticles editionId={editionWithDetails.id} title={`Artículos sobre ${competition.name} ${editionWithDetails.year}`} className="mt-8" />
       </div>
     </div>
   );

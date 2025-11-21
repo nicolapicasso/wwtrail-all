@@ -22,21 +22,13 @@ class ServicesService {
     if (filters?.status) params.append('status', filters.status);
     if (filters?.country) params.append('country', filters.country);
     if (filters?.city) params.append('city', filters.city);
-    if (filters?.category) params.append('category', filters.category);
+    if (filters?.categoryId) params.append('categoryId', filters.categoryId);
     if (filters?.featured !== undefined) params.append('featured', filters.featured.toString());
     if (filters?.sortBy) params.append('sortBy', filters.sortBy);
     if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const response = await apiClientV2.get<ServicesResponse>(`/services?${params.toString()}`);
     return response.data;
-  }
-
-  /**
-   * Get all service categories (public)
-   */
-  async getCategories(): Promise<string[]> {
-    const response = await apiClientV2.get<CategoriesResponse>('/services/categories');
-    return response.data.data;
   }
 
   /**

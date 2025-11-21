@@ -19,13 +19,79 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
+/**
+ * Ajusta coordenadas de marcadores que se solapan, distribuyéndolos en círculo
+ * @param items Array de items con latitude y longitude
+ * @param centerLat Latitud del centro (evento principal)
+ * @param centerLon Longitud del centro (evento principal)
+ * @param radius Radio del círculo en grados (~0.003 = 300m)
+ * @returns Array de items con coordenadas ajustadas
+ */
+function spreadOverlappingMarkers<T extends { latitude: number; longitude: number }>(
+  items: T[],
+  centerLat: number,
+  centerLon: number,
+  radius: number = 0.003
+): (T & { originalLat?: number; originalLon?: number })[] {
+  if (items.length === 0) return [];
+
+  // Agrupar items por coordenadas
+  const groups = new Map<string, T[]>();
+
+  items.forEach(item => {
+    const lat = Number(item.latitude);
+    const lon = Number(item.longitude);
+    const key = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(item);
+  });
+
+  const result: (T & { originalLat?: number; originalLon?: number })[] = [];
+
+  // Procesar cada grupo
+  groups.forEach((groupItems, key) => {
+    if (groupItems.length === 1) {
+      // Si solo hay un item, no necesita ajuste
+      result.push(groupItems[0]);
+    } else {
+      // Si hay múltiples items en la misma posición, distribuirlos en círculo
+      groupItems.forEach((item, index) => {
+        const angle = (360 / groupItems.length) * index;
+        const angleRad = (angle * Math.PI) / 180;
+
+        const newLat = Number(item.latitude) + radius * Math.cos(angleRad);
+        const newLon = Number(item.longitude) + radius * Math.sin(angleRad);
+
+        result.push({
+          ...item,
+          originalLat: Number(item.latitude),
+          originalLon: Number(item.longitude),
+          latitude: newLat,
+          longitude: newLon,
+        } as T & { originalLat?: number; originalLon?: number });
+      });
+    }
+  });
+
+  return result;
+}
+
 interface EventMapProps {
-  event: Event;
+  event: Event & { categoryIcon?: string }; // Agregamos soporte para icono de categoría
   nearbyEvents?: Event[];
+  nearbyServices?: Event[]; // Services passed as Event-like objects with categoryIcon
   nearbyLinkPrefix?: string; // Prefijo para links de nearby (default: '/events/')
 }
 
-export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = '/events/' }: EventMapProps) {
+export default function EventMap({
+  event,
+  nearbyEvents = [],
+  nearbyServices = [],
+  nearbyLinkPrefix = '/events/'
+}: EventMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -40,19 +106,27 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
       return;
     }
 
-    // Limpiar mapa existente si existe
-    if (mapRef.current) {
-      mapRef.current.remove();
-      mapRef.current = null;
-    }
+    // Filtrar el evento principal de ambas listas para evitar duplicación
+    const filteredNearbyEvents = nearbyEvents.filter(e => e.id !== event.id);
+    const filteredNearbyServices = nearbyServices.filter(s => s.id !== event.id);
 
-    // Inicializar mapa
-    const map = L.map(mapContainerRef.current).setView(
-      [lat, lon],
-      12 // zoom level
-    );
+    // Pequeño delay para asegurar que el DOM esté listo
+    const timer = setTimeout(() => {
+      if (!mapContainerRef.current) return;
 
-    mapRef.current = map;
+      // Limpiar mapa existente si existe
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+
+      // Inicializar mapa
+      const map = L.map(mapContainerRef.current).setView(
+        [lat, lon],
+        12 // zoom level
+      );
+
+      mapRef.current = map;
 
     // Agregar capa de tiles (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -60,169 +134,251 @@ export default function EventMap({ event, nearbyEvents = [], nearbyLinkPrefix = 
       maxZoom: 19,
     }).addTo(map);
 
-    // ============================================
-    // ✅ ICONO PERSONALIZADO PARA EVENTO PRINCIPAL
-    // ============================================
-    const mainIcon = L.divIcon({
-      className: 'custom-marker-main',
-      html: `
-        <div style="
-          background-color: #16a34a;
-          width: 40px;
-          height: 40px;
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          border: 3px solid white;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">
+      // ============================================
+      // ✅ ICONO PERSONALIZADO PARA EVENTO PRINCIPAL
+      // ============================================
+      const mainIconEmoji = event.categoryIcon || '📍';
+      const mainIcon = L.divIcon({
+        className: 'custom-marker-main',
+        html: `
           <div style="
-            transform: rotate(45deg);
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-          ">📍</div>
-        </div>
-      `,
-      iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -40],
-    });
+            background-color: #16a34a;
+            width: 40px;
+            height: 40px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 3px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <div style="
+              transform: rotate(45deg);
+              color: white;
+              font-size: 20px;
+              font-weight: bold;
+            ">${mainIconEmoji}</div>
+          </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40],
+      });
 
-    // ============================================
-    // ✅ ICONO PARA EVENTOS CERCANOS
-    // ============================================
-    const nearbyIcon = L.divIcon({
-      className: 'custom-marker-nearby',
-      html: `
-        <div style="
-          background-color: #3b82f6;
-          width: 28px;
-          height: 28px;
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          border: 2px solid white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">
+      // Helper function to create nearby icon with emoji and color
+      const createNearbyIcon = (emoji: string = '📌', color: string = '#3b82f6') => L.divIcon({
+        className: 'custom-marker-nearby',
+        html: `
           <div style="
-            transform: rotate(45deg);
-            color: white;
-            font-size: 14px;
-          ">📌</div>
-        </div>
-      `,
-      iconSize: [28, 28],
-      iconAnchor: [14, 28],
-      popupAnchor: [0, -28],
-    });
+            background-color: ${color};
+            width: 28px;
+            height: 28px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <div style="
+              transform: rotate(45deg);
+              color: white;
+              font-size: 14px;
+            ">${emoji}</div>
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -28],
+      });
 
-    // ============================================
-    // 📍 MARKER PRINCIPAL (Evento actual)
-    // ============================================
-    const mainMarker = L.marker([lat, lon], {
-      icon: mainIcon,
-      title: event.name,
-    }).addTo(map);
+      // ============================================
+      // 📍 MARKER PRINCIPAL (Evento actual)
+      // ============================================
+      const mainMarker = L.marker([lat, lon], {
+        icon: mainIcon,
+        title: event.name,
+      }).addTo(map);
 
-    // Popup del evento principal
-    mainMarker.bindPopup(`
-      <div style="min-width: 200px;">
-        <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #16a34a;">
-          ${event.name}
-        </h3>
-        <p style="font-size: 14px; color: #666; margin-bottom: 4px;">
-          📍 ${event.city}, ${event.country}
-        </p>
-        ${event.type ? `<p style="font-size: 12px; color: #888;">Tipo: ${event.type}</p>` : ''}
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">
-          <a 
-            href="/events/${event.slug}" 
-            style="color: #16a34a; text-decoration: none; font-weight: 600; font-size: 13px;"
-          >
-            Ver detalles →
-          </a>
-        </div>
-      </div>
-    `);
-
-    // ============================================
-    // 📌 MARKERS DE EVENTOS CERCANOS
-    // ============================================
-    nearbyEvents.forEach((nearbyEvent) => {
-      if (!nearbyEvent.latitude || !nearbyEvent.longitude) return;
-
-      // Validar coordenadas
-      const nearbyLat = Number(nearbyEvent.latitude);
-      const nearbyLon = Number(nearbyEvent.longitude);
-      if (isNaN(nearbyLat) || isNaN(nearbyLon)) return;
-
-      const nearbyMarker = L.marker(
-        [nearbyLat, nearbyLon],
-        {
-          icon: nearbyIcon,
-          title: nearbyEvent.name,
-        }
-      ).addTo(map);
-
-      // Popup de evento cercano
-      nearbyMarker.bindPopup(`
-        <div style="min-width: 180px;">
-          <h4 style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #3b82f6;">
-            ${nearbyEvent.name}
-          </h4>
-          <p style="font-size: 12px; color: #666; margin-bottom: 4px;">
-            📍 ${nearbyEvent.city}, ${nearbyEvent.country}
+      // Popup del evento principal
+      mainMarker.bindPopup(`
+        <div style="min-width: 200px; padding: 16px;">
+          <h3 style="font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #000; line-height: 1.3;">
+            ${event.name}
+          </h3>
+          <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+            <strong>Tipo:</strong> Evento
           </p>
-          ${nearbyEvent.type ? `<p style="font-size: 11px; color: #888;">Tipo: ${nearbyEvent.type}</p>` : ''}
-          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">
+          <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+            <strong>Lugar:</strong> ${event.city}, ${event.country}
+          </p>
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
             <a
-              href="${nearbyLinkPrefix}${nearbyEvent.slug}"
-              style="color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 12px;"
+              href="/events/${event.slug}"
+              style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s;"
+              onmouseover="this.style.color='#B66916'"
+              onmouseout="this.style.color='#000'"
             >
-              Ver detalles →
+              Ver evento →
             </a>
           </div>
         </div>
       `);
-    });
 
-    // ============================================
-    // 🗺️ AJUSTAR VISTA PARA MOSTRAR TODOS LOS MARKERS
-    // ============================================
-    if (nearbyEvents.length > 0) {
-      // Filtrar y validar coordenadas de eventos cercanos
-      const validNearbyCoords = nearbyEvents
-        .filter(e => e.latitude && e.longitude)
-        .map(e => {
-          const nLat = Number(e.latitude);
-          const nLon = Number(e.longitude);
-          return !isNaN(nLat) && !isNaN(nLon) ? [nLat, nLon] as [number, number] : null;
-        })
-        .filter((coords): coords is [number, number] => coords !== null);
+      // ============================================
+      // 📌 MARKERS DE EVENTOS CERCANOS (Azul)
+      // ============================================
+      // Ajustar coordenadas de eventos solapados antes de crear marcadores
+      const adjustedNearbyEvents = spreadOverlappingMarkers(
+        filteredNearbyEvents,
+        lat,
+        lon,
+        0.003 // ~300 metros
+      );
 
-      if (validNearbyCoords.length > 0) {
-        const bounds = L.latLngBounds([
-          [lat, lon],
-          ...validNearbyCoords
-        ]);
+      adjustedNearbyEvents.forEach((nearbyEvent) => {
+        if (!nearbyEvent.latitude || !nearbyEvent.longitude) return;
 
-        map.fitBounds(bounds, { padding: [50, 50] });
+        // Validar coordenadas
+        const nearbyLat = Number(nearbyEvent.latitude);
+        const nearbyLon = Number(nearbyEvent.longitude);
+        if (isNaN(nearbyLat) || isNaN(nearbyLon)) return;
+
+        // Usar el emoji de categoría si está disponible
+        const nearbyIconEmoji = (nearbyEvent as any).categoryIcon || '📌';
+        const nearbyIcon = createNearbyIcon(nearbyIconEmoji, '#3b82f6'); // Azul para eventos
+
+        const nearbyMarker = L.marker(
+          [nearbyLat, nearbyLon],
+          {
+            icon: nearbyIcon,
+            title: nearbyEvent.name,
+          }
+        ).addTo(map);
+
+        // Popup de evento cercano
+        nearbyMarker.bindPopup(`
+          <div style="min-width: 180px; padding: 16px;">
+            <h4 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
+              ${nearbyEvent.name}
+            </h4>
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+              <strong>Tipo:</strong> Evento
+            </p>
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+              <strong>Lugar:</strong> ${nearbyEvent.city}, ${nearbyEvent.country}
+            </p>
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+              <a
+                href="/events/${nearbyEvent.slug}"
+                style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;"
+                onmouseover="this.style.color='#B66916'"
+                onmouseout="this.style.color='#000'"
+              >
+                Ver evento →
+              </a>
+            </div>
+          </div>
+        `);
+      });
+
+      // ============================================
+      // 🏪 MARKERS DE SERVICIOS CERCANOS (Naranja)
+      // ============================================
+      // Ajustar coordenadas de servicios solapados antes de crear marcadores
+      const adjustedNearbyServices = spreadOverlappingMarkers(
+        filteredNearbyServices,
+        lat,
+        lon,
+        0.003 // ~300 metros
+      );
+
+      adjustedNearbyServices.forEach((nearbyService) => {
+        if (!nearbyService.latitude || !nearbyService.longitude) return;
+
+        // Validar coordenadas
+        const nearbyLat = Number(nearbyService.latitude);
+        const nearbyLon = Number(nearbyService.longitude);
+        if (isNaN(nearbyLat) || isNaN(nearbyLon)) return;
+
+        // Usar el emoji de categoría si está disponible
+        const nearbyIconEmoji = (nearbyService as any).categoryIcon || '🏪';
+        const nearbyIcon = createNearbyIcon(nearbyIconEmoji, '#f97316'); // Naranja para servicios
+
+        const nearbyMarker = L.marker(
+          [nearbyLat, nearbyLon],
+          {
+            icon: nearbyIcon,
+            title: nearbyService.name,
+          }
+        ).addTo(map);
+
+        // Popup de servicio cercano
+        const categoryName = (nearbyService as any).categoryName || (nearbyService as any).type || 'Servicio';
+        nearbyMarker.bindPopup(`
+          <div style="min-width: 180px; padding: 16px;">
+            <h4 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
+              ${nearbyService.name}
+            </h4>
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+              <strong>Categoría:</strong> ${categoryName}
+            </p>
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
+              ${nearbyService.city}, ${nearbyService.country}
+            </p>
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+              <a
+                href="/services/${nearbyService.slug}"
+                style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;"
+                onmouseover="this.style.color='#B66916'"
+                onmouseout="this.style.color='#000'"
+              >
+                Ver →
+              </a>
+            </div>
+          </div>
+        `);
+      });
+
+      // ============================================
+      // 🗺️ AJUSTAR VISTA PARA MOSTRAR TODOS LOS MARKERS
+      // ============================================
+      if (filteredNearbyEvents.length > 0 || filteredNearbyServices.length > 0) {
+        // Combinar y validar coordenadas de eventos y servicios cercanos
+        const validNearbyCoords = [
+          ...filteredNearbyEvents,
+          ...filteredNearbyServices
+        ]
+          .filter(e => e.latitude && e.longitude)
+          .map(e => {
+            const nLat = Number(e.latitude);
+            const nLon = Number(e.longitude);
+            return !isNaN(nLat) && !isNaN(nLon) ? [nLat, nLon] as [number, number] : null;
+          })
+          .filter((coords): coords is [number, number] => coords !== null);
+
+        if (validNearbyCoords.length > 0) {
+          const bounds = L.latLngBounds([
+            [lat, lon],
+            ...validNearbyCoords
+          ]);
+
+          map.fitBounds(bounds, { padding: [50, 50] });
+        }
       }
-    }
+    }, 100); // 100ms delay para asegurar que el DOM esté listo
 
     // Cleanup
     return () => {
+      clearTimeout(timer);
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, [event, nearbyEvents, nearbyLinkPrefix]);
+  }, [event, nearbyEvents, nearbyServices, nearbyLinkPrefix]);
 
   if (!event.latitude || !event.longitude) {
     return (

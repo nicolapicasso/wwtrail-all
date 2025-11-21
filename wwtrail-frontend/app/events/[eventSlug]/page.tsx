@@ -8,7 +8,9 @@
  */
 
 import { eventsService } from '@/lib/api/events.service';
+import servicesService from '@/lib/api/v2/services.service';
 import { Event } from '@/types/api';
+import { Service } from '@/types/v2';
 import { 
   MapPin, Calendar, Globe, Mail, Phone, Facebook, Instagram, Twitter, Youtube,
   Trophy, Eye, Clock, Image as ImageIcon
@@ -19,6 +21,7 @@ import { notFound } from 'next/navigation';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
 import OrganizerCard from '@/components/OrganizerCard';
+import { RelatedArticles } from '@/components/RelatedArticles';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 // ============================================================================
@@ -56,22 +59,33 @@ export default async function EventDetailPage({
 }) {
   let event: Event;
   let nearbyEvents: Event[] = [];
+  let nearbyServices: Service[] = [];
 
   try {
     event = await eventsService.getBySlug(params.eventSlug);
-    
-    // ✅ Obtener eventos cercanos para el mapa
+
+    // ✅ Obtener eventos y servicios cercanos para el mapa
     if (event.latitude && event.longitude) {
       try {
         nearbyEvents = await eventsService.getNearby(
-          event.latitude, 
-          event.longitude, 
+          event.latitude,
+          event.longitude,
           50 // 50km radius
         );
         // Filtrar el evento actual
         nearbyEvents = nearbyEvents.filter(e => e.id !== event.id);
       } catch (error) {
         console.error('Error loading nearby events:', error);
+      }
+
+      try {
+        nearbyServices = await servicesService.getNearby(
+          event.latitude,
+          event.longitude,
+          50 // 50km radius
+        );
+      } catch (error) {
+        console.error('Error loading nearby services:', error);
       }
     }
   } catch (error) {
@@ -94,21 +108,22 @@ export default async function EventDetailPage({
         ) : null}
         <div className="absolute inset-0 bg-black/40"></div>
         
-        {/* Breadcrumb */}
-        <div className="absolute top-4 left-4 z-10">
-          <Link 
-            href="/events" 
-            className="text-white hover:text-gray-200 flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm"
-          >
-            ← Volver a eventos
-          </Link>
-        </div>
-
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
           <div className="container mx-auto">
             <div className="flex items-end justify-between">
               <div>
+                {/* Breadcrumbs */}
+                <div className="mb-4">
+                  <nav className="flex items-center gap-2 text-sm text-white/80">
+                    <Link href="/events" className="hover:text-white transition-colors">
+                      Eventos
+                    </Link>
+                    <span>/</span>
+                    <span className="text-white font-semibold">{event.name}</span>
+                  </nav>
+                </div>
+
                 {event.featured && (
                   <div className="mb-2">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-semibold">
@@ -255,9 +270,21 @@ export default async function EventDetailPage({
                   <MapPin className="h-5 w-5 text-green-600" />
                   Ubicación
                 </h3>
-                <EventMap 
+                <EventMap
                   event={event}
                   nearbyEvents={nearbyEvents}
+                  nearbyServices={nearbyServices
+                    .filter(s => s.latitude && s.longitude)
+                    .map(s => ({
+                      id: s.id,
+                      name: s.name,
+                      slug: s.slug,
+                      city: s.city,
+                      country: s.country,
+                      latitude: s.latitude!,
+                      longitude: s.longitude!,
+                      categoryIcon: s.category?.icon || '🏪',
+                    } as any))}
                 />
                 <div className="mt-4">
                   <a 
@@ -416,6 +443,9 @@ export default async function EventDetailPage({
             )}
           </div>
         </div>
+
+        {/* Related Articles */}
+        <RelatedArticles eventId={event.id} title="Artículos sobre este evento" className="mt-8" />
       </div>
     </div>
   );

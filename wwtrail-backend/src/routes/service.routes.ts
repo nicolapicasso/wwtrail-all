@@ -20,7 +20,6 @@ const router = Router();
 // PASO 1: RUTAS PÚBLICAS ESPECÍFICAS
 // ===================================
 
-router.get('/categories', ServiceController.getCategories);
 router.get('/nearby', ServiceController.getNearby);
 
 // ===================================

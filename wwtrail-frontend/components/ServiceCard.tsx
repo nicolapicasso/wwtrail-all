@@ -68,7 +68,11 @@ export default function ServiceCard({
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
         <div className="text-center">
           <Tag className="h-16 w-16 text-gray-300 mx-auto mb-2" />
-          <p className="text-xs text-gray-500 font-semibold uppercase">{service.category}</p>
+          {service.category && (
+            <p className="text-xs text-gray-500 font-semibold uppercase">
+              {service.category.icon} {service.category.name}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -139,8 +143,9 @@ export default function ServiceCard({
 
         {/* Category Badge */}
         {service.category && (
-          <div className="absolute bottom-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10">
-            {service.category}
+          <div className="absolute bottom-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10 flex items-center gap-1">
+            <span>{service.category.icon}</span>
+            <span>{service.category.name}</span>
           </div>
         )}
       </div>

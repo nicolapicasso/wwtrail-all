@@ -20,11 +20,12 @@ import {
   ChevronDown,
   Briefcase,
   Sparkles,
+  BookOpen,
 } from 'lucide-react';
 
 interface NavItem {
   label: string;
-  href: string;
+  href?: string;
   icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
   badge?: string;
@@ -44,7 +45,7 @@ const navItems: NavItem[] = [
     adminOnly: true,
   },
   {
-    label: 'Gestión de Organizadores',
+    label: 'Gestión de eventos',
     href: '/organizer',
     icon: Award,
     children: [
@@ -73,18 +74,28 @@ const navItems: NavItem[] = [
         href: '/organizer/special-series',
         icon: Sparkles,
       },
+    ],
+  },
+  {
+    label: 'Servicios',
+    icon: Building2,
+    children: [
       {
-        label: 'Servicios',
+        label: 'Gestionar servicios',
         href: '/organizer/services',
         icon: Building2,
+      },
+      {
+        label: 'Categorías',
+        href: '/organizer/services/categories',
+        icon: Tag,
       },
     ],
   },
   {
     label: 'Blog y Artículos',
-    href: '/blog',
-    icon: FileText,
-    badge: 'Pronto',
+    href: '/organizer/posts',
+    icon: BookOpen,
   },
   {
     label: 'Ofertas y Cupones',
@@ -111,7 +122,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['/organizer']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Gestión de eventos', 'Servicios']);
 
   const filteredItems = navItems.filter((item) => {
     if (item.adminOnly) {
@@ -120,13 +131,14 @@ export function DashboardNav() {
     return true;
   });
 
-  const toggleExpand = (href: string) => {
+  const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
-      prev.includes(href) ? prev.filter((h) => h !== href) : [...prev, href]
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
     );
   };
 
-  const isActive = (href: string) => {
+  const isActive = (href?: string) => {
+    if (!href) return false;
     if (href === '/dashboard') {
       return pathname === href;
     }
@@ -145,11 +157,11 @@ export function DashboardNav() {
         const active = isActive(item.href);
         const childActive = isChildActive(item.children);
         const hasChildren = item.children && item.children.length > 0;
-        const isExpanded = expandedItems.includes(item.href);
+        const isExpanded = expandedItems.includes(item.label);
         const disabled = !!item.badge;
 
         return (
-          <div key={item.href}>
+          <div key={item.label}>
             {/* Main Item */}
             {disabled ? (
               <div
@@ -170,7 +182,7 @@ export function DashboardNav() {
               </div>
             ) : hasChildren ? (
               <button
-                onClick={() => toggleExpand(item.href)}
+                onClick={() => toggleExpand(item.label)}
                 className={`
                   flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-lg
                   transition-colors
@@ -193,7 +205,7 @@ export function DashboardNav() {
               </button>
             ) : (
               <Link
-                href={item.href}
+                href={item.href!}
                 className={`
                   flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg
                   transition-colors

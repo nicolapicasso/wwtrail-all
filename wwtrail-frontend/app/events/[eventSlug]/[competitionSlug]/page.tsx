@@ -4,9 +4,11 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCompetition } from '@/hooks/useCompetitions';
 import { useEditions } from '@/hooks/useEditions';
+import { eventsService } from '@/lib/api/events.service';
+import servicesService from '@/lib/api/v2/services.service';
 import { EditionSelector } from '@/components/EditionSelector';
 import { EditionCard } from '@/components/EditionCard';
 import { Edition } from '@/types/v2';
@@ -15,6 +17,7 @@ import Link from 'next/link';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
 import OrganizerCard from '@/components/OrganizerCard';
+import { RelatedArticles } from '@/components/RelatedArticles';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 export default function CompetitionDetailPage() {
@@ -25,6 +28,39 @@ export default function CompetitionDetailPage() {
   const { competition, loading, error } = useCompetition(competitionSlug);
   const { editions, loading: editionsLoading } = useEditions(competition?.id || '');
   const [selectedEdition, setSelectedEdition] = useState<Edition | null>(null);
+  const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
+  const [nearbyServices, setNearbyServices] = useState<any[]>([]);
+
+  // Fetch nearby events and services when competition data is available
+  useEffect(() => {
+    if (competition?.event?.latitude && competition?.event?.longitude) {
+      const fetchNearby = async () => {
+        try {
+          const events = await eventsService.getNearby(
+            competition.event.latitude,
+            competition.event.longitude,
+            50 // 50km radius
+          );
+          setNearbyEvents(events);
+        } catch (err) {
+          console.error('Error loading nearby events:', err);
+        }
+
+        try {
+          const services = await servicesService.getNearby(
+            competition.event.latitude,
+            competition.event.longitude,
+            50 // 50km radius
+          );
+          setNearbyServices(services);
+        } catch (err) {
+          console.error('Error loading nearby services:', err);
+        }
+      };
+
+      fetchNearby();
+    }
+  }, [competition]);
 
   if (loading) {
     return (
@@ -72,22 +108,29 @@ export default function CompetitionDetailPage() {
         )}
         <div className="absolute inset-0 bg-black/40"></div>
 
-        {/* Back Button */}
-        <div className="absolute top-4 left-4 z-10">
-          <Link
-            href={`/events/${eventSlug}`}
-            className="text-white hover:text-gray-200 flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver a {competition.event?.name}
-          </Link>
-        </div>
-
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
           <div className="container mx-auto">
             <div className="flex items-end justify-between">
               <div>
+                {/* Breadcrumbs */}
+                <div className="mb-4">
+                  <nav className="flex items-center gap-2 text-sm text-white/80">
+                    <Link href="/events" className="hover:text-white transition-colors">
+                      Eventos
+                    </Link>
+                    <span>/</span>
+                    <Link
+                      href={`/events/${eventSlug}`}
+                      className="hover:text-white transition-colors"
+                    >
+                      {competition.event?.name}
+                    </Link>
+                    <span>/</span>
+                    <span className="text-white font-semibold">{competition.name}</span>
+                  </nav>
+                </div>
+
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
                   {competition.name}
                 </h1>
@@ -275,10 +318,28 @@ export default function CompetitionDetailPage() {
                 </h3>
                 <EventMap
                   event={{
-                    ...competition.event,
+                    id: competition.id,
                     name: competition.name,
+                    city: competition.event.city,
+                    country: competition.event.country,
+                    latitude: competition.event.latitude,
+                    longitude: competition.event.longitude,
+                    categoryIcon: '🏃', // Icon for competition
+                    type: competition.type,
                   }}
-                  nearbyEvents={[]}
+                  nearbyEvents={nearbyEvents}
+                  nearbyServices={nearbyServices
+                    .filter((s: any) => s.latitude && s.longitude)
+                    .map((s: any) => ({
+                      id: s.id,
+                      name: s.name,
+                      slug: s.slug,
+                      city: s.city,
+                      country: s.country,
+                      latitude: s.latitude,
+                      longitude: s.longitude,
+                      categoryIcon: s.category?.icon || '🏪',
+                    }))}
                 />
                 <div className="mt-4">
                   <a
@@ -467,6 +528,9 @@ export default function CompetitionDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Related Articles */}
+        <RelatedArticles competitionId={competition.id} title="Artículos sobre esta competición" className="mt-8" />
       </div>
     </div>
   );

@@ -263,24 +263,6 @@ export class ServiceController {
   }
 
   /**
-   * GET /api/v2/services/categories
-   * Obtener todas las categorías únicas de servicios
-   * @auth Public
-   */
-  static async getCategories(req: Request, res: Response, next: NextFunction) {
-    try {
-      const categories = await ServiceService.getCategories();
-
-      res.json({
-        status: 'success',
-        data: categories,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
    * GET /api/v2/services/nearby
    * Obtener servicios cercanos por coordenadas
    * @auth No requerida
@@ -318,10 +300,19 @@ export class ServiceController {
 
       const services = await ServiceService.findNearby(latitude, longitude, radiusKm);
 
+      // Mapear category_icon y category_name a objeto category para compatibilidad con frontend
+      const mappedServices = services.map((service: any) => ({
+        ...service,
+        category: service.category_name && service.category_icon ? {
+          name: service.category_name,
+          icon: service.category_icon,
+        } : null,
+      }));
+
       res.json({
         status: 'success',
-        data: services,
-        count: services.length,
+        data: mappedServices,
+        count: mappedServices.length,
       });
     } catch (error) {
       next(error);

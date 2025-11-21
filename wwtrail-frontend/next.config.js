@@ -10,9 +10,20 @@ const nextConfig = {
         pathname: '/uploads/**',
       },
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+        pathname: '/api/uploads/**',
+      },
+      {
         protocol: 'https',
         hostname: 'wwtrail.com',
         pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'wwtrail.com',
+        pathname: '/api/uploads/**',
       },
     ],
   },

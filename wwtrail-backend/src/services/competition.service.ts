@@ -294,8 +294,11 @@ export class CompetitionService {
         // Añadir coordenadas al objeto event
         (competition.event as any).latitude = coordinates[0].lat;
         (competition.event as any).longitude = coordinates[0].lon;
+      } else {
+        logger.warn(`No coordinates found for event ${competition.event.id} (${competition.event.name})`);
       }
     } catch (error) {
+      logger.error(`Error extracting coordinates for event ${competition.event.id}:`, error);
       // Si falla, continuar sin coordenadas
     }
 
@@ -372,8 +375,11 @@ export class CompetitionService {
         // Añadir coordenadas al objeto event
         (competition.event as any).latitude = coordinates[0].lat;
         (competition.event as any).longitude = coordinates[0].lon;
+      } else {
+        logger.warn(`No coordinates found for event ${competition.event.id} (${competition.event.name})`);
       }
     } catch (error) {
+      logger.error(`Error extracting coordinates for event ${competition.event.id}:`, error);
       // Si falla, continuar sin coordenadas
     }
 

@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import { eventsService } from '@/lib/api/events.service';
+import servicesService from '@/lib/api/v2/services.service';
 import { Calendar, MapPin, TrendingUp, Users, ArrowLeft, Share2, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +31,7 @@ export default function CompetitionDetailPage() {
 
   const [competition, setCompetition] = useState<any>(null);
   const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
+  const [nearbyServices, setNearbyServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,15 +41,36 @@ export default function CompetitionDetailPage() {
     }
   }, [slug]);
 
+  // Redirect to hierarchical route when competition data is loaded
+  useEffect(() => {
+    if (competition?.event?.slug) {
+      console.log('🔄 Redirecting to hierarchical route:', `/events/${competition.event.slug}/${competition.slug}`);
+      router.replace(`/events/${competition.event.slug}/${competition.slug}`);
+    }
+  }, [competition, router]);
+
   const loadCompetition = async () => {
     try {
       setLoading(true);
       setError(null);
       const comp = await competitionsService.getBySlug(slug);
+
+      console.log('🔍 Competition loaded:', {
+        name: comp.name,
+        hasEvent: !!comp.event,
+        eventHasCoordinates: !!(comp.event?.latitude && comp.event?.longitude),
+        latitude: comp.event?.latitude,
+        longitude: comp.event?.longitude,
+        eventCity: comp.event?.city,
+        eventCountry: comp.event?.country,
+      });
+
       setCompetition(comp);
 
-      // Cargar eventos cercanos si hay coordenadas
+      // Cargar eventos y servicios cercanos si hay coordenadas
       if (comp.event?.latitude && comp.event?.longitude) {
+        console.log('✅ Fetching nearby elements with coordinates:', comp.event.latitude, comp.event.longitude);
+
         try {
           const nearby = await eventsService.getNearby(
             comp.event.latitude,
@@ -58,6 +82,26 @@ export default function CompetitionDetailPage() {
           console.error('Error loading nearby events:', err);
           // No bloqueamos si falla la carga de eventos cercanos
         }
+
+        try {
+          const services = await servicesService.getNearby(
+            comp.event.latitude,
+            comp.event.longitude,
+            50 // 50km radius
+          );
+          setNearbyServices(services);
+        } catch (err) {
+          console.error('Error loading nearby services:', err);
+          // No bloqueamos si falla la carga de servicios cercanos
+        }
+      } else {
+        console.warn('⚠️ No coordinates available for competition:', {
+          competitionName: comp.name,
+          eventId: comp.event?.id,
+          eventName: comp.event?.name,
+          latitude: comp.event?.latitude,
+          longitude: comp.event?.longitude,
+        });
       }
     } catch (err: any) {
       console.error('Error loading competition:', err);
@@ -138,6 +182,26 @@ export default function CompetitionDetailPage() {
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           <div className="container mx-auto">
+            {/* Breadcrumbs */}
+            {competition.event && (
+              <div className="mb-4">
+                <nav className="flex items-center gap-2 text-sm text-white/80">
+                  <Link href="/events" className="hover:text-white transition-colors">
+                    Eventos
+                  </Link>
+                  <span>/</span>
+                  <Link
+                    href={`/events/${competition.event.slug}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {competition.event.name}
+                  </Link>
+                  <span>/</span>
+                  <span className="text-white font-semibold">{competition.name}</span>
+                </nav>
+              </div>
+            )}
+
             <div className="flex items-center gap-3 mb-3">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${typeColors[competition.type] || typeColors.OTHER}`}>
                 {competition.type}
@@ -149,22 +213,14 @@ export default function CompetitionDetailPage() {
               )}
             </div>
             <h1 className="text-4xl font-bold mb-2">{competition.name}</h1>
-            <p className="text-lg opacity-90 flex items-center">
-              <MapPin className="w-5 h-5 mr-2" />
-              {competition.city}, {competition.country}
-            </p>
+            {competition.event && (
+              <p className="text-lg opacity-90 flex items-center">
+                <MapPin className="w-5 h-5 mr-2" />
+                {competition.event.city}, {competition.event.country}
+              </p>
+            )}
           </div>
         </div>
-
-        {/* Back Button */}
-        <Button
-          variant="secondary"
-          onClick={() => router.back()}
-          className="absolute top-4 left-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver
-        </Button>
 
         {/* Share Button */}
         <Button
@@ -277,10 +333,28 @@ export default function CompetitionDetailPage() {
                 <CardContent>
                   <EventMap
                     event={{
-                      ...competition.event,
+                      id: competition.id,
                       name: competition.name,
+                      city: competition.event.city,
+                      country: competition.event.country,
+                      latitude: competition.event.latitude,
+                      longitude: competition.event.longitude,
+                      categoryIcon: '🏃', // Icon for competition
+                      type: competition.type,
                     }}
                     nearbyEvents={nearbyEvents}
+                    nearbyServices={nearbyServices
+                      .filter((s: any) => s.latitude && s.longitude)
+                      .map((s: any) => ({
+                        id: s.id,
+                        name: s.name,
+                        slug: s.slug,
+                        city: s.city,
+                        country: s.country,
+                        latitude: s.latitude,
+                        longitude: s.longitude,
+                        categoryIcon: s.category?.icon || '🏪',
+                      }))}
                   />
                   <div className="mt-4">
                     <a

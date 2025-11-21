@@ -76,8 +76,12 @@ export default function MyRegistrationsPage() {
                 <div className="flex justify-between items-start">
                   {/* Información de la competición */}
                   <div className="flex-1">
-                    <Link 
-                      href={`/competitions/${uc.competition.slug}`}
+                    <Link
+                      href={
+                        uc.competition.event?.slug
+                          ? `/events/${uc.competition.event.slug}/${uc.competition.slug}`
+                          : `/competitions/${uc.competition.slug}`
+                      }
                       className="text-xl font-bold text-gray-900 hover:text-green-600 transition"
                     >
                       {uc.competition.name}

@@ -8,6 +8,16 @@ import { User } from './auth';
 export type ServiceStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED';
 
 /**
+ * Service Category interface
+ */
+export interface ServiceCategory {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string; // Emoji for map markers and UI
+}
+
+/**
  * Base Service interface
  */
 export interface Service {
@@ -15,7 +25,10 @@ export interface Service {
   name: string;
   slug: string;
   description?: string;
-  category: string; // Free-form category (alojamientos, restaurantes, tiendas, etc.)
+
+  // Category (now a relation)
+  categoryId?: string;
+  category?: ServiceCategory;
 
   // Location
   country: string;
@@ -51,7 +64,7 @@ export interface Service {
 export interface CreateServiceInput {
   name: string;
   description?: string;
-  category: string;
+  categoryId?: string; // Now ID reference to ServiceCategory
   country: string;
   city: string;
   latitude?: number;
@@ -68,7 +81,7 @@ export interface CreateServiceInput {
 export interface UpdateServiceInput {
   name?: string;
   description?: string;
-  category?: string;
+  categoryId?: string; // Now ID reference to ServiceCategory
   country?: string;
   city?: string;
   latitude?: number;
@@ -89,10 +102,10 @@ export interface ServiceFilters {
   search?: string;
   country?: string;
   city?: string;
-  category?: string;
+  categoryId?: string; // Now ID reference to ServiceCategory
   featured?: boolean;
   status?: ServiceStatus;
-  sortBy?: 'name' | 'createdAt' | 'viewCount' | 'category';
+  sortBy?: 'name' | 'createdAt' | 'viewCount';
   sortOrder?: 'asc' | 'desc';
 }
 

@@ -108,6 +108,15 @@ export class CompetitionController {
 
       const competition = await CompetitionService.findBySlug(slug);
 
+      // Log coordinates for debugging
+      logger.info(`Competition ${slug} coordinates:`, {
+        hasEvent: !!competition.event,
+        eventId: competition.event?.id,
+        eventName: competition.event?.name,
+        latitude: (competition.event as any)?.latitude,
+        longitude: (competition.event as any)?.longitude,
+      });
+
       res.json({
         status: 'success',
         data: competition,
