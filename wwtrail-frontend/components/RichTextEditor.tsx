@@ -73,6 +73,7 @@ export function RichTextEditor({
         allowBase64: true,
         HTMLAttributes: {
           class: 'rounded-lg cursor-pointer',
+          style: null, // Permitir estilos inline
         },
       }),
       TextStyle,
@@ -159,7 +160,16 @@ export function RichTextEditor({
   };
 
   const setImageWidth = (width: string) => {
-    editor.chain().focus().updateAttributes('image', { style: `width: ${width}; height: auto;` }).run();
+    // Obtener la imagen actual
+    const { src, alt } = editor.getAttributes('image');
+
+    // Eliminar la imagen actual y reinsertarla con el nuevo estilo
+    editor
+      .chain()
+      .focus()
+      .deleteSelection()
+      .insertContent(`<img src="${src}" alt="${alt || ''}" style="width: ${width}; height: auto;" class="rounded-lg cursor-pointer" />`)
+      .run();
   };
 
   return (
