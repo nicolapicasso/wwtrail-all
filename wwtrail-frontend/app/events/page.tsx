@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { MapPin, Calendar, Users, Mountain, Search, Filter, Globe, Star } from 'lucide-react';
 import { EventList } from '@/components/EventList';
+import { MountainDivider } from '@/components/MountainDivider';
 
 export default function EventsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -50,6 +51,9 @@ export default function EventsPage() {
             </div>
           </div>
         </div>
+
+        {/* Divisor de montaña */}
+        <MountainDivider fillColor="rgb(22, 163, 74)" position="bottom" />
       </div>
 
       {/* Main Content */}
