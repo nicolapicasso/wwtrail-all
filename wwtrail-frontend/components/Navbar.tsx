@@ -55,7 +55,7 @@ export default function Navbar() {
               <Link href="/" className="flex items-center gap-2">
                 <div className="relative h-10 w-40">
                   <Image
-                    src="/api/uploads/others/logo_cabecera.webp"
+                    src="http://localhost:3001/uploads/others/logo_cabecera.webp"
                     alt="WWTRAIL"
                     fill
                     className="object-contain"
@@ -82,7 +82,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-2">
               <div className="relative h-10 w-40">
                 <Image
-                  src="/api/uploads/others/logo_cabecera.webp"
+                  src="http://localhost:3001/uploads/others/logo_cabecera.webp"
                   alt="WWTRAIL"
                   fill
                   className="object-contain"
