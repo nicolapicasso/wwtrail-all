@@ -33,7 +33,7 @@ export default function PromotionsPage() {
       if (typeFilter !== 'ALL') filters.type = typeFilter;
 
       const response = await promotionsService.getAll(filters);
-      setPromotions(response.data);
+      setPromotions(response.promotions || []);
       setTotalPages(response.pagination.pages);
     } catch (err) {
       console.error('Error loading promotions:', err);

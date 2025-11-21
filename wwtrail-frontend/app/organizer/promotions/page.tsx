@@ -50,7 +50,7 @@ export default function AdminPromotionsPage() {
       if (statusFilter !== 'ALL') filters.status = statusFilter;
 
       const response = await promotionsService.getAll(filters);
-      setPromotions(response.data);
+      setPromotions(response.promotions || []);
       setTotalPages(response.pagination.pages);
     } catch (err: any) {
       console.error('Error loading promotions:', err);
