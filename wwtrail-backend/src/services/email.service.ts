@@ -1,5 +1,5 @@
 // src/services/email.service.ts
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import logger from '../utils/logger';
 
 interface SendCouponEmailParams {
