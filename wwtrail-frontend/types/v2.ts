@@ -26,6 +26,9 @@ export * from './specialSeries';
 // TerrainType types
 export * from './terrainType';
 
+// Promotion types
+export * from './promotion';
+
 // API Response types
 export interface ApiResponse<T> {
   status: 'success' | 'error';
