@@ -106,6 +106,11 @@ enum PostStatus {
   ARCHIVED
 }
 
+enum PromotionType {
+  EXCLUSIVE_CONTENT
+  COUPON
+}
+
 enum PodiumType {
   GENERAL
   MALE
@@ -150,6 +155,7 @@ model User {
   userCompetitions      UserCompetition[]
   blogPosts             Post[]
   ratings               EditionRating[]   @relation("UserRatings")
+  promotions            Promotion[]       @relation("PromotionCreator")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -238,28 +244,28 @@ model Event {
   email   String? @db.VarChar(255)
   phone   String? @db.VarChar(20)
 
-    // Redes sociales
+  // Redes sociales
   instagramUrl String? @db.Text
   facebookUrl  String? @db.Text
   twitterUrl   String? @db.Text
   youtubeUrl   String? @db.Text
 
   // Imágenes
-  logo          String?     @db.Text
-  coverImage    String?     @db.Text
+  logo          String?  @db.Text
+  coverImage    String?  @db.Text
   gallery       String[] // ✅ Ya existe
   logoUrl       String? // ✅ Agregado por ti
   coverImageUrl String?
 
   // Meta
-  userId      String // Usuario que creó el evento
-  user        User   @relation("EventCreator", fields: [userId], references: [id])
+  userId String // Usuario que creó el evento
+  user   User   @relation("EventCreator", fields: [userId], references: [id])
 
   // Entidad organizadora (opcional)
   organizerId String?
   organizer   Organizer? @relation("OrganizerEvents", fields: [organizerId], references: [id], onDelete: SetNull)
 
-  status      EventStatus @default(DRAFT)
+  status EventStatus @default(DRAFT)
 
   // Temporalidad
   typicalMonth     Int? // 1-12 para ordenar/filtrar
@@ -277,7 +283,6 @@ model Event {
 
   // Relaciones
   competitions Competition[]
-  posts        Post[]
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -343,7 +348,6 @@ model Competition {
   reviews          Review[]
   favorites        Favorite[]
   userCompetitions UserCompetition[]
-  posts            Post[]
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -409,16 +413,16 @@ model Edition {
   chronicle String? @db.Text
 
   // ✅ NUEVOS CAMPOS - FASE 4: Meteo Automático
-  weather        Json?    // Datos climáticos históricos
+  weather        Json? // Datos climáticos históricos
   weatherFetched Boolean @default(false)
 
   // Relaciones
-  competition  Competition       @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  competition  Competition     @relation(fields: [competitionId], references: [id], onDelete: Cascade)
   userEditions UserEdition[]
   blogPosts    Post[]
-  ratings      EditionRating[]   @relation("EditionRatings")
-  podiums      EditionPodium[]   @relation("EditionPodiums")
-  photos       EditionPhoto[]    @relation("EditionPhotos")
+  ratings      EditionRating[] @relation("EditionRatings")
+  podiums      EditionPodium[] @relation("EditionPodiums")
+  photos       EditionPhoto[]  @relation("EditionPhotos")
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -706,27 +710,18 @@ model Post {
   content       String  @db.Text
   featuredImage String? @db.Text
 
-  // SEO fields
-  metaTitle       String? @db.VarChar(255)
-  metaDescription String? @db.Text
-
   category PostCategory @default(GENERAL)
   status   PostStatus   @default(DRAFT)
-  language Language     @default(ES)
 
-  // Relaciones con eventos, competiciones y ediciones (solo una de cada tipo)
-  eventId       String?
-  event         Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  competitionId String?
-  competition   Competition? @relation(fields: [competitionId], references: [id], onDelete: SetNull)
-  editionId     String?
-  edition       Edition?     @relation(fields: [editionId], references: [id], onDelete: SetNull)
+  // Relación con edición específica
+  editionId String?
+  edition   Edition? @relation(fields: [editionId], references: [id], onDelete: SetNull)
 
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
 
-  viewCount         Int       @default(0)
-  publishedAt       DateTime?
+  viewCount          Int       @default(0)
+  publishedAt        DateTime?
   scheduledPublishAt DateTime?
 
   tags         PostTag[]
@@ -739,13 +734,8 @@ model Post {
   @@index([slug])
   @@index([status])
   @@index([category])
-  @@index([language])
   @@index([authorId])
-  @@index([eventId])
-  @@index([competitionId])
   @@index([editionId])
-  @@index([publishedAt])
-  @@index([scheduledPublishAt])
   @@map("posts")
 }
 
@@ -777,12 +767,12 @@ model PostTag {
 }
 
 model PostImage {
-  id          String  @id @default(uuid())
-  postId      String
-  post        Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  imageUrl    String  @db.Text
-  caption     String? @db.Text
-  sortOrder   Int     @default(0)
+  id        String  @id @default(uuid())
+  postId    String
+  post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  imageUrl  String  @db.Text
+  caption   String? @db.Text
+  sortOrder Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -919,8 +909,8 @@ model EditionPodium {
   type         PodiumType
   categoryName String?    @db.VarChar(100)
 
-  firstPlace  String  @db.VarChar(200)
-  firstTime   String? @db.VarChar(20)
+  firstPlace String  @db.VarChar(200)
+  firstTime  String? @db.VarChar(20)
 
   secondPlace String? @db.VarChar(200)
   secondTime  String? @db.VarChar(20)
@@ -948,9 +938,9 @@ model EditionPhoto {
   editionId String
   edition   Edition @relation("EditionPhotos", fields: [editionId], references: [id], onDelete: Cascade)
 
-  url        String @db.Text
-  thumbnail  String? @db.Text
-  caption    String? @db.Text
+  url          String  @db.Text
+  thumbnail    String? @db.Text
+  caption      String? @db.Text
   photographer String? @db.VarChar(200)
 
   width    Int?
@@ -1000,11 +990,11 @@ enum HomeTextVariant {
 }
 
 model HomeConfiguration {
-  id           String   @id @default(uuid())
-  heroImage    String?  @db.Text // URL de la imagen del hero
-  heroTitle    String?  @db.Text // Título principal del hero
-  heroSubtitle String?  @db.Text // Subtítulo del hero
-  isActive     Boolean  @default(true) // Solo una configuración activa a la vez
+  id           String  @id @default(uuid())
+  heroImage    String? @db.Text // URL de la imagen del hero
+  heroTitle    String? @db.Text // Título principal del hero
+  heroSubtitle String? @db.Text // Subtítulo del hero
+  isActive     Boolean @default(true) // Solo una configuración activa a la vez
 
   blocks HomeBlock[]
 
@@ -1015,7 +1005,7 @@ model HomeConfiguration {
 }
 
 model HomeBlock {
-  id              String        @id @default(uuid())
+  id              String            @id @default(uuid())
   configurationId String
   configuration   HomeConfiguration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
 
@@ -1042,7 +1032,8 @@ model ServiceCategory {
   icon String @db.VarChar(10) // Emoji para mostrar en mapas y UI
 
   // Relaciones
-  services Service[]
+  services   Service[]
+  promotions Promotion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1075,8 +1066,8 @@ model Service {
 
   // Meta
   organizerId String
-  organizer   User         @relation("ServiceOrganizer", fields: [organizerId], references: [id])
-  status      EventStatus  @default(DRAFT) // Reutilizamos EventStatus (DRAFT, PUBLISHED, CANCELLED)
+  organizer   User        @relation("ServiceOrganizer", fields: [organizerId], references: [id])
+  status      EventStatus @default(DRAFT) // Reutilizamos EventStatus (DRAFT, PUBLISHED, CANCELLED)
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -1092,4 +1083,118 @@ model Service {
   @@index([organizerId])
   @@index([featured])
   @@map("services")
+}
+
+// ===================================
+// PROMOCIONES (Cupones y Contenido Exclusivo)
+// ===================================
+
+model Promotion {
+  id   String        @id @default(uuid())
+  type PromotionType // EXCLUSIVE_CONTENT o COUPON
+
+  // Campos comunes
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  description String   @db.Text
+  coverImage  String?  @db.Text
+  gallery     String[] // Array de URLs para galería de fotos
+  brandUrl    String?  @db.Text // URL de la marca/fabricante
+
+  // Categoría (usa las mismas que servicios)
+  categoryId String?
+  category   ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Idioma
+  language Language @default(ES)
+
+  // Países (relación many-to-many o GLOBAL si no tiene países asociados)
+  countries PromotionCountry[]
+  isGlobal  Boolean            @default(false)
+
+  // Campos específicos por tipo
+  exclusiveContent String? @db.Text // Solo para EXCLUSIVE_CONTENT (contenido oculto)
+
+  // Para cupones: pool de códigos
+  couponCodes CouponCode[]
+  redemptions CouponRedemption[]
+
+  // Estado y metadatos
+  status    PostStatus @default(DRAFT) // Reutilizamos PostStatus
+  viewCount Int        @default(0)
+  featured  Boolean    @default(false)
+
+  // Usuario creador
+  createdById String
+  createdBy   User   @relation("PromotionCreator", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([type])
+  @@index([status])
+  @@index([language])
+  @@index([categoryId])
+  @@index([createdById])
+  @@index([isGlobal])
+  @@map("promotions")
+}
+
+// Relación many-to-many para países
+model PromotionCountry {
+  id          String    @id @default(uuid())
+  promotionId String
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  countryCode String    @db.VarChar(2) // ISO 3166-1 alpha-2
+
+  createdAt DateTime @default(now())
+
+  @@unique([promotionId, countryCode])
+  @@index([promotionId])
+  @@index([countryCode])
+  @@map("promotion_countries")
+}
+
+// Pool de códigos de cupón
+model CouponCode {
+  id          String    @id @default(uuid())
+  promotionId String
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  code   String    @db.VarChar(100) // Código único del cupón
+  isUsed Boolean   @default(false)
+  usedAt DateTime?
+  usedBy String?   @db.VarChar(255) // Email del usuario que lo canjeó
+
+  redemption CouponRedemption?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([promotionId, code])
+  @@index([promotionId])
+  @@index([isUsed])
+  @@map("coupon_codes")
+}
+
+// Registro de canjes de cupones
+model CouponRedemption {
+  id           String     @id @default(uuid())
+  promotionId  String
+  promotion    Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  couponCodeId String     @unique
+  couponCode   CouponCode @relation(fields: [couponCodeId], references: [id], onDelete: Cascade)
+
+  userName  String @db.VarChar(255)
+  userEmail String @db.VarChar(255)
+
+  emailSent   Boolean   @default(false)
+  emailSentAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([promotionId])
+  @@index([userEmail])
+  @@map("coupon_redemptions")
 }
