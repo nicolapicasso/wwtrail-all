@@ -204,20 +204,22 @@ export default function EventMap({
 
       // Popup del evento principal
       mainMarker.bindPopup(`
-        <div style="min-width: 200px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
-          <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #000;">
+        <div style="min-width: 200px; padding: 16px;">
+          <h3 style="font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #000; line-height: 1.3;">
             ${event.name}
           </h3>
-          <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+          <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
             <strong>Tipo:</strong> Evento
           </p>
-          <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+          <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
             <strong>Lugar:</strong> ${event.city}, ${event.country}
           </p>
-          <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
             <a
               href="/events/${event.slug}"
-              style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;"
+              style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s;"
+              onmouseover="this.style.color='#B66916'"
+              onmouseout="this.style.color='#000'"
             >
               Ver evento →
             </a>
@@ -258,20 +260,22 @@ export default function EventMap({
 
         // Popup de evento cercano
         nearbyMarker.bindPopup(`
-          <div style="min-width: 180px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
-            <h4 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+          <div style="min-width: 180px; padding: 16px;">
+            <h4 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
               ${nearbyEvent.name}
             </h4>
-            <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
               <strong>Tipo:</strong> Evento
             </p>
-            <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
               <strong>Lugar:</strong> ${nearbyEvent.city}, ${nearbyEvent.country}
             </p>
-            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
               <a
                 href="/events/${nearbyEvent.slug}"
-                style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;"
+                style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;"
+                onmouseover="this.style.color='#B66916'"
+                onmouseout="this.style.color='#000'"
               >
                 Ver evento →
               </a>
@@ -314,20 +318,22 @@ export default function EventMap({
         // Popup de servicio cercano
         const categoryName = (nearbyService as any).categoryName || (nearbyService as any).type || 'Servicio';
         nearbyMarker.bindPopup(`
-          <div style="min-width: 180px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
-            <h4 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+          <div style="min-width: 180px; padding: 16px;">
+            <h4 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
               ${nearbyService.name}
             </h4>
-            <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
               <strong>Categoría:</strong> ${categoryName}
             </p>
-            <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+            <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
               ${nearbyService.city}, ${nearbyService.country}
             </p>
-            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
               <a
                 href="/services/${nearbyService.slug}"
-                style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;"
+                style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;"
+                onmouseover="this.style.color='#B66916'"
+                onmouseout="this.style.color='#000'"
               >
                 Ver →
               </a>

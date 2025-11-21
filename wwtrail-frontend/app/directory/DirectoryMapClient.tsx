@@ -199,18 +199,18 @@ export default function DirectoryMapClient() {
               icon: createEventIcon(),
             })
               .bindPopup(`
-                <div style="min-width: 180px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
-                  <h3 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+                <div style="min-width: 180px; padding: 16px;">
+                  <h3 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
                     ${event.name}
                   </h3>
-                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
                     <strong>Tipo:</strong> Evento
                   </p>
-                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
                     <strong>Lugar:</strong> ${event.city}, ${event.country}
                   </p>
-                  <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
-                    <a href="/events/${event.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;">
+                  <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+                    <a href="/events/${event.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
                       Ver evento →
                     </a>
                   </div>
@@ -328,21 +328,21 @@ export default function DirectoryMapClient() {
             })
               .bindPopup(
                 `
-                <div style="min-width: 200px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
-                  <h3 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+                <div style="min-width: 200px; padding: 16px;">
+                  <h3 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
                     ${comp.name}
                   </h3>
-                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
                     <strong>Tipo:</strong> Competición
                   </p>
-                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
                     <strong>Lugar:</strong> ${comp.event.city}, ${comp.event.country}
                   </p>
-                  ${comp.baseDistance ? `<p style="font-size: 13px; color: #000; margin-bottom: 4px;"><strong>Distancia:</strong> ${comp.baseDistance} km</p>` : ''}
-                  ${comp.baseElevation ? `<p style="font-size: 13px; color: #000; margin-bottom: 4px;"><strong>Desnivel +:</strong> ${comp.baseElevation}m+</p>` : ''}
-                  ${comp.specialSeries ? `<p style="font-size: 13px; color: #000; margin-bottom: 4px;"><strong>Special series:</strong> <a href="/special-series/${comp.specialSeries.slug}" style="color: #000; text-decoration: underline;">${comp.specialSeries.name}</a></p>` : ''}
-                  <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
-                    <a href="/events/${comp.event.slug}/${comp.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;">
+                  ${comp.baseDistance ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Distancia:</strong> ${comp.baseDistance} km</p>` : ''}
+                  ${comp.baseElevation ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Desnivel +:</strong> ${comp.baseElevation}m+</p>` : ''}
+                  ${comp.specialSeries ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Special series:</strong> <a href="/special-series/${comp.specialSeries.slug}" style="color: #000; text-decoration: underline;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">${comp.specialSeries.name}</a></p>` : ''}
+                  <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+                    <a href="/events/${comp.event.slug}/${comp.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
                       Ver competición →
                     </a>
                   </div>
@@ -387,18 +387,18 @@ export default function DirectoryMapClient() {
               icon: createServiceIcon(categoryIcon),
             })
               .bindPopup(`
-                <div style="min-width: 180px; border: 2px solid #000; border-radius: 0px; padding: 12px;">
-                  <h3 style="font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #000;">
+                <div style="min-width: 180px; padding: 16px;">
+                  <h3 style="font-weight: bold; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3;">
                     ${service.name}
                   </h3>
-                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
                     <strong>Categoría:</strong> ${categoryName}
                   </p>
-                  <p style="font-size: 13px; color: #000; margin-bottom: 4px;">
+                  <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
                     ${service.city}, ${service.country}
                   </p>
-                  <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #000;">
-                    <a href="/services/${service.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 13px;">
+                  <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
+                    <a href="/services/${service.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
                       Ver →
                     </a>
                   </div>
