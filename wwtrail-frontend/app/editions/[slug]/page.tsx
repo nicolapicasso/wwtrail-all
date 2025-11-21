@@ -9,6 +9,7 @@ import servicesService from '@/lib/api/v2/services.service';
 import EditionDetailTabs from '@/components/EditionDetailTabs';
 import EventGallery from '@/components/EventGallery';
 import EventMap from '@/components/EventMap';
+import { RelatedArticles } from '@/components/RelatedArticles';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Event } from '@/types/api';
@@ -461,6 +462,9 @@ export default async function EditionDetailPage({
             </div>
           </div>
         </div>
+
+        {/* Related Articles */}
+        <RelatedArticles editionId={editionWithDetails.id} title={`Artículos sobre ${competition.name} ${editionWithDetails.year}`} className="mt-8" />
       </div>
     </div>
   );
