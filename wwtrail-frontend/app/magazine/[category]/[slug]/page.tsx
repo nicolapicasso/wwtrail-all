@@ -192,6 +192,31 @@ export default function ArticleDetailPage() {
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
 
+            {/* Gallery */}
+            {article.images && article.images.length > 0 && (
+              <div className="mt-12 mb-8">
+                <h3 className="text-2xl font-bold mb-6">Galería</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {article.images.map((image, index) => (
+                    <div key={image.id} className="relative group overflow-hidden rounded-lg">
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.caption || `Imagen ${index + 1}`}
+                        width={400}
+                        height={300}
+                        className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      {image.caption && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                          <p className="text-white text-sm">{image.caption}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Related Event/Competition/Edition */}
             {(article.event || article.competition || article.edition) && (
               <div className="mt-8 p-4 bg-gray-50 rounded-lg border">

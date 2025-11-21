@@ -33,6 +33,9 @@ export function PostForm({ post, mode }: PostFormProps) {
   const [excerpt, setExcerpt] = useState(post?.excerpt || '');
   const [content, setContent] = useState(post?.content || '');
   const [featuredImage, setFeaturedImage] = useState(post?.featuredImage || '');
+  const [galleryImages, setGalleryImages] = useState<string[]>(
+    post?.images?.map(img => img.imageUrl) || []
+  );
   const [metaTitle, setMetaTitle] = useState(post?.metaTitle || '');
   const [metaDescription, setMetaDescription] = useState(post?.metaDescription || '');
   const [category, setCategory] = useState<PostCategory>(post?.category || PostCategory.GENERAL);
@@ -82,7 +85,7 @@ export function PostForm({ post, mode }: PostFormProps) {
     setError(null);
 
     try {
-      const data: CreatePostInput | UpdatePostInput = {
+      const data: any = {
         title,
         excerpt: excerpt || undefined,
         content,
@@ -96,6 +99,14 @@ export function PostForm({ post, mode }: PostFormProps) {
         editionId: editionId || undefined,
         scheduledPublishAt: scheduledPublishAt ? new Date(scheduledPublishAt).toISOString() : undefined,
       };
+
+      // Añadir imágenes de galería si existen
+      if (galleryImages.length > 0) {
+        data.images = galleryImages.map((imageUrl, index) => ({
+          imageUrl,
+          sortOrder: index,
+        }));
+      }
 
       if (mode === 'create') {
         await postsService.create(data as CreatePostInput);
@@ -200,8 +211,8 @@ export function PostForm({ post, mode }: PostFormProps) {
       </div>
 
       {/* Media */}
-      <div className="bg-white rounded-lg border p-6 space-y-4">
-        <h2 className="text-xl font-bold mb-4">Imagen Destacada</h2>
+      <div className="bg-white rounded-lg border p-6 space-y-6">
+        <h2 className="text-xl font-bold mb-4">Imágenes</h2>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -212,6 +223,25 @@ export function PostForm({ post, mode }: PostFormProps) {
             currentUrl={featuredImage}
             fieldname="cover"
             buttonText="Subir imagen de portada"
+            accept="image/*"
+            maxSizeMB={5}
+            showPreview={true}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Galería de Imágenes
+          </label>
+          <p className="text-sm text-gray-500 mb-2">
+            Se mostrarán al final del artículo
+          </p>
+          <FileUpload
+            onUploadMultiple={setGalleryImages}
+            currentUrls={galleryImages}
+            multiple={true}
+            fieldname="gallery"
+            buttonText="Subir imágenes a la galería"
             accept="image/*"
             maxSizeMB={5}
             showPreview={true}

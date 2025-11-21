@@ -42,6 +42,11 @@ interface UpdatePostInput {
   status?: PostStatus;
   publishedAt?: Date;
   scheduledPublishAt?: Date;
+  images?: Array<{
+    imageUrl: string;
+    caption?: string;
+    sortOrder: number;
+  }>;
 }
 
 interface PostFilters {
@@ -435,15 +440,29 @@ export class PostsService {
 
       // Preparar datos de actualización
       const updateData: any = { ...data };
+      delete updateData.images; // No incluir images en el update directo
 
       // Si se cambia el título, regenerar slug
       if (data.title) {
         updateData.slug = await generateUniqueSlug(data.title, prisma.post, id);
       }
 
+      // Si hay imágenes, borrar las existentes y crear las nuevas
+      if (data.images !== undefined) {
+        // Borrar imágenes existentes
+        await prisma.postImage.deleteMany({
+          where: { postId: id },
+        });
+      }
+
       const post = await prisma.post.update({
         where: { id },
-        data: updateData,
+        data: {
+          ...updateData,
+          images: data.images?.length ? {
+            create: data.images,
+          } : undefined,
+        },
         include: {
           author: {
             select: {

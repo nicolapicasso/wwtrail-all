@@ -3,6 +3,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { useRef, useState } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -10,6 +11,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
 import TextStyle from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
+import { uploadFile } from '@/lib/api/files.service';
 import {
   Bold,
   Italic,
@@ -24,6 +26,7 @@ import {
   AlignRight,
   Link as LinkIcon,
   ImageIcon,
+  Upload,
   Undo,
   Redo,
 } from 'lucide-react';
@@ -41,6 +44,9 @@ export function RichTextEditor({
   placeholder = 'Escribe tu contenido aquí...',
   className = '',
 }: RichTextEditorProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -82,10 +88,46 @@ export function RichTextEditor({
     return null;
   }
 
-  const addImage = () => {
+  const addImageFromUrl = () => {
     const url = window.prompt('Introduce la URL de la imagen:');
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
+
+  const uploadImageFile = async (file: File) => {
+    try {
+      setIsUploading(true);
+      const url = await uploadFile(file, 'file');
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error al subir la imagen. Por favor, inténtalo de nuevo.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor selecciona un archivo de imagen.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen es demasiado grande. El tamaño máximo es 5MB.');
+        return;
+      }
+      uploadImageFile(file);
+    }
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -110,6 +152,15 @@ export function RichTextEditor({
 
   return (
     <div className={`border rounded-lg bg-white ${className}`}>
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* Toolbar */}
       <div className="border-b bg-gray-50 p-2 flex flex-wrap gap-1">
         {/* Text Style Buttons */}
@@ -257,12 +308,27 @@ export function RichTextEditor({
           <LinkIcon className="h-4 w-4" />
         </button>
 
-        {/* Image */}
+        {/* Image Upload */}
         <button
           type="button"
-          onClick={addImage}
+          onClick={handleImageUpload}
+          disabled={isUploading}
+          className="p-2 rounded hover:bg-gray-200 disabled:opacity-50"
+          title="Subir imagen"
+        >
+          {isUploading ? (
+            <div className="h-4 w-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
+        </button>
+
+        {/* Image from URL */}
+        <button
+          type="button"
+          onClick={addImageFromUrl}
           className="p-2 rounded hover:bg-gray-200"
-          title="Añadir imagen"
+          title="Añadir imagen desde URL"
         >
           <ImageIcon className="h-4 w-4" />
         </button>
