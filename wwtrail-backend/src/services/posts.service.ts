@@ -10,8 +10,12 @@ interface CreatePostInput {
   excerpt?: string;
   content: string;
   featuredImage?: string;
+  metaTitle?: string;
+  metaDescription?: string;
   category: PostCategory;
   language: Language;
+  eventId?: string;
+  competitionId?: string;
   editionId?: string;
   authorId: string;
   publishedAt?: Date;
@@ -28,8 +32,12 @@ interface UpdatePostInput {
   excerpt?: string;
   content?: string;
   featuredImage?: string;
+  metaTitle?: string;
+  metaDescription?: string;
   category?: PostCategory;
   language?: Language;
+  eventId?: string;
+  competitionId?: string;
   editionId?: string;
   status?: PostStatus;
   publishedAt?: Date;
@@ -80,6 +88,8 @@ export class PostsService {
         excerpt: data.excerpt,
         content: data.content,
         featuredImage: data.featuredImage,
+        metaTitle: data.metaTitle || data.title,
+        metaDescription: data.metaDescription || data.excerpt,
         category: data.category,
         language: data.language,
         status,
@@ -89,6 +99,8 @@ export class PostsService {
       };
 
       // Añadir relaciones opcionales
+      if (data.eventId) postData.eventId = data.eventId;
+      if (data.competitionId) postData.competitionId = data.competitionId;
       if (data.editionId) postData.editionId = data.editionId;
 
       // Crear post con imágenes de galería si existen
@@ -177,6 +189,20 @@ export class PostsService {
                 username: true,
                 firstName: true,
                 lastName: true,
+              },
+            },
+            event: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+            competition: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
               },
             },
             edition: {
@@ -285,6 +311,20 @@ export class PostsService {
               lastName: true,
             },
           },
+          event: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          competition: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
           edition: {
             select: {
               id: true,
@@ -370,9 +410,13 @@ export class PostsService {
       if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
       if (data.content !== undefined) updateData.content = data.content;
       if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+      if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
+      if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
       if (data.category !== undefined) updateData.category = data.category;
       if (data.language !== undefined) updateData.language = data.language;
       if (data.status !== undefined) updateData.status = data.status;
+      if (data.eventId !== undefined) updateData.eventId = data.eventId;
+      if (data.competitionId !== undefined) updateData.competitionId = data.competitionId;
       if (data.editionId !== undefined) updateData.editionId = data.editionId;
       if (data.publishedAt !== undefined) updateData.publishedAt = data.publishedAt;
       if (data.scheduledPublishAt !== undefined) updateData.scheduledPublishAt = data.scheduledPublishAt;
@@ -407,6 +451,8 @@ export class PostsService {
               lastName: true,
             },
           },
+          event: true,
+          competition: true,
           edition: true,
           images: {
             orderBy: {
