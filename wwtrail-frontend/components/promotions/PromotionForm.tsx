@@ -7,6 +7,7 @@ import { promotionsService } from '@/lib/api/v2';
 import { Upload, X, Plus } from 'lucide-react';
 import { uploadFile } from '@/lib/api/files.service';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import { COUNTRIES } from '@/lib/data/countries';
 
 interface PromotionFormProps {
   promotion?: Promotion;
@@ -20,19 +21,6 @@ const LANGUAGES: { value: Language; label: string }[] = [
   { value: 'CA', label: 'Català' },
   { value: 'FR', label: 'Français' },
   { value: 'DE', label: 'Deutsch' },
-];
-
-const COUNTRIES = [
-  { code: 'ES', name: 'España' },
-  { code: 'FR', name: 'Francia' },
-  { code: 'IT', name: 'Italia' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'DE', name: 'Alemania' },
-  { code: 'UK', name: 'Reino Unido' },
-  { code: 'US', name: 'Estados Unidos' },
-  { code: 'MX', name: 'México' },
-  { code: 'AR', name: 'Argentina' },
-  { code: 'CL', name: 'Chile' },
 ];
 
 export default function PromotionForm({ promotion, onSuccess }: PromotionFormProps) {
@@ -352,23 +340,25 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
         {!isGlobal && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Países Válidos *
+              Países Válidos * ({countries.length} seleccionados)
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {COUNTRIES.map(country => (
-                <label
-                  key={country.code}
-                  className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={countries.includes(country.code)}
-                    onChange={() => toggleCountry(country.code)}
-                    className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                  />
-                  <span className="text-sm">{country.name}</span>
-                </label>
-              ))}
+            <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {COUNTRIES.map(country => (
+                  <label
+                    key={country.code}
+                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={countries.includes(country.code)}
+                      onChange={() => toggleCountry(country.code)}
+                      className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm">{country.flag} {country.name}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         )}

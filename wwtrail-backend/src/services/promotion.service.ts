@@ -236,7 +236,7 @@ export class PromotionService {
         }
       };
 
-      await cache.set(cacheKey, result, CACHE_TTL);
+      await cache.set(cacheKey, JSON.stringify(result), CACHE_TTL);
       return result;
 
     } catch (error) {
@@ -304,11 +304,11 @@ export class PromotionService {
           couponCodes: undefined, // No exponer códigos individuales
         };
 
-        await cache.set(cacheKey, result, CACHE_TTL);
+        await cache.set(cacheKey, JSON.stringify(result), CACHE_TTL);
         return result;
       }
 
-      await cache.set(cacheKey, promotion, CACHE_TTL);
+      await cache.set(cacheKey, JSON.stringify(promotion), CACHE_TTL);
       return promotion;
 
     } catch (error) {
@@ -576,7 +576,7 @@ export class PromotionService {
         };
       });
 
-      await cache.set(cacheKey, analytics, CACHE_TTL);
+      await cache.set(cacheKey, JSON.stringify(analytics), CACHE_TTL);
       return analytics;
 
     } catch (error) {
