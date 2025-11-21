@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from './RichTextEditor';
+import FileUpload from './FileUpload';
 import { postsService, eventsService, competitionsService, editionsService } from '@/lib/api/v2';
 import {
   PostCategory,
@@ -62,8 +63,8 @@ export function PostForm({ post, mode }: PostFormProps) {
       ]);
 
       setEvents(eventsRes.data || []);
-      setCompetitions(competitionsRes.data || []);
-      setEditions(editionsRes.data || []);
+      setCompetitions(competitionsRes.competitions || []);
+      setEditions(editionsRes.editions || []);
     } catch (err) {
       console.error('Error loading options:', err);
     }
@@ -97,11 +98,11 @@ export function PostForm({ post, mode }: PostFormProps) {
       };
 
       if (mode === 'create') {
-        const created = await postsService.create(data as CreatePostInput);
-        router.push(`/magazine/${category.toLowerCase()}/${created.slug}`);
+        await postsService.create(data as CreatePostInput);
+        router.push('/organizer/posts');
       } else if (post) {
-        const updated = await postsService.update(post.id, data as UpdatePostInput);
-        router.push(`/magazine/${category.toLowerCase()}/${updated.slug}`);
+        await postsService.update(post.id, data as UpdatePostInput);
+        router.push('/organizer/posts');
       }
     } catch (err: any) {
       console.error('Error saving post:', err);
@@ -204,28 +205,17 @@ export function PostForm({ post, mode }: PostFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            URL de la Imagen Destacada
+            Imagen de Portada
           </label>
-          <input
-            type="url"
-            value={featuredImage}
-            onChange={(e) => setFeaturedImage(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            placeholder="https://ejemplo.com/imagen.jpg"
+          <FileUpload
+            onUpload={setFeaturedImage}
+            currentUrl={featuredImage}
+            fieldname="cover"
+            buttonText="Subir imagen de portada"
+            accept="image/*"
+            maxSizeMB={5}
+            showPreview={true}
           />
-          {featuredImage && (
-            <div className="mt-2">
-              <img
-                src={featuredImage}
-                alt="Preview"
-                className="max-w-xs rounded-lg"
-                onError={(e) => {
-                  e.currentTarget.src = '';
-                  e.currentTarget.alt = 'Error al cargar imagen';
-                }}
-              />
-            </div>
-          )}
         </div>
       </div>
 

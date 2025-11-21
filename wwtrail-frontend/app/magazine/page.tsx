@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
-import { postsService } from '@/lib/api/v2';
+import { postsService, eventsService, competitionsService, editionsService } from '@/lib/api/v2';
 import { ArticleGrid } from '@/components/ArticleGrid';
-import { PostListItem, PostCategory, Language, POST_CATEGORY_LABELS, LANGUAGE_LABELS } from '@/types/v2';
+import { PostListItem, PostCategory, POST_CATEGORY_LABELS } from '@/types/v2';
 
 export default function MagazinePage() {
   const [articles, setArticles] = useState<PostListItem[]>([]);
@@ -12,12 +12,39 @@ export default function MagazinePage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<PostCategory | ''>('');
-  const [selectedLanguage, setSelectedLanguage] = useState<Language | ''>('');
+  const [selectedEventId, setSelectedEventId] = useState('');
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState('');
+  const [selectedEditionId, setSelectedEditionId] = useState('');
   const [showFilters, setShowFilters] = useState(true);
+
+  // Options for selects
+  const [events, setEvents] = useState<any[]>([]);
+  const [competitions, setCompetitions] = useState<any[]>([]);
+  const [editions, setEditions] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadRelatedOptions();
+  }, []);
 
   useEffect(() => {
     loadArticles();
-  }, [search, selectedCategory, selectedLanguage]);
+  }, [search, selectedCategory, selectedEventId, selectedCompetitionId, selectedEditionId]);
+
+  const loadRelatedOptions = async () => {
+    try {
+      const [eventsRes, competitionsRes, editionsRes] = await Promise.all([
+        eventsService.getAll({ limit: 100, sortBy: 'name' }),
+        competitionsService.getAll({ limit: 100, sortBy: 'name' }),
+        editionsService.getAll({ limit: 100, sortBy: 'startDate', sortOrder: 'desc' }),
+      ]);
+
+      setEvents(eventsRes.data || []);
+      setCompetitions(competitionsRes.competitions || []);
+      setEditions(editionsRes.editions || []);
+    } catch (err) {
+      console.error('Error loading filter options:', err);
+    }
+  };
 
   const loadArticles = async () => {
     try {
@@ -32,7 +59,9 @@ export default function MagazinePage() {
 
       if (search) params.search = search;
       if (selectedCategory) params.category = selectedCategory;
-      if (selectedLanguage) params.language = selectedLanguage;
+      if (selectedEventId) params.eventId = selectedEventId;
+      if (selectedCompetitionId) params.competitionId = selectedCompetitionId;
+      if (selectedEditionId) params.editionId = selectedEditionId;
 
       const response = await postsService.getAll(params);
       setArticles(response.data || []);
@@ -51,7 +80,9 @@ export default function MagazinePage() {
   const handleResetFilters = () => {
     setSearch('');
     setSelectedCategory('');
-    setSelectedLanguage('');
+    setSelectedEventId('');
+    setSelectedCompetitionId('');
+    setSelectedEditionId('');
   };
 
   return (
@@ -96,7 +127,7 @@ export default function MagazinePage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Category Filter */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -116,20 +147,58 @@ export default function MagazinePage() {
                     </select>
                   </div>
 
-                  {/* Language Filter */}
+                  {/* Event Filter */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Idioma
+                      Evento
                     </label>
                     <select
-                      value={selectedLanguage}
-                      onChange={(e) => setSelectedLanguage(e.target.value as Language | '')}
+                      value={selectedEventId}
+                      onChange={(e) => setSelectedEventId(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
-                      <option value="">Todos los idiomas</option>
-                      {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
-                        <option key={key} value={key}>
-                          {label}
+                      <option value="">Todos los eventos</option>
+                      {events.map((event) => (
+                        <option key={event.id} value={event.id}>
+                          {event.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Competition Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Competición
+                    </label>
+                    <select
+                      value={selectedCompetitionId}
+                      onChange={(e) => setSelectedCompetitionId(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Todas las competiciones</option>
+                      {competitions.map((comp) => (
+                        <option key={comp.id} value={comp.id}>
+                          {comp.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Edition Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Edición
+                    </label>
+                    <select
+                      value={selectedEditionId}
+                      onChange={(e) => setSelectedEditionId(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Todas las ediciones</option>
+                      {editions.map((edition: any) => (
+                        <option key={edition.id} value={edition.id}>
+                          {edition.competition?.name} - {edition.year}
                         </option>
                       ))}
                     </select>
@@ -137,7 +206,7 @@ export default function MagazinePage() {
                 </div>
 
                 {/* Reset Button */}
-                {(search || selectedCategory || selectedLanguage) && (
+                {(search || selectedCategory || selectedEventId || selectedCompetitionId || selectedEditionId) && (
                   <div className="flex justify-end">
                     <button
                       onClick={handleResetFilters}
