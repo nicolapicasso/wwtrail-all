@@ -14,8 +14,6 @@ interface CreatePostInput {
   metaDescription?: string;
   category: PostCategory;
   language: Language;
-  eventId?: string;
-  competitionId?: string;
   editionId?: string;
   authorId: string;
   publishedAt?: Date;
@@ -36,8 +34,6 @@ interface UpdatePostInput {
   metaDescription?: string;
   category?: PostCategory;
   language?: Language;
-  eventId?: string;
-  competitionId?: string;
   editionId?: string;
   status?: PostStatus;
   publishedAt?: Date;
@@ -57,8 +53,6 @@ interface PostFilters {
   language?: Language;
   status?: PostStatus;
   authorId?: string;
-  eventId?: string;
-  competitionId?: string;
   editionId?: string;
   sortBy?: 'publishedAt' | 'createdAt' | 'viewCount' | 'title';
   sortOrder?: 'asc' | 'desc';
@@ -101,8 +95,6 @@ export class PostsService {
       };
 
       // Añadir relaciones opcionales
-      if (data.eventId) postData.eventId = data.eventId;
-      if (data.competitionId) postData.competitionId = data.competitionId;
       if (data.editionId) postData.editionId = data.editionId;
 
       // Crear post con imágenes de galería si existen
@@ -122,20 +114,6 @@ export class PostsService {
               lastName: true,
             },
           },
-          event: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
-          competition: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
           edition: {
             select: {
               id: true,
@@ -148,6 +126,7 @@ export class PostsService {
               sortOrder: 'asc',
             },
           },
+          tags: true,
         },
       });
 
@@ -183,8 +162,6 @@ export class PostsService {
       if (filters.language) where.language = filters.language;
       if (filters.status) where.status = filters.status;
       if (filters.authorId) where.authorId = filters.authorId;
-      if (filters.eventId) where.eventId = filters.eventId;
-      if (filters.competitionId) where.competitionId = filters.competitionId;
       if (filters.editionId) where.editionId = filters.editionId;
 
       // Ordenamiento
@@ -268,22 +245,6 @@ export class PostsService {
               lastName: true,
             },
           },
-          event: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              coverImageUrl: true,
-            },
-          },
-          competition: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              logoUrl: true,
-            },
-          },
           edition: {
             select: {
               id: true,
@@ -340,25 +301,6 @@ export class PostsService {
               username: true,
               firstName: true,
               lastName: true,
-            },
-          },
-          event: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              coverImageUrl: true,
-              city: true,
-              country: true,
-            },
-          },
-          competition: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              logoUrl: true,
-              type: true,
             },
           },
           edition: {
