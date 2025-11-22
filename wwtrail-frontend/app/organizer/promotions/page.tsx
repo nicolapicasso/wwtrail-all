@@ -51,7 +51,7 @@ export default function AdminPromotionsPage() {
 
       const response = await promotionsService.getAll(filters);
       setPromotions(response.promotions || []);
-      setTotalPages(response.pagination?.pages || 1);
+      setTotalPages(response?.pagination?.pages ?? 1);
     } catch (err: any) {
       console.error('Error loading promotions:', err);
       setError(err.message || 'Error al cargar promociones');
