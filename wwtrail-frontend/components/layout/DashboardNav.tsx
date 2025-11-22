@@ -108,6 +108,11 @@ const navItems: NavItem[] = [
         icon: Ticket,
       },
       {
+        label: 'Categorías',
+        href: '/organizer/promotions/categories',
+        icon: Tag,
+      },
+      {
         label: 'Configurar Email',
         href: '/organizer/promotions/settings/email-templates',
         icon: FileText,
