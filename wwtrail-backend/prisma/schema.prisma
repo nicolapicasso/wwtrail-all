@@ -283,6 +283,7 @@ model Event {
 
   // Relaciones
   competitions Competition[]
+  translations EventTranslation[]
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -531,6 +532,57 @@ model CompetitionTranslation {
   @@unique([competitionId, language])
   @@index([competitionId])
   @@map("competition_translations")
+}
+
+model EventTranslation {
+  id          String            @id @default(uuid())
+  eventId     String
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  language    Language
+  name        String            @db.VarChar(255)
+  description String?           @db.Text
+  status      TranslationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, language])
+  @@index([eventId])
+  @@map("event_translations")
+}
+
+model ServiceTranslation {
+  id          String            @id @default(uuid())
+  serviceId   String
+  service     Service           @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  language    Language
+  name        String            @db.VarChar(255)
+  description String?           @db.Text
+  status      TranslationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([serviceId, language])
+  @@index([serviceId])
+  @@map("service_translations")
+}
+
+model SpecialSeriesTranslation {
+  id              String            @id @default(uuid())
+  specialSeriesId String
+  specialSeries   SpecialSeries     @relation(fields: [specialSeriesId], references: [id], onDelete: Cascade)
+  language        Language
+  name            String            @db.VarChar(255)
+  description     String?           @db.Text
+  status          TranslationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([specialSeriesId, language])
+  @@index([specialSeriesId])
+  @@map("special_series_translations")
 }
 
 // ===================================
@@ -853,6 +905,7 @@ model SpecialSeries {
 
   // Relaciones
   competitions Competition[] @relation("SpecialSeriesCompetitions")
+  translations SpecialSeriesTranslation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1076,6 +1129,9 @@ model Service {
   organizerId String
   organizer   User        @relation("ServiceOrganizer", fields: [organizerId], references: [id])
   status      EventStatus @default(DRAFT) // Reutilizamos EventStatus (DRAFT, PUBLISHED, CANCELLED)
+
+  // Relaciones
+  translations ServiceTranslation[]
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)

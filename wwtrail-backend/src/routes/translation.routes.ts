@@ -1,50 +1,70 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
-import {
-  createTranslationSchema,
-  updateTranslationSchema,
-  autoTranslateSchema,
-  getTranslationsSchema,
-  updateTranslationStatusSchema,
-  translationIdSchema,
-} from '../schemas/translation.schema';
+import { TranslationController } from '../controllers/translation.controller';
 
 const router = Router();
 
-// Nota: TranslationController debe ser creado para estas rutas
-// import { TranslationController } from '../controllers/translation.controller';
-
 // ============================================
-// RUTAS PÚBLICAS
+// RUTAS PÚBLICAS - Obtener traducciones
 // ============================================
 
 // Obtener traducciones de una competición
-// router.get('/competition/:competitionId', validate(getTranslationsSchema), TranslationController.getByCompetition);
+router.get('/competition/:competitionId', TranslationController.getCompetitionTranslations);
 
-// Obtener traducción por ID
-// router.get('/:id', validate(translationIdSchema), TranslationController.getById);
+// Obtener traducciones de un post
+router.get('/post/:postId', TranslationController.getPostTranslations);
 
 // ============================================
 // RUTAS PROTEGIDAS (ORGANIZER y ADMIN)
 // ============================================
 
-// Traducción automática con IA (solo organizador o admin)
-// router.post('/auto-translate', authenticate, authorize('ORGANIZER', 'ADMIN'), validate(autoTranslateSchema), TranslationController.autoTranslate);
+// Traducción automática genérica con IA
+router.post(
+  '/auto-translate',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  TranslationController.autoTranslate
+);
 
-// Crear traducción manual (organizador o admin)
-// router.post('/', authenticate, authorize('ORGANIZER', 'ADMIN'), validate(createTranslationSchema), TranslationController.create);
+// Auto-traducir competición específica
+router.post(
+  '/competition/:competitionId',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  TranslationController.autoTranslateCompetition
+);
 
-// Actualizar traducción (organizador o admin)
-// router.put('/:id', authenticate, authorize('ORGANIZER', 'ADMIN'), validate(translationIdSchema), validate(updateTranslationSchema), TranslationController.update);
-// router.patch('/:id', authenticate, authorize('ORGANIZER', 'ADMIN'), validate(translationIdSchema), validate(updateTranslationSchema), TranslationController.update);
+// Auto-traducir post específico
+router.post(
+  '/post/:postId',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  TranslationController.autoTranslatePost
+);
 
-// Actualizar estado de traducción (admin)
-// router.patch('/:id/status', authenticate, authorize('ADMIN'), validate(translationIdSchema), validate(updateTranslationStatusSchema), TranslationController.updateStatus);
+// Auto-traducir evento específico
+router.post(
+  '/event/:eventId',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  TranslationController.autoTranslateEvent
+);
 
-// Eliminar traducción (admin)
-// router.delete('/:id', authenticate, authorize('ADMIN'), validate(translationIdSchema), TranslationController.delete);
+// Auto-traducir servicio específico
+router.post(
+  '/service/:serviceId',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  TranslationController.autoTranslateService
+);
 
-// TODO: Crear TranslationController y descomentar estas rutas
+// Auto-traducir serie especial
+router.post(
+  '/special-series/:specialSeriesId',
+  authenticate,
+  authorize('ORGANIZER', 'ADMIN'),
+  TranslationController.autoTranslateSpecialSeries
+);
 
 export default router;
