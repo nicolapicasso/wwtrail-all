@@ -39,21 +39,6 @@ export default function PromotionsAnalyticsPage() {
     }
   };
 
-  // Calculate totals
-  const totals = analytics.reduce(
-    (acc, item) => ({
-      total: acc.total + item.totalCodes,
-      used: acc.used + item.usedCodes,
-      available: acc.available + item.availableCodes,
-      redemptions: acc.redemptions + item.redemptions,
-      views: acc.views + item.viewCount,
-    }),
-    { total: 0, used: 0, available: 0, redemptions: 0, views: 0 }
-  );
-
-  const usageRate = totals.total > 0 ? (totals.used / totals.total) * 100 : 0;
-  const conversionRate = totals.views > 0 ? (totals.redemptions / totals.views) * 100 : 0;
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -68,6 +53,21 @@ export default function PromotionsAnalyticsPage() {
   if (user?.role !== 'ADMIN') {
     return null;
   }
+
+  // Calculate totals (only after loading is complete)
+  const totals = Array.isArray(analytics) ? analytics.reduce(
+    (acc, item) => ({
+      total: acc.total + item.totalCodes,
+      used: acc.used + item.usedCodes,
+      available: acc.available + item.availableCodes,
+      redemptions: acc.redemptions + item.redemptions,
+      views: acc.views + item.viewCount,
+    }),
+    { total: 0, used: 0, available: 0, redemptions: 0, views: 0 }
+  ) : { total: 0, used: 0, available: 0, redemptions: 0, views: 0 };
+
+  const usageRate = totals.total > 0 ? (totals.used / totals.total) * 100 : 0;
+  const conversionRate = totals.views > 0 ? (totals.redemptions / totals.views) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
