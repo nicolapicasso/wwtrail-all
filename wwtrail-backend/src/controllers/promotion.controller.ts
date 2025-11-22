@@ -62,7 +62,7 @@ export class PromotionController {
 
       res.json({
         status: 'success',
-        data: result.promotions,
+        promotions: result.promotions,
         pagination: result.pagination,
       });
     } catch (error) {
