@@ -14,16 +14,20 @@ export default function PromotionsAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Redirect if not admin
   useEffect(() => {
-    if (!authLoading && user?.role !== 'ADMIN') {
+    if (!authLoading && user && user.role !== 'ADMIN') {
       router.push('/dashboard');
-      return;
-    }
-
-    if (user?.role === 'ADMIN') {
-      loadAnalytics();
     }
   }, [user, authLoading, router]);
+
+  // Load analytics when user is admin
+  useEffect(() => {
+    if (!authLoading && user?.role === 'ADMIN') {
+      loadAnalytics();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]);
 
   const loadAnalytics = async () => {
     try {
