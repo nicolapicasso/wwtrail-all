@@ -14,9 +14,13 @@ import {
 import { User, LogOut, Menu, ChevronDown, MapPin, Award, Settings } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useTranslations } from 'next-intl';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = useTranslations('nav');
+  const tCommon = useTranslations('common');
   
   // Safely get auth - might not be in AuthProvider
   let user = null;
@@ -65,7 +69,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div className="flex items-center">
-              <span className="text-sm text-gray-400">Cargando...</span>
+              <span className="text-sm text-gray-400">{tCommon('loading')}</span>
             </div>
           </div>
         </div>
@@ -97,26 +101,26 @@ export default function Navbar() {
                 href="/events"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
               >
-                Eventos
+                {t('events')}
               </Link>
 
               {/* Competiciones con dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
-                    Competiciones
+                    {t('competitions')}
                     <ChevronDown className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
                   <DropdownMenuItem asChild>
                     <Link href="/competitions" className="cursor-pointer">
-                      Todas las competiciones
+                      {t('competitions')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/special-series" className="cursor-pointer">
-                      Special Series
+                      {t('specialSeries')}
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -126,7 +130,7 @@ export default function Navbar() {
                 href="/services"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
               >
-                Servicios
+                {t('services')}
               </Link>
               <Link
                 href="/directory"
@@ -138,19 +142,20 @@ export default function Navbar() {
                 href="/promotions"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
               >
-                Promociones
+                {t('promotions')}
               </Link>
               <Link
                 href="/magazine"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
               >
-                Magazine
+                {t('magazine')}
               </Link>
             </div>
           </div>
 
           {/* User Menu */}
           <div className="hidden md:flex md:items-center md:space-x-4">
+            <LanguageSelector />
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -161,25 +166,25 @@ export default function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t('profile')}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="flex items-center cursor-pointer">
                       <User className="mr-2 h-4 w-4" />
-                      <span>Mi cuenta</span>
+                      <span>{t('profile')}</span>
                     </Link>
                   </DropdownMenuItem>
                   {/* Mis participaciones - Próximamente */}
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard" className="flex items-center cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
-                      <span>Administración</span>
+                      <span>{t('admin')}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 dark:text-red-400">
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar sesión</span>
+                    <span>{t('logout')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -187,12 +192,12 @@ export default function Navbar() {
               <>
                 <Link href="/auth/login">
                   <Button variant="ghost" size="sm">
-                    Iniciar Sesión
+                    {t('login')}
                   </Button>
                 </Link>
                 <Link href="/auth/register">
                   <Button size="sm">
-                    Registrarse
+                    {t('register')}
                   </Button>
                 </Link>
               </>
@@ -222,28 +227,28 @@ export default function Navbar() {
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Eventos
+              {t('events')}
             </Link>
             <Link
               href="/competitions"
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Competiciones
+              {t('competitions')}
             </Link>
             <Link
               href="/special-series"
               className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              → Special Series
+              → {t('specialSeries')}
             </Link>
             <Link
               href="/services"
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Servicios
+              {t('services')}
             </Link>
             <Link
               href="/directory"
@@ -257,14 +262,14 @@ export default function Navbar() {
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Promociones
+              {t('promotions')}
             </Link>
             <Link
               href="/magazine"
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Magazine
+              {t('magazine')}
             </Link>
           </div>
 
@@ -272,7 +277,7 @@ export default function Navbar() {
           {isAuthenticated && (
             <div className="pt-2 pb-3 border-t border-gray-800 space-y-1">
               <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Mi cuenta
+                {t('profile')}
               </div>
               <Link
                 href="/profile"
@@ -281,7 +286,7 @@ export default function Navbar() {
               >
                 <div className="flex items-center">
                   <User className="mr-2 h-4 w-4" />
-                  Mi cuenta
+                  {t('profile')}
                 </div>
               </Link>
               {/* Mis participaciones - Próximamente */}
@@ -292,11 +297,18 @@ export default function Navbar() {
               >
                 <div className="flex items-center">
                   <Settings className="mr-2 h-4 w-4" />
-                  Administración
+                  {t('admin')}
                 </div>
               </Link>
             </div>
           )}
+          {/* Language Selector */}
+          <div className="pt-4 pb-3 border-t border-gray-800">
+            <div className="px-4 mb-3">
+              <LanguageSelector />
+            </div>
+          </div>
+
           {/* Auth Section */}
           <div className="pt-4 pb-3 border-t border-gray-800">
             {isAuthenticated ? (
@@ -311,7 +323,7 @@ export default function Navbar() {
                 >
                   <div className="flex items-center">
                     <LogOut className="mr-2 h-4 w-4" />
-                    Cerrar sesión
+                    {t('logout')}
                   </div>
                 </button>
               </div>
@@ -319,12 +331,12 @@ export default function Navbar() {
               <div className="space-y-1 px-4">
                 <Link href="/auth/login" className="block" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" size="sm" className="w-full">
-                    Iniciar Sesión
+                    {t('login')}
                   </Button>
                 </Link>
                 <Link href="/auth/register" className="block" onClick={() => setMobileMenuOpen(false)}>
                   <Button size="sm" className="w-full">
-                    Registrarse
+                    {t('register')}
                   </Button>
                 </Link>
               </div>

@@ -1,0 +1,197 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "apply": "Apply",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "name": "Name",
+    "description": "Description",
+    "date": "Date",
+    "location": "Location",
+    "status": "Status",
+    "actions": "Actions",
+    "viewMore": "View more",
+    "showLess": "Show less"
+  },
+  "nav": {
+    "home": "Home",
+    "events": "Events",
+    "competitions": "Competitions",
+    "editions": "Editions",
+    "services": "Services",
+    "magazine": "Magazine",
+    "promotions": "Promotions",
+    "specialSeries": "Special Series",
+    "organizers": "Organizers",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "admin": "Administration",
+    "login": "Log in",
+    "logout": "Log out",
+    "register": "Register"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "myEvents": "My Events",
+    "myCompetitions": "My Competitions",
+    "myPosts": "My Posts",
+    "myServices": "My Services",
+    "statistics": "Statistics",
+    "settings": "Settings",
+    "eventManagement": "Event Management",
+    "competitionManagement": "Competition Management",
+    "contentManagement": "Content Management",
+    "userManagement": "User Management"
+  },
+  "events": {
+    "title": "Events",
+    "noEvents": "No events found",
+    "createEvent": "Create Event",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "eventDetails": "Event Details",
+    "firstEditionYear": "First Edition Year",
+    "typicalMonth": "Typical Month",
+    "country": "Country",
+    "city": "City",
+    "website": "Website",
+    "contactInfo": "Contact Information",
+    "socialMedia": "Social Media",
+    "gallery": "Gallery",
+    "organizer": "Organizer"
+  },
+  "competitions": {
+    "title": "Competitions",
+    "noCompetitions": "No competitions found",
+    "createCompetition": "Create Competition",
+    "editCompetition": "Edit Competition",
+    "deleteCompetition": "Delete Competition",
+    "competitionDetails": "Competition Details",
+    "distance": "Distance",
+    "elevation": "Elevation Gain",
+    "maxParticipants": "Max Participants",
+    "raceType": "Race Type",
+    "terrain": "Terrain",
+    "itraPoints": "ITRA Points",
+    "utmbIndex": "UTMB Index",
+    "filters": {
+      "title": "Filters",
+      "type": "Type",
+      "country": "Country",
+      "distance": "Distance",
+      "elevation": "Elevation",
+      "specialSeries": "Special Series",
+      "search": "Search by name"
+    }
+  },
+  "posts": {
+    "title": "Magazine",
+    "noPosts": "No posts found",
+    "createPost": "Create Post",
+    "editPost": "Edit Post",
+    "deletePost": "Delete Post",
+    "readMore": "Read more",
+    "categories": {
+      "GENERAL": "General",
+      "TRAINING": "Training",
+      "NUTRITION": "Nutrition",
+      "GEAR": "Gear",
+      "DESTINATIONS": "Destinations",
+      "INTERVIEWS": "Interviews",
+      "RACE_REPORTS": "Race Reports",
+      "TIPS": "Tips"
+    }
+  },
+  "services": {
+    "title": "Services",
+    "noServices": "No services found",
+    "createService": "Create Service",
+    "editService": "Edit Service",
+    "deleteService": "Delete Service",
+    "serviceDetails": "Service Details",
+    "category": "Category"
+  },
+  "promotions": {
+    "title": "Promotions",
+    "noPromotions": "No promotions found",
+    "createPromotion": "Create Promotion",
+    "viewPromotion": "View Promotion",
+    "exclusiveContent": "Exclusive Content",
+    "getCoupon": "Get Coupon",
+    "couponRedeemed": "Coupon Redeemed",
+    "enterEmail": "Enter your email",
+    "redeem": "Redeem"
+  },
+  "auth": {
+    "login": {
+      "title": "Log In",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "noAccount": "Don't have an account?",
+      "register": "Register here"
+    },
+    "register": {
+      "title": "Register",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "submit": "Register",
+      "hasAccount": "Already have an account?",
+      "login": "Log in here"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "editProfile": "Edit Profile",
+    "myCompetitions": "My Competitions",
+    "myEvents": "My Events",
+    "settings": "Settings",
+    "language": "Language",
+    "notifications": "Notifications",
+    "privacy": "Privacy"
+  },
+  "forms": {
+    "validation": {
+      "required": "This field is required",
+      "email": "Must be a valid email",
+      "minLength": "Must be at least {min} characters",
+      "maxLength": "Cannot exceed {max} characters",
+      "passwordMatch": "Passwords do not match"
+    }
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "PUBLISHED": "Published",
+    "ARCHIVED": "Archived",
+    "CANCELLED": "Cancelled",
+    "PENDING": "Pending",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected"
+  },
+  "messages": {
+    "createSuccess": "Created successfully",
+    "updateSuccess": "Updated successfully",
+    "deleteSuccess": "Deleted successfully",
+    "error": "An error occurred",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server error"
+  }
+}

@@ -29,4 +29,7 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Configuración de next-intl
+const withNextIntl = require('next-intl/plugin')('./i18n.ts');
+
+module.exports = withNextIntl(nextConfig);
