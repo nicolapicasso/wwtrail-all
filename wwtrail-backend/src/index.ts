@@ -37,6 +37,7 @@ import organizerRoutes from './routes/organizer.routes';
 import specialSeriesRoutes from './routes/specialSeries.routes';
 import postsRoutes from './routes/posts.routes';
 import promotionRoutes from './routes/promotion.routes';
+import emailTemplateRoutes from './routes/email-template.routes';
 
 dotenv.config();
 
@@ -154,6 +155,7 @@ app.use('/api/v2/podiums', editionPodiumRoutes);
 app.use('/api/v2/photos', editionPhotoRoutes);
 app.use('/api/v2/home', homeConfigurationRoutes);
 app.use('/api/v2/promotions', promotionRoutes);
+app.use('/api/v2/email-templates', emailTemplateRoutes);
 app.use('/api/v2', catalogRoutes);
 
 // ============================================

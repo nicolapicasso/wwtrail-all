@@ -1,6 +1,7 @@
 // src/services/email.service.ts
 import * as nodemailer from 'nodemailer';
 import logger from '../utils/logger';
+import { EmailTemplateService } from './email-template.service';
 
 interface SendCouponEmailParams {
   to: string;
@@ -60,19 +61,59 @@ export class EmailService {
         brandUrl,
       } = params;
 
-      const html = this.generateCouponEmailHTML({
-        userName,
-        couponCode,
-        promotionTitle,
-        promotionDescription,
-        brandUrl,
-      });
+      // Try to get template from database
+      let htmlBody: string;
+      let textBody: string;
+      let subject: string;
+
+      try {
+        const template = await EmailTemplateService.getActiveByType('COUPON_REDEMPTION');
+
+        if (template) {
+          // Use database template
+          const variables = {
+            userName,
+            couponCode,
+            promotionTitle,
+            promotionDescription,
+            brandUrl: brandUrl || '',
+          };
+
+          subject = EmailTemplateService.renderTemplate(template.subject, variables);
+          htmlBody = EmailTemplateService.renderTemplate(template.htmlBody, variables);
+          textBody = EmailTemplateService.renderTemplate(template.textBody, variables);
+        } else {
+          // Fallback to hardcoded template
+          htmlBody = this.generateCouponEmailHTML({
+            userName,
+            couponCode,
+            promotionTitle,
+            promotionDescription,
+            brandUrl,
+          });
+          textBody = `Hola ${userName},\n\n¡Tu cupón de ${promotionTitle} está listo!\n\nCódigo: ${couponCode}\n\n${promotionDescription}`;
+          subject = `Tu cupón: ${promotionTitle}`;
+        }
+      } catch (templateError) {
+        // If template fetch fails, use fallback
+        logger.warn('Failed to load email template, using fallback:', templateError);
+        htmlBody = this.generateCouponEmailHTML({
+          userName,
+          couponCode,
+          promotionTitle,
+          promotionDescription,
+          brandUrl,
+        });
+        textBody = `Hola ${userName},\n\n¡Tu cupón de ${promotionTitle} está listo!\n\nCódigo: ${couponCode}\n\n${promotionDescription}`;
+        subject = `Tu cupón: ${promotionTitle}`;
+      }
 
       const mailOptions = {
         from: process.env.EMAIL_FROM || 'noreply@wwtrail.com',
         to,
-        subject: `Tu cupón: ${promotionTitle}`,
-        html,
+        subject,
+        html: htmlBody,
+        text: textBody,
       };
 
       const info = await this.getTransporter().sendMail(mailOptions);

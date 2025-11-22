@@ -1005,6 +1005,14 @@ enum HomeTextVariant {
   HEADING
 }
 
+enum EmailTemplateType {
+  COUPON_REDEMPTION
+  WELCOME
+  PASSWORD_RESET
+  EVENT_REMINDER
+  COMPETITION_UPDATE
+}
+
 model HomeConfiguration {
   id           String  @id @default(uuid())
   heroImage    String? @db.Text // URL de la imagen del hero
@@ -1213,4 +1221,32 @@ model CouponRedemption {
   @@index([promotionId])
   @@index([userEmail])
   @@map("coupon_redemptions")
+}
+
+// ===================================
+// EMAIL TEMPLATES
+// ===================================
+
+// Plantillas de email configurables
+model EmailTemplate {
+  id   String            @id @default(uuid())
+  type EmailTemplateType @unique // Tipo de email (solo una plantilla activa por tipo)
+  name String            @db.VarChar(100) // Nombre descriptivo
+
+  subject  String @db.VarChar(255) // Asunto del email
+  htmlBody String @db.Text // Cuerpo HTML con variables {{variable}}
+  textBody String @db.Text // Versión texto plano (opcional pero recomendado)
+
+  // Variables disponibles para este tipo de template (JSON)
+  // Ejemplo: {"userName": "Nombre del usuario", "couponCode": "Código del cupón"}
+  availableVariables Json @default("{}")
+
+  isActive Boolean @default(true) // Si está activa o no
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([isActive])
+  @@map("email_templates")
 }
