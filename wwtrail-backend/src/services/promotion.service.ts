@@ -151,10 +151,11 @@ export class PromotionService {
       const take = Number(limit);
 
       const cacheKey = `promotions:list:${JSON.stringify(filters)}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return cached;
-      }
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // const cached = await cache.get(cacheKey);
+      // if (cached) {
+      //   return cached;
+      // }
 
       const where: any = {};
 
@@ -236,7 +237,8 @@ export class PromotionService {
         }
       };
 
-      await cache.set(cacheKey, JSON.stringify(result), CACHE_TTL);
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // await cache.set(cacheKey, JSON.stringify(result), CACHE_TTL);
       return result;
 
     } catch (error) {
