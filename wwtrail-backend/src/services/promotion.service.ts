@@ -533,10 +533,11 @@ export class PromotionService {
   static async getCouponAnalytics(promotionId?: string) {
     try {
       const cacheKey = promotionId ? `analytics:coupon:${promotionId}` : 'analytics:coupons:all';
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return cached;
-      }
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // const cached = await cache.get(cacheKey);
+      // if (cached) {
+      //   return cached;
+      // }
 
       const where: any = { type: 'COUPON' };
       if (promotionId) where.id = promotionId;
@@ -581,7 +582,8 @@ export class PromotionService {
         };
       });
 
-      await cache.set(cacheKey, JSON.stringify(analytics), CACHE_TTL);
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // await cache.set(cacheKey, JSON.stringify(analytics), CACHE_TTL);
       return analytics;
 
     } catch (error) {
