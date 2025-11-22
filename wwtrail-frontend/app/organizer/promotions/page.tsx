@@ -23,18 +23,29 @@ export default function AdminPromotionsPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    console.log('🔄 useEffect ejecutado', {
+      authLoading,
+      userRole: user?.role,
+      user: user ? 'presente' : 'null'
+    });
+
     if (!authLoading && user?.role !== 'ADMIN') {
+      console.log('❌ Usuario no es ADMIN, redirigiendo...');
       router.push('/dashboard');
       return;
     }
 
     if (user?.role === 'ADMIN') {
+      console.log('✅ Usuario es ADMIN, cargando promociones...');
       loadPromotions();
+    } else {
+      console.log('⏳ Esperando autenticación...');
     }
   }, [user, authLoading, router, page, search, typeFilter, statusFilter]);
 
   const loadPromotions = async () => {
     try {
+      console.log('🔍 loadPromotions() iniciado');
       setLoading(true);
       setError(null);
 
@@ -49,11 +60,16 @@ export default function AdminPromotionsPage() {
       if (typeFilter !== 'ALL') filters.type = typeFilter;
       if (statusFilter !== 'ALL') filters.status = statusFilter;
 
+      console.log('📤 Llamando API con filtros:', filters);
       const response = await promotionsService.getAll(filters);
+      console.log('📥 Respuesta recibida:', response);
+
       setPromotions(response.promotions || []);
       setTotalPages(response?.pagination?.pages ?? 1);
+
+      console.log('✅ Promociones cargadas:', response.promotions?.length || 0);
     } catch (err: any) {
-      console.error('Error loading promotions:', err);
+      console.error('❌ Error loading promotions:', err);
       setError(err.message || 'Error al cargar promociones');
     } finally {
       setLoading(false);
