@@ -15,12 +15,32 @@ export class CompetitionController {
    */
   static async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const { limit = 50, sortBy = 'name', isFeatured } = req.query;
+      const {
+        limit = 50,
+        sortBy = 'name',
+        isFeatured,
+        search,
+        type,
+        country,
+        minDistance,
+        maxDistance,
+        minElevation,
+        maxElevation,
+        specialSeriesId,
+      } = req.query;
 
       const competitions = await CompetitionService.findAll({
         limit: parseInt(limit as string),
         sortBy: sortBy as string,
         isFeatured: isFeatured === 'true',
+        search: search as string,
+        type: type as string,
+        country: country as string,
+        minDistance: minDistance ? parseFloat(minDistance as string) : undefined,
+        maxDistance: maxDistance ? parseFloat(maxDistance as string) : undefined,
+        minElevation: minElevation ? parseFloat(minElevation as string) : undefined,
+        maxElevation: maxElevation ? parseFloat(maxElevation as string) : undefined,
+        specialSeriesId: specialSeriesId as string,
       });
 
       res.json({
