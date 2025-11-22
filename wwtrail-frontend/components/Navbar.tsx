@@ -55,7 +55,7 @@ export default function Navbar() {
               <Link href="/" className="flex items-center gap-2">
                 <div className="relative h-10 w-40">
                   <Image
-                    src="/api/uploads/others/logo_cabecera.webp"
+                    src="http://localhost:3001/uploads/others/logo_cabecera.webp"
                     alt="WWTRAIL"
                     fill
                     className="object-contain"
@@ -82,7 +82,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-2">
               <div className="relative h-10 w-40">
                 <Image
-                  src="/api/uploads/others/logo_cabecera.webp"
+                  src="http://localhost:3001/uploads/others/logo_cabecera.webp"
                   alt="WWTRAIL"
                   fill
                   className="object-contain"
@@ -104,6 +104,18 @@ export default function Navbar() {
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
               >
                 Competiciones
+              </Link>
+              <Link
+                href="/special-series"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+              >
+                Special Series
+              </Link>
+              <Link
+                href="/magazine"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+              >
+                Magazine
               </Link>
               <Link
                 href="/services"
@@ -202,6 +214,20 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Competiciones
+            </Link>
+            <Link
+              href="/special-series"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Special Series
+            </Link>
+            <Link
+              href="/magazine"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Magazine
             </Link>
             <Link
               href="/services"

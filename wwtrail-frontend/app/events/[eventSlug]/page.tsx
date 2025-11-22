@@ -21,6 +21,7 @@ import { notFound } from 'next/navigation';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
 import OrganizerCard from '@/components/OrganizerCard';
+import { RelatedArticles } from '@/components/RelatedArticles';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 // ============================================================================
@@ -442,6 +443,9 @@ export default async function EventDetailPage({
             )}
           </div>
         </div>
+
+        {/* Related Articles */}
+        <RelatedArticles eventId={event.id} title="Artículos sobre este evento" className="mt-8" />
       </div>
     </div>
   );

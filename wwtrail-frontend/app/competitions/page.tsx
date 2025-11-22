@@ -60,19 +60,17 @@ export default function CompetitionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 py-8">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-2">Competiciones de Trail Running</h1>
-          <p className="text-lg opacity-90">
-            Descubre las mejores carreras de montaña
-          </p>
-        </div>
+      <div className="container mx-auto px-4 mb-8">
+        <h1 className="text-4xl font-bold mb-2">Competiciones de Trail Running</h1>
+        <p className="text-muted-foreground">
+          Descubre las mejores carreras de montaña
+        </p>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         {/* Filters */}
         <div className="mb-8">
           <CompetitionFilters 

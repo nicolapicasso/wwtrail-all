@@ -17,6 +17,7 @@ import Link from 'next/link';
 import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
 import OrganizerCard from '@/components/OrganizerCard';
+import { RelatedArticles } from '@/components/RelatedArticles';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 export default function CompetitionDetailPage() {
@@ -527,6 +528,9 @@ export default function CompetitionDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Related Articles */}
+        <RelatedArticles competitionId={competition.id} title="Artículos sobre esta competición" className="mt-8" />
       </div>
     </div>
   );

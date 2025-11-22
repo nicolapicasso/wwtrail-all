@@ -8,5 +8,7 @@ export { default as editionsService } from './editions.service';
 export { default as servicesService } from './services.service';
 export { default as serviceCategoriesService } from './serviceCategories.service';
 export { default as organizersService } from './organizers.service';
+export { default as postsService } from './posts.service';
+export { default as promotionsService } from './promotions.service';
 
 // Types should be imported from @/types/v2 instead

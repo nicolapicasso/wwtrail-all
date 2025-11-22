@@ -121,4 +121,31 @@
     outline: 2px solid #B5751A;
     outline-offset: 2px;
   }
+
+  /* Leaflet Popup Styles - Ángulos rectos y borde negro */
+  .leaflet-popup-content-wrapper {
+    border-radius: 0px !important;
+    border: 2px solid #000 !important;
+    padding: 0 !important;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.4) !important;
+  }
+
+  .leaflet-popup-tip-container {
+    display: none !important; /* Ocultar la flecha para evitar problemas de estilo */
+  }
+
+  .leaflet-popup-content {
+    margin: 0 !important;
+  }
+
+  /* Cerrar botón del popup */
+  .leaflet-popup-close-button {
+    color: #000 !important;
+    font-size: 20px !important;
+    padding: 4px 8px !important;
+  }
+
+  .leaflet-popup-close-button:hover {
+    color: #B66916 !important;
+  }
 }

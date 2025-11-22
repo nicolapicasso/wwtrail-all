@@ -51,7 +51,7 @@ export function CompetitionFilters({ onFilterChange, onReset }: CompetitionFilte
     country: '',
     sortBy: 'startDate',
   });
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
 
   const handleSearchChange = (value: string) => {
     const newFilters = { ...filters, search: value };

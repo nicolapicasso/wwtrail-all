@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Users,
   Award,
-  BarChart3
+  BarChart3,
+  BookOpen
 } from 'lucide-react';
 
 export default function OrganizerDashboard() {
@@ -99,6 +100,16 @@ export default function OrganizerDashboard() {
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-200',
+    },
+    {
+      title: 'Artículos',
+      description: 'Gestiona tus artículos del magazine',
+      icon: BookOpen,
+      href: '/organizer/posts',
+      count: 0,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      borderColor: 'border-orange-200',
     },
   ];
 
@@ -225,7 +236,7 @@ export default function OrganizerDashboard() {
         {/* Main Sections */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {sections.map((section) => (
               <Link
                 key={section.title}
