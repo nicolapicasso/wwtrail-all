@@ -27,7 +27,7 @@ CREATE INDEX "email_templates_type_idx" ON "email_templates"("type");
 CREATE INDEX "email_templates_isActive_idx" ON "email_templates"("isActive");
 
 -- Insert default coupon redemption template
-INSERT INTO "email_templates" ("id", "type", "name", "subject", "htmlBody", "textBody", "availableVariables", "isActive") VALUES (
+INSERT INTO "email_templates" ("id", "type", "name", "subject", "htmlBody", "textBody", "availableVariables", "isActive", "createdAt", "updatedAt") VALUES (
     gen_random_uuid(),
     'COUPON_REDEMPTION',
     'Cupón Canjeado',
@@ -96,5 +96,7 @@ Guarda este código en un lugar seguro. Lo necesitarás para canjear tu descuent
 © 2024 WWTrail. Todos los derechos reservados.
 Este es un email automático, por favor no respondas a este mensaje.',
     '{"userName": "Nombre del usuario que canjea", "couponCode": "Código del cupón", "promotionTitle": "Título de la promoción", "promotionDescription": "Descripción de la promoción", "brandUrl": "URL del sitio web de la marca (opcional)"}',
-    true
+    true,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 );
