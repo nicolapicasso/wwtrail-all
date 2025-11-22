@@ -181,7 +181,7 @@ export default function PromotionsAnalyticsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {analytics.length === 0 ? (
+                {!Array.isArray(analytics) || analytics.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                       No hay cupones creados todavía
