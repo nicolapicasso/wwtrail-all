@@ -2,7 +2,7 @@
 
 import { Router } from 'express';
 import { PromotionController } from '../controllers/promotion.controller';
-import { authenticate } from '../middlewares/auth.middleware';
+import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware';
 import { authorize } from '../middlewares/authorize.middleware';
 
 const router = Router();
@@ -72,8 +72,8 @@ router.delete(
 // RUTA RAÍZ - AL FINAL
 // ===================================
 
-// GET / - Lista de promociones
-router.get('/', PromotionController.getAll);
+// GET / - Lista de promociones (autenticación opcional para detectar ADMIN)
+router.get('/', optionalAuthenticate, PromotionController.getAll);
 
 // POST / - Crear promoción (solo ADMIN)
 router.post(
