@@ -4,6 +4,13 @@ import { cache, CACHE_TTL } from '../config/redis';
 import logger from '../utils/logger';
 import { generateUniqueSlug } from '../utils/slugify';
 import { PostStatus, PostCategory, Language } from '@prisma/client';
+import { TranslationService } from './translation.service';
+import {
+  isAutoTranslateEnabled,
+  getTargetLanguages,
+  shouldTranslateByStatus,
+  TranslationConfig,
+} from '../config/translation.config';
 
 interface CreatePostInput {
   title: string;
@@ -63,6 +70,42 @@ interface PostFilters {
 }
 
 export class PostsService {
+  /**
+   * Disparar traducciones automáticas en background (no bloqueante)
+   */
+  private static triggerAutoTranslation(postId: string, sourceLanguage: Language, status: PostStatus) {
+    // Verificar si está habilitado y si debe traducirse según el status
+    if (!isAutoTranslateEnabled() || !shouldTranslateByStatus(status)) {
+      return;
+    }
+
+    const targetLanguages = getTargetLanguages(sourceLanguage);
+
+    if (targetLanguages.length === 0) {
+      logger.info(`No target languages for post ${postId} (source: ${sourceLanguage})`);
+      return;
+    }
+
+    logger.info(`Triggering auto-translation for post ${postId} to: ${targetLanguages.join(', ')}`);
+
+    // Ejecutar traducción en background (no bloqueante)
+    if (TranslationConfig.BACKGROUND_MODE) {
+      // No esperamos el resultado, se ejecuta en background
+      setImmediate(() => {
+        TranslationService.autoTranslatePost(postId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING)
+          .then((translations) => {
+            logger.info(`Auto-translation completed for post ${postId}: ${translations.length} translations created`);
+          })
+          .catch((error) => {
+            logger.error(`Auto-translation failed for post ${postId}:`, error.message);
+          });
+      });
+    } else {
+      // Modo síncrono (espera a que termine)
+      return TranslationService.autoTranslatePost(postId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
+    }
+  }
+
   /**
    * Crear un nuevo post/artículo
    * - Si el usuario es ADMIN → puede publicar directamente (status PUBLISHED)
@@ -137,6 +180,10 @@ export class PostsService {
       });
 
       logger.info(`Post created: ${post.id} by user ${data.authorId}`);
+
+      // Disparar traducciones automáticas si está publicado
+      this.triggerAutoTranslation(post.id, data.language, status);
+
       return post;
     } catch (error: any) {
       logger.error('Error creating post:', error);
@@ -468,6 +515,12 @@ export class PostsService {
       }
 
       logger.info(`Post updated: ${id} by user ${userId}`);
+
+      // Si cambió a PUBLISHED, disparar traducciones automáticas
+      if (data.status === 'PUBLISHED' && existingPost.status !== 'PUBLISHED') {
+        this.triggerAutoTranslation(post.id, post.language, 'PUBLISHED');
+      }
+
       return post;
     } catch (error: any) {
       logger.error(`Error updating post ${id}:`, error);
@@ -492,6 +545,10 @@ export class PostsService {
       });
 
       logger.info(`Post published: ${id} by user ${userId}`);
+
+      // Disparar traducciones automáticas
+      this.triggerAutoTranslation(post.id, post.language, 'PUBLISHED');
+
       return post;
     } catch (error: any) {
       logger.error(`Error publishing post ${id}:`, error);

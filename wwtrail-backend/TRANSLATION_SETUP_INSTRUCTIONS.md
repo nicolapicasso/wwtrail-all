@@ -182,35 +182,54 @@ Content-Type: application/json
 
 ---
 
-## 💡 Próximos Pasos (Pendientes)
+## ✅ Integración Automática Implementada
 
-### 1. Integración Automática al Crear Contenido
+Las traducciones se disparan **automáticamente** cuando se crea o publica contenido con status PUBLISHED:
 
-Actualmente, las traducciones deben llamarse manualmente. Para automatizar:
+### Servicios con Auto-Traducción Integrada
 
-**Opción A: Hook en el Service**
-```typescript
-// En posts.service.ts
-static async create(data: CreatePostInput, userRole: string) {
-  const post = await prisma.post.create({ data });
+1. **PostsService** ✅
+   - Al crear con status PUBLISHED (ADMIN)
+   - Al publicar (método `publish()`)
+   - Al actualizar de DRAFT a PUBLISHED
 
-  // Auto-traducir después de crear
-  if (post.status === 'PUBLISHED') {
-    await TranslationService.autoTranslatePost(
-      post.id,
-      ['EN', 'IT', 'FR', 'DE', 'CA'],
-      false
-    );
-  }
+2. **CompetitionService** ✅
+   - Al crear (siempre se crea con status PUBLISHED)
 
-  return post;
-}
+3. **EventService** ✅
+   - Al crear con status PUBLISHED (ADMIN)
+
+4. **ServiceService** ✅
+   - Al crear (normalmente DRAFT, se traduce al publicar)
+
+### Configuración de Auto-Traducción
+
+Controla el comportamiento mediante variables de entorno:
+
+```bash
+# Habilitar/deshabilitar traducciones automáticas
+AUTO_TRANSLATE_ENABLED=true
+
+# Idiomas objetivo (separados por coma)
+AUTO_TRANSLATE_LANGUAGES=EN,IT,CA,FR,DE
+
+# Idioma por defecto/fuente
+DEFAULT_LANGUAGE=ES
+
+# Sobrescribir traducciones existentes
+AUTO_TRANSLATE_OVERWRITE=false
+
+# Ejecutar en background (no bloqueante)
+AUTO_TRANSLATE_BACKGROUND=true
+
+# Solo traducir contenido publicado
+AUTO_TRANSLATE_ONLY_PUBLISHED=true
 ```
 
-**Opción B: Endpoint dedicado**
-```typescript
-POST /api/v2/posts/:id/translate
-```
+### Modo Background vs Síncrono
+
+- **Background (recomendado)**: La traducción se ejecuta después de devolver la respuesta al usuario. No afecta el tiempo de respuesta de la API.
+- **Síncrono**: Espera a que termine la traducción antes de devolver la respuesta. Útil para debugging pero más lento.
 
 ### 2. Frontend - Sistema i18n
 

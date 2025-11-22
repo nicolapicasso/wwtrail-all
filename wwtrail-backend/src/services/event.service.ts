@@ -4,6 +4,8 @@ import { cache, CACHE_TTL, CACHE_TTL_LONG } from '../config/redis';
 import logger from '../utils/logger';
 import { generateUniqueSlug } from '../utils/slugify';
 import { EventStatus } from '@prisma/client';
+import { TranslationService } from './translation.service';
+import { isAutoTranslateEnabled, getTargetLanguages, shouldTranslateByStatus, TranslationConfig } from '../config/translation.config';
 
 interface CreateEventInput {
   name: string;
@@ -60,6 +62,38 @@ interface EventFilters {
 }
 
 export class EventService {
+  /**
+   * Disparar traducciones automáticas en background (no bloqueante)
+   */
+  private static triggerAutoTranslation(eventId: string, status: EventStatus) {
+    if (!isAutoTranslateEnabled() || !shouldTranslateByStatus(status)) {
+      return;
+    }
+
+    const sourceLanguage = TranslationConfig.DEFAULT_LANGUAGE;
+    const targetLanguages = getTargetLanguages(sourceLanguage);
+
+    if (targetLanguages.length === 0) {
+      logger.info(`No target languages for event ${eventId}`);
+      return;
+    }
+
+    logger.info(`Triggering auto-translation for event ${eventId} to: ${targetLanguages.join(', ')}`);
+
+    if (TranslationConfig.BACKGROUND_MODE) {
+      setImmediate(() => {
+        TranslationService.autoTranslateEvent(eventId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING)
+          .then((translations) => {
+            logger.info(`Auto-translation completed for event ${eventId}: ${translations.length} translations created`);
+          })
+          .catch((error) => {
+            logger.error(`Auto-translation failed for event ${eventId}:`, error.message);
+          });
+      });
+    } else {
+      return TranslationService.autoTranslateEvent(eventId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
+    }
+  }
 
   /**
    * ✅ Helper: Extraer coordenadas de PostGIS para uno o varios eventos
@@ -304,6 +338,10 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       await cache.del('events:list');
 
       logger.info(`✅ Event created: ${event.id} by user ${userId} with status ${status}`);
+
+      // Disparar traducciones automáticas si está publicado
+      this.triggerAutoTranslation(event.id, status as EventStatus);
+
       return event;
     } catch (error) {
       logger.error(`❌ Error creating event: ${error}`);

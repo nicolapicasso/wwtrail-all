@@ -1,19 +1,61 @@
-import { PrismaClient, EventStatus } from '@prisma/client';
+import { PrismaClient, EventStatus, Language } from '@prisma/client';
 import logger from '../utils/logger';
 import { slugify } from '../utils/slugify';
+import { TranslationService } from './translation.service';
+import {
+  isAutoTranslateEnabled,
+  getTargetLanguages,
+  shouldTranslateByStatus,
+  TranslationConfig,
+} from '../config/translation.config';
 
 const prisma = new PrismaClient();
 
 /**
  * CompetitionService v2
- * 
+ *
  * Maneja las COMPETICIONES (distancias/carreras) dentro de un evento.
  * Ejemplo: UTMB 171K, CCC 101K, OCC 56K son competitions del evento UTMB Mont Blanc
- * 
+ *
  * Competition tiene datos BASE que heredan las Editions:
  * - baseDistance, baseElevation, baseMaxParticipants
  */
 export class CompetitionService {
+  /**
+   * Disparar traducciones automáticas en background (no bloqueante)
+   */
+  private static triggerAutoTranslation(competitionId: string, status: EventStatus) {
+    // Verificar si está habilitado y si debe traducirse según el status
+    if (!isAutoTranslateEnabled() || !shouldTranslateByStatus(status)) {
+      return;
+    }
+
+    // Usar idioma por defecto ya que Competition no tiene campo language
+    const sourceLanguage = TranslationConfig.DEFAULT_LANGUAGE;
+    const targetLanguages = getTargetLanguages(sourceLanguage);
+
+    if (targetLanguages.length === 0) {
+      logger.info(`No target languages for competition ${competitionId} (source: ${sourceLanguage})`);
+      return;
+    }
+
+    logger.info(`Triggering auto-translation for competition ${competitionId} to: ${targetLanguages.join(', ')}`);
+
+    // Ejecutar traducción en background (no bloqueante)
+    if (TranslationConfig.BACKGROUND_MODE) {
+      setImmediate(() => {
+        TranslationService.autoTranslateCompetition(competitionId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING)
+          .then((translations) => {
+            logger.info(`Auto-translation completed for competition ${competitionId}: ${translations.length} translations created`);
+          })
+          .catch((error) => {
+            logger.error(`Auto-translation failed for competition ${competitionId}:`, error.message);
+          });
+      });
+    } else {
+      return TranslationService.autoTranslateCompetition(competitionId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
+    }
+  }
   /**
    * Listar todas las competiciones
    */
@@ -236,6 +278,10 @@ export class CompetitionService {
     });
 
     logger.info(`Competition created: ${competition.id} - ${competition.name}`);
+
+    // Disparar traducciones automáticas
+    this.triggerAutoTranslation(competition.id, EventStatus.PUBLISHED);
+
     return competition;
   }
 

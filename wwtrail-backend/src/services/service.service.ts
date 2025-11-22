@@ -4,6 +4,8 @@ import { cache, CACHE_TTL, CACHE_TTL_LONG } from '../config/redis';
 import logger from '../utils/logger';
 import { generateUniqueSlug } from '../utils/slugify';
 import { EventStatus } from '@prisma/client';
+import { TranslationService } from './translation.service';
+import { isAutoTranslateEnabled, getTargetLanguages, shouldTranslateByStatus, TranslationConfig } from '../config/translation.config';
 
 interface CreateServiceInput {
   name: string;
@@ -49,6 +51,38 @@ interface ServiceFilters {
 }
 
 export class ServiceService {
+  /**
+   * Disparar traducciones automáticas en background (no bloqueante)
+   */
+  private static triggerAutoTranslation(serviceId: string, status: EventStatus) {
+    if (!isAutoTranslateEnabled() || !shouldTranslateByStatus(status)) {
+      return;
+    }
+
+    const sourceLanguage = TranslationConfig.DEFAULT_LANGUAGE;
+    const targetLanguages = getTargetLanguages(sourceLanguage);
+
+    if (targetLanguages.length === 0) {
+      logger.info(`No target languages for service ${serviceId}`);
+      return;
+    }
+
+    logger.info(`Triggering auto-translation for service ${serviceId} to: ${targetLanguages.join(', ')}`);
+
+    if (TranslationConfig.BACKGROUND_MODE) {
+      setImmediate(() => {
+        TranslationService.autoTranslateService(serviceId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING)
+          .then((translations) => {
+            logger.info(`Auto-translation completed for service ${serviceId}: ${translations.length} translations created`);
+          })
+          .catch((error) => {
+            logger.error(`Auto-translation failed for service ${serviceId}:`, error.message);
+          });
+      });
+    } else {
+      return TranslationService.autoTranslateService(serviceId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
+    }
+  }
 
   /**
    * Helper: Extraer coordenadas de PostGIS para uno o varios servicios
@@ -186,6 +220,11 @@ export class ServiceService {
       await cache.del('services:categories:count'); // Invalidar caché de categorías con conteo
 
       logger.info(`Service created: ${slug} by user ${data.organizerId}`);
+
+      // Disparar traducciones automáticas (normalmente no se dispara porque status es DRAFT)
+      if (createdService) {
+        this.triggerAutoTranslation(createdService.id, createdService.status);
+      }
 
       return await this.enrichWithCoordinates(createdService);
     } catch (error) {
