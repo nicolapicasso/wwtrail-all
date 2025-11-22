@@ -10,6 +10,7 @@ import { Search, Filter } from 'lucide-react';
 export default function PromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<ServiceCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<PromotionType | 'ALL'>('ALL');
@@ -17,17 +18,35 @@ export default function PromotionsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Load categories on mount
+  // Load categories on mount and filter by promotions
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadCategoriesWithPromotions = async () => {
       try {
-        const data = await serviceCategoriesService.getAll();
-        setCategories(data);
+        // Load all categories
+        const allCategories = await serviceCategoriesService.getAll();
+        setCategories(allCategories);
+
+        // Load all published promotions to get category usage
+        const allPromotionsResponse = await promotionsService.getAll({
+          status: 'PUBLISHED',
+          limit: 1000, // High limit to get all promotions
+        });
+
+        // Extract unique category IDs from promotions
+        const categoryIds = new Set(
+          (allPromotionsResponse.promotions || [])
+            .map(p => p.categoryId)
+            .filter(id => id != null)
+        );
+
+        // Filter categories to show only those with promotions
+        const filtered = allCategories.filter(cat => categoryIds.has(cat.id));
+        setFilteredCategories(filtered);
       } catch (err) {
         console.error('Error loading categories:', err);
       }
     };
-    loadCategories();
+    loadCategoriesWithPromotions();
   }, []);
 
   useEffect(() => {
@@ -103,7 +122,7 @@ export default function PromotionsPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="">Todas las categorías</option>
-                {categories.map(category => (
+                {filteredCategories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.icon} {category.name}
                   </option>
