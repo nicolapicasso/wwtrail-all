@@ -34,19 +34,21 @@ interface EventListProps {
   viewMode?: 'grid' | 'list';
   featuredOnly?: boolean;
   limit?: number;
+  simplified?: boolean;  // Para modo simplificado (solo imagen + logo)
 }
 
 // ============================================================================
 // 🎨 COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function EventList({ 
-  initialPage = 1, 
+export function EventList({
+  initialPage = 1,
   initialLimit = 12,
   showFilters = true,
   viewMode = 'grid',
   featuredOnly = false,
-  limit: customLimit
+  limit: customLimit,
+  simplified = false
 }: EventListProps) {
   const [page, setPage] = useState(initialPage);
   const [limitState] = useState(customLimit || initialLimit);
@@ -265,11 +267,12 @@ export function EventList({
           ))
         ) : events && events.length > 0 ? (
           events.map((event) => (
-            <EventCard 
-              key={event.id} 
+            <EventCard
+              key={event.id}
               event={event}
-              showStats={true}
+              showStats={!simplified}
               managementMode={false}
+              simplified={simplified}
             />
           ))
         ) : (

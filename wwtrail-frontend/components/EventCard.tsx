@@ -30,6 +30,8 @@ interface EventCardProps {
 // Props para selección múltiple
   isSelected?: boolean;
   onSelect?: () => void;
+  // Props para modo simplificado (solo imagen + logo)
+  simplified?: boolean;
 }
 
 const MONTHS = [
@@ -43,9 +45,9 @@ const COUNTRY_FLAGS: { [key: string]: string } = {
   'PT': '🇵🇹', 'CA': '🇨🇦', 'NL': '🇳🇱', 'BE': '🇧🇪',
 };
 
-export default function EventCard({ 
-  event, 
-  showStats = true, 
+export default function EventCard({
+  event,
+  showStats = true,
   onClick,
   viewMode = 'grid',
   // Management mode props
@@ -60,6 +62,8 @@ export default function EventCard({
 // Selection props
   isSelected = false,
   onSelect,
+  // Simplified mode
+  simplified = false,
 }: EventCardProps) {
   
   const [imageError, setImageError] = useState(false);
@@ -146,6 +150,64 @@ export default function EventCard({
       );
     }
   };
+
+  // Modo simplificado: solo imagen + logo
+  if (simplified) {
+    const simplifiedContent = (
+      <div className="group relative overflow-hidden rounded-lg shadow-sm transition-all hover:shadow-md bg-white border-gray-200 h-48">
+        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-green-50">
+          {renderImage()}
+
+          {/* Overlay Gradient */}
+          {mainImage && !imageError && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+          )}
+
+          {/* Logo Overlay */}
+          {logoImage && !logoError && (
+            <div className="absolute bottom-3 left-3 bg-white rounded-lg p-2 shadow-lg z-10">
+              <div className="relative w-12 h-12">
+                <Image
+                  src={logoImage}
+                  alt={`${event.name} logo`}
+                  fill
+                  className="object-contain"
+                  onError={() => setLogoError(true)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Featured Badge */}
+          {(event.isFeatured || event.featured) && (
+            <div className="absolute top-2 right-2 z-10">
+              <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
+                <Star className="h-3 w-3 fill-current" />
+                Featured
+              </span>
+            </div>
+          )}
+
+          {/* Typical Month Badge */}
+          {event.typicalMonth && (
+            <div className="absolute bottom-3 right-3 bg-black text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10">
+              {MONTHS[event.typicalMonth - 1]}
+            </div>
+          )}
+        </div>
+
+        {/* Hover effect */}
+        <div className="absolute inset-0 bg-hover/0 transition-colors group-hover:bg-hover/5 pointer-events-none" />
+      </div>
+    );
+
+    // Envolver en Link
+    return (
+      <Link href={`/events/${event.slug}`} className="block">
+        {simplifiedContent}
+      </Link>
+    );
+  }
 
   const content = (
 <div className={`group relative overflow-hidden rounded-lg border text-card-foreground shadow-sm transition-all hover:shadow-md ${

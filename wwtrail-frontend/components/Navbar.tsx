@@ -74,7 +74,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-black border-b border-gray-800">
+    <nav className="sticky top-0 z-50 bg-black border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Brand */}
@@ -99,24 +99,29 @@ export default function Navbar() {
               >
                 Eventos
               </Link>
-              <Link
-                href="/competitions"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
-              >
-                Competiciones
-              </Link>
-              <Link
-                href="/special-series"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
-              >
-                Special Series
-              </Link>
-              <Link
-                href="/magazine"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
-              >
-                Magazine
-              </Link>
+
+              {/* Competiciones con dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
+                    Competiciones
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/competitions" className="cursor-pointer">
+                      Todas las competiciones
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/special-series" className="cursor-pointer">
+                      Special Series
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Link
                 href="/services"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
@@ -129,7 +134,18 @@ export default function Navbar() {
               >
                 Mapa
               </Link>
-              {/* Ventajas - Próximamente */}
+              <Link
+                href="/promotions"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+              >
+                Promociones
+              </Link>
+              <Link
+                href="/magazine"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+              >
+                Magazine
+              </Link>
             </div>
           </div>
 
@@ -217,17 +233,10 @@ export default function Navbar() {
             </Link>
             <Link
               href="/special-series"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Special Series
-            </Link>
-            <Link
-              href="/magazine"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Magazine
+              → Special Series
             </Link>
             <Link
               href="/services"
@@ -243,7 +252,20 @@ export default function Navbar() {
             >
               Mapa
             </Link>
-            {/* Ventajas - Próximamente */}
+            <Link
+              href="/promotions"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Promociones
+            </Link>
+            <Link
+              href="/magazine"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Magazine
+            </Link>
           </div>
 
           {/* Private Menu Items (only if authenticated) */}
