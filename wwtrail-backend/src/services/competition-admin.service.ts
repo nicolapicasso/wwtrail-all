@@ -124,9 +124,9 @@ class CompetitionAdminService {
           city: comp.event.city,
           organizer: {
             id: comp.event.organizer.id,
-            email: comp.event.organizer.email,
-            username: comp.event.organizer.username,
-            fullName: `${comp.event.organizer.firstName || ''} ${comp.event.organizer.lastName || ''}`.trim() || comp.event.organizer.username,
+            email: comp.event.organizer.createdBy.email,
+            username: comp.event.organizer.createdBy.username,
+            fullName: `${comp.event.organizer.createdBy.firstName || ''} ${comp.event.organizer.createdBy.lastName || ''}`.trim() || comp.event.organizer.createdBy.username,
           },
         },
         totalEditions: comp._count.editions,
@@ -164,8 +164,12 @@ class CompetitionAdminService {
             organizerId: true,
             organizer: {
               select: {
-                email: true,
-                username: true,
+                createdBy: {
+                  select: {
+                    email: true,
+                    username: true,
+                  },
+                },
               },
             },
           },
@@ -248,8 +252,12 @@ class CompetitionAdminService {
             organizerId: true,
             organizer: {
               select: {
-                email: true,
-                username: true,
+                createdBy: {
+                  select: {
+                    email: true,
+                    username: true,
+                  },
+                },
               },
             },
           },

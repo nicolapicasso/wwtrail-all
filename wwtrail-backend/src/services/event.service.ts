@@ -303,7 +303,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       // Invalidar caché
       await cache.del('events:list');
 
-      logger.info(`✅ Event created: ${event.id} by user ${organizerId} with status ${status}`);
+      logger.info(`✅ Event created: ${event.id} by user ${userId} with status ${status}`);
       return event;
     } catch (error) {
       logger.error(`❌ Error creating event: ${error}`);

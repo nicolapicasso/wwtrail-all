@@ -44,16 +44,25 @@ export class PromotionController {
       const isAdmin = req.user?.role === 'ADMIN';
 
       // Si no es admin, solo mostrar publicados
-      const queryFilters = {
+      // Si es admin y no especifica status, mostrar todos
+      const queryFilters: any = {
         ...filters,
-        status: isAdmin ? filters.status : 'PUBLISHED',
       };
+
+      // Solo aplicar filtro de status si:
+      // - No es admin (forzar PUBLISHED)
+      // - Es admin Y especificó un status explícitamente
+      if (!isAdmin) {
+        queryFilters.status = 'PUBLISHED';
+      } else if (filters.status) {
+        queryFilters.status = filters.status;
+      }
 
       const result = await PromotionService.getAll(queryFilters);
 
       res.json({
         status: 'success',
-        data: result.promotions,
+        promotions: result.promotions,
         pagination: result.pagination,
       });
     } catch (error) {

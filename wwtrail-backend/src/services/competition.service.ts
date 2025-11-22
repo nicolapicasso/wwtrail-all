@@ -18,11 +18,72 @@ export class CompetitionService {
    * Listar todas las competiciones
    */
   static async findAll(options: any = {}) {
-    const { limit = 50, sortBy = 'name', isFeatured } = options;
+    const {
+      limit = 50,
+      sortBy = 'name',
+      isFeatured,
+      search,
+      type,
+      country,
+      minDistance,
+      maxDistance,
+      minElevation,
+      maxElevation,
+      specialSeriesId,
+    } = options;
+
+    // Build dynamic where clause
+    const where: any = {};
+
+    if (isFeatured) {
+      where.featured = true;
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (type) {
+      where.type = type;
+    }
+
+    if (country) {
+      where.event = {
+        ...where.event,
+        country,
+      };
+    }
+
+    if (minDistance !== undefined || maxDistance !== undefined) {
+      where.baseDistance = {};
+      if (minDistance !== undefined) {
+        where.baseDistance.gte = minDistance;
+      }
+      if (maxDistance !== undefined) {
+        where.baseDistance.lte = maxDistance;
+      }
+    }
+
+    if (minElevation !== undefined || maxElevation !== undefined) {
+      where.baseElevation = {};
+      if (minElevation !== undefined) {
+        where.baseElevation.gte = minElevation;
+      }
+      if (maxElevation !== undefined) {
+        where.baseElevation.lte = maxElevation;
+      }
+    }
+
+    if (specialSeriesId) {
+      where.specialSeriesId = specialSeriesId;
+    }
 
     const competitions = await prisma.competition.findMany({
       take: limit,
-      where: isFeatured ? { featured: true } : undefined,
+      where: Object.keys(where).length > 0 ? where : undefined,
       include: {
         event: {
           select: {

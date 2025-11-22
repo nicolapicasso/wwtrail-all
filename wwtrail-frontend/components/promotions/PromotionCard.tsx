@@ -37,11 +37,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
 
         {/* Type Badge */}
         <div className="absolute top-2 left-2">
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            isCoupon
-              ? 'bg-blue-500 text-white'
-              : 'bg-purple-500 text-white'
-          }`}>
+          <span className={`px-3 py-1 rounded-none text-xs font-semibold bg-gray-800 text-white`}>
             {isCoupon ? '🎟️ Cupón' : '🔒 Exclusivo'}
           </span>
         </div>
@@ -58,11 +54,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
         {/* Status Badge */}
         {promotion.status !== 'PUBLISHED' && (
           <div className="absolute bottom-2 right-2">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              promotion.status === 'DRAFT'
-                ? 'bg-gray-500 text-white'
-                : 'bg-red-500 text-white'
-            }`}>
+            <span className={`px-3 py-1 rounded-none text-xs font-semibold bg-gray-800 text-white`}>
               {promotion.status === 'DRAFT' ? 'Borrador' : 'Archivado'}
             </span>
           </div>

@@ -2,21 +2,56 @@
 
 import { useEffect, useState } from 'react';
 import { promotionsService } from '@/lib/api/v2';
+import serviceCategoriesService, { ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
 import { Promotion, PromotionType } from '@/types/v2';
 import PromotionCard from '@/components/promotions/PromotionCard';
 import { Search, Filter } from 'lucide-react';
 
 export default function PromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<ServiceCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<PromotionType | 'ALL'>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Load categories on mount and filter by promotions
+  useEffect(() => {
+    const loadCategoriesWithPromotions = async () => {
+      try {
+        // Load all categories
+        const allCategories = await serviceCategoriesService.getAll();
+        setCategories(allCategories);
+
+        // Load all published promotions to get category usage
+        const allPromotionsResponse = await promotionsService.getAll({
+          status: 'PUBLISHED',
+          limit: 1000, // High limit to get all promotions
+        });
+
+        // Extract unique category IDs from promotions
+        const categoryIds = new Set(
+          (allPromotionsResponse.promotions || [])
+            .map(p => p.categoryId)
+            .filter(id => id != null)
+        );
+
+        // Filter categories to show only those with promotions
+        const filtered = allCategories.filter(cat => categoryIds.has(cat.id));
+        setFilteredCategories(filtered);
+      } catch (err) {
+        console.error('Error loading categories:', err);
+      }
+    };
+    loadCategoriesWithPromotions();
+  }, []);
+
   useEffect(() => {
     loadPromotions();
-  }, [page, search, typeFilter]);
+  }, [page, search, typeFilter, categoryFilter]);
 
   const loadPromotions = async () => {
     try {
@@ -31,10 +66,11 @@ export default function PromotionsPage() {
 
       if (search) filters.search = search;
       if (typeFilter !== 'ALL') filters.type = typeFilter;
+      if (categoryFilter) filters.categoryId = categoryFilter;
 
       const response = await promotionsService.getAll(filters);
-      setPromotions(response.data);
-      setTotalPages(response.pagination.pages);
+      setPromotions(response.promotions || []);
+      setTotalPages(response.pagination?.pages || 1);
     } catch (err) {
       console.error('Error loading promotions:', err);
     } finally {
@@ -55,7 +91,7 @@ export default function PromotionsPage() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-4 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -77,6 +113,20 @@ export default function PromotionsPage() {
                 <option value="ALL">Todas</option>
                 <option value="COUPON">Cupones</option>
                 <option value="EXCLUSIVE_CONTENT">Contenido Exclusivo</option>
+              </select>
+            </div>
+            <div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="">Todas las categorías</option>
+                {filteredCategories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.icon} {category.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

@@ -55,7 +55,7 @@ export default function Navbar() {
               <Link href="/" className="flex items-center gap-2">
                 <div className="relative h-10 w-40">
                   <Image
-                    src="/api/uploads/others/logo_cabecera.webp"
+                    src="http://localhost:3001/uploads/others/logo_cabecera.webp"
                     alt="WWTRAIL"
                     fill
                     className="object-contain"
@@ -74,7 +74,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-black border-b border-gray-800">
+    <nav className="sticky top-0 z-50 bg-black border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Brand */}
@@ -82,7 +82,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-2">
               <div className="relative h-10 w-40">
                 <Image
-                  src="/api/uploads/others/logo_cabecera.webp"
+                  src="http://localhost:3001/uploads/others/logo_cabecera.webp"
                   alt="WWTRAIL"
                   fill
                   className="object-contain"
@@ -99,12 +99,29 @@ export default function Navbar() {
               >
                 Eventos
               </Link>
-              <Link
-                href="/competitions"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
-              >
-                Competiciones
-              </Link>
+
+              {/* Competiciones con dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
+                    Competiciones
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/competitions" className="cursor-pointer">
+                      Todas las competiciones
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/special-series" className="cursor-pointer">
+                      Special Series
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Link
                 href="/services"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
@@ -117,7 +134,18 @@ export default function Navbar() {
               >
                 Mapa
               </Link>
-              {/* Ventajas - Próximamente */}
+              <Link
+                href="/promotions"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+              >
+                Promociones
+              </Link>
+              <Link
+                href="/magazine"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+              >
+                Magazine
+              </Link>
             </div>
           </div>
 
@@ -126,7 +154,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-hover transition-colors">
+                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-hover hover:bg-gray-900">
                     <User className="h-5 w-5" />
                     <span>{user?.username || user?.email}</span>
                     <ChevronDown className="h-4 w-4" />
@@ -158,12 +186,12 @@ export default function Navbar() {
             ) : (
               <>
                 <Link href="/auth/login">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-hover transition-colors">
+                  <Button variant="ghost" size="sm">
                     Iniciar Sesión
                   </Button>
                 </Link>
                 <Link href="/auth/register">
-                  <Button size="sm" className="bg-hover hover:bg-opacity-90 text-white transition-colors">
+                  <Button size="sm">
                     Registrarse
                   </Button>
                 </Link>
@@ -175,7 +203,7 @@ export default function Navbar() {
           <div className="flex items-center md:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-hover transition-colors"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-hover hover:bg-gray-900"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <Menu className="h-6 w-6" />
@@ -191,33 +219,53 @@ export default function Navbar() {
           <div className="pt-2 pb-3 space-y-1">
             <Link
               href="/events"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-white hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Eventos
             </Link>
             <Link
               href="/competitions"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-white hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Competiciones
             </Link>
             <Link
+              href="/special-series"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              → Special Series
+            </Link>
+            <Link
               href="/services"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-white hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Servicios
             </Link>
             <Link
               href="/directory"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-white hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Mapa
             </Link>
-            {/* Ventajas - Próximamente */}
+            <Link
+              href="/promotions"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Promociones
+            </Link>
+            <Link
+              href="/magazine"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Magazine
+            </Link>
           </div>
 
           {/* Private Menu Items (only if authenticated) */}
@@ -228,7 +276,7 @@ export default function Navbar() {
               </div>
               <Link
                 href="/profile"
-                className="block pl-3 pr-4 py-2 text-base font-medium text-white hover:bg-gray-900 hover:text-hover transition-colors"
+                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center">
@@ -239,7 +287,7 @@ export default function Navbar() {
               {/* Mis participaciones - Próximamente */}
               <Link
                 href="/dashboard"
-                className="block pl-3 pr-4 py-2 text-base font-medium text-white hover:bg-gray-900 hover:text-hover transition-colors"
+                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center">
@@ -253,7 +301,7 @@ export default function Navbar() {
           <div className="pt-4 pb-3 border-t border-gray-800">
             {isAuthenticated ? (
               <div className="space-y-1">
-                <div className="px-4 flex items-center gap-2 text-sm text-white mb-3">
+                <div className="px-4 flex items-center gap-2 text-sm text-gray-300 mb-3">
                   <User className="h-5 w-5" />
                   <span>{user?.username || user?.email}</span>
                 </div>
@@ -270,12 +318,12 @@ export default function Navbar() {
             ) : (
               <div className="space-y-1 px-4">
                 <Link href="/auth/login" className="block" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" size="sm" className="w-full border-white text-white hover:bg-gray-900 hover:text-hover transition-colors">
+                  <Button variant="outline" size="sm" className="w-full">
                     Iniciar Sesión
                   </Button>
                 </Link>
                 <Link href="/auth/register" className="block" onClick={() => setMobileMenuOpen(false)}>
-                  <Button size="sm" className="w-full bg-hover hover:bg-opacity-90 text-white transition-colors">
+                  <Button size="sm" className="w-full">
                     Registrarse
                   </Button>
                 </Link>

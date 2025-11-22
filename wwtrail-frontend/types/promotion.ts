@@ -205,8 +205,7 @@ export interface CouponAnalytics {
  * API Response types
  */
 export interface PromotionsResponse {
-  status: 'success';
-  data: Promotion[];
+  promotions: Promotion[];
   pagination: {
     page: number;
     limit: number;

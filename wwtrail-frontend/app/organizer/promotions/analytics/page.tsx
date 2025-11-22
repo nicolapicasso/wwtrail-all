@@ -14,16 +14,20 @@ export default function PromotionsAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Redirect if not admin
   useEffect(() => {
-    if (!authLoading && user?.role !== 'ADMIN') {
+    if (!authLoading && user && user.role !== 'ADMIN') {
       router.push('/dashboard');
-      return;
-    }
-
-    if (user?.role === 'ADMIN') {
-      loadAnalytics();
     }
   }, [user, authLoading, router]);
+
+  // Load analytics when user is admin
+  useEffect(() => {
+    if (!authLoading && user?.role === 'ADMIN') {
+      loadAnalytics();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]);
 
   const loadAnalytics = async () => {
     try {
@@ -39,21 +43,6 @@ export default function PromotionsAnalyticsPage() {
     }
   };
 
-  // Calculate totals
-  const totals = analytics.reduce(
-    (acc, item) => ({
-      total: acc.total + item.totalCodes,
-      used: acc.used + item.usedCodes,
-      available: acc.available + item.availableCodes,
-      redemptions: acc.redemptions + item.redemptions,
-      views: acc.views + item.viewCount,
-    }),
-    { total: 0, used: 0, available: 0, redemptions: 0, views: 0 }
-  );
-
-  const usageRate = totals.total > 0 ? (totals.used / totals.total) * 100 : 0;
-  const conversionRate = totals.views > 0 ? (totals.redemptions / totals.views) * 100 : 0;
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -68,6 +57,21 @@ export default function PromotionsAnalyticsPage() {
   if (user?.role !== 'ADMIN') {
     return null;
   }
+
+  // Calculate totals (only after loading is complete)
+  const totals = Array.isArray(analytics) ? analytics.reduce(
+    (acc, item) => ({
+      total: acc.total + item.totalCodes,
+      used: acc.used + item.usedCodes,
+      available: acc.available + item.availableCodes,
+      redemptions: acc.redemptions + item.redemptions,
+      views: acc.views + item.viewCount,
+    }),
+    { total: 0, used: 0, available: 0, redemptions: 0, views: 0 }
+  ) : { total: 0, used: 0, available: 0, redemptions: 0, views: 0 };
+
+  const usageRate = totals.total > 0 ? (totals.used / totals.total) * 100 : 0;
+  const conversionRate = totals.views > 0 ? (totals.redemptions / totals.views) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -181,7 +185,7 @@ export default function PromotionsAnalyticsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {analytics.length === 0 ? (
+                {!Array.isArray(analytics) || analytics.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                       No hay cupones creados todavía
@@ -233,7 +237,7 @@ export default function PromotionsAnalyticsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                           <button
-                            onClick={() => router.push(`/admin/promotions/${item.id}`)}
+                            onClick={() => router.push(`/organizer/promotions/${item.id}`)}
                             className="text-blue-600 hover:text-blue-900 font-medium"
                           >
                             Ver

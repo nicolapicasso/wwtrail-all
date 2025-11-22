@@ -15,6 +15,11 @@ export default function CompetitionsPage() {
     type: '',
     country: '',
     sortBy: 'startDate',
+    minDistance: '',
+    maxDistance: '',
+    minElevation: '',
+    maxElevation: '',
+    specialSeriesId: '',
   });
 
   useEffect(() => {
@@ -27,14 +32,19 @@ export default function CompetitionsPage() {
       setError(null);
       
       // Build query params
-      const params: any = { 
+      const params: any = {
         limit: 50,
         sortBy: filters.sortBy,
       };
-      
+
       if (filters.search) params.search = filters.search;
       if (filters.type) params.type = filters.type;
       if (filters.country) params.country = filters.country;
+      if (filters.minDistance) params.minDistance = filters.minDistance;
+      if (filters.maxDistance) params.maxDistance = filters.maxDistance;
+      if (filters.minElevation) params.minElevation = filters.minElevation;
+      if (filters.maxElevation) params.maxElevation = filters.maxElevation;
+      if (filters.specialSeriesId) params.specialSeriesId = filters.specialSeriesId;
       
       const response = await competitionsService.getAll(params);
       setCompetitions(response.data || []);
@@ -56,6 +66,11 @@ export default function CompetitionsPage() {
       type: '',
       country: '',
       sortBy: 'startDate',
+      minDistance: '',
+      maxDistance: '',
+      minElevation: '',
+      maxElevation: '',
+      specialSeriesId: '',
     });
   };
 

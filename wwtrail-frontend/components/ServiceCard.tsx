@@ -121,10 +121,10 @@ export default function ServiceCard({
 
           {/* Status Badge (management mode) */}
           {managementMode && (
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg ${
-              service.status === 'PUBLISHED' ? 'bg-green-500' :
-              service.status === 'DRAFT' ? 'bg-yellow-500' :
-              'bg-gray-500'
+            <span className={`inline-flex items-center gap-1 rounded-none px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg ${
+              service.status === 'PUBLISHED' ? 'bg-gray-800' :
+              service.status === 'DRAFT' ? 'bg-gray-800' :
+              'bg-gray-800'
             }`}>
               {service.status === 'PUBLISHED' ? 'Publicado' :
                service.status === 'DRAFT' ? 'Borrador' :
@@ -135,7 +135,7 @@ export default function ServiceCard({
 
         {/* Gallery Indicator */}
         {hasGallery && !managementMode && (
-          <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1 z-10">
+          <div className="absolute top-2 left-2 bg-gray-800 backdrop-blur-sm text-white px-2 py-1 rounded-none text-xs flex items-center gap-1 z-10">
             <ImageIcon className="h-3 w-3" />
             {service.gallery!.length}
           </div>
@@ -143,7 +143,7 @@ export default function ServiceCard({
 
         {/* Category Badge */}
         {service.category && (
-          <div className="absolute bottom-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10 flex items-center gap-1">
+          <div className="absolute bottom-3 right-3 bg-gray-800 text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10 flex items-center gap-1">
             <span>{service.category.icon}</span>
             <span>{service.category.name}</span>
           </div>

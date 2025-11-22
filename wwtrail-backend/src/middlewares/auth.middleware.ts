@@ -87,3 +87,48 @@ export const authorizeOwner = (req: Request, res: Response, next: NextFunction) 
 
   next();
 };
+
+// Middleware de autenticación OPCIONAL
+// Detecta si hay un token válido pero NO falla si no hay
+export const optionalAuthenticate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    // Si no hay token, continuar sin usuario
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return next();
+    }
+
+    const token = authHeader.substring(7);
+
+    try {
+      // Verificar token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+        id: string;
+        email: string;
+        role: UserRole;
+      };
+
+      // Verificar que el usuario existe y está activo
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, email: true, role: true, isActive: true },
+      });
+
+      if (user && user.isActive) {
+        // Agregar usuario al request
+        req.user = {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        };
+      }
+    } catch (error) {
+      // Si el token es inválido, continuar sin usuario (no lanzar error)
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};

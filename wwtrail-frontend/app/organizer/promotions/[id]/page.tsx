@@ -87,7 +87,7 @@ export default function EditPromotionPage() {
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || 'Promoción no encontrada'}</p>
           <button
-            onClick={() => router.push('/admin/promotions')}
+            onClick={() => router.push('/organizer/promotions')}
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             Volver al listado
@@ -178,7 +178,7 @@ export default function EditPromotionPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <PromotionForm
             promotion={promotion}
-            onSuccess={() => router.push('/admin/promotions')}
+            onSuccess={() => router.push('/organizer/promotions')}
           />
         </div>
       </div>

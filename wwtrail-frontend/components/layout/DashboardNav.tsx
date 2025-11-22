@@ -21,6 +21,7 @@ import {
   Briefcase,
   Sparkles,
   BookOpen,
+  Ticket,
 } from 'lucide-react';
 
 interface NavItem {
@@ -98,10 +99,30 @@ const navItems: NavItem[] = [
     icon: BookOpen,
   },
   {
-    label: 'Ofertas y Cupones',
-    href: '/offers',
-    icon: Tag,
-    badge: 'Pronto',
+    label: 'Promociones',
+    icon: Ticket,
+    children: [
+      {
+        label: 'Gestionar promociones',
+        href: '/organizer/promotions',
+        icon: Ticket,
+      },
+      {
+        label: 'Categorías',
+        href: '/organizer/promotions/categories',
+        icon: Tag,
+      },
+      {
+        label: 'Configurar Email',
+        href: '/organizer/promotions/settings/email-templates',
+        icon: FileText,
+      },
+      {
+        label: 'Analítica',
+        href: '/organizer/promotions/analytics',
+        icon: BarChart3,
+      },
+    ],
   },
   {
     label: 'Usuarios',
@@ -122,7 +143,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Gestión de eventos', 'Servicios']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Gestión de eventos', 'Servicios', 'Promociones']);
 
   const filteredItems = navItems.filter((item) => {
     if (item.adminOnly) {

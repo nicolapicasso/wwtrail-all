@@ -1,7 +1,7 @@
 // src/controllers/competition-admin.controller.ts
 
 import { Request, Response, NextFunction } from 'express';
-import CompetitionAdminService from '../services/competition-admin.service';
+import CompetitionAdminService from '../../services/competition-admin.service';
 
 class CompetitionAdminController {
   /**

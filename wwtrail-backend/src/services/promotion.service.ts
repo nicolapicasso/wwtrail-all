@@ -151,10 +151,11 @@ export class PromotionService {
       const take = Number(limit);
 
       const cacheKey = `promotions:list:${JSON.stringify(filters)}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return cached;
-      }
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // const cached = await cache.get(cacheKey);
+      // if (cached) {
+      //   return cached;
+      // }
 
       const where: any = {};
 
@@ -236,7 +237,8 @@ export class PromotionService {
         }
       };
 
-      await cache.set(cacheKey, result, CACHE_TTL);
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // await cache.set(cacheKey, JSON.stringify(result), CACHE_TTL);
       return result;
 
     } catch (error) {
@@ -251,10 +253,11 @@ export class PromotionService {
   static async getByIdOrSlug(identifier: string, userId?: string) {
     try {
       const cacheKey = `promotion:${identifier}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return cached;
-      }
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // const cached = await cache.get(cacheKey);
+      // if (cached) {
+      //   return cached;
+      // }
 
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
 
@@ -304,11 +307,13 @@ export class PromotionService {
           couponCodes: undefined, // No exponer códigos individuales
         };
 
-        await cache.set(cacheKey, result, CACHE_TTL);
+        // TEMPORALMENTE DESHABILITADO - cache corrupto
+        // await cache.set(cacheKey, JSON.stringify(result), CACHE_TTL);
         return result;
       }
 
-      await cache.set(cacheKey, promotion, CACHE_TTL);
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // await cache.set(cacheKey, JSON.stringify(promotion), CACHE_TTL);
       return promotion;
 
     } catch (error) {
@@ -528,10 +533,11 @@ export class PromotionService {
   static async getCouponAnalytics(promotionId?: string) {
     try {
       const cacheKey = promotionId ? `analytics:coupon:${promotionId}` : 'analytics:coupons:all';
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return cached;
-      }
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // const cached = await cache.get(cacheKey);
+      // if (cached) {
+      //   return cached;
+      // }
 
       const where: any = { type: 'COUPON' };
       if (promotionId) where.id = promotionId;
@@ -576,7 +582,8 @@ export class PromotionService {
         };
       });
 
-      await cache.set(cacheKey, analytics, CACHE_TTL);
+      // TEMPORALMENTE DESHABILITADO - cache corrupto
+      // await cache.set(cacheKey, JSON.stringify(analytics), CACHE_TTL);
       return analytics;
 
     } catch (error) {

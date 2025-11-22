@@ -4,7 +4,9 @@ import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { specialSeriesService } from '@/lib/api/catalogs.service';
+import type { SpecialSeries } from '@/types/catalog';
 
 interface CompetitionFiltersProps {
   onFilterChange: (filters: FilterState) => void;
@@ -16,6 +18,11 @@ export interface FilterState {
   type: string;
   country: string;
   sortBy: string;
+  minDistance: string;
+  maxDistance: string;
+  minElevation: string;
+  maxElevation: string;
+  specialSeriesId: string;
 }
 
 const COMPETITION_TYPES = [
@@ -50,8 +57,27 @@ export function CompetitionFilters({ onFilterChange, onReset }: CompetitionFilte
     type: '',
     country: '',
     sortBy: 'startDate',
+    minDistance: '',
+    maxDistance: '',
+    minElevation: '',
+    maxElevation: '',
+    specialSeriesId: '',
   });
   const [showFilters, setShowFilters] = useState(true);
+  const [specialSeriesList, setSpecialSeriesList] = useState<SpecialSeries[]>([]);
+
+  // Load special series on mount
+  useEffect(() => {
+    const loadSpecialSeries = async () => {
+      try {
+        const series = await specialSeriesService.getAll(true); // Only active
+        setSpecialSeriesList(series);
+      } catch (error) {
+        console.error('Error loading special series:', error);
+      }
+    };
+    loadSpecialSeries();
+  }, []);
 
   const handleSearchChange = (value: string) => {
     const newFilters = { ...filters, search: value };
@@ -71,12 +97,18 @@ export function CompetitionFilters({ onFilterChange, onReset }: CompetitionFilte
       type: '',
       country: '',
       sortBy: 'startDate',
+      minDistance: '',
+      maxDistance: '',
+      minElevation: '',
+      maxElevation: '',
+      specialSeriesId: '',
     };
     setFilters(resetFilters);
     onReset();
   };
 
-  const hasActiveFilters = filters.search || filters.type || filters.country || filters.sortBy !== 'startDate';
+  const hasActiveFilters = filters.search || filters.type || filters.country || filters.sortBy !== 'startDate' ||
+    filters.minDistance || filters.maxDistance || filters.minElevation || filters.maxElevation || filters.specialSeriesId;
 
   return (
     <div className="space-y-4">
@@ -172,6 +204,75 @@ export function CompetitionFilters({ onFilterChange, onReset }: CompetitionFilte
                 {SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Second row: Distance and Elevation filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            {/* Distance Range */}
+            <div className="space-y-2">
+              <Label>Distancia (km)</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="number"
+                  placeholder="Desde"
+                  value={filters.minDistance}
+                  onChange={(e) => handleFilterChange('minDistance', e.target.value)}
+                  min="0"
+                  className="w-full"
+                />
+                <span className="text-muted-foreground">-</span>
+                <Input
+                  type="number"
+                  placeholder="Hasta"
+                  value={filters.maxDistance}
+                  onChange={(e) => handleFilterChange('maxDistance', e.target.value)}
+                  min="0"
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Elevation Range */}
+            <div className="space-y-2">
+              <Label>Desnivel (m)</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="number"
+                  placeholder="Desde"
+                  value={filters.minElevation}
+                  onChange={(e) => handleFilterChange('minElevation', e.target.value)}
+                  min="0"
+                  className="w-full"
+                />
+                <span className="text-muted-foreground">-</span>
+                <Input
+                  type="number"
+                  placeholder="Hasta"
+                  value={filters.maxElevation}
+                  onChange={(e) => handleFilterChange('maxElevation', e.target.value)}
+                  min="0"
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Special Series Filter */}
+            <div className="space-y-2">
+              <Label htmlFor="specialSeries">Special Series</Label>
+              <select
+                id="specialSeries"
+                value={filters.specialSeriesId}
+                onChange={(e) => handleFilterChange('specialSeriesId', e.target.value)}
+                className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Todas las series</option>
+                {specialSeriesList.map((series) => (
+                  <option key={series.id} value={series.id}>
+                    {series.name}
                   </option>
                 ))}
               </select>

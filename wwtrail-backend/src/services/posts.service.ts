@@ -57,8 +57,6 @@ interface PostFilters {
   language?: Language;
   status?: PostStatus;
   authorId?: string;
-  eventId?: string;
-  competitionId?: string;
   editionId?: string;
   sortBy?: 'publishedAt' | 'createdAt' | 'viewCount' | 'title';
   sortOrder?: 'asc' | 'desc';
@@ -122,20 +120,6 @@ export class PostsService {
               lastName: true,
             },
           },
-          event: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
-          competition: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
           edition: {
             select: {
               id: true,
@@ -148,6 +132,7 @@ export class PostsService {
               sortOrder: 'asc',
             },
           },
+          tags: true,
         },
       });
 
@@ -183,8 +168,6 @@ export class PostsService {
       if (filters.language) where.language = filters.language;
       if (filters.status) where.status = filters.status;
       if (filters.authorId) where.authorId = filters.authorId;
-      if (filters.eventId) where.eventId = filters.eventId;
-      if (filters.competitionId) where.competitionId = filters.competitionId;
       if (filters.editionId) where.editionId = filters.editionId;
 
       // Ordenamiento
@@ -229,6 +212,8 @@ export class PostsService {
                 slug: true,
               },
             },
+            tags: true,
+            images: true,
           },
         }),
         prisma.post.count({ where }),
@@ -266,22 +251,6 @@ export class PostsService {
               username: true,
               firstName: true,
               lastName: true,
-            },
-          },
-          event: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              coverImageUrl: true,
-            },
-          },
-          competition: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              logoUrl: true,
             },
           },
           edition: {
@@ -347,9 +316,6 @@ export class PostsService {
               id: true,
               name: true,
               slug: true,
-              coverImageUrl: true,
-              city: true,
-              country: true,
             },
           },
           competition: {
@@ -357,8 +323,6 @@ export class PostsService {
               id: true,
               name: true,
               slug: true,
-              logoUrl: true,
-              type: true,
             },
           },
           edition: {
@@ -438,9 +402,24 @@ export class PostsService {
         throw new Error('Unauthorized to update this post');
       }
 
-      // Preparar datos de actualización
-      const updateData: any = { ...data };
-      delete updateData.images; // No incluir images en el update directo
+      // Preparar datos de actualización - solo campos válidos del schema
+      const updateData: any = {};
+
+      // Campos opcionales que SÍ existen en el schema
+      if (data.title !== undefined) updateData.title = data.title;
+      if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
+      if (data.content !== undefined) updateData.content = data.content;
+      if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+      if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
+      if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
+      if (data.category !== undefined) updateData.category = data.category;
+      if (data.language !== undefined) updateData.language = data.language;
+      if (data.status !== undefined) updateData.status = data.status;
+      if (data.eventId !== undefined) updateData.eventId = data.eventId;
+      if (data.competitionId !== undefined) updateData.competitionId = data.competitionId;
+      if (data.editionId !== undefined) updateData.editionId = data.editionId;
+      if (data.publishedAt !== undefined) updateData.publishedAt = data.publishedAt;
+      if (data.scheduledPublishAt !== undefined) updateData.scheduledPublishAt = data.scheduledPublishAt;
 
       // Si se cambia el título, regenerar slug
       if (data.title) {
