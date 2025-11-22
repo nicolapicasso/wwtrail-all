@@ -83,7 +83,7 @@ export function CompetitionCard({
         {/* Inactive Badge */}
         {!competition.isActive && (
           <div className="absolute top-2 right-2 z-10">
-            <span className="inline-flex items-center rounded-full bg-gray-500 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
+            <span className="inline-flex items-center rounded-none bg-gray-800 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
               Inactive
             </span>
           </div>

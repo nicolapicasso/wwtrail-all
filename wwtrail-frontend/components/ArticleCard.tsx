@@ -62,22 +62,15 @@ export function ArticleCard({
 
         {/* Category Badge */}
         <div className="absolute top-3 left-3 z-10">
-          <span className="inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          <span className="inline-flex items-center rounded-none bg-gray-800 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
             {POST_CATEGORY_LABELS[article.category]}
-          </span>
-        </div>
-
-        {/* Language Badge */}
-        <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-gray-700 backdrop-blur-sm">
-            {LANGUAGE_LABELS[article.language]}
           </span>
         </div>
 
         {/* Status Badge (DRAFT) */}
         {article.status === 'DRAFT' && (
           <div className="absolute bottom-3 right-3 z-10">
-            <span className="inline-flex items-center rounded-full bg-yellow-500 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
+            <span className="inline-flex items-center rounded-none bg-gray-800 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
               Borrador
             </span>
           </div>

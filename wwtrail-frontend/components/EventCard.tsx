@@ -190,7 +190,7 @@ export default function EventCard({
 
           {/* Typical Month Badge */}
           {event.typicalMonth && (
-            <div className="absolute bottom-3 right-3 bg-black text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10">
+            <div className="absolute bottom-3 right-3 bg-gray-800 text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10">
               {MONTHS[event.typicalMonth - 1]}
             </div>
           )}
@@ -270,11 +270,11 @@ export default function EventCard({
           
           {/* Status Badge (management mode) */}
           {managementMode && (
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg ${
-              event.status === 'PUBLISHED' ? 'bg-green-500' :
-              event.status === 'DRAFT' ? 'bg-yellow-500' :
-              event.status === 'REJECTED' ? 'bg-red-500' :
-              'bg-gray-500'
+            <span className={`inline-flex items-center gap-1 rounded-none px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg ${
+              event.status === 'PUBLISHED' ? 'bg-gray-800' :
+              event.status === 'DRAFT' ? 'bg-gray-800' :
+              event.status === 'REJECTED' ? 'bg-gray-800' :
+              'bg-gray-800'
             }`}>
               <StatusIcon className="h-3 w-3" />
               {statusConfig.label}
@@ -284,7 +284,7 @@ export default function EventCard({
 
       {/* Gallery Indicator */}
         {hasGallery && !managementMode && (
-          <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1 z-10">
+          <div className="absolute top-2 left-2 bg-gray-800 backdrop-blur-sm text-white px-2 py-1 rounded-none text-xs flex items-center gap-1 z-10">
             <ImageIcon className="h-3 w-3" />
             {event.gallery.length}
           </div>
@@ -292,7 +292,7 @@ export default function EventCard({
 
         {/* Typical Month Badge */}
         {event.typicalMonth && (
-          <div className="absolute bottom-3 right-3 bg-black text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10">
+          <div className="absolute bottom-3 right-3 bg-gray-800 text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10">
             {MONTHS[event.typicalMonth - 1]}
           </div>
         )}

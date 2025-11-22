@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Promotion, CreatePromotionInput, UpdatePromotionInput, Language, PromotionType } from '@/types/v2';
 import { promotionsService } from '@/lib/api/v2';
+import { serviceCategoriesService, ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
 import { Upload, X, Plus } from 'lucide-react';
 import { uploadFile } from '@/lib/api/files.service';
 import { RichTextEditor } from '@/components/RichTextEditor';
@@ -29,6 +30,10 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Categories
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [categoryId, setCategoryId] = useState<string>(promotion?.categoryId || '');
+
   // Form data
   const [type, setType] = useState<PromotionType>(promotion?.type || 'COUPON');
   const [title, setTitle] = useState(promotion?.title || '');
@@ -46,6 +51,19 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
   // Type-specific fields
   const [exclusiveContent, setExclusiveContent] = useState(promotion?.exclusiveContent || '');
   const [couponCodesText, setCouponCodesText] = useState('');
+
+  // Load categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await serviceCategoriesService.getAll();
+        setCategories(data);
+      } catch (err) {
+        console.error('Error loading categories:', err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +103,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
         coverImage: coverImage || undefined,
         gallery,
         brandUrl: brandUrl || undefined,
+        categoryId: categoryId || undefined,
         language,
         isGlobal,
         countries: !isGlobal ? countries : undefined,
@@ -235,6 +254,26 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           placeholder="https://ejemplo.com"
         />
+      </div>
+
+      {/* Category */}
+      <div>
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+          Categoría
+        </label>
+        <select
+          id="category"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        >
+          <option value="">Sin categoría</option>
+          {categories.map(category => (
+            <option key={category.id} value={category.id}>
+              {category.icon} {category.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Cover Image */}
