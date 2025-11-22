@@ -81,11 +81,7 @@ export class PromotionController {
       const userId = req.user?.id;
       const isAdmin = req.user?.role === 'ADMIN';
 
-      console.log('🔍 getByIdOrSlug:', { idOrSlug, userId, isAdmin, hasUser: !!req.user });
-
       const promotion = await PromotionService.getByIdOrSlug(idOrSlug, userId);
-
-      console.log('📦 Promotion from service:', promotion ? { id: promotion.id, status: promotion.status, type: promotion.type } : 'null');
 
       if (!promotion) {
         return res.status(404).json({
@@ -96,7 +92,6 @@ export class PromotionController {
 
       // Si no es admin y no está publicado, no mostrar
       if (!isAdmin && promotion.status !== 'PUBLISHED') {
-        console.log('❌ Not admin and not published');
         return res.status(404).json({
           status: 'error',
           message: 'Promotion not found',
@@ -106,7 +101,6 @@ export class PromotionController {
       // Si es contenido exclusivo y no está logueado, ocultar el contenido
       if (promotion.type === 'EXCLUSIVE_CONTENT' && !userId) {
         const { exclusiveContent, ...publicData } = promotion;
-        console.log('🔒 Exclusive content without login - hiding content');
         return res.json({
           status: 'success',
           data: {
@@ -116,13 +110,11 @@ export class PromotionController {
         });
       }
 
-      console.log('✅ Returning full promotion');
       res.json({
         status: 'success',
         data: promotion,
       });
     } catch (error) {
-      console.error('❌ Error in getByIdOrSlug:', error);
       next(error);
     }
   }
