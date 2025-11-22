@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { promotionsService } from '@/lib/api/v2';
 import { Promotion, PromotionType, PromotionStatus } from '@/types/v2';
 import PromotionCard from '@/components/promotions/PromotionCard';
-import { Plus, Search, Filter, BarChart } from 'lucide-react';
+import { Plus, Search, Filter, BarChart, Tag } from 'lucide-react';
 
 export default function AdminPromotionsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -97,6 +97,13 @@ export default function AdminPromotionsPage() {
               <p className="text-gray-600 mt-1">Cupones y Contenido Exclusivo</p>
             </div>
             <div className="flex gap-3">
+              <button
+                onClick={() => router.push('/organizer/promotions/categories')}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                <Tag className="h-5 w-5" />
+                Categorías
+              </button>
               <button
                 onClick={() => router.push('/organizer/promotions/analytics')}
                 className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"

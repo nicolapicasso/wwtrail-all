@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Promotion, CreatePromotionInput, UpdatePromotionInput, Language, PromotionType } from '@/types/v2';
 import { promotionsService } from '@/lib/api/v2';
-import { serviceCategoriesService, ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
+import serviceCategoriesService, { ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
 import { Upload, X, Plus } from 'lucide-react';
 import { uploadFile } from '@/lib/api/files.service';
 import { RichTextEditor } from '@/components/RichTextEditor';

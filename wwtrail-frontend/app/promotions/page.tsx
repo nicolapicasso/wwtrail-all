@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { promotionsService } from '@/lib/api/v2';
-import { serviceCategoriesService, ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
+import serviceCategoriesService, { ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
 import { Promotion, PromotionType } from '@/types/v2';
 import PromotionCard from '@/components/promotions/PromotionCard';
 import { Search, Filter } from 'lucide-react';
