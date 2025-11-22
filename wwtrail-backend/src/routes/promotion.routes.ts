@@ -23,7 +23,7 @@ const router = Router();
 router.post('/:id/redeem', PromotionController.redeemCoupon);
 
 // Get promotion by ID or slug (público para PUBLISHED, requiere login para ver contenido exclusivo)
-router.get('/:idOrSlug', PromotionController.getByIdOrSlug);
+router.get('/:idOrSlug', optionalAuthenticate, PromotionController.getByIdOrSlug);
 
 // ===================================
 // RUTAS CON AUTENTICACIÓN
