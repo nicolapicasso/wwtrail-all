@@ -6,7 +6,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Competition } from '@/types/v2';
-import { Mountain, TrendingUp, Users, Calendar } from 'lucide-react';
+import { Mountain, TrendingUp, Users, Calendar, MapPin } from 'lucide-react';
+
+const COUNTRY_FLAGS: { [key: string]: string } = {
+  'ES': '🇪🇸', 'FR': '🇫🇷', 'IT': '🇮🇹', 'CH': '🇨🇭',
+  'US': '🇺🇸', 'GB': '🇬🇧', 'DE': '🇩🇪', 'AT': '🇦🇹',
+  'PT': '🇵🇹', 'CA': '🇨🇦', 'NL': '🇳🇱', 'BE': '🇧🇪',
+};
 
 interface CompetitionCardProps {
   competition: Competition;
@@ -90,6 +96,16 @@ export function CompetitionCard({
         <h3 className="text-lg font-semibold group-hover:text-green-600 transition-colors mb-2 line-clamp-2">
           {competition.name}
         </h3>
+
+        {/* Location - Ciudad + País */}
+        {competition.event && competition.event.city && competition.event.country && (
+          <div className="mb-3 flex items-center gap-2 text-sm text-gray-600">
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">
+              {COUNTRY_FLAGS[competition.event.country] || '🌍'} {competition.event.city}, {competition.event.country}
+            </span>
+          </div>
+        )}
 
         {/* Description */}
         {competition.description && (
