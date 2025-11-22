@@ -34,7 +34,7 @@ export default function PromotionsPage() {
 
       const response = await promotionsService.getAll(filters);
       setPromotions(response.promotions || []);
-      setTotalPages(response.pagination.pages);
+      setTotalPages(response.pagination?.pages || 1);
     } catch (err) {
       console.error('Error loading promotions:', err);
     } finally {
