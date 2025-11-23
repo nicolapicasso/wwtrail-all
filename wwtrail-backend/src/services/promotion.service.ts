@@ -4,6 +4,7 @@ import { cache, CACHE_TTL, CACHE_TTL_LONG } from '../config/redis';
 import logger from '../utils/logger';
 import { generateUniqueSlug } from '../utils/slugify';
 import { PromotionType, PostStatus, Language } from '@prisma/client';
+import { applyTranslationsToList, parseLanguage } from '../utils/translations';
 
 interface CreatePromotionInput {
   type: PromotionType;
@@ -43,7 +44,7 @@ interface PromotionFilters {
   search?: string;
   type?: PromotionType;
   categoryId?: string;
-  language?: Language;
+  language?: string;
   country?: string; // Filtrar por país específico
   isGlobal?: boolean;
   featured?: boolean;
@@ -147,6 +148,8 @@ export class PromotionService {
         sortOrder = 'desc'
       } = filters;
 
+      const requestedLanguage = parseLanguage(language);
+
       const skip = (Number(page) - 1) * Number(limit);
       const take = Number(limit);
 
@@ -168,7 +171,6 @@ export class PromotionService {
 
       if (type) where.type = type;
       if (categoryId) where.categoryId = categoryId;
-      if (language) where.language = language;
       if (typeof isGlobal === 'boolean') where.isGlobal = isGlobal;
       if (typeof featured === 'boolean') where.featured = featured;
       if (status) where.status = status;
@@ -190,6 +192,7 @@ export class PromotionService {
           include: {
             category: true,
             countries: true,
+            translations: true,
             couponCodes: {
               select: {
                 id: true,
@@ -227,8 +230,11 @@ export class PromotionService {
         return promo;
       });
 
+      // Apply translations based on requested language
+      const translatedPromotions = applyTranslationsToList(enrichedPromotions, requestedLanguage);
+
       const result = {
-        promotions: enrichedPromotions,
+        promotions: translatedPromotions,
         pagination: {
           page: Number(page),
           limit: Number(limit),
