@@ -7,7 +7,7 @@ const intlMiddleware = createIntlMiddleware({
   locales,
   defaultLocale,
   localePrefix: 'as-needed',
-  localeDetection: true,
+  localeDetection: false, // ✅ DESACTIVADO para evitar redirecciones automáticas
 });
 
 export function middleware(request: NextRequest) {
