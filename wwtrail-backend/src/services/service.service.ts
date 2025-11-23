@@ -6,6 +6,7 @@ import { generateUniqueSlug } from '../utils/slugify';
 import { EventStatus } from '@prisma/client';
 import { TranslationService } from './translation.service';
 import { isAutoTranslateEnabled, getTargetLanguages, shouldTranslateByStatus, TranslationConfig } from '../config/translation.config';
+import { applyTranslationsToList, parseLanguage } from '../utils/translations';
 
 interface CreateServiceInput {
   name: string;
@@ -48,6 +49,7 @@ interface ServiceFilters {
   status?: EventStatus;
   sortBy?: 'name' | 'createdAt' | 'viewCount';
   sortOrder?: 'asc' | 'desc';
+  language?: string;
 }
 
 export class ServiceService {
@@ -244,6 +246,9 @@ export class ServiceService {
       const sortBy = filters.sortBy || 'createdAt';
       const sortOrder = filters.sortOrder || 'desc';
 
+      // Parse requested language
+      const requestedLanguage = parseLanguage(filters.language);
+
       const where: any = {};
 
       if (filters.search) {
@@ -297,6 +302,7 @@ export class ServiceService {
                 icon: true,
               },
             },
+            translations: true,
           },
         }),
         prisma.service.count({ where }),
@@ -304,8 +310,11 @@ export class ServiceService {
 
       const enrichedServices = await this.enrichWithCoordinates(services);
 
+      // Apply translations to the list
+      const translatedServices = applyTranslationsToList(enrichedServices, requestedLanguage);
+
       return {
-        services: enrichedServices,
+        services: translatedServices,
         total,
         page,
         totalPages: Math.ceil(total / limit),
