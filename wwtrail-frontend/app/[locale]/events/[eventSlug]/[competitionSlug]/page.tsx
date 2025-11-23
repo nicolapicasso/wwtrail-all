@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { useCompetition } from '@/hooks/useCompetitions';
 import { useEditions } from '@/hooks/useEditions';
 import { eventsService } from '@/lib/api/events.service';
+import { seoService } from '@/lib/api/seo.service';
 import servicesService from '@/lib/api/v2/services.service';
 import { EditionSelector } from '@/components/EditionSelector';
 import { EditionCard } from '@/components/EditionCard';
@@ -18,7 +19,9 @@ import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
 import OrganizerCard from '@/components/OrganizerCard';
 import { RelatedArticles } from '@/components/RelatedArticles';
+import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
+import Head from 'next/head';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -31,6 +34,22 @@ export default function CompetitionDetailPage() {
   const [selectedEdition, setSelectedEdition] = useState<Edition | null>(null);
   const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
   const [nearbyServices, setNearbyServices] = useState<any[]>([]);
+  const [seo, setSeo] = useState<any>(null);
+
+  // Fetch SEO data
+  useEffect(() => {
+    const fetchSEO = async () => {
+      if (competition?.id) {
+        try {
+          const seoData = await seoService.getSEO('competition', competition.id);
+          setSeo(seoData);
+        } catch (error) {
+          // SEO not found, continue without it
+        }
+      }
+    };
+    fetchSEO();
+  }, [competition?.id]);
 
   // Fetch nearby events and services when competition data is available
   useEffect(() => {
@@ -532,6 +551,11 @@ export default function CompetitionDetailPage() {
 
         {/* Related Articles */}
         <RelatedArticles competitionId={competition.id} title="Artículos sobre esta competición" className="mt-8" />
+
+        {/* SEO FAQ Schema.org + Visible FAQ */}
+        {seo && seo.llmFaq && seo.llmFaq.length > 0 && (
+          <SEOFaqSchema faq={seo.llmFaq} visible={true} />
+        )}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@
  */
 
 import { eventsService } from '@/lib/api/events.service';
+import { seoService } from '@/lib/api/seo.service';
 import servicesService from '@/lib/api/v2/services.service';
 import { Event } from '@/types/api';
 import { Service } from '@/types/v2';
@@ -22,6 +23,7 @@ import EventMap from '@/components/EventMap';
 import EventGallery from '@/components/EventGallery';
 import OrganizerCard from '@/components/OrganizerCard';
 import { RelatedArticles } from '@/components/RelatedArticles';
+import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 // ============================================================================
@@ -32,17 +34,29 @@ export async function generateMetadata({ params }: { params: { locale: string; e
   try {
     const event = await eventsService.getBySlug(params.eventSlug);
 
+    // Get SEO data if available
+    let seo = null;
+    try {
+      seo = await seoService.getSEO('event', event.id);
+    } catch (error) {
+      // SEO not found, use fallback
+    }
+
     // Get translated content if available
     const translation = event.translations?.find((t: any) => t.language === params.locale.toUpperCase());
     const name = translation?.name || event.name;
     const description = translation?.description || event.description;
 
+    // Use SEO metadata if available, otherwise fallback to event data
+    const title = seo?.metaTitle || `${name} | WWTRAIL`;
+    const metaDescription = seo?.metaDescription || description || `Trail running event in ${event.city}, ${event.country}`;
+
     return {
-      title: `${name} | WWTRAIL`,
-      description: description || `Trail running event in ${event.city}, ${event.country}`,
+      title,
+      description: metaDescription,
       openGraph: {
-        title: name,
-        description,
+        title,
+        description: metaDescription,
         images: event.coverImage ? [event.coverImage] : [],
       }
     };
@@ -65,9 +79,17 @@ export default async function EventDetailPage({
   let event: Event;
   let nearbyEvents: Event[] = [];
   let nearbyServices: Service[] = [];
+  let seo: any = null;
 
   try {
     event = await eventsService.getBySlug(params.eventSlug);
+
+    // Get SEO data if available
+    try {
+      seo = await seoService.getSEO('event', event.id);
+    } catch (error) {
+      // SEO not found, continue without it
+    }
 
     // Get translated content if available
     const translation = (event as any).translations?.find((t: any) => t.language === params.locale.toUpperCase());
@@ -458,6 +480,11 @@ export default async function EventDetailPage({
 
         {/* Related Articles */}
         <RelatedArticles eventId={event.id} title="Artículos sobre este evento" className="mt-8" />
+
+        {/* SEO FAQ Schema.org + Visible FAQ */}
+        {seo && seo.llmFaq && seo.llmFaq.length > 0 && (
+          <SEOFaqSchema faq={seo.llmFaq} visible={true} />
+        )}
       </div>
     </div>
   );

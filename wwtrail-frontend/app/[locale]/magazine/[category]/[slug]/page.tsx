@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { ArrowLeft, Calendar, User, Eye, Globe, Share2 } from 'lucide-react';
 import { postsService } from '@/lib/api/v2';
 import { Post, POST_CATEGORY_LABELS, LANGUAGE_LABELS } from '@/types/v2';
+import { seoService } from '@/lib/api/seo.service';
+import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -19,12 +21,28 @@ export default function ArticleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [seo, setSeo] = useState<any>(null);
 
   useEffect(() => {
     if (slug) {
       loadArticle();
     }
   }, [slug, locale]); // ✅ Reload when locale changes
+
+  // Fetch SEO data when article is loaded
+  useEffect(() => {
+    const fetchSEO = async () => {
+      if (article?.id) {
+        try {
+          const seoData = await seoService.getSEO('post', article.id);
+          setSeo(seoData);
+        } catch (error) {
+          // SEO not found, continue without it
+        }
+      }
+    };
+    fetchSEO();
+  }, [article?.id]);
 
   const loadArticle = async () => {
     try {
@@ -282,6 +300,11 @@ export default function ArticleDetailPage() {
               </div>
             )}
           </article>
+
+          {/* SEO FAQ Schema.org + Visible FAQ */}
+          {seo && seo.llmFaq && seo.llmFaq.length > 0 && (
+            <SEOFaqSchema faq={seo.llmFaq} visible={true} />
+          )}
         </div>
       </div>
     </div>
