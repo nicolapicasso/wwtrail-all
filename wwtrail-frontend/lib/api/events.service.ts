@@ -39,6 +39,7 @@ export interface EventFilters {
   limit?: number;
   featured?: boolean | string;  // ✅ AGREGADO
   typicalMonth?: string;  // ✅ NUEVO: Filtro por mes típico del evento
+  language?: string;  // ✅ NUEVO: Idioma para traducciones
 }
 
 interface ApiResponse<T> {
@@ -73,6 +74,11 @@ export const eventsService = {
     // ✅ NUEVO: Agregar typicalMonth
     if (filters.typicalMonth) {
       params.append('typicalMonth', filters.typicalMonth);
+    }
+
+    // ✅ NUEVO: Agregar language para traducciones
+    if (filters.language) {
+      params.append('language', filters.language);
     }
 
     const { data } = await apiClientV1.get('/events', { params });

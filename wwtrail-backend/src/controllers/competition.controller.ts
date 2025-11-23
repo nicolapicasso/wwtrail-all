@@ -27,6 +27,7 @@ export class CompetitionController {
         minElevation,
         maxElevation,
         specialSeriesId,
+        language,
       } = req.query;
 
       const competitions = await CompetitionService.findAll({
@@ -41,6 +42,7 @@ export class CompetitionController {
         minElevation: minElevation ? parseFloat(minElevation as string) : undefined,
         maxElevation: maxElevation ? parseFloat(maxElevation as string) : undefined,
         specialSeriesId: specialSeriesId as string,
+        language: language as string,
       });
 
       res.json({

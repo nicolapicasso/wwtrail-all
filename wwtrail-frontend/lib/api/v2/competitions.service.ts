@@ -33,11 +33,12 @@ export const competitionsService = {
    * Get all competitions with optional filters
    * GET /competitions
    */
-  async getAll(filters?: { limit?: number; offset?: number; isFeatured?: boolean }): Promise<{ competitions: Competition[] }> {
+  async getAll(filters?: { limit?: number; offset?: number; isFeatured?: boolean; language?: string }): Promise<{ competitions: Competition[] }> {
     const params = new URLSearchParams();
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.offset) params.append('offset', filters.offset.toString());
     if (filters?.isFeatured !== undefined) params.append('isFeatured', filters.isFeatured.toString());
+    if (filters?.language) params.append('language', filters.language);
 
     const response = await apiClientV2.get<{
       status: string;
