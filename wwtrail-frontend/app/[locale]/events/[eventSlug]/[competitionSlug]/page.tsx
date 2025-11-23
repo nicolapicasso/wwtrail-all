@@ -36,12 +36,12 @@ export default function CompetitionDetailPage() {
   const [nearbyServices, setNearbyServices] = useState<any[]>([]);
   const [seo, setSeo] = useState<any>(null);
 
-  // Fetch SEO data
+  // Fetch SEO data (in current language)
   useEffect(() => {
     const fetchSEO = async () => {
       if (competition?.id) {
         try {
-          const seoData = await seoService.getSEO('competition', competition.id);
+          const seoData = await seoService.getSEO('competition', competition.id, locale);
           setSeo(seoData);
         } catch (error) {
           // SEO not found, continue without it
@@ -49,7 +49,7 @@ export default function CompetitionDetailPage() {
       }
     };
     fetchSEO();
-  }, [competition?.id]);
+  }, [competition?.id, locale]);
 
   // Fetch nearby events and services when competition data is available
   useEffect(() => {

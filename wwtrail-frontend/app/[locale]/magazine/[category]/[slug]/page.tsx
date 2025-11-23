@@ -29,12 +29,12 @@ export default function ArticleDetailPage() {
     }
   }, [slug, locale]); // ✅ Reload when locale changes
 
-  // Fetch SEO data when article is loaded
+  // Fetch SEO data when article is loaded (in current language)
   useEffect(() => {
     const fetchSEO = async () => {
       if (article?.id) {
         try {
-          const seoData = await seoService.getSEO('post', article.id);
+          const seoData = await seoService.getSEO('post', article.id, locale);
           setSeo(seoData);
         } catch (error) {
           // SEO not found, continue without it
@@ -42,7 +42,7 @@ export default function ArticleDetailPage() {
       }
     };
     fetchSEO();
-  }, [article?.id]);
+  }, [article?.id, locale]);
 
   const loadArticle = async () => {
     try {
