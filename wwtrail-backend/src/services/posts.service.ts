@@ -17,8 +17,6 @@ interface CreatePostInput {
   excerpt?: string;
   content: string;
   featuredImage?: string;
-  metaTitle?: string;
-  metaDescription?: string;
   category: PostCategory;
   language: Language;
   eventId?: string;
@@ -39,8 +37,6 @@ interface UpdatePostInput {
   excerpt?: string;
   content?: string;
   featuredImage?: string;
-  metaTitle?: string;
-  metaDescription?: string;
   category?: PostCategory;
   language?: Language;
   eventId?: string;
@@ -131,8 +127,6 @@ export class PostsService {
         excerpt: data.excerpt,
         content: data.content,
         featuredImage: data.featuredImage,
-        metaTitle: data.metaTitle || data.title,
-        metaDescription: data.metaDescription || data.excerpt,
         category: data.category,
         language: data.language,
         status,
@@ -461,8 +455,6 @@ export class PostsService {
       if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
       if (data.content !== undefined) updateData.content = data.content;
       if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-      if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
-      if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
       if (data.category !== undefined) updateData.category = data.category;
       if (data.language !== undefined) updateData.language = data.language;
       if (data.status !== undefined) updateData.status = data.status;
