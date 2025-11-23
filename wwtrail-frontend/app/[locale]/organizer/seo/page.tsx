@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { seoService, type SEO } from '@/lib/api/seo.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,17 +20,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Loader2,
   Edit,
@@ -40,30 +39,54 @@ import {
   Minus,
   Clock,
   CheckCircle2,
+  Search,
+  Globe,
+  FileText,
+  Flag,
+  Award,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 
+// Grouped SEO structure
+interface GroupedSEO {
+  entityType: string;
+  entityId: string;
+  slug: string | null;
+  entityName: string;
+  languages: SEO[];
+}
+
 export default function SEOManagementPage() {
-  const [entityType, setEntityType] = useState('event');
-  const [seoList, setSeoList] = useState<SEO[]>([]);
+  const [allSEO, setAllSEO] = useState<SEO[]>([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
   const [editingSEO, setEditingSEO] = useState<SEO | null>(null);
   const [regenerating, setRegenerating] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadSEO();
-  }, [entityType, page]);
+    loadAllSEO();
+  }, []);
 
-  const loadSEO = async () => {
+  const loadAllSEO = async () => {
     try {
       setLoading(true);
-      const response = await seoService.listSEO(entityType, page, 20);
-      setSeoList(response.data);
-      setTotalPages(response.meta.totalPages);
+
+      // Load SEO for all entity types in parallel
+      const [events, competitions, posts] = await Promise.all([
+        seoService.listSEO('event', 1, 1000),
+        seoService.listSEO('competition', 1, 1000),
+        seoService.listSEO('post', 1, 1000),
+      ]);
+
+      const allData = [
+        ...events.data,
+        ...competitions.data,
+        ...posts.data,
+      ];
+
+      setAllSEO(allData);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -74,6 +97,58 @@ export default function SEOManagementPage() {
       setLoading(false);
     }
   };
+
+  // Group SEO by entity (entityType + entityId/slug)
+  const groupedSEO = useMemo(() => {
+    const groups = new Map<string, GroupedSEO>();
+
+    allSEO.forEach((seo) => {
+      const key = `${seo.entityType}-${seo.entityId || seo.slug}`;
+
+      if (!groups.has(key)) {
+        groups.set(key, {
+          entityType: seo.entityType,
+          entityId: seo.entityId || '',
+          slug: seo.slug,
+          entityName: seo.metaTitle?.split('|')[0]?.trim() || seo.slug || seo.entityId || 'Sin nombre',
+          languages: [],
+        });
+      }
+
+      groups.get(key)!.languages.push(seo);
+    });
+
+    return Array.from(groups.values());
+  }, [allSEO]);
+
+  // Filter by search query
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return groupedSEO;
+
+    const query = searchQuery.toLowerCase();
+    return groupedSEO.filter((group) =>
+      group.entityName.toLowerCase().includes(query) ||
+      group.slug?.toLowerCase().includes(query) ||
+      group.entityId.toLowerCase().includes(query)
+    );
+  }, [groupedSEO, searchQuery]);
+
+  // Group by entity type
+  const groupedByType = useMemo(() => {
+    const byType: Record<string, GroupedSEO[]> = {
+      event: [],
+      competition: [],
+      post: [],
+    };
+
+    filteredGroups.forEach((group) => {
+      if (byType[group.entityType]) {
+        byType[group.entityType].push(group);
+      }
+    });
+
+    return byType;
+  }, [filteredGroups]);
 
   const handleEdit = (seo: SEO) => {
     setEditingSEO({ ...seo });
@@ -95,7 +170,7 @@ export default function SEOManagementPage() {
       });
 
       setEditingSEO(null);
-      await loadSEO();
+      await loadAllSEO();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -114,7 +189,7 @@ export default function SEOManagementPage() {
         title: '✅ Eliminado',
         description: 'SEO eliminado correctamente',
       });
-      await loadSEO();
+      await loadAllSEO();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -136,7 +211,6 @@ export default function SEOManagementPage() {
         description: 'El SEO se está regenerando con IA. Esto puede tardar unos segundos...',
       });
 
-      // Llamar al endpoint de regeneración
       await seoService.regenerateSEO({
         entityType: seo.entityType,
         entityId: seo.entityId,
@@ -148,7 +222,7 @@ export default function SEOManagementPage() {
         description: 'El SEO ha sido regenerado exitosamente',
       });
 
-      await loadSEO();
+      await loadAllSEO();
       setRegenerating(null);
     } catch (error: any) {
       toast({
@@ -186,156 +260,198 @@ export default function SEOManagementPage() {
     });
   };
 
-  const entityTypes = [
-    { value: 'event', label: 'Eventos' },
-    { value: 'competition', label: 'Competiciones' },
-    { value: 'post', label: 'Posts' },
-  ];
+  const getEntityIcon = (entityType: string) => {
+    switch (entityType) {
+      case 'event':
+        return <Award className="h-4 w-4" />;
+      case 'competition':
+        return <Flag className="h-4 w-4" />;
+      case 'post':
+        return <FileText className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
+  const getEntityLabel = (entityType: string) => {
+    switch (entityType) {
+      case 'event':
+        return 'Eventos';
+      case 'competition':
+        return 'Competiciones';
+      case 'post':
+        return 'Posts';
+      default:
+        return entityType;
+    }
+  };
+
+  const getLanguageLabel = (lang: string) => {
+    const labels: Record<string, string> = {
+      ES: 'Español',
+      EN: 'English',
+      IT: 'Italiano',
+      CA: 'Català',
+      FR: 'Français',
+      DE: 'Deutsch',
+    };
+    return labels[lang.toUpperCase()] || lang;
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">🔍 Gestión de SEO</h1>
         <p className="text-muted-foreground">
-          Administra el SEO de eventos, competiciones y posts
+          Administra el SEO de eventos, competiciones y posts. Agrupado por entidad con todos los idiomas.
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Listado de SEO</CardTitle>
-              <CardDescription>Visualiza y edita el SEO generado para cada entidad</CardDescription>
-            </div>
-            <Select value={entityType} onValueChange={(value) => { setEntityType(value); setPage(1); }}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Seleccionar tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {entityTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* Search Bar */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nombre, slug o ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : seoList.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No hay SEO generado para este tipo de entidad
-            </div>
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Meta Title</TableHead>
-                    <TableHead>Meta Description</TableHead>
-                    <TableHead>FAQ</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Última Regeneración</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {seoList.map((seo) => (
-                    <TableRow key={seo.id}>
-                      <TableCell className="font-medium max-w-xs truncate">
-                        {seo.metaTitle || '-'}
-                      </TableCell>
-                      <TableCell className="max-w-md truncate">
-                        {seo.metaDescription || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{seo.llmFaq?.length || 0} preguntas</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {seo.autoGenerated ? (
-                          <Badge variant="outline">
-                            <Clock className="mr-1 h-3 w-3" />
-                            Auto
-                          </Badge>
-                        ) : (
-                          <Badge>
-                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Manual
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {seo.lastRegenerated
-                          ? format(new Date(seo.lastRegenerated), 'dd/MM/yyyy HH:mm')
-                          : '-'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(seo)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRegenerate(seo)}
-                            disabled={regenerating === seo.id}
-                          >
-                            {regenerating === seo.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <RefreshCw className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(seo.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    Anterior
-                  </Button>
-                  <span className="text-sm">
-                    Página {page} de {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                  >
-                    Siguiente
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
         </CardContent>
       </Card>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : allSEO.length === 0 ? (
+        <Card>
+          <CardContent className="py-16">
+            <div className="text-center text-muted-foreground">
+              No hay SEO generado aún
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Accordion type="multiple" defaultValue={['event', 'competition', 'post']} className="space-y-4">
+          {(['event', 'competition', 'post'] as const).map((entityType) => {
+            const groups = groupedByType[entityType];
+            if (groups.length === 0) return null;
+
+            return (
+              <AccordionItem key={entityType} value={entityType} className="border rounded-lg">
+                <AccordionTrigger className="px-6 hover:no-underline">
+                  <div className="flex items-center gap-3">
+                    {getEntityIcon(entityType)}
+                    <span className="font-semibold text-lg">{getEntityLabel(entityType)}</span>
+                    <Badge variant="secondary">{groups.length} entidades</Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-4">
+                  <div className="space-y-4">
+                    {groups.map((group) => (
+                      <Card key={`${group.entityType}-${group.entityId || group.slug}`}>
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-base">{group.entityName}</CardTitle>
+                              <CardDescription className="text-xs mt-1">
+                                {group.slug || group.entityId}
+                              </CardDescription>
+                            </div>
+                            <Badge variant="outline">
+                              <Globe className="h-3 w-3 mr-1" />
+                              {group.languages.length} idiomas
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="w-[100px]">Idioma</TableHead>
+                                <TableHead>Meta Title</TableHead>
+                                <TableHead>FAQ</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {group.languages.map((seo) => (
+                                <TableRow key={seo.id}>
+                                  <TableCell>
+                                    <Badge variant="secondary">
+                                      {getLanguageLabel(seo.language)}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="font-medium max-w-xs truncate">
+                                    {seo.metaTitle || '-'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="outline">{seo.llmFaq?.length || 0} preguntas</Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {seo.autoGenerated ? (
+                                      <Badge variant="outline">
+                                        <Clock className="mr-1 h-3 w-3" />
+                                        Auto
+                                      </Badge>
+                                    ) : (
+                                      <Badge>
+                                        <CheckCircle2 className="mr-1 h-3 w-3" />
+                                        Manual
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex items-center justify-end gap-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleEdit(seo)}
+                                        title="Editar"
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleRegenerate(seo)}
+                                        disabled={regenerating === seo.id}
+                                        title="Regenerar con IA"
+                                      >
+                                        {regenerating === seo.id ? (
+                                          <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                          <RefreshCw className="h-4 w-4" />
+                                        )}
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDelete(seo.id)}
+                                        title="Eliminar"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+      )}
 
       {/* Dialog de Edición */}
       <Dialog open={!!editingSEO} onOpenChange={(open) => !open && setEditingSEO(null)}>
