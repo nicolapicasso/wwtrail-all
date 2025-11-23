@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { promotionsService } from '@/lib/api/v2';
 import serviceCategoriesService, { ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
 import { Promotion, PromotionType } from '@/types/v2';
@@ -8,6 +9,7 @@ import PromotionCard from '@/components/promotions/PromotionCard';
 import { Search, Filter } from 'lucide-react';
 
 export default function PromotionsPage() {
+  const locale = useLocale();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<ServiceCategory[]>([]);
@@ -62,6 +64,7 @@ export default function PromotionsPage() {
         status: 'PUBLISHED',
         sortBy: 'createdAt',
         sortOrder: 'desc',
+        language: locale,
       };
 
       if (search) filters.search = search;
