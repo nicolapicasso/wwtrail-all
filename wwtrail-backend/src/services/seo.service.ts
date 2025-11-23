@@ -113,11 +113,17 @@ export class SEOService {
       const parsed = JSON.parse(content);
 
       // Normalizar respuesta - esperamos {faq: [{question, answer}]}
-      const faq = parsed.faq || parsed.questions || parsed;
+      let faq = parsed.faq || parsed.questions || parsed;
 
       if (!Array.isArray(faq)) {
         throw new Error('Invalid FAQ format from OpenAI');
       }
+
+      // Normalizar claves de cada objeto (pregunta→question, respuesta→answer)
+      faq = faq.map((item: any) => ({
+        question: item.question || item.pregunta || item.q || '',
+        answer: item.answer || item.respuesta || item.a || '',
+      }));
 
       logger.info(`Generated ${faq.length} FAQ items`);
       return faq.slice(0, 5); // Limitar a 5 preguntas
