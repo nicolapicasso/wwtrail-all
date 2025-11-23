@@ -18,7 +18,16 @@ export default function LanguageSelector() {
   const pathname = usePathname();
 
   const handleLocaleChange = (newLocale: Locale) => {
-    if (newLocale === locale) return;
+    if (newLocale === locale) {
+      console.log('Same locale, skipping');
+      return;
+    }
+
+    console.log('🌍 Language change requested:', {
+      from: locale,
+      to: newLocale,
+      currentPathname: pathname
+    });
 
     // Get the current pathname without the locale prefix
     // Create a regex that matches any of our supported locales at the start
@@ -26,11 +35,13 @@ export default function LanguageSelector() {
 
     // Remove the locale prefix - if the path starts with a locale, remove it
     let pathnameWithoutLocale = pathname.replace(localeRegex, '/');
+    console.log('After removing locale prefix:', pathnameWithoutLocale);
 
     // Remove leading slash for easier concatenation
     if (pathnameWithoutLocale.startsWith('/')) {
       pathnameWithoutLocale = pathnameWithoutLocale.substring(1);
     }
+    console.log('After removing leading slash:', pathnameWithoutLocale);
 
     // Build the new path with the new locale
     // For 'es' (default locale), don't add prefix when using 'as-needed'
@@ -38,14 +49,18 @@ export default function LanguageSelector() {
     if (newLocale === 'es') {
       // Spanish is the default, no locale prefix needed
       newPath = pathnameWithoutLocale ? `/${pathnameWithoutLocale}` : '/';
+      console.log('Building path for ES (no prefix):', newPath);
     } else {
       // Other languages need the locale prefix
       newPath = pathnameWithoutLocale ? `/${newLocale}/${pathnameWithoutLocale}` : `/${newLocale}`;
+      console.log('Building path for', newLocale, '(with prefix):', newPath);
     }
 
     // Clean up any double slashes
     newPath = newPath.replace(/\/+/g, '/');
+    console.log('Final path after cleanup:', newPath);
 
+    console.log('🚀 Navigating to:', newPath);
     router.push(newPath);
     router.refresh();
   };
