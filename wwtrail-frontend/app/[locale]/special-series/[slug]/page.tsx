@@ -14,6 +14,7 @@ export default function SpecialSeriesDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const locale = params.locale as string; // ✅ Get current locale
 
   const [specialSeries, setSpecialSeries] = useState<SpecialSeries | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,14 +25,26 @@ export default function SpecialSeriesDetailPage() {
     if (slug) {
       loadSpecialSeries();
     }
-  }, [slug]);
+  }, [slug, locale]); // ✅ Reload when locale changes
 
   const loadSpecialSeries = async () => {
     try {
       setLoading(true);
       setError(null);
       const series = await specialSeriesService.getBySlug(slug);
-      console.log('Special series loaded:', series);
+
+      // ✅ Apply translations if available
+      const translation = (series as any).translations?.find((t: any) => t.language === locale?.toUpperCase());
+      if (translation) {
+        series.name = translation.name || series.name;
+        series.description = translation.description || series.description;
+      }
+
+      console.log('Special series loaded:', {
+        name: series.name,
+        locale,
+        hasTranslation: !!translation
+      });
       setSpecialSeries(series);
     } catch (err: any) {
       console.error('Error loading special series:', err);

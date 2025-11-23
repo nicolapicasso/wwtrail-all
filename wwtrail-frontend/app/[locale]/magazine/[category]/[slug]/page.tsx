@@ -13,6 +13,7 @@ export default function ArticleDetailPage() {
   const router = useRouter();
   const slug = params.slug as string;
   const category = params.category as string;
+  const locale = params.locale as string; // ✅ Get current locale
 
   const [article, setArticle] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,14 +24,27 @@ export default function ArticleDetailPage() {
     if (slug) {
       loadArticle();
     }
-  }, [slug]);
+  }, [slug, locale]); // ✅ Reload when locale changes
 
   const loadArticle = async () => {
     try {
       setLoading(true);
       setError(null);
       const post = await postsService.getBySlug(slug);
-      console.log('Article loaded:', post);
+
+      // ✅ Apply translations if available
+      const translation = (post as any).translations?.find((t: any) => t.language === locale?.toUpperCase());
+      if (translation) {
+        post.title = translation.title || post.title;
+        post.excerpt = translation.excerpt || post.excerpt;
+        post.content = translation.content || post.content;
+      }
+
+      console.log('Article loaded:', {
+        title: post.title,
+        locale,
+        hasTranslation: !!translation
+      });
       setArticle(post);
     } catch (err: any) {
       console.error('Error loading article:', err);

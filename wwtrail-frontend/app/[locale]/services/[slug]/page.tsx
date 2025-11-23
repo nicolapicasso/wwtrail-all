@@ -28,6 +28,7 @@ const EventMap = dynamic(() => import('@/components/EventMap'), {
 export default function ServiceDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
+  const locale = params?.locale as string; // ✅ Get current locale
 
   const [service, setService] = useState<Service | null>(null);
   const [nearbyServices, setNearbyServices] = useState<Service[]>([]);
@@ -43,7 +44,22 @@ export default function ServiceDetailPage() {
       setLoading(true);
       try {
         const response = await servicesService.getBySlug(slug);
-        setService(response.data);
+        const serviceData = response.data;
+
+        // ✅ Apply translations if available
+        const translation = (serviceData as any).translations?.find((t: any) => t.language === locale?.toUpperCase());
+        if (translation) {
+          serviceData.name = translation.name || serviceData.name;
+          serviceData.description = translation.description || serviceData.description;
+        }
+
+        console.log('Service loaded:', {
+          name: serviceData.name,
+          locale,
+          hasTranslation: !!translation
+        });
+
+        setService(serviceData);
 
         // Cargar servicios y eventos cercanos si hay coordenadas
         if (response.data.latitude && response.data.longitude) {
@@ -87,7 +103,7 @@ export default function ServiceDetailPage() {
     };
 
     fetchService();
-  }, [slug]);
+  }, [slug, locale]); // ✅ Reload when locale changes
 
   if (loading) {
     return (
