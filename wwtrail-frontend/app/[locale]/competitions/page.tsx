@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { competitionsService } from '@/lib/api';
 import { CompetitionGrid } from '@/components/CompetitionGrid';
 import { CompetitionGridSkeleton } from '@/components/CompetitionSkeleton';
 import { CompetitionFilters, FilterState } from '@/components/CompetitionFilters';
 
 export default function CompetitionsPage() {
+  const locale = useLocale();
   const [competitions, setCompetitions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +37,7 @@ export default function CompetitionsPage() {
       const params: any = {
         limit: 50,
         sortBy: filters.sortBy,
+        language: locale,  // ✅ NUEVO: Pass locale to API
       };
 
       if (filters.search) params.search = filters.search;
