@@ -261,6 +261,7 @@ export class PostsService {
             },
             tags: true,
             images: true,
+            translations: true,
           },
         }),
         prisma.post.count({ where }),

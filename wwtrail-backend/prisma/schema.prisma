@@ -233,6 +233,7 @@ model Event {
   name        String  @db.VarChar(255)
   slug        String  @unique @db.VarChar(255)
   description String? @db.Text
+  language    Language @default(ES)
 
   // Ubicación
   country  String                                @db.VarChar(2)
@@ -284,6 +285,7 @@ model Event {
   // Relaciones
   competitions Competition[]
   translations EventTranslation[]
+  posts        Post[]           @relation("PostEvent")
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -310,6 +312,7 @@ model Competition {
   name        String  @db.VarChar(255)
   slug        String  @unique @db.VarChar(255)
   description String? @db.Text
+  language    Language @default(ES)
 
   // Datos base (pueden ser sobrescritos en Edition)
   baseDistance        Float? // km
@@ -349,6 +352,7 @@ model Competition {
   reviews          Review[]
   favorites        Favorite[]
   userCompetitions UserCompetition[]
+  posts            Post[]                   @relation("PostCompetition")
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -764,8 +768,15 @@ model Post {
 
   category PostCategory @default(GENERAL)
   status   PostStatus   @default(DRAFT)
+  language Language     @default(ES)
 
-  // Relación con edición específica
+  // Relaciones opcionales con Event, Competition o Edition
+  eventId String?
+  event   Event? @relation("PostEvent", fields: [eventId], references: [id], onDelete: SetNull)
+
+  competitionId String?
+  competition   Competition? @relation("PostCompetition", fields: [competitionId], references: [id], onDelete: SetNull)
+
   editionId String?
   edition   Edition? @relation(fields: [editionId], references: [id], onDelete: SetNull)
 
@@ -787,6 +798,8 @@ model Post {
   @@index([status])
   @@index([category])
   @@index([authorId])
+  @@index([eventId])
+  @@index([competitionId])
   @@index([editionId])
   @@map("posts")
 }
@@ -880,6 +893,7 @@ model SpecialSeries {
   name        String  @db.VarChar(255)
   slug        String  @unique @db.VarChar(255)
   description String? @db.Text
+  language    Language @default(ES)
 
   // Ubicación
   country String @db.VarChar(2)
@@ -1110,6 +1124,7 @@ model Service {
   name        String  @db.VarChar(255)
   slug        String  @unique @db.VarChar(255)
   description String? @db.Text
+  language    Language @default(ES)
 
   // Categoría (relación con ServiceCategory)
   categoryId String?

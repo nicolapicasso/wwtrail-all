@@ -175,6 +175,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           id: true,
           name: true,
           description: true,
+          language: true,
           translations: true,
         },
       });
@@ -183,10 +184,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         throw new Error('Competición no encontrada');
       }
 
-      // Detectar idioma original (asumimos que el nombre original está en algún idioma)
-      // Por simplicidad, asumimos ES como idioma por defecto si no hay traducciones
-      const existingLanguages = competition.translations.map((t) => t.language);
-      const sourceLanguage: Language = 'ES'; // Podría mejorarse detectando el idioma
+      const sourceLanguage: Language = competition.language;
 
       const results = [];
 
@@ -260,6 +258,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           title: true,
           excerpt: true,
           content: true,
+          language: true,
           translations: true,
         },
       });
@@ -268,7 +267,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         throw new Error('Post no encontrado');
       }
 
-      const sourceLanguage: Language = 'ES';
+      const sourceLanguage: Language = post.language;
       const results = [];
 
       for (const targetLang of targetLanguages) {
@@ -338,6 +337,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           id: true,
           name: true,
           description: true,
+          language: true,
           translations: true,
         },
       });
@@ -346,7 +346,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         throw new Error('Evento no encontrado');
       }
 
-      const sourceLanguage: Language = 'ES';
+      const sourceLanguage: Language = event.language;
       const results = [];
 
       for (const targetLang of targetLanguages) {
@@ -411,6 +411,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           id: true,
           name: true,
           description: true,
+          language: true,
           translations: true,
         },
       });
@@ -419,7 +420,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         throw new Error('Servicio no encontrado');
       }
 
-      const sourceLanguage: Language = 'ES';
+      const sourceLanguage: Language = service.language;
       const results = [];
 
       for (const targetLang of targetLanguages) {
@@ -484,6 +485,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           id: true,
           name: true,
           description: true,
+          language: true,
           translations: true,
         },
       });
@@ -492,7 +494,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         throw new Error('Serie especial no encontrada');
       }
 
-      const sourceLanguage: Language = 'ES';
+      const sourceLanguage: Language = specialSeries.language;
       const results = [];
 
       for (const targetLang of targetLanguages) {
