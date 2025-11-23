@@ -38,6 +38,7 @@ import specialSeriesRoutes from './routes/specialSeries.routes';
 import postsRoutes from './routes/posts.routes';
 import promotionRoutes from './routes/promotion.routes';
 import emailTemplateRoutes from './routes/email-template.routes';
+import seoRoutes from './routes/seo.routes';
 
 dotenv.config();
 
@@ -157,6 +158,7 @@ app.use('/api/v2/home', homeConfigurationRoutes);
 app.use('/api/v2/promotions', promotionRoutes);
 app.use('/api/v2/email-templates', emailTemplateRoutes);
 app.use('/api/v2/translations', translationRoutes);
+app.use('/api/v2/seo', seoRoutes);
 app.use('/api/v2', catalogRoutes);
 
 // ============================================

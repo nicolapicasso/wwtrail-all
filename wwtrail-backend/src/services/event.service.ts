@@ -5,6 +5,7 @@ import logger from '../utils/logger';
 import { generateUniqueSlug } from '../utils/slugify';
 import { EventStatus } from '@prisma/client';
 import { TranslationService } from './translation.service';
+import { SEOService } from './seo.service';
 import { isAutoTranslateEnabled, getTargetLanguages, shouldTranslateByStatus, TranslationConfig } from '../config/translation.config';
 
 interface CreateEventInput {
@@ -103,6 +104,55 @@ export class EventService {
       });
     } else {
       return TranslationService.autoTranslateEvent(eventId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
+    }
+  }
+
+  /**
+   * Disparar generación de SEO automática en background (no bloqueante)
+   */
+  private static async triggerAutoSEO(eventId: string, event: any, status: EventStatus) {
+    try {
+      // Solo generar SEO si está publicado
+      if (status !== 'PUBLISHED') {
+        return;
+      }
+
+      // Obtener configuración de SEO
+      const config = await SEOService.getConfig('event');
+      if (!config || !config.generateOnCreate) {
+        return;
+      }
+
+      logger.info(`Triggering auto-SEO generation for event "${event.name}" (${eventId})`);
+
+      // Preparar datos para el template
+      const seoData = {
+        name: event.name,
+        description: event.description || '',
+        city: event.city,
+        country: event.country,
+        location: `${event.city}, ${event.country}`,
+        year: new Date().getFullYear(),
+        date: event.firstEditionYear ? `desde ${event.firstEditionYear}` : '',
+        url: `${process.env.FRONTEND_URL || 'https://wwtrail.com'}/events/${event.slug}`,
+      };
+
+      // Ejecutar en background
+      setImmediate(() => {
+        SEOService.generateAndSave({
+          entityType: 'event',
+          entityId: eventId,
+          data: seoData,
+        })
+          .then(() => {
+            logger.info(`SEO generated successfully for event ${eventId}`);
+          })
+          .catch((error) => {
+            logger.error(`SEO generation failed for event ${eventId}:`, error.message);
+          });
+      });
+    } catch (error: any) {
+      logger.error('Error in triggerAutoSEO:', error);
     }
   }
 
@@ -355,6 +405,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
       // Disparar traducciones automáticas si está publicado
       await this.triggerAutoTranslation(event.id, status as EventStatus);
+
+      // Disparar generación de SEO automática
+      await this.triggerAutoSEO(event.id, event, status as EventStatus);
 
       return event;
     } catch (error) {
