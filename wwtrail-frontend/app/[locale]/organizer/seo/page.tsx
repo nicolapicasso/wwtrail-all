@@ -130,21 +130,30 @@ export default function SEOManagementPage() {
 
     try {
       setRegenerating(seo.id);
-      // Aquí necesitarías obtener los datos de la entidad para regenerar
-      // Por simplicidad, mostramos el toast de éxito
+
       toast({
         title: '⏳ Regenerando...',
-        description: 'El SEO se está regenerando en segundo plano',
+        description: 'El SEO se está regenerando con IA. Esto puede tardar unos segundos...',
       });
 
-      setTimeout(async () => {
-        await loadSEO();
-        setRegenerating(null);
-      }, 2000);
+      // Llamar al endpoint de regeneración
+      await seoService.regenerateSEO({
+        entityType: seo.entityType,
+        entityId: seo.entityId,
+        slug: seo.slug,
+      } as any);
+
+      toast({
+        title: '✅ Regenerado',
+        description: 'El SEO ha sido regenerado exitosamente',
+      });
+
+      await loadSEO();
+      setRegenerating(null);
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Error al regenerar',
+        description: error.message || 'Error al regenerar SEO',
         variant: 'destructive',
       });
       setRegenerating(null);

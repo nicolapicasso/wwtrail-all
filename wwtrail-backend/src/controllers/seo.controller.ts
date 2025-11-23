@@ -112,7 +112,9 @@ export async function generateSEO(req: Request, res: Response) {
 /**
  * Regenerar SEO (eliminar y crear de nuevo)
  * POST /api/v2/seo/regenerate
- * Body: { entityType, entityId?, slug?, data }
+ * Body: { entityType, entityId?, slug?, data? }
+ *
+ * Si 'data' no se proporciona, se obtendrá automáticamente de la base de datos
  */
 export async function regenerateSEO(req: Request, res: Response) {
   try {
@@ -132,19 +134,13 @@ export async function regenerateSEO(req: Request, res: Response) {
       });
     }
 
-    if (!data) {
-      return res.status(400).json({
-        success: false,
-        message: 'data object is required',
-      });
-    }
-
+    // El campo 'data' ahora es opcional - el servicio lo obtendrá automáticamente si no se proporciona
     const seo = await SEOService.regenerateSEO({
       entityType,
       entityId,
       slug,
-      data,
-    });
+      ...(data && { data }),
+    } as any);
 
     res.json({
       success: true,

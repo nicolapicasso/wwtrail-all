@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import logger from '../utils/logger';
 import axios from 'axios';
 import { Language } from '@prisma/client';
+import { EventService } from './event.service';
 
 // Configuración de OpenAI
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -297,16 +298,51 @@ export class SEOService {
   }
 
   /**
-   * Regenerar SEO (eliminar y crear de nuevo)
+   * Obtener datos de la entidad automáticamente
    */
-  static async regenerateSEO(input: GenerateSEOInput) {
+  private static async fetchEntityData(entityType: string, entityIdOrSlug: string): Promise<Record<string, any>> {
+    try {
+      let entity: any = null;
+
+      if (entityType === 'event') {
+        // Intentar primero por ID, luego por slug
+        entity = await EventService.findById(entityIdOrSlug).catch(() => null);
+        if (!entity) {
+          entity = await EventService.findBySlug(entityIdOrSlug);
+        }
+      } else if (entityType === 'competition') {
+        // TODO: Implementar cuando exista CompetitionService
+        throw new Error('Competition entity type not yet supported for auto-fetch');
+      } else if (entityType === 'post') {
+        // TODO: Implementar cuando exista PostService
+        throw new Error('Post entity type not yet supported for auto-fetch');
+      } else {
+        throw new Error(`Unknown entity type: ${entityType}`);
+      }
+
+      if (!entity) {
+        throw new Error(`Entity not found: ${entityType} ${entityIdOrSlug}`);
+      }
+
+      return entity;
+    } catch (error: any) {
+      logger.error('Error fetching entity data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Regenerar SEO (eliminar y crear de nuevo)
+   * Si no se proporciona 'data', se obtendrá automáticamente de la base de datos
+   */
+  static async regenerateSEO(input: GenerateSEOInput | { entityType: string; entityId?: string; slug?: string }) {
     try {
       // Buscar SEO existente
       const existingSEO = await prisma.sEO.findFirst({
         where: {
           entityType: input.entityType,
-          ...(input.entityId ? { entityId: input.entityId } : {}),
-          ...(input.slug ? { slug: input.slug } : {}),
+          ...((input as any).entityId ? { entityId: (input as any).entityId } : {}),
+          ...((input as any).slug ? { slug: (input as any).slug } : {}),
         },
       });
 
@@ -314,7 +350,26 @@ export class SEOService {
         await this.deleteSEO(existingSEO.id);
       }
 
-      return await this.generateAndSave(input);
+      // Si no se proporciona 'data', obtenerlo automáticamente
+      let generateInput: GenerateSEOInput;
+      if (!(input as GenerateSEOInput).data) {
+        const entityIdOrSlug = (input as any).entityId || (input as any).slug;
+        if (!entityIdOrSlug) {
+          throw new Error('Either entityId or slug is required');
+        }
+
+        const entityData = await this.fetchEntityData(input.entityType, entityIdOrSlug);
+        generateInput = {
+          entityType: input.entityType,
+          entityId: (input as any).entityId,
+          slug: (input as any).slug,
+          data: entityData,
+        };
+      } else {
+        generateInput = input as GenerateSEOInput;
+      }
+
+      return await this.generateAndSave(generateInput);
     } catch (error: any) {
       logger.error('Error regenerating SEO:', error);
       throw error;
