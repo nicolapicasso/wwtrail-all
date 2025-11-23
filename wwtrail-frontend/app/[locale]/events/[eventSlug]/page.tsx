@@ -34,10 +34,10 @@ export async function generateMetadata({ params }: { params: { locale: string; e
   try {
     const event = await eventsService.getBySlug(params.eventSlug);
 
-    // Get SEO data if available
+    // Get SEO data if available (in current language)
     let seo = null;
     try {
-      seo = await seoService.getSEO('event', event.id);
+      seo = await seoService.getSEO('event', event.id, params.locale);
     } catch (error) {
       // SEO not found, use fallback
     }
@@ -84,9 +84,9 @@ export default async function EventDetailPage({
   try {
     event = await eventsService.getBySlug(params.eventSlug);
 
-    // Get SEO data if available
+    // Get SEO data if available (in current language)
     try {
-      seo = await seoService.getSEO('event', event.id);
+      seo = await seoService.getSEO('event', event.id, params.locale);
     } catch (error) {
       // SEO not found, continue without it
     }

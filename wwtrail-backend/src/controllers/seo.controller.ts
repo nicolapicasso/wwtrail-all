@@ -5,13 +5,14 @@ import logger from '../utils/logger';
 
 /**
  * Obtener SEO de una entidad específica
- * GET /api/v2/seo/:entityType/:entityId
+ * GET /api/v2/seo/:entityType/:entityId?language=ES
  */
 export async function getSEO(req: Request, res: Response) {
   try {
     const { entityType, entityId } = req.params;
+    const language = (req.query.language as any) || 'ES';
 
-    const seo = await SEOService.getSEO(entityType, entityId);
+    const seo = await SEOService.getSEO(entityType, entityId, language);
 
     if (!seo) {
       return res.status(404).json({

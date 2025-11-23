@@ -83,9 +83,11 @@ class SEOService {
   /**
    * Obtener SEO de una entidad específica
    */
-  async getSEO(entityType: string, entityId: string): Promise<SEO | null> {
+  async getSEO(entityType: string, entityId: string, language: string = 'ES'): Promise<SEO | null> {
     try {
-      const response = await apiClientV2.get(`/seo/${entityType}/${entityId}`);
+      const response = await apiClientV2.get(`/seo/${entityType}/${entityId}`, {
+        params: { language: language.toUpperCase() },
+      });
       return response.data.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
