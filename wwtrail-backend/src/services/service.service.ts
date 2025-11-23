@@ -346,6 +346,7 @@ export class ServiceService {
               icon: true,
             },
           },
+          translations: true,  // ✅ Include translations
         },
       });
 

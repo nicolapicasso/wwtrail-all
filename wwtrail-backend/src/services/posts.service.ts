@@ -389,6 +389,7 @@ export class PostsService {
             },
           },
           tags: true,
+          translations: true,  // ✅ Include translations
         },
       });
 

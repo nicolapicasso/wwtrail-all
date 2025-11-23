@@ -247,6 +247,7 @@ export class SpecialSeriesService {
               },
             },
           },
+          translations: true,  // ✅ Include translations
           _count: {
             select: {
               competitions: true,
