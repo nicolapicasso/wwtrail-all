@@ -7,14 +7,8 @@ import { requireAdmin } from '../middlewares/authorize.middleware';
 const router = express.Router();
 
 // ==========================================
-// RUTAS PÚBLICAS (para frontend)
-// ==========================================
-
-// Obtener SEO de una entidad específica
-router.get('/:entityType/:entityId', seoController.getSEO);
-
-// ==========================================
 // RUTAS DE ADMIN (requieren autenticación y rol ADMIN)
+// ⚠️ IMPORTANTE: Estas rutas deben ir ANTES de las rutas dinámicas
 // ==========================================
 
 // Configuración
@@ -28,5 +22,13 @@ router.post('/generate', authenticate, requireAdmin, seoController.generateSEO);
 router.post('/regenerate', authenticate, requireAdmin, seoController.regenerateSEO);
 router.put('/:id', authenticate, requireAdmin, seoController.updateSEO);
 router.delete('/:id', authenticate, requireAdmin, seoController.deleteSEO);
+
+// ==========================================
+// RUTAS PÚBLICAS (para frontend)
+// ⚠️ IMPORTANTE: Esta ruta dinámica debe ir AL FINAL
+// ==========================================
+
+// Obtener SEO de una entidad específica
+router.get('/:entityType/:entityId', seoController.getSEO);
 
 export default router;
