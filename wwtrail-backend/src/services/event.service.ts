@@ -7,6 +7,7 @@ import { EventStatus } from '@prisma/client';
 import { TranslationService } from './translation.service';
 import { SEOService } from './seo.service';
 import { isAutoTranslateEnabled, getTargetLanguages, shouldTranslateByStatus, TranslationConfig } from '../config/translation.config';
+import { applyTranslationsToList, parseLanguage } from '../utils/translations';
 
 interface CreateEventInput {
   name: string;
@@ -58,6 +59,7 @@ interface EventFilters {
   featured?: boolean;
   status?: EventStatus;
   typicalMonth?: number | string;  // ✅ NUEVO: Filtro por mes típico del evento
+  language?: string;  // ✅ NUEVO: Idioma para traducciones
   sortBy?: 'name' | 'createdAt' | 'viewCount' | 'firstEditionYear';
   sortOrder?: 'asc' | 'desc';
 }
@@ -455,6 +457,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     const featured = filters.featured;
     const status = filters.status;
     const typicalMonth = filters.typicalMonth;  // ✅ NUEVO
+    const language = parseLanguage(filters.language);  // ✅ NUEVO: Parse language
     const sortBy = filters.sortBy || 'createdAt';
     const sortOrder = filters.sortOrder || 'desc';
 
@@ -462,7 +465,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
     // Generar cache key
     const cacheKey = `events:list:${JSON.stringify(filters)}`;
-    
+
     // Intentar obtener del caché
     const cached = await cache.get(cacheKey);
     if (cached) {
@@ -522,6 +525,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
               logoUrl: true,
             },
           },
+          translations: true,  // ✅ NUEVO: Include translations
           _count: {
             select: {
               competitions: true,
@@ -535,8 +539,11 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     // ✅ Enriquecer con coordenadas PostGIS
     const enrichedEvents = await this.enrichWithCoordinates(events);
 
+    // ✅ NUEVO: Apply translations based on requested language
+    const translatedEvents = applyTranslationsToList(enrichedEvents, language);
+
     const result = {
-      data: enrichedEvents,
+      data: translatedEvents,
       pagination: {
         page,
         limit,
