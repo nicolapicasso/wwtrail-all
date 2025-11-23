@@ -756,6 +756,26 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
     logger.info(`Event updated: ${updated.name} (${updated.id})`);
 
+    // 🔄 Hook: Regenerar SEO automáticamente si está configurado
+    try {
+      const seoConfig = await SEOService.getConfig('event');
+      if (seoConfig && seoConfig.generateOnUpdate) {
+        logger.info(`🔄 Auto-regenerate SEO enabled for events - regenerating for ${updated.id}`);
+
+        // Regenerar en background (no bloquear la respuesta)
+        SEOService.regenerateSEO({
+          entityType: 'event',
+          entityId: updated.id,
+          data: updated as any,
+        }).catch((error) => {
+          logger.error('Error regenerating SEO on event update:', error);
+        });
+      }
+    } catch (error) {
+      logger.error('Error checking SEO config:', error);
+      // No fallar la actualización del evento si falla la regeneración del SEO
+    }
+
     return updated;
   }
 
