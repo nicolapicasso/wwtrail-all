@@ -1,8 +1,8 @@
 // src/routes/seo.routes.ts
 import express from 'express';
 import * as seoController from '../controllers/seo.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
-import { checkRole } from '../middleware/role.middleware';
+import { authenticate } from '../middlewares/auth.middleware';
+import { requireAdmin } from '../middlewares/authorize.middleware';
 
 const router = express.Router();
 
@@ -18,15 +18,15 @@ router.get('/:entityType/:entityId', seoController.getSEO);
 // ==========================================
 
 // Configuración
-router.get('/config', authMiddleware, checkRole(['ADMIN']), seoController.listConfigs);
-router.get('/config/:entityType', authMiddleware, checkRole(['ADMIN']), seoController.getConfig);
-router.post('/config', authMiddleware, checkRole(['ADMIN']), seoController.upsertConfig);
+router.get('/config', authenticate, requireAdmin, seoController.listConfigs);
+router.get('/config/:entityType', authenticate, requireAdmin, seoController.getConfig);
+router.post('/config', authenticate, requireAdmin, seoController.upsertConfig);
 
 // Gestión de SEO
-router.get('/list/:entityType', authMiddleware, checkRole(['ADMIN']), seoController.listSEO);
-router.post('/generate', authMiddleware, checkRole(['ADMIN']), seoController.generateSEO);
-router.post('/regenerate', authMiddleware, checkRole(['ADMIN']), seoController.regenerateSEO);
-router.put('/:id', authMiddleware, checkRole(['ADMIN']), seoController.updateSEO);
-router.delete('/:id', authMiddleware, checkRole(['ADMIN']), seoController.deleteSEO);
+router.get('/list/:entityType', authenticate, requireAdmin, seoController.listSEO);
+router.post('/generate', authenticate, requireAdmin, seoController.generateSEO);
+router.post('/regenerate', authenticate, requireAdmin, seoController.regenerateSEO);
+router.put('/:id', authenticate, requireAdmin, seoController.updateSEO);
+router.delete('/:id', authenticate, requireAdmin, seoController.deleteSEO);
 
 export default router;
