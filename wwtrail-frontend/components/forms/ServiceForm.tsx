@@ -9,10 +9,12 @@ import { useAuth } from '@/hooks/useAuth';
 import servicesService from '@/lib/api/v2/services.service';
 import serviceCategoriesService from '@/lib/api/v2/serviceCategories.service';
 import { ServiceCategory } from '@/types/v2';
-import { ArrowLeft, MapPin, Save, Loader2, Tag } from 'lucide-react';
+import { ArrowLeft, MapPin, Save, Loader2, Tag, Globe } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import FileUpload from '@/components/FileUpload';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
+import { Language } from '@/types/event';
+import { LANGUAGE_LABELS } from '@/types/post';
 
 interface ServiceFormProps {
   mode: 'create' | 'edit';
@@ -36,6 +38,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
     city: initialData?.city || '',
     country: initialData?.country || '',
     description: initialData?.description || '',
+    language: initialData?.language || Language.ES,
     latitude: initialData?.latitude?.toString() || '',
     longitude: initialData?.longitude?.toString() || '',
     logoUrl: initialData?.logoUrl || '',
@@ -125,6 +128,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
         city: formData.city,
         country: formData.country,
         description: formData.description || undefined,
+        language: formData.language,
         latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
         longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
         logoUrl: formData.logoUrl || undefined,
@@ -273,6 +277,31 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                 className="w-full rounded-md border border-input bg-background px-3 py-2"
                 placeholder="Describe el servicio..."
               />
+            </div>
+
+            {/* Language */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                <span className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Idioma del Contenido *
+                </span>
+              </label>
+              <select
+                value={formData.language}
+                onChange={(e) => setFormData({ ...formData, language: e.target.value as Language })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                required
+              >
+                {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+              </p>
             </div>
           </div>
         </div>

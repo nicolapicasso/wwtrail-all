@@ -7,9 +7,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
-import { ArrowLeft, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2, Sparkles, Building2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2, Sparkles, Building2, Globe } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import FileUpload from '@/components/FileUpload';
+import { Language } from '@/types/event';
+import { LANGUAGE_LABELS } from '@/types/post';
 
 interface SpecialSeriesFormProps {
   mode: 'create' | 'edit';
@@ -28,6 +30,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
     name: initialData?.name || '',
     slug: initialData?.slug || '',
     description: initialData?.description || '',
+    language: initialData?.language || Language.ES,
     country: initialData?.country || '',
     website: initialData?.website || '',
     logoUrl: initialData?.logoUrl || '',
@@ -166,6 +169,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
       const specialSeriesData = {
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
+        language: formData.language,
         country: formData.country.trim(),
         website: formData.website.trim() || undefined,
         logoUrl: formData.logoUrl || undefined,
@@ -335,6 +339,32 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
                   placeholder="Descripción de la serie especial, su historia, objetivos, etc."
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none resize-none"
                 />
+              </div>
+
+              {/* Language */}
+              <div>
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Idioma del Contenido <span className="text-red-500">*</span>
+                  </span>
+                </label>
+                <select
+                  id="language"
+                  value={formData.language}
+                  onChange={(e) => handleChange('language', e.target.value as Language)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                  required
+                >
+                  {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+                </p>
               </div>
 
               {/* Website */}

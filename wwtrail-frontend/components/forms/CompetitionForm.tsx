@@ -4,14 +4,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Loader2, AlertCircle, Image as ImageIcon, Tag } from 'lucide-react';
+import { Save, Loader2, AlertCircle, Image as ImageIcon, Tag, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { terrainTypesService } from '@/lib/api/catalogs.service';
 import type { Competition, UTMBIndex } from '@/types/competition';
 import type { TerrainType, SpecialSeriesListItem } from '@/types/v2';
-import { CompetitionType } from '@/types/event';
+import { CompetitionType, Language } from '@/types/event';
+import { LANGUAGE_LABELS } from '@/types/post';
 import FileUpload from '@/components/FileUpload';
 
 interface CompetitionFormProps {
@@ -43,6 +44,7 @@ export default function CompetitionForm({
     name: competition?.name || '',
     slug: competition?.slug || '',
     description: competition?.description || '',
+    language: competition?.language || Language.ES,
     type: competition?.type || CompetitionType.TRAIL,
     baseDistance: competition?.baseDistance?.toString() || '',
     baseElevation: competition?.baseElevation?.toString() || '',
@@ -131,6 +133,7 @@ export default function CompetitionForm({
         slug: formData.slug.trim(),
         type: formData.type,
         description: formData.description.trim() || undefined,
+        language: formData.language,
         baseDistance: formData.baseDistance ? parseFloat(formData.baseDistance) : undefined,
         baseElevation: formData.baseElevation ? parseInt(formData.baseElevation) : undefined,
         baseMaxParticipants: formData.baseMaxParticipants
@@ -294,6 +297,32 @@ export default function CompetitionForm({
             placeholder="Descripción de la competición..."
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
           />
+        </div>
+
+        {/* Language */}
+        <div>
+          <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
+            <span className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Idioma del Contenido *
+            </span>
+          </label>
+          <select
+            id="language"
+            value={formData.language}
+            onChange={(e) => setFormData({ ...formData, language: e.target.value as Language })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            required
+          >
+            {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+          </p>
         </div>
       </div>
 

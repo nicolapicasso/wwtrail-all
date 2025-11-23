@@ -7,9 +7,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import eventsService from '@/lib/api/v2/events.service';
-import { ArrowLeft, MapPin, Calendar, Save, Loader2, Check, X, AlertCircle, Image, Share2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Save, Loader2, Check, X, AlertCircle, Image, Share2, Globe } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import FileUpload from '@/components/FileUpload';
+import { Language } from '@/types/event';
+import { LANGUAGE_LABELS } from '@/types/post';
 
 export default function NewEventPage() {
   const router = useRouter();
@@ -25,6 +27,7 @@ export default function NewEventPage() {
     city: '',
     country: '',
     description: '',
+    language: Language.ES,
     website: '',
     typicalMonth: '',
     firstEditionYear: new Date().getFullYear().toString(),
@@ -242,6 +245,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       name: formData.name.trim(),
       slug: formData.slug.trim(),
       description: formData.description.trim() || undefined,
+      language: formData.language,
       city: formData.city.trim(),
       country: formData.country.trim(),
       latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
@@ -382,6 +386,31 @@ const handleSubmit = async (e: React.FormEvent) => {
                   placeholder="Describe el evento, su historia, características principales..."
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
+              </div>
+
+              {/* Idioma */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Idioma del Contenido *
+                  </span>
+                </label>
+                <select
+                  value={formData.language}
+                  onChange={(e) => handleChange('language', e.target.value as Language)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  required
+                >
+                  {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+                </p>
               </div>
             </div>
           </div>
