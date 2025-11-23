@@ -9,6 +9,7 @@ import {
   shouldTranslateByStatus,
   TranslationConfig,
 } from '../config/translation.config';
+import { applyTranslationsToList, parseLanguage } from '../utils/translations';
 
 const prisma = new PrismaClient();
 
@@ -125,7 +126,10 @@ export class CompetitionService {
       minElevation,
       maxElevation,
       specialSeriesId,
+      language,  // ✅ NUEVO: Language parameter
     } = options;
+
+    const requestedLanguage = parseLanguage(language);
 
     // Build dynamic where clause
     const where: any = {};
@@ -205,6 +209,7 @@ export class CompetitionService {
             logoUrl: true,
           },
         },
+        translations: true,  // ✅ NUEVO: Include translations
         _count: {
           select: {
             editions: true,
@@ -239,20 +244,23 @@ export class CompetitionService {
       }
     }
 
+    // ✅ NUEVO: Apply translations AFTER extracting coordinates
+    const translatedCompetitions = applyTranslationsToList(competitions, requestedLanguage);
+
     // Ordenar según el campo
     if (sortBy === 'startDate' || sortBy === 'typicalMonth') {
       // Ordenar por mes del evento
-      competitions.sort((a, b) => {
+      translatedCompetitions.sort((a, b) => {
         const monthA = a.event.typicalMonth || 99;
         const monthB = b.event.typicalMonth || 99;
         return monthA - monthB;
       });
     } else if (sortBy === 'name') {
       // Ordenar por nombre
-      competitions.sort((a, b) => a.name.localeCompare(b.name));
+      translatedCompetitions.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    return competitions;
+    return translatedCompetitions;
   }
 
   /**
