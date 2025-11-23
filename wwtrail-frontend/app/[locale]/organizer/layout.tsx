@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import Link from 'next/link';
 import { Trophy, LogOut, Menu, X } from 'lucide-react';
 import { DashboardNav } from '@/components/layout/DashboardNav';
 
