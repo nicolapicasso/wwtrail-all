@@ -21,14 +21,19 @@ export default function LanguageSelector() {
     if (newLocale === locale) return;
 
     // Get the current pathname without the locale prefix
-    const pathnameWithoutLocale = pathname.replace(new RegExp(`^/(${locales.join('|')})`), '');
+    // Remove locale prefix including the trailing slash
+    const pathnameWithoutLocale = pathname.replace(new RegExp(`^/(${locales.join('|')})(/|$)`), '');
 
     // Build the new path with the new locale
+    // For 'es' (default locale), don't add prefix when using 'as-needed'
     const newPath = newLocale === 'es'
-      ? pathnameWithoutLocale || '/'
-      : `/${newLocale}${pathnameWithoutLocale || '/'}`;
+      ? `/${pathnameWithoutLocale || ''}`
+      : `/${newLocale}/${pathnameWithoutLocale || ''}`;
 
-    router.push(newPath);
+    // Remove any double slashes
+    const cleanPath = newPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+
+    router.push(cleanPath);
     router.refresh();
   };
 
