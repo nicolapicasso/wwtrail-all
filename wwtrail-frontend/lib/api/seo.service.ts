@@ -1,5 +1,5 @@
 // lib/api/seo.service.ts
-import { api } from './axios';
+import apiClientV2 from './client-v2';
 
 export interface SEOConfig {
   id: string;
@@ -56,7 +56,7 @@ class SEOService {
    * Listar todas las configuraciones
    */
   async listConfigs(): Promise<SEOConfig[]> {
-    const response = await api.get('/seo/config');
+    const response = await apiClientV2.get('/seo/config');
     return response.data.data;
   }
 
@@ -64,7 +64,7 @@ class SEOService {
    * Obtener configuración de un tipo de entidad
    */
   async getConfig(entityType: string): Promise<SEOConfig> {
-    const response = await api.get(`/seo/config/${entityType}`);
+    const response = await apiClientV2.get(`/seo/config/${entityType}`);
     return response.data.data;
   }
 
@@ -72,7 +72,7 @@ class SEOService {
    * Crear o actualizar configuración
    */
   async upsertConfig(data: UpsertConfigInput): Promise<SEOConfig> {
-    const response = await api.post('/seo/config', data);
+    const response = await apiClientV2.post('/seo/config', data);
     return response.data.data;
   }
 
@@ -85,7 +85,7 @@ class SEOService {
    */
   async getSEO(entityType: string, entityId: string): Promise<SEO | null> {
     try {
-      const response = await api.get(`/seo/${entityType}/${entityId}`);
+      const response = await apiClientV2.get(`/seo/${entityType}/${entityId}`);
       return response.data.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
@@ -111,7 +111,7 @@ class SEOService {
       totalPages: number;
     };
   }> {
-    const response = await api.get(`/seo/list/${entityType}`, {
+    const response = await apiClientV2.get(`/seo/list/${entityType}`, {
       params: { page, limit },
     });
     return response.data;
@@ -121,7 +121,7 @@ class SEOService {
    * Generar SEO para una entidad
    */
   async generateSEO(input: GenerateSEOInput): Promise<SEO> {
-    const response = await api.post('/seo/generate', input);
+    const response = await apiClientV2.post('/seo/generate', input);
     return response.data.data;
   }
 
@@ -129,7 +129,7 @@ class SEOService {
    * Regenerar SEO (eliminar y crear de nuevo)
    */
   async regenerateSEO(input: GenerateSEOInput): Promise<SEO> {
-    const response = await api.post('/seo/regenerate', input);
+    const response = await apiClientV2.post('/seo/regenerate', input);
     return response.data.data;
   }
 
@@ -144,7 +144,7 @@ class SEOService {
       llmFaq?: Array<{ question: string; answer: string }>;
     }
   ): Promise<SEO> {
-    const response = await api.put(`/seo/${id}`, data);
+    const response = await apiClientV2.put(`/seo/${id}`, data);
     return response.data.data;
   }
 
@@ -152,7 +152,7 @@ class SEOService {
    * Eliminar SEO
    */
   async deleteSEO(id: string): Promise<void> {
-    await api.delete(`/seo/${id}`);
+    await apiClientV2.delete(`/seo/${id}`);
   }
 }
 
