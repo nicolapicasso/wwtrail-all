@@ -70,14 +70,16 @@ export class SEOService {
   ): Promise<Array<{ question: string; answer: string }>> {
     try {
       if (!OPENAI_API_KEY) {
-        throw new Error('OPENAI_API_KEY no configurada');
+        logger.error('❌ OPENAI_API_KEY no está configurada en las variables de entorno');
+        logger.warn('⚠️  FAQ will be empty - configure OPENAI_API_KEY to generate FAQs');
+        return [];
       }
 
       // Aplicar variables al prompt
       const processedPrompt = this.applyTemplate(prompt, entityData);
 
-      logger.info('Generating FAQ with OpenAI...');
-      logger.debug('Prompt:', processedPrompt.substring(0, 200) + '...');
+      logger.info('🤖 Generating FAQ with OpenAI GPT-4o-mini...');
+      logger.debug('Prompt preview:', processedPrompt.substring(0, 200) + '...');
 
       const response = await axios.post(
         OPENAI_API_URL,
@@ -111,12 +113,15 @@ export class SEOService {
         throw new Error('No response from OpenAI');
       }
 
+      logger.debug('OpenAI raw response:', content.substring(0, 300));
+
       const parsed = JSON.parse(content);
 
       // Normalizar respuesta - esperamos {faq: [{question, answer}]}
       let faq = parsed.faq || parsed.questions || parsed;
 
       if (!Array.isArray(faq)) {
+        logger.error('❌ Invalid FAQ format from OpenAI:', JSON.stringify(parsed).substring(0, 200));
         throw new Error('Invalid FAQ format from OpenAI');
       }
 
@@ -126,10 +131,19 @@ export class SEOService {
         answer: item.answer || item.respuesta || item.a || '',
       }));
 
-      logger.info(`Generated ${faq.length} FAQ items`);
+      // Filtrar items vacíos
+      faq = faq.filter((item) => item.question && item.answer);
+
+      logger.info(`✅ Generated ${faq.length} FAQ items successfully`);
       return faq.slice(0, 5); // Limitar a 5 preguntas
     } catch (error: any) {
-      logger.error('Error generating FAQ with OpenAI:', error.response?.data || error.message);
+      logger.error('❌ Error generating FAQ with OpenAI:');
+      if (error.response?.data) {
+        logger.error('OpenAI API Error:', JSON.stringify(error.response.data));
+      } else if (error.message) {
+        logger.error('Error message:', error.message);
+      }
+      logger.warn('⚠️  FAQ will be empty due to error');
       // Retornar array vacío en caso de error, no bloquear el proceso
       return [];
     }
@@ -163,7 +177,13 @@ export class SEOService {
       // Generar FAQ con IA
       let llmFaq: Array<{ question: string; answer: string }> = [];
       if (config.qaPrompt) {
+        logger.info('📝 Attempting to generate FAQ with AI...');
         llmFaq = await this.generateFAQ(config.qaPrompt, input.data);
+        if (llmFaq.length === 0) {
+          logger.warn('⚠️  FAQ generation returned empty array - check logs above for errors');
+        }
+      } else {
+        logger.warn('⚠️  No qaPrompt configured - FAQ will be empty');
       }
 
       return {
