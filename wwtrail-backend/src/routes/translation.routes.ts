@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { TranslationController } from '../controllers/translation.controller';
+import { BulkTranslationController } from '../controllers/bulkTranslation.controller';
 
 const router = Router();
 
@@ -14,6 +15,26 @@ router.get('/competition/:competitionId', TranslationController.getCompetitionTr
 
 // Obtener traducciones de un post
 router.get('/post/:postId', TranslationController.getPostTranslations);
+
+// ============================================
+// RUTAS PROTEGIDAS (ADMIN) - Traducciones masivas
+// ============================================
+
+// Generar traducciones masivas para un tipo de entidad
+router.post(
+  '/bulk/generate',
+  authenticate,
+  authorize('ADMIN'),
+  BulkTranslationController.generateBulkTranslations
+);
+
+// Obtener estado de traducciones
+router.get(
+  '/bulk/status',
+  authenticate,
+  authorize('ADMIN'),
+  BulkTranslationController.getTranslationStatus
+);
 
 // ============================================
 // RUTAS PROTEGIDAS (ORGANIZER y ADMIN)
