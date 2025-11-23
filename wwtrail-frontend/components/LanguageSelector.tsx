@@ -21,19 +21,32 @@ export default function LanguageSelector() {
     if (newLocale === locale) return;
 
     // Get the current pathname without the locale prefix
-    // Remove locale prefix including the trailing slash
-    const pathnameWithoutLocale = pathname.replace(new RegExp(`^/(${locales.join('|')})(/|$)`), '');
+    // Create a regex that matches any of our supported locales at the start
+    const localeRegex = new RegExp(`^/(${locales.join('|')})(/|$)`);
+
+    // Remove the locale prefix - if the path starts with a locale, remove it
+    let pathnameWithoutLocale = pathname.replace(localeRegex, '/');
+
+    // Remove leading slash for easier concatenation
+    if (pathnameWithoutLocale.startsWith('/')) {
+      pathnameWithoutLocale = pathnameWithoutLocale.substring(1);
+    }
 
     // Build the new path with the new locale
     // For 'es' (default locale), don't add prefix when using 'as-needed'
-    const newPath = newLocale === 'es'
-      ? `/${pathnameWithoutLocale || ''}`
-      : `/${newLocale}/${pathnameWithoutLocale || ''}`;
+    let newPath: string;
+    if (newLocale === 'es') {
+      // Spanish is the default, no locale prefix needed
+      newPath = pathnameWithoutLocale ? `/${pathnameWithoutLocale}` : '/';
+    } else {
+      // Other languages need the locale prefix
+      newPath = pathnameWithoutLocale ? `/${newLocale}/${pathnameWithoutLocale}` : `/${newLocale}`;
+    }
 
-    // Remove any double slashes
-    const cleanPath = newPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+    // Clean up any double slashes
+    newPath = newPath.replace(/\/+/g, '/');
 
-    router.push(cleanPath);
+    router.push(newPath);
     router.refresh();
   };
 

@@ -28,16 +28,21 @@ import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 // 📋 METADATA
 // ============================================================================
 
-export async function generateMetadata({ params }: { params: { eventSlug: string } }) {
+export async function generateMetadata({ params }: { params: { locale: string; eventSlug: string } }) {
   try {
     const event = await eventsService.getBySlug(params.eventSlug);
-    
+
+    // Get translated content if available
+    const translation = event.translations?.find((t: any) => t.language === params.locale.toUpperCase());
+    const name = translation?.name || event.name;
+    const description = translation?.description || event.description;
+
     return {
-      title: `${event.name} | WWTRAIL`,
-      description: event.description || `Trail running event in ${event.city}, ${event.country}`,
+      title: `${name} | WWTRAIL`,
+      description: description || `Trail running event in ${event.city}, ${event.country}`,
       openGraph: {
-        title: event.name,
-        description: event.description,
+        title: name,
+        description,
         images: event.coverImage ? [event.coverImage] : [],
       }
     };
@@ -52,10 +57,10 @@ export async function generateMetadata({ params }: { params: { eventSlug: string
 // 🎨 PÁGINA PRINCIPAL
 // ============================================================================
 
-export default async function EventDetailPage({ 
-  params 
-}: { 
-  params: { eventSlug: string } 
+export default async function EventDetailPage({
+  params
+}: {
+  params: { locale: string; eventSlug: string }
 }) {
   let event: Event;
   let nearbyEvents: Event[] = [];
@@ -63,6 +68,13 @@ export default async function EventDetailPage({
 
   try {
     event = await eventsService.getBySlug(params.eventSlug);
+
+    // Get translated content if available
+    const translation = (event as any).translations?.find((t: any) => t.language === params.locale.toUpperCase());
+    if (translation) {
+      event.name = translation.name || event.name;
+      event.description = translation.description || event.description;
+    }
 
     // ✅ Obtener eventos y servicios cercanos para el mapa
     if (event.latitude && event.longitude) {

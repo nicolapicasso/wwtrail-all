@@ -595,6 +595,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
             },
           },
         },
+        translations: true,  // ✅ Incluir traducciones
         _count: {
           select: {
             competitions: true,
