@@ -22,6 +22,8 @@ import {
   Sparkles,
   BookOpen,
   Ticket,
+  Search,
+  Settings,
 } from 'lucide-react';
 
 interface NavItem {
@@ -125,6 +127,23 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    label: 'SEO',
+    icon: Search,
+    adminOnly: true,
+    children: [
+      {
+        label: 'SEO',
+        href: '/organizer/seo',
+        icon: Search,
+      },
+      {
+        label: 'Configuración',
+        href: '/organizer/seo/config',
+        icon: Settings,
+      },
+    ],
+  },
+  {
     label: 'Usuarios',
     href: '/users',
     icon: Users,
@@ -143,7 +162,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Gestión de eventos', 'Servicios', 'Promociones']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Gestión de eventos', 'Servicios', 'Promociones', 'SEO']);
 
   const filteredItems = navItems.filter((item) => {
     if (item.adminOnly) {
