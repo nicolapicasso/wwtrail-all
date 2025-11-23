@@ -2,6 +2,7 @@ import { PrismaClient, EventStatus, Language } from '@prisma/client';
 import logger from '../utils/logger';
 import { slugify } from '../utils/slugify';
 import { TranslationService } from './translation.service';
+import { SEOService } from './seo.service';
 import {
   isAutoTranslateEnabled,
   getTargetLanguages,
@@ -56,6 +57,58 @@ export class CompetitionService {
       return TranslationService.autoTranslateCompetition(competitionId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
     }
   }
+
+  /**
+   * Disparar generación de SEO automática en background (no bloqueante)
+   */
+  private static async triggerAutoSEO(competitionId: string, competition: any, event: any, status: EventStatus) {
+    try {
+      // Solo generar SEO si está publicado
+      if (status !== 'PUBLISHED') {
+        return;
+      }
+
+      // Obtener configuración de SEO
+      const config = await SEOService.getConfig('competition');
+      if (!config || !config.generateOnCreate) {
+        return;
+      }
+
+      logger.info(`Triggering auto-SEO generation for competition "${competition.name}" (${competitionId})`);
+
+      // Preparar datos para el template
+      const seoData = {
+        name: competition.name,
+        description: competition.description || '',
+        event: event?.name || '',
+        location: event ? `${event.city}, ${event.country}` : '',
+        city: event?.city || '',
+        country: event?.country || '',
+        distance: competition.baseDistance || '',
+        elevation: competition.baseElevation || '',
+        type: competition.type || '',
+        url: `${process.env.FRONTEND_URL || 'https://wwtrail.com'}/competitions/${competition.slug}`,
+      };
+
+      // Ejecutar en background
+      setImmediate(() => {
+        SEOService.generateAndSave({
+          entityType: 'competition',
+          entityId: competitionId,
+          data: seoData,
+        })
+          .then(() => {
+            logger.info(`SEO generated successfully for competition ${competitionId}`);
+          })
+          .catch((error) => {
+            logger.error(`SEO generation failed for competition ${competitionId}:`, error.message);
+          });
+      });
+    } catch (error: any) {
+      logger.error('Error in triggerAutoSEO:', error);
+    }
+  }
+
   /**
    * Listar todas las competiciones
    */
@@ -281,6 +334,9 @@ export class CompetitionService {
 
     // Disparar traducciones automáticas
     this.triggerAutoTranslation(competition.id, EventStatus.PUBLISHED);
+
+    // Disparar generación de SEO automática
+    await this.triggerAutoSEO(competition.id, competition, competition.event, EventStatus.PUBLISHED);
 
     return competition;
   }

@@ -5,6 +5,7 @@ import logger from '../utils/logger';
 import { generateUniqueSlug } from '../utils/slugify';
 import { PostStatus, PostCategory, Language } from '@prisma/client';
 import { TranslationService } from './translation.service';
+import { SEOService } from './seo.service';
 import {
   isAutoTranslateEnabled,
   getTargetLanguages,
@@ -103,6 +104,53 @@ export class PostsService {
   }
 
   /**
+   * Disparar generación de SEO automática en background (no bloqueante)
+   */
+  private static async triggerAutoSEO(postId: string, post: any, status: PostStatus) {
+    try {
+      // Solo generar SEO si está publicado
+      if (status !== 'PUBLISHED') {
+        return;
+      }
+
+      // Obtener configuración de SEO
+      const config = await SEOService.getConfig('post');
+      if (!config || !config.generateOnCreate) {
+        return;
+      }
+
+      logger.info(`Triggering auto-SEO generation for post "${post.title}" (${postId})`);
+
+      // Preparar datos para el template
+      const seoData = {
+        title: post.title,
+        excerpt: post.excerpt || '',
+        content: post.content?.substring(0, 500) || '', // Primeros 500 caracteres
+        category: post.category,
+        author: post.author?.username || post.author?.firstName || '',
+        url: `${process.env.FRONTEND_URL || 'https://wwtrail.com'}/magazine/${post.category}/${post.slug}`,
+      };
+
+      // Ejecutar en background
+      setImmediate(() => {
+        SEOService.generateAndSave({
+          entityType: 'post',
+          entityId: postId,
+          data: seoData,
+        })
+          .then(() => {
+            logger.info(`SEO generated successfully for post ${postId}`);
+          })
+          .catch((error) => {
+            logger.error(`SEO generation failed for post ${postId}:`, error.message);
+          });
+      });
+    } catch (error: any) {
+      logger.error('Error in triggerAutoSEO:', error);
+    }
+  }
+
+  /**
    * Crear un nuevo post/artículo
    * - Si el usuario es ADMIN → puede publicar directamente (status PUBLISHED)
    * - Si el usuario es ORGANIZER → queda en borrador (status DRAFT)
@@ -177,6 +225,9 @@ export class PostsService {
 
       // Disparar traducciones automáticas si está publicado
       this.triggerAutoTranslation(post.id, data.language, status);
+
+      // Disparar generación de SEO automática
+      await this.triggerAutoSEO(post.id, post, status);
 
       return post;
     } catch (error: any) {
@@ -515,6 +566,8 @@ export class PostsService {
       // Si cambió a PUBLISHED, disparar traducciones automáticas
       if (data.status === 'PUBLISHED' && existingPost.status !== 'PUBLISHED') {
         this.triggerAutoTranslation(post.id, post.language, 'PUBLISHED');
+        // Disparar generación de SEO automática
+        await this.triggerAutoSEO(post.id, post, 'PUBLISHED');
       }
 
       return post;
@@ -544,6 +597,9 @@ export class PostsService {
 
       // Disparar traducciones automáticas
       this.triggerAutoTranslation(post.id, post.language, 'PUBLISHED');
+
+      // Disparar generación de SEO automática
+      await this.triggerAutoSEO(post.id, post, 'PUBLISHED');
 
       return post;
     } catch (error: any) {
