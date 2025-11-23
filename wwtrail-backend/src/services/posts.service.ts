@@ -12,6 +12,7 @@ import {
   shouldTranslateByStatus,
   TranslationConfig,
 } from '../config/translation.config';
+import { applyTranslationsToList, parseLanguage } from '../utils/translations';
 
 interface CreatePostInput {
   title: string;
@@ -245,6 +246,9 @@ export class PostsService {
       const limit = Math.min(100, Math.max(1, Number(filters.limit) || 20));
       const skip = (page - 1) * limit;
 
+      // Parse requested language
+      const requestedLanguage = parseLanguage(filters.language);
+
       // Construir filtros de búsqueda
       const where: any = {};
 
@@ -314,10 +318,13 @@ export class PostsService {
         prisma.post.count({ where }),
       ]);
 
+      // Apply translations to the list
+      const translatedPosts = applyTranslationsToList(posts, requestedLanguage);
+
       const totalPages = Math.ceil(totalCount / limit);
 
       return {
-        data: posts,
+        data: translatedPosts,
         pagination: {
           page,
           limit,
