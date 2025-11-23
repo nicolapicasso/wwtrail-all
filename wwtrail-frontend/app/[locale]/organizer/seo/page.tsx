@@ -21,11 +21,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -335,21 +335,39 @@ export default function SEOManagementPage() {
           </CardContent>
         </Card>
       ) : (
-        <Accordion type="multiple" defaultValue={['event', 'competition', 'post']} className="space-y-4">
+        <Tabs defaultValue="event" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="event" className="flex items-center gap-2">
+              <Award className="h-4 w-4" />
+              Eventos
+              <Badge variant="secondary" className="ml-1">{groupedByType.event.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="competition" className="flex items-center gap-2">
+              <Flag className="h-4 w-4" />
+              Competiciones
+              <Badge variant="secondary" className="ml-1">{groupedByType.competition.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="post" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Posts
+              <Badge variant="secondary" className="ml-1">{groupedByType.post.length}</Badge>
+            </TabsTrigger>
+          </TabsList>
+
           {(['event', 'competition', 'post'] as const).map((entityType) => {
             const groups = groupedByType[entityType];
-            if (groups.length === 0) return null;
 
             return (
-              <AccordionItem key={entityType} value={entityType} className="border rounded-lg">
-                <AccordionTrigger className="px-6 hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    {getEntityIcon(entityType)}
-                    <span className="font-semibold text-lg">{getEntityLabel(entityType)}</span>
-                    <Badge variant="secondary">{groups.length} entidades</Badge>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-4">
+              <TabsContent key={entityType} value={entityType} className="mt-6">
+                {groups.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-12">
+                      <div className="text-center text-muted-foreground">
+                        No hay SEO generado para {getEntityLabel(entityType).toLowerCase()}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
                   <div className="space-y-4">
                     {groups.map((group) => (
                       <Card key={`${group.entityType}-${group.entityId || group.slug}`}>
@@ -446,11 +464,11 @@ export default function SEOManagementPage() {
                       </Card>
                     ))}
                   </div>
-                </AccordionContent>
-              </AccordionItem>
+                )}
+              </TabsContent>
             );
           })}
-        </Accordion>
+        </Tabs>
       )}
 
       {/* Dialog de Edición */}
