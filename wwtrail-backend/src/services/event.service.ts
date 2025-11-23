@@ -65,20 +65,31 @@ export class EventService {
   /**
    * Disparar traducciones automáticas en background (no bloqueante)
    */
-  private static triggerAutoTranslation(eventId: string, status: EventStatus) {
+  private static async triggerAutoTranslation(eventId: string, status: EventStatus) {
     if (!isAutoTranslateEnabled() || !shouldTranslateByStatus(status)) {
       return;
     }
 
-    const sourceLanguage = TranslationConfig.DEFAULT_LANGUAGE;
-    const targetLanguages = getTargetLanguages(sourceLanguage);
+    // Obtener el evento para acceder al campo language
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { language: true, name: true },
+    });
 
-    if (targetLanguages.length === 0) {
-      logger.info(`No target languages for event ${eventId}`);
+    if (!event) {
+      logger.warn(`Event ${eventId} not found for translation`);
       return;
     }
 
-    logger.info(`Triggering auto-translation for event ${eventId} to: ${targetLanguages.join(', ')}`);
+    const sourceLanguage = event.language || TranslationConfig.DEFAULT_LANGUAGE;
+    const targetLanguages = getTargetLanguages(sourceLanguage);
+
+    if (targetLanguages.length === 0) {
+      logger.info(`No target languages for event ${eventId} (source: ${sourceLanguage})`);
+      return;
+    }
+
+    logger.info(`Triggering auto-translation for event "${event.name}" (${eventId}) from ${sourceLanguage} to: ${targetLanguages.join(', ')}`);
 
     if (TranslationConfig.BACKGROUND_MODE) {
       setImmediate(() => {
@@ -292,6 +303,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       if (data.twitterUrl) eventData.twitterUrl = data.twitterUrl;
       if (data.youtubeUrl) eventData.youtubeUrl = data.youtubeUrl;
 
+      // Idioma (language field for translations)
+      if (data.language) eventData.language = data.language;
+
       // Crear evento
       const event = await prisma.event.create({
         data: eventData,
@@ -340,7 +354,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       logger.info(`✅ Event created: ${event.id} by user ${userId} with status ${status}`);
 
       // Disparar traducciones automáticas si está publicado
-      this.triggerAutoTranslation(event.id, status as EventStatus);
+      await this.triggerAutoTranslation(event.id, status as EventStatus);
 
       return event;
     } catch (error) {
