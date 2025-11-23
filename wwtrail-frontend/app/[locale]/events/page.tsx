@@ -4,10 +4,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocale } from 'next-intl';
 import { MapPin, Calendar, Users, Mountain, Search, Filter, Globe, Star } from 'lucide-react';
 import { EventList } from '@/components/EventList';
 
 export default function EventsPage() {
+  const locale = useLocale();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   return (
@@ -32,6 +34,7 @@ export default function EventsPage() {
             showFilters={false}
             limit={6}
             simplified={true}
+            locale={locale}
           />
         </div>
 
@@ -76,9 +79,10 @@ export default function EventsPage() {
           FIX #1: Los filtros están dentro de EventList
           FIX #3: Pasar viewMode correctamente
         */}
-        <EventList 
-          viewMode={viewMode} 
+        <EventList
+          viewMode={viewMode}
           showFilters={true}
+          locale={locale}
         />
       </div>
 

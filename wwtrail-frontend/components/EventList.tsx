@@ -25,6 +25,7 @@ export interface EventFilters {
   city: string;  // Filtro de ciudad
   month: string;  // ✅ CAMBIO: "month" en lugar de "status"
   featured: boolean | null;
+  language?: string;  // ✅ NUEVO: Idioma para traducciones
 }
 
 interface EventListProps {
@@ -35,6 +36,7 @@ interface EventListProps {
   featuredOnly?: boolean;
   limit?: number;
   simplified?: boolean;  // Para modo simplificado (solo imagen + logo)
+  locale?: string;  // ✅ NUEVO: Idioma actual
 }
 
 // ============================================================================
@@ -48,11 +50,12 @@ export function EventList({
   viewMode = 'grid',
   featuredOnly = false,
   limit: customLimit,
-  simplified = false
+  simplified = false,
+  locale = 'es'  // ✅ NUEVO: Default locale
 }: EventListProps) {
   const [page, setPage] = useState(initialPage);
   const [limitState] = useState(customLimit || initialLimit);
-  
+
   // ✅ SOLUCIÓN: Separar searchQuery (input) de filters (API query)
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<EventFilters>({
@@ -61,6 +64,7 @@ export function EventList({
     city: '',  // Filtro de ciudad
     month: '',  // ✅ CAMBIO: month en lugar de status
     featured: featuredOnly ? true : null,
+    language: locale,  // ✅ NUEVO: Pass locale to filters
   });
 
   // ✅ DEBOUNCE: Esperar 1000ms antes de actualizar filtros
@@ -77,6 +81,9 @@ export function EventList({
   // ============================================================================
   const queryParams = useMemo(() => {
     const params: Record<string, string> = {};
+
+    // ✅ ALWAYS include language
+    if (filters.language) params.language = filters.language;
 
     // ✅ CRÍTICO: Si featuredOnly, SOLO paginación y highlighted
     if (featuredOnly) {
