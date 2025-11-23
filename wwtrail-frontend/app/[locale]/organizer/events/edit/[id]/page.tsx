@@ -5,8 +5,9 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import eventsService from '@/lib/api/v2/events.service';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import EventForm from '@/components/forms/EventForm';
+import { Button } from '@/components/ui/button';
 
 export default function EditEventPage() {
   const router = useRouter();
@@ -130,13 +131,24 @@ export default function EditEventPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Volver
-          </button>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Volver
+            </button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/organizer/seo')}
+              className="flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              Gestionar SEO
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900">Editar Evento</h1>
           <p className="mt-2 text-gray-600">
             Modifica la información de tu evento
@@ -144,8 +156,8 @@ export default function EditEventPage() {
         </div>
 
         {/* Formulario */}
-        <EventForm 
-          mode="edit" 
+        <EventForm
+          mode="edit"
           initialData={event}
           eventId={eventId}
         />

@@ -8,7 +8,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { servicesService } from '@/lib/api/v2';
 import { Service } from '@/types/v2';
 import ServiceForm from '@/components/forms/ServiceForm';
-import { Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function EditServicePage() {
   const params = useParams();
@@ -83,6 +85,32 @@ export default function EditServicePage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/organizer/services"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Volver a Mis Servicios
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/organizer/seo')}
+              className="flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              Gestionar SEO
+            </Button>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Editar Servicio</h1>
+          <p className="mt-2 text-gray-600">
+            Modifica la información de tu servicio
+          </p>
+        </div>
+
         <ServiceForm mode="edit" initialData={service} serviceId={serviceId} />
       </div>
     </div>

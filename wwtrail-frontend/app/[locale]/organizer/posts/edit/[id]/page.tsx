@@ -5,8 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { PostForm } from '@/components/PostForm';
 import { postsService } from '@/lib/api/v2';
 import { Post } from '@/types/v2';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function EditPostPage() {
   const params = useParams();
@@ -69,13 +70,24 @@ export default function EditPostPage() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            href="/organizer/posts"
-            className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver a Mis Artículos
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/organizer/posts"
+              className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver a Mis Artículos
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/organizer/seo')}
+              className="flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              Gestionar SEO
+            </Button>
+          </div>
           <h1 className="text-4xl font-bold mb-2">Editar Artículo</h1>
           <p className="text-muted-foreground">
             Edita el artículo &quot;{post.title}&quot;

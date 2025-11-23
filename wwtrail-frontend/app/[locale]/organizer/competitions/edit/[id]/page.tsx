@@ -4,11 +4,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
 import CompetitionForm from '@/components/forms/CompetitionForm';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import type { Competition } from '@/types/competition';
+import { Button } from '@/components/ui/button';
 
 interface EditCompetitionPageProps {
   params: {
@@ -77,7 +78,7 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <Link
             href={`/organizer/events/${competition.eventId}`}
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -85,6 +86,15 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
             <ArrowLeft className="w-4 h-4" />
             Volver al evento
           </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/organizer/seo')}
+            className="flex items-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+            Gestionar SEO
+          </Button>
         </div>
 
         {/* Competition Context */}
