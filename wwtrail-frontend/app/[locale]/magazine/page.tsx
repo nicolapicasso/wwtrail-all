@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { Search, Filter } from 'lucide-react';
 import { postsService, eventsService, competitionsService, editionsService } from '@/lib/api/v2';
 import { ArticleGrid } from '@/components/ArticleGrid';
 import { PostListItem, PostCategory, POST_CATEGORY_LABELS } from '@/types/v2';
 
 export default function MagazinePage() {
+  const locale = useLocale();
   const [articles, setArticles] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +57,7 @@ export default function MagazinePage() {
         limit: 50,
         sortBy: 'publishedAt',
         sortOrder: 'desc',
+        language: locale,
       };
 
       if (search) params.search = search;
