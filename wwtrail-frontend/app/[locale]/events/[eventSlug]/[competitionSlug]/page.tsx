@@ -24,8 +24,9 @@ export default function CompetitionDetailPage() {
   const params = useParams();
   const competitionSlug = params?.competitionSlug as string;
   const eventSlug = params?.eventSlug as string;
+  const locale = params?.locale as string; // ✅ Get current locale
 
-  const { competition, loading, error } = useCompetition(competitionSlug);
+  const { competition, loading, error } = useCompetition(competitionSlug, locale); // ✅ Pass locale
   const { editions, loading: editionsLoading } = useEditions(competition?.id || '');
   const [selectedEdition, setSelectedEdition] = useState<Edition | null>(null);
   const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);

@@ -67,7 +67,7 @@ export function useCompetitions(eventId: string): UseCompetitionsResult {
 /**
  * Hook para obtener una competición específica por slug
  */
-export function useCompetition(slug: string): UseCompetitionResult {
+export function useCompetition(slug: string, locale?: string): UseCompetitionResult {
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,14 +84,26 @@ export function useCompetition(slug: string): UseCompetitionResult {
       try {
         setLoading(true);
         setError(null);
-        
-        console.log('🔍 Fetching competition with slug:', slug);
-        
+
+        console.log('🔍 Fetching competition with slug:', slug, 'locale:', locale);
+
         // ✅ Usar getBySlug del service
         const data = await competitionsService.getBySlug(slug);
-        
+
         console.log('✅ Competition fetched:', data);
-        
+
+        // ✅ Apply translations if available
+        if (locale && (data as any).translations) {
+          const translation = (data as any).translations.find((t: any) => t.language === locale.toUpperCase());
+          console.log('🌍 Translation found:', translation ? 'YES' : 'NO', 'for locale:', locale.toUpperCase());
+
+          if (translation) {
+            data.name = translation.name || data.name;
+            data.description = translation.description || data.description;
+            console.log('✅ Translation applied:', { name: data.name, description: data.description?.substring(0, 50) + '...' });
+          }
+        }
+
         if (isMounted) {
           setCompetition(data);
         }
@@ -112,7 +124,7 @@ export function useCompetition(slug: string): UseCompetitionResult {
     return () => {
       isMounted = false;
     };
-  }, [slug]);
+  }, [slug, locale]); // ✅ Reload when locale changes
 
   return { competition, loading, error };
 }
