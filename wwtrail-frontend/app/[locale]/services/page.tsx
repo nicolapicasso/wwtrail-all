@@ -3,12 +3,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { servicesService, serviceCategoriesService } from '@/lib/api/v2';
 import { Service, ServiceCategory, ServiceFilters } from '@/types/v2';
 import ServiceCard from '@/components/ServiceCard';
 import { Search, Filter, MapPin, Tag, Loader2 } from 'lucide-react';
 
 export default function ServicesPage() {
+  const locale = useLocale();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -24,6 +26,7 @@ export default function ServicesPage() {
     featured: undefined,
     sortBy: 'createdAt',
     sortOrder: 'desc',
+    language: locale,
   });
 
   // Fetch services

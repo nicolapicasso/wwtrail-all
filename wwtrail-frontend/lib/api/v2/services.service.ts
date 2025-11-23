@@ -26,6 +26,7 @@ class ServicesService {
     if (filters?.featured !== undefined) params.append('featured', filters.featured.toString());
     if (filters?.sortBy) params.append('sortBy', filters.sortBy);
     if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
+    if (filters?.language) params.append('language', filters.language);
 
     const response = await apiClientV2.get<ServicesResponse>(`/services?${params.toString()}`);
     return response.data;

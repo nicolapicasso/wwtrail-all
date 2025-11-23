@@ -107,6 +107,7 @@ export interface ServiceFilters {
   status?: ServiceStatus;
   sortBy?: 'name' | 'createdAt' | 'viewCount';
   sortOrder?: 'asc' | 'desc';
+  language?: string;
 }
 
 /**
