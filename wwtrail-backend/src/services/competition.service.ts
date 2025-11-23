@@ -457,6 +457,7 @@ export class CompetitionService {
             registrationStatus: true,
           },
         },
+        translations: true,  // ✅ Include translations
         _count: {
           select: {
             editions: true,

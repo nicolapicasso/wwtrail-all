@@ -28,6 +28,7 @@ export default function CompetitionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const locale = params.locale as string; // ✅ Get current locale
 
   const [competition, setCompetition] = useState<any>(null);
   const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
@@ -39,7 +40,7 @@ export default function CompetitionDetailPage() {
     if (slug) {
       loadCompetition();
     }
-  }, [slug]);
+  }, [slug, locale]); // ✅ Reload when locale changes
 
   // Redirect to hierarchical route when competition data is loaded
   useEffect(() => {
@@ -55,8 +56,17 @@ export default function CompetitionDetailPage() {
       setError(null);
       const comp = await competitionsService.getBySlug(slug);
 
+      // ✅ Apply translations if available
+      const translation = comp.translations?.find((t: any) => t.language === locale?.toUpperCase());
+      if (translation) {
+        comp.name = translation.name || comp.name;
+        comp.description = translation.description || comp.description;
+      }
+
       console.log('🔍 Competition loaded:', {
         name: comp.name,
+        locale,
+        hasTranslation: !!translation,
         hasEvent: !!comp.event,
         eventHasCoordinates: !!(comp.event?.latitude && comp.event?.longitude),
         latitude: comp.event?.latitude,
