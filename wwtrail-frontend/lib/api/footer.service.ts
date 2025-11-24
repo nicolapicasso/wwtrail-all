@@ -1,5 +1,5 @@
 // lib/api/footer.service.ts
-import api from './axios';
+import api from './client-v2';
 
 export interface FooterContent {
   leftColumn: string | null;

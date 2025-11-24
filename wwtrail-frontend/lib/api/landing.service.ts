@@ -1,5 +1,5 @@
 // lib/api/landing.service.ts
-import api from './axios';
+import api from './client-v2';
 import { Language } from '@/types/v2';
 
 export interface Landing {
