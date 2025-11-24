@@ -284,6 +284,7 @@ async function main() {
       website: 'https://utmb.world',
       email: 'info@utmb.world',
       phone: '+33 4 50 47 62 73',
+      userId: organizerUTMB.id, // Usuario creador
       organizerId: organizerUTMB.id,
       status: EventStatus.PUBLISHED,
       featured: true,
@@ -301,6 +302,7 @@ async function main() {
       firstEditionYear: 2003,
       website: 'https://transgrancanaria.net',
       email: 'info@transgrancanaria.net',
+      userId: organizerES.id, // Usuario creador
       organizerId: organizerES.id,
       status: EventStatus.PUBLISHED,
       featured: true,
