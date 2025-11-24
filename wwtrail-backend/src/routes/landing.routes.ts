@@ -2,8 +2,7 @@
 import { Router } from 'express';
 import LandingController from '../controllers/landing.controller';
 import { authenticate } from '../middlewares/auth.middleware';
-import { requireRole } from '../middlewares/role.middleware';
-import { UserRole } from '@prisma/client';
+import { authorize } from '../middlewares/authorize.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import {
   createLandingSchema,
@@ -25,7 +24,7 @@ router.get('/slug/:slug', LandingController.getLandingBySlug);
 router.get(
   '/',
   authenticate,
-  requireRole([UserRole.ADMIN]),
+  authorize('ADMIN'),
   validate(getLandingsSchema),
   LandingController.getAllLandings
 );
@@ -33,14 +32,14 @@ router.get(
 router.get(
   '/:id',
   authenticate,
-  requireRole([UserRole.ADMIN]),
+  authorize('ADMIN'),
   LandingController.getLandingById
 );
 
 router.post(
   '/',
   authenticate,
-  requireRole([UserRole.ADMIN]),
+  authorize('ADMIN'),
   validate(createLandingSchema),
   LandingController.createLanding
 );
@@ -48,7 +47,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  requireRole([UserRole.ADMIN]),
+  authorize('ADMIN'),
   validate(updateLandingSchema),
   LandingController.updateLanding
 );
@@ -56,14 +55,14 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  requireRole([UserRole.ADMIN]),
+  authorize('ADMIN'),
   LandingController.deleteLanding
 );
 
 router.post(
   '/:id/translate',
   authenticate,
-  requireRole([UserRole.ADMIN]),
+  authorize('ADMIN'),
   validate(translateLandingSchema),
   LandingController.translateLanding
 );
