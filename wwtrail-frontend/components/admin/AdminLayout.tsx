@@ -12,7 +12,11 @@ import {
   Settings,
   LogOut,
   MapPin,
-  Tag
+  Tag,
+  Globe,
+  Home,
+  FileText,
+  Layout as LayoutIcon,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -28,6 +32,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       title: 'Dashboard',
       href: '/admin',
       icon: LayoutDashboard,
+    },
+    {
+      title: 'Administración Web',
+      href: '/admin/web',
+      icon: Globe,
+      subItems: [
+        {
+          title: 'HOME',
+          href: '/dashboard/home-config',
+          icon: Home,
+        },
+        {
+          title: 'Footer',
+          href: '/admin/footer',
+          icon: LayoutIcon,
+        },
+        {
+          title: 'Landings',
+          href: '/admin/landings',
+          icon: FileText,
+        },
+      ],
     },
     {
       title: 'Usuarios',

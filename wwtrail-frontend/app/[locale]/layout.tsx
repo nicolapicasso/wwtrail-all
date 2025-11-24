@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/layout/Footer";
 import { Toaster } from 'sonner';
 import { IntlProvider } from "@/components/providers/IntlProvider";
 import { notFound } from 'next/navigation';
@@ -41,7 +42,12 @@ export default async function RootLayout({
         <IntlProvider locale={locale} messages={messages}>
           <AuthProvider>
             <Navbar />
-            {children}
+            <div className="flex flex-col min-h-screen">
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
             <Toaster position="top-right" />
           </AuthProvider>
         </IntlProvider>
