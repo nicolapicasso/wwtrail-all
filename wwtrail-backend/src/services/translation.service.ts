@@ -33,7 +33,7 @@ interface TranslationResult {
 }
 
 interface AutoTranslateInput {
-  entityType: 'competition' | 'post' | 'event' | 'service' | 'specialSeries';
+  entityType: 'competition' | 'post' | 'event' | 'service' | 'specialSeries' | 'promotion';
   entityId: string;
   targetLanguages: Language[];
   overwrite?: boolean;
@@ -549,6 +549,82 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
   }
 
   /**
+   * Auto-traduce una promoción
+   */
+  static async autoTranslatePromotion(promotionId: string, targetLanguages: Language[], overwrite = false) {
+    try {
+      const promotion = await prisma.promotion.findUnique({
+        where: { id: promotionId },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          exclusiveContent: true,
+          language: true,
+          translations: true,
+        },
+      });
+
+      if (!promotion) {
+        throw new Error('Promoción no encontrada');
+      }
+
+      const sourceLanguage: Language = promotion.language;
+      const results = [];
+
+      for (const targetLang of targetLanguages) {
+        const existingTranslation = promotion.translations.find((t) => t.language === targetLang);
+
+        if (existingTranslation && !overwrite) {
+          results.push(existingTranslation);
+          continue;
+        }
+
+        const textsToTranslate = [
+          { key: 'title', text: promotion.title },
+          ...(promotion.description ? [{ key: 'description', text: promotion.description }] : []),
+          ...(promotion.exclusiveContent ? [{ key: 'exclusiveContent', text: promotion.exclusiveContent }] : []),
+        ];
+
+        const translated = await this.translateMultipleTexts(
+          textsToTranslate,
+          sourceLanguage,
+          targetLang,
+          'promotional content for trail runners (brand discounts, exclusive content)'
+        );
+
+        const translationData = {
+          promotionId: promotion.id,
+          language: targetLang,
+          title: translated.title,
+          description: translated.description || null,
+          exclusiveContent: translated.exclusiveContent || null,
+        };
+
+        const savedTranslation = await prisma.promotionTranslation.upsert({
+          where: {
+            promotionId_language: {
+              promotionId: promotion.id,
+              language: targetLang,
+            },
+          },
+          update: translationData,
+          create: translationData,
+        });
+
+        results.push(savedTranslation);
+      }
+
+      await cache.del(`promotion:${promotionId}`);
+
+      return results;
+    } catch (error: any) {
+      logger.error('Error en auto-traducción de promoción:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Función genérica de auto-traducción
    */
   static async autoTranslate(input: AutoTranslateInput) {
@@ -563,9 +639,32 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         return this.autoTranslateService(input.entityId, input.targetLanguages, input.overwrite);
       case 'specialSeries':
         return this.autoTranslateSpecialSeries(input.entityId, input.targetLanguages, input.overwrite);
+      case 'promotion':
+        return this.autoTranslatePromotion(input.entityId, input.targetLanguages, input.overwrite);
       default:
         throw new Error(`Tipo de entidad no soportado: ${input.entityType}`);
     }
+  }
+
+  // Alias methods for backwards compatibility
+  static async translateEvent(eventId: string, targetLanguages: Language[]) {
+    return this.autoTranslateEvent(eventId, targetLanguages, false);
+  }
+
+  static async translateCompetition(competitionId: string, targetLanguages: Language[]) {
+    return this.autoTranslateCompetition(competitionId, targetLanguages, false);
+  }
+
+  static async translatePost(postId: string, targetLanguages: Language[]) {
+    return this.autoTranslatePost(postId, targetLanguages, false);
+  }
+
+  static async translateService(serviceId: string, targetLanguages: Language[]) {
+    return this.autoTranslateService(serviceId, targetLanguages, false);
+  }
+
+  static async translatePromotion(promotionId: string, targetLanguages: Language[]) {
+    return this.autoTranslatePromotion(promotionId, targetLanguages, false);
   }
 
   /**

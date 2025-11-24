@@ -1187,6 +1187,9 @@ model Promotion {
   // Idioma
   language Language @default(ES)
 
+  // Traducciones
+  translations PromotionTranslation[]
+
   // Países (relación many-to-many o GLOBAL si no tiene países asociados)
   countries PromotionCountry[]
   isGlobal  Boolean            @default(false)
@@ -1218,6 +1221,28 @@ model Promotion {
   @@index([createdById])
   @@index([isGlobal])
   @@map("promotions")
+}
+
+// Traducciones de promociones
+model PromotionTranslation {
+  id          String    @id @default(uuid())
+  promotionId String
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  language    Language
+  title       String    @db.VarChar(255)
+  description String    @db.Text
+
+  // Contenido exclusivo traducido (si aplica)
+  exclusiveContent String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([promotionId, language])
+  @@index([promotionId])
+  @@index([language])
+  @@map("promotion_translations")
 }
 
 // Relación many-to-many para países

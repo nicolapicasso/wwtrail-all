@@ -19,7 +19,7 @@ export class BulkTranslationController {
       if (!entityType) {
         return res.status(400).json({
           status: 'error',
-          message: 'entityType is required (event, competition, post, service)',
+          message: 'entityType is required (event, competition, post, service, promotion)',
         });
       }
 
@@ -128,10 +128,34 @@ export class BulkTranslationController {
           break;
         }
 
+        case 'promotion': {
+          const promotions = await prisma.promotion.findMany({
+            where: { status: 'PUBLISHED' },
+            include: { translations: true },
+          });
+
+          for (const promotion of promotions) {
+            try {
+              const existingLanguages = promotion.translations.map(t => t.language);
+              const missingLanguages = languages.filter(lang => !existingLanguages.includes(lang));
+
+              if (missingLanguages.length > 0) {
+                await TranslationService.translatePromotion(promotion.id, missingLanguages as Language[]);
+                count++;
+                logger.info(`Translated promotion ${promotion.id} to ${missingLanguages.join(', ')}`);
+              }
+            } catch (error) {
+              logger.error(`Error translating promotion ${promotion.id}:`, error);
+              errors++;
+            }
+          }
+          break;
+        }
+
         default:
           return res.status(400).json({
             status: 'error',
-            message: 'Invalid entityType. Use: event, competition, post, service',
+            message: 'Invalid entityType. Use: event, competition, post, service, promotion',
           });
       }
 
@@ -181,6 +205,11 @@ export class BulkTranslationController {
           withTranslations: 0,
           missingTranslations: 0,
         },
+        promotions: {
+          total: 0,
+          withTranslations: 0,
+          missingTranslations: 0,
+        },
       };
 
       // Events
@@ -217,6 +246,15 @@ export class BulkTranslationController {
       stats.services.total = services.length;
       stats.services.withTranslations = services.filter(s => s._count.translations > 0).length;
       stats.services.missingTranslations = services.filter(s => s._count.translations === 0).length;
+
+      // Promotions
+      const promotions = await prisma.promotion.findMany({
+        where: { status: 'PUBLISHED' },
+        include: { _count: { select: { translations: true } } },
+      });
+      stats.promotions.total = promotions.length;
+      stats.promotions.withTranslations = promotions.filter(p => p._count.translations > 0).length;
+      stats.promotions.missingTranslations = promotions.filter(p => p._count.translations === 0).length;
 
       res.json({
         status: 'success',
