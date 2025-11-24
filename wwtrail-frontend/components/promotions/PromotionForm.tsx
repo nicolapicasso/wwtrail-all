@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Promotion, CreatePromotionInput, UpdatePromotionInput, Language, PromotionType } from '@/types/v2';
+import { PostStatus } from '@/types/post';
 import { promotionsService } from '@/lib/api/v2';
 import serviceCategoriesService, { ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
 import { Upload, X, Plus } from 'lucide-react';
@@ -47,6 +48,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
     promotion?.countries?.map(c => c.countryCode) || []
   );
   const [featured, setFeatured] = useState(promotion?.featured || false);
+  const [status, setStatus] = useState<PostStatus>(promotion?.status || PostStatus.DRAFT);
 
   // Type-specific fields
   const [exclusiveContent, setExclusiveContent] = useState(promotion?.exclusiveContent || '');
@@ -110,6 +112,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
         exclusiveContent: type === 'EXCLUSIVE_CONTENT' ? exclusiveContent : undefined,
         couponCodes,
         featured,
+        status,
       };
 
       if (promotion) {
@@ -357,6 +360,29 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Status */}
+      <div>
+        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
+          Estado de Publicación *
+        </label>
+        <select
+          id="status"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as PostStatus)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          required
+        >
+          <option value={PostStatus.DRAFT}>📝 Borrador</option>
+          <option value={PostStatus.PUBLISHED}>✅ Publicado</option>
+          <option value={PostStatus.ARCHIVED}>📦 Archivado</option>
+        </select>
+        <p className="mt-1 text-sm text-gray-500">
+          {status === PostStatus.DRAFT && 'La promoción no será visible públicamente'}
+          {status === PostStatus.PUBLISHED && 'La promoción será visible para todos los usuarios'}
+          {status === PostStatus.ARCHIVED && 'La promoción no aparecerá en listados pero seguirá accesible por URL'}
+        </p>
       </div>
 
       {/* Countries */}

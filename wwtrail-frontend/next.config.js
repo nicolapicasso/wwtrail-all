@@ -25,6 +25,19 @@ const nextConfig = {
         hostname: 'wwtrail.com',
         pathname: '/api/uploads/**',
       },
+      // External image sources for special series logos
+      {
+        protocol: 'https',
+        hostname: 'www.goldentrailseries.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'utmb.world',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.skyrunner.com',
+      },
     ],
   },
 }
