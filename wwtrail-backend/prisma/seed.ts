@@ -155,50 +155,11 @@ async function main() {
 
   console.log(`✅ Created ${6} terrain types`);
 
-  // Special Series
-  const goldenTrail = await prisma.specialSeries.create({
-    data: {
-      name: 'Golden Trail Series',
-      slug: 'golden-trail-series',
-      logoUrl: 'https://www.goldentrailseries.com/images/logo.png',
-      websiteUrl: 'https://www.goldentrailseries.com',
-      description: 'Serie mundial de carreras de skyrunning',
-      sortOrder: 1,
-      isActive: true,
-    },
-  });
-
-  const utmbWorld = await prisma.specialSeries.create({
-    data: {
-      name: 'UTMB World Series',
-      slug: 'utmb-world-series',
-      logoUrl: 'https://utmb.world/images/logo.png',
-      websiteUrl: 'https://utmb.world',
-      description: 'Serie mundial de ultra trails',
-      sortOrder: 2,
-      isActive: true,
-    },
-  });
-
-  const skyrunnerWorld = await prisma.specialSeries.create({
-    data: {
-      name: 'Skyrunner World Series',
-      slug: 'skyrunner-world-series',
-      logoUrl: 'https://www.skyrunner.com/images/logo.png',
-      websiteUrl: 'https://www.skyrunner.com',
-      description: 'Serie mundial de skyrunning',
-      sortOrder: 3,
-      isActive: true,
-    },
-  });
-
-  console.log(`✅ Created ${3} special series\n`);
-
-  // 1. CREAR USUARIOS
+  // 1. CREAR USUARIOS (movido aquí para poder usar admin en Special Series)
   console.log('👤 Creating users...');
-  
+
   const hashedPassword = await bcrypt.hash('Password123!', 10);
-  
+
   const admin = await prisma.user.create({
     data: {
       email: 'admin@wwtrail.com',
@@ -260,6 +221,53 @@ async function main() {
   });
 
   console.log('✅ 4 users created\n');
+
+  // 1.5. CREAR SPECIAL SERIES (necesitan admin user)
+  console.log('🏆 Creating special series...');
+
+  const goldenTrail = await prisma.specialSeries.create({
+    data: {
+      name: 'Golden Trail Series',
+      slug: 'golden-trail-series',
+      logoUrl: 'https://www.goldentrailseries.com/images/logo.png',
+      website: 'https://www.goldentrailseries.com',
+      description: 'Serie mundial de carreras de skyrunning',
+      country: 'INT', // Internacional
+      language: Language.EN,
+      status: EventStatus.PUBLISHED,
+      createdById: admin.id,
+    },
+  });
+
+  const utmbWorld = await prisma.specialSeries.create({
+    data: {
+      name: 'UTMB World Series',
+      slug: 'utmb-world-series',
+      logoUrl: 'https://utmb.world/images/logo.png',
+      website: 'https://utmb.world',
+      description: 'Serie mundial de ultra trails',
+      country: 'INT', // Internacional
+      language: Language.EN,
+      status: EventStatus.PUBLISHED,
+      createdById: admin.id,
+    },
+  });
+
+  const skyrunnerWorld = await prisma.specialSeries.create({
+    data: {
+      name: 'Skyrunner World Series',
+      slug: 'skyrunner-world-series',
+      logoUrl: 'https://www.skyrunner.com/images/logo.png',
+      website: 'https://www.skyrunner.com',
+      description: 'Serie mundial de skyrunning',
+      country: 'INT', // Internacional
+      language: Language.EN,
+      status: EventStatus.PUBLISHED,
+      createdById: admin.id,
+    },
+  });
+
+  console.log('✅ 3 special series created\n');
 
   // 2. CREAR EVENTOS (Nivel 1)
   console.log('🏔️ Creating events...');
