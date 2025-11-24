@@ -232,7 +232,7 @@ async function main() {
       logoUrl: 'https://www.goldentrailseries.com/images/logo.png',
       website: 'https://www.goldentrailseries.com',
       description: 'Serie mundial de carreras de skyrunning',
-      country: 'INT', // Internacional
+      country: 'FR', // Francia (sede principal)
       language: Language.EN,
       status: EventStatus.PUBLISHED,
       createdById: admin.id,
@@ -246,7 +246,7 @@ async function main() {
       logoUrl: 'https://utmb.world/images/logo.png',
       website: 'https://utmb.world',
       description: 'Serie mundial de ultra trails',
-      country: 'INT', // Internacional
+      country: 'FR', // Francia (Chamonix)
       language: Language.EN,
       status: EventStatus.PUBLISHED,
       createdById: admin.id,
@@ -260,7 +260,7 @@ async function main() {
       logoUrl: 'https://www.skyrunner.com/images/logo.png',
       website: 'https://www.skyrunner.com',
       description: 'Serie mundial de skyrunning',
-      country: 'INT', // Internacional
+      country: 'IT', // Italia (Skyrunning Federation)
       language: Language.EN,
       status: EventStatus.PUBLISHED,
       createdById: admin.id,
