@@ -1,8 +1,8 @@
 // src/routes/footer.routes.ts
 import { Router } from 'express';
 import FooterController from '../controllers/footer.controller';
-import { authenticate } from '../middleware/auth.middleware';
-import { requireRole } from '../middleware/role.middleware';
+import { authenticate } from '../middlewares/auth.middleware';
+import { requireRole } from '../middlewares/role.middleware';
 import { UserRole } from '@prisma/client';
 
 const router = Router();

@@ -1,10 +1,10 @@
 // src/routes/landing.routes.ts
 import { Router } from 'express';
 import LandingController from '../controllers/landing.controller';
-import { authenticate } from '../middleware/auth.middleware';
-import { requireRole } from '../middleware/role.middleware';
+import { authenticate } from '../middlewares/auth.middleware';
+import { requireRole } from '../middlewares/role.middleware';
 import { UserRole } from '@prisma/client';
-import { validate } from '../middleware/validate.middleware';
+import { validate } from '../middlewares/validate.middleware';
 import {
   createLandingSchema,
   updateLandingSchema,
