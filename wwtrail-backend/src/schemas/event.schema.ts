@@ -94,8 +94,8 @@ export const getEventsSchema = z.object({
     sortBy: z.enum(['name', 'createdAt', 'viewCount']).optional().default('createdAt'),
     sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
     
-    // Idioma
-    language: z.nativeEnum(Language).optional(),
+    // Idioma (acepta minúsculas y transforma a mayúsculas)
+    language: z.string().optional().transform(val => val ? val.toUpperCase() as Language : undefined),
   }),
 });
 

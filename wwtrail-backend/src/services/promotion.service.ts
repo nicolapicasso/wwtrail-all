@@ -192,7 +192,6 @@ export class PromotionService {
           include: {
             category: true,
             countries: true,
-            translations: true,
             couponCodes: {
               select: {
                 id: true,
