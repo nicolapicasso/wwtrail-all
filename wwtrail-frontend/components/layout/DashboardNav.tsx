@@ -23,6 +23,8 @@ import {
   Ticket,
   Search,
   Settings,
+  Globe,
+  Layout,
 } from 'lucide-react';
 
 interface NavItem {
@@ -45,6 +47,23 @@ const navItems: NavItem[] = [
     href: '/dashboard/home-config',
     icon: Home,
     adminOnly: true,
+  },
+  {
+    label: 'Administración Web',
+    icon: Globe,
+    adminOnly: true,
+    children: [
+      {
+        label: 'Footer',
+        href: '/organizer/footer',
+        icon: Layout,
+      },
+      {
+        label: 'Landings',
+        href: '/organizer/landings',
+        icon: FileText,
+      },
+    ],
   },
   {
     label: 'Gestión de eventos',
@@ -161,7 +180,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Gestión de eventos', 'Servicios', 'Promociones', 'SEO']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO']);
 
   const filteredItems = navItems.filter((item) => {
     if (item.adminOnly) {
