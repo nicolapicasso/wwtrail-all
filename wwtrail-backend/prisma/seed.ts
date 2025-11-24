@@ -19,10 +19,10 @@ async function main() {
   await prisma.competition.deleteMany();
   await prisma.event.deleteMany();
   await prisma.refreshToken.deleteMany();
+  await prisma.specialSeries.deleteMany();
   await prisma.user.deleteMany();
   await prisma.competitionType.deleteMany();
   await prisma.terrainType.deleteMany();
-  await prisma.specialSeries.deleteMany();
 
   // ===================================
   // 0. CREAR CATÁLOGOS - FASE 1
