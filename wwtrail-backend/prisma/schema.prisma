@@ -155,6 +155,7 @@ model User {
   userCompetitions      UserCompetition[]
   blogPosts             Post[]
   promotions            Promotion[]       @relation("PromotionCreator")
+  landings              Landing[]         @relation("LandingCreator")
   ratings               EditionRating[]   @relation("UserRatings")
 
   createdAt DateTime @default(now())
@@ -1391,4 +1392,96 @@ model SEO {
   @@index([entityType, entityId, language])
   @@index([entityType, slug, language])
   @@map("seo_metadata")
+}
+
+// ==========================================
+// FOOTER - Global site footer
+// ==========================================
+model Footer {
+  id String @id @default(uuid())
+
+  // Columna izquierda por idioma (HTML)
+  leftColumnES String? @db.Text
+  leftColumnEN String? @db.Text
+  leftColumnIT String? @db.Text
+  leftColumnCA String? @db.Text
+  leftColumnFR String? @db.Text
+  leftColumnDE String? @db.Text
+
+  // Columna central por idioma (HTML)
+  centerColumnES String? @db.Text
+  centerColumnEN String? @db.Text
+  centerColumnIT String? @db.Text
+  centerColumnCA String? @db.Text
+  centerColumnFR String? @db.Text
+  centerColumnDE String? @db.Text
+
+  // Columna derecha por idioma (HTML)
+  rightColumnES String? @db.Text
+  rightColumnEN String? @db.Text
+  rightColumnIT String? @db.Text
+  rightColumnCA String? @db.Text
+  rightColumnFR String? @db.Text
+  rightColumnDE String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("footer")
+}
+
+// ==========================================
+// LANDINGS - Custom landing pages
+// ==========================================
+model Landing {
+  id       String   @id @default(uuid())
+  title    String   @db.VarChar(255)
+  slug     String   @unique @db.VarChar(255)
+  language Language @default(ES)
+
+  // Contenido
+  coverImage String?  @db.Text
+  gallery    String[] // Array de URLs para galería de fotos
+  content    String   @db.Text // WYSIWYG content
+
+  // SEO
+  metaTitle       String? @db.VarChar(255)
+  metaDescription String? @db.Text
+
+  // Traducciones
+  translations LandingTranslation[]
+
+  // Usuario creador (solo admins)
+  createdById String
+  createdBy   User   @relation("LandingCreator", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([language])
+  @@index([createdById])
+  @@map("landings")
+}
+
+model LandingTranslation {
+  id        String  @id @default(uuid())
+  landingId String
+  landing   Landing @relation(fields: [landingId], references: [id], onDelete: Cascade)
+
+  language Language
+  title    String   @db.VarChar(255)
+  content  String   @db.Text
+
+  // SEO traducido
+  metaTitle       String? @db.VarChar(255)
+  metaDescription String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([landingId, language])
+  @@index([landingId])
+  @@index([language])
+  @@map("landing_translations")
 }

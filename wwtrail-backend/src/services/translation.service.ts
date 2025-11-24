@@ -33,7 +33,7 @@ interface TranslationResult {
 }
 
 interface AutoTranslateInput {
-  entityType: 'competition' | 'post' | 'event' | 'service' | 'specialSeries' | 'promotion';
+  entityType: 'competition' | 'post' | 'event' | 'service' | 'specialSeries' | 'promotion' | 'landing';
   entityId: string;
   targetLanguages: Language[];
   overwrite?: boolean;
@@ -625,6 +625,83 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
   }
 
   /**
+   * Auto-traduce una landing page
+   */
+  static async autoTranslateLanding(landingId: string, targetLanguages: Language[], overwrite = false) {
+    try {
+      const landing = await prisma.landing.findUnique({
+        where: { id: landingId },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          metaTitle: true,
+          metaDescription: true,
+          language: true,
+          translations: true,
+        },
+      });
+
+      if (!landing) {
+        throw new Error('Landing no encontrada');
+      }
+
+      const sourceLanguage: Language = landing.language;
+      const results = [];
+
+      for (const targetLang of targetLanguages) {
+        const existingTranslation = landing.translations.find((t) => t.language === targetLang);
+
+        if (existingTranslation && !overwrite) {
+          results.push(existingTranslation);
+          continue;
+        }
+
+        const textsToTranslate = [
+          { key: 'title', text: landing.title },
+          { key: 'content', text: landing.content },
+          ...(landing.metaTitle ? [{ key: 'metaTitle', text: landing.metaTitle }] : []),
+          ...(landing.metaDescription ? [{ key: 'metaDescription', text: landing.metaDescription }] : []),
+        ];
+
+        const translated = await this.translateMultipleTexts(
+          textsToTranslate,
+          sourceLanguage,
+          targetLang,
+          'landing page content for trail running website'
+        );
+
+        const translationData = {
+          landingId: landing.id,
+          language: targetLang,
+          title: translated.title,
+          content: translated.content,
+          metaTitle: translated.metaTitle || null,
+          metaDescription: translated.metaDescription || null,
+        };
+
+        const savedTranslation = await prisma.landingTranslation.upsert({
+          where: {
+            landingId_language: {
+              landingId: landing.id,
+              language: targetLang,
+            },
+          },
+          update: translationData,
+          create: translationData,
+        });
+
+        results.push(savedTranslation);
+      }
+
+      return results;
+    } catch (error: any) {
+      logger.error('Error en auto-traducción de landing:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Función genérica de auto-traducción
    */
   static async autoTranslate(input: AutoTranslateInput) {
@@ -641,6 +718,8 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         return this.autoTranslateSpecialSeries(input.entityId, input.targetLanguages, input.overwrite);
       case 'promotion':
         return this.autoTranslatePromotion(input.entityId, input.targetLanguages, input.overwrite);
+      case 'landing':
+        return this.autoTranslateLanding(input.entityId, input.targetLanguages, input.overwrite);
       default:
         throw new Error(`Tipo de entidad no soportado: ${input.entityType}`);
     }
@@ -665,6 +744,10 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
 
   static async translatePromotion(promotionId: string, targetLanguages: Language[]) {
     return this.autoTranslatePromotion(promotionId, targetLanguages, false);
+  }
+
+  static async translateLanding(landingId: string, targetLanguages: Language[]) {
+    return this.autoTranslateLanding(landingId, targetLanguages, false);
   }
 
   /**

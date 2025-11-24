@@ -39,6 +39,8 @@ import postsRoutes from './routes/posts.routes';
 import promotionRoutes from './routes/promotion.routes';
 import emailTemplateRoutes from './routes/email-template.routes';
 import seoRoutes from './routes/seo.routes';
+import footerRoutes from './routes/footer.routes';
+import landingRoutes from './routes/landing.routes';
 
 dotenv.config();
 
@@ -159,6 +161,8 @@ app.use('/api/v2/promotions', promotionRoutes);
 app.use('/api/v2/email-templates', emailTemplateRoutes);
 app.use('/api/v2/translations', translationRoutes);
 app.use('/api/v2/seo', seoRoutes);
+app.use('/api/v2/footer', footerRoutes);
+app.use('/api/v2/landings', landingRoutes);
 app.use('/api/v2', catalogRoutes);
 
 // ============================================
