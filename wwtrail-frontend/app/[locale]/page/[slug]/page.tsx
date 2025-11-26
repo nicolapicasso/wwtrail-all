@@ -65,7 +65,7 @@ export default async function LandingPage({ params }: PageProps) {
 
           {/* Main Content */}
           <div
-            className="prose prose-lg max-w-none mb-12"
+            className="prose prose-lg max-w-none mb-12 prose-headings:text-gray-900 prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-lg prose-ul:text-gray-700 prose-ol:text-gray-700 prose-strong:text-gray-900"
             dangerouslySetInnerHTML={{ __html: landing.content }}
           />
 
@@ -92,39 +92,6 @@ export default async function LandingPage({ params }: PageProps) {
           )}
         </div>
       </div>
-
-      <style jsx global>{`
-        .prose h1,
-        .prose h2,
-        .prose h3,
-        .prose h4,
-        .prose h5,
-        .prose h6 {
-          color: #111827;
-          font-weight: 700;
-        }
-        .prose p {
-          color: #374151;
-          line-height: 1.75;
-        }
-        .prose a {
-          color: #2563eb;
-          text-decoration: none;
-        }
-        .prose a:hover {
-          text-decoration: underline;
-        }
-        .prose img {
-          border-radius: 0.5rem;
-        }
-        .prose ul,
-        .prose ol {
-          color: #374151;
-        }
-        .prose strong {
-          color: #111827;
-        }
-      `}</style>
     </div>
   );
 }

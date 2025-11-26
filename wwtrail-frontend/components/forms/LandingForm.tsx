@@ -80,7 +80,7 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push('/admin/landings');
+        router.push('/organizer/landings');
       }
     } catch (error: any) {
       console.error('Error saving landing:', error);

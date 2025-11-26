@@ -42,7 +42,7 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
         description: error.message || 'Error al cargar la landing',
         variant: 'destructive',
       });
-      router.push('/admin/landings');
+      router.push('/organizer/landings');
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
         <div className="bg-white rounded-lg shadow p-6">
           <LandingForm
             landing={landing}
-            onSuccess={() => router.push('/admin/landings')}
+            onSuccess={() => router.push('/organizer/landings')}
           />
         </div>
 

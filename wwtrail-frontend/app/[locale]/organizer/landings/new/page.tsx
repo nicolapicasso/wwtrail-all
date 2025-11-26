@@ -50,7 +50,7 @@ export default function NewLandingPage() {
       {/* Form */}
       <div className="max-w-4xl">
         <div className="bg-white rounded-lg shadow p-6">
-          <LandingForm onSuccess={() => router.push('/admin/landings')} />
+          <LandingForm onSuccess={() => router.push('/organizer/landings')} />
         </div>
       </div>
     </div>

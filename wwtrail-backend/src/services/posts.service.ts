@@ -261,7 +261,7 @@ export class PostsService {
       }
 
       if (filters.category) where.category = filters.category;
-      if (filters.language) where.language = filters.language;
+      if (filters.language) where.language = filters.language.toUpperCase();
       if (filters.status) where.status = filters.status;
       if (filters.authorId) where.authorId = filters.authorId;
       if (filters.eventId) where.eventId = filters.eventId;

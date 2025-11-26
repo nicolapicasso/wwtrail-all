@@ -105,7 +105,7 @@ export default function LandingsAdminPage() {
             Gestiona las páginas landing personalizadas
           </p>
         </div>
-        <Link href="/admin/landings/new">
+        <Link href="/organizer/landings/new">
           <Button size="lg">
             <Plus className="mr-2 h-4 w-4" />
             Nueva Landing
@@ -140,7 +140,7 @@ export default function LandingsAdminPage() {
             <p className="text-muted-foreground mb-4">
               {search ? 'No se encontraron resultados' : 'No hay landings creadas'}
             </p>
-            <Link href="/admin/landings/new">
+            <Link href="/organizer/landings/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Crear primera landing
@@ -191,7 +191,7 @@ export default function LandingsAdminPage() {
                         <Eye className="h-4 w-4" />
                       </Button>
                     </Link>
-                    <Link href={`/admin/landings/${landing.id}`}>
+                    <Link href={`/organizer/landings/${landing.id}`}>
                       <Button variant="outline" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
