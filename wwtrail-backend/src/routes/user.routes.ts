@@ -1,42 +1,100 @@
 import { Router } from 'express';
-import { authenticate, authorize } from '../middlewares/auth.middleware';
+import { authenticate } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
-import { userIdSchema, updateUserSchema, changePasswordSchema, getUsersSchema } from '../schemas/user.schema';
+import {
+  updateUserSchema,
+  changePasswordSchema,
+  usernameSchema,
+  getPublicUsersSchema,
+} from '../schemas/user.schema';
+import {
+  userEditionSchema,
+  editionIdParamSchema,
+} from '../schemas/userEdition.schema';
+import { UserController } from '../controllers/user.controller';
+import { UserEditionController } from '../controllers/userEdition.controller';
 
 const router = Router();
 
-// Nota: UserController debe ser creado para estas rutas
-// import { UserController } from '../controllers/user.controller';
-
 // ============================================
-// RUTAS PROTEGIDAS
+// RUTAS PÚBLICAS
 // ============================================
 
-// Obtener todos los usuarios (solo ADMIN)
-// router.get('/', authenticate, authorize('ADMIN'), validate(getUsersSchema), UserController.getAll);
+// Listar usuarios públicos con filtros
+// GET /api/v2/users
+router.get('/', validate(getPublicUsersSchema), UserController.getPublicUsers);
 
-// Obtener perfil de usuario por ID
-// router.get('/:id', authenticate, validate(userIdSchema), UserController.getById);
+// Obtener perfil público por username
+// GET /api/v2/users/profile/:username
+router.get('/profile/:username', validate(usernameSchema), UserController.getPublicProfile);
 
-// Actualizar perfil de usuario (propio o admin)
-// router.put('/:id', authenticate, validate(userIdSchema), validate(updateUserSchema), UserController.update);
-// router.patch('/:id', authenticate, validate(userIdSchema), validate(updateUserSchema), UserController.update);
+// ============================================
+// RUTAS PROTEGIDAS (Autenticado)
+// ============================================
 
-// Cambiar contraseña (propia)
-// router.post('/:id/change-password', authenticate, validate(userIdSchema), validate(changePasswordSchema), UserController.changePassword);
+// Obtener perfil propio
+// GET /api/v2/users/me
+router.get('/me', authenticate, UserController.getOwnProfile);
 
-// Obtener competiciones del usuario
-// router.get('/:id/competitions', authenticate, validate(userIdSchema), UserController.getCompetitions);
+// Actualizar perfil propio
+// PUT /api/v2/users/me
+router.put('/me', authenticate, validate(updateUserSchema), UserController.updateOwnProfile);
 
-// Obtener resultados del usuario
-// router.get('/:id/results', authenticate, validate(userIdSchema), UserController.getResults);
+// PATCH /api/v2/users/me (alias)
+router.patch('/me', authenticate, validate(updateUserSchema), UserController.updateOwnProfile);
 
-// Obtener favoritos del usuario
-// router.get('/:id/favorites', authenticate, validate(userIdSchema), UserController.getFavorites);
+// Cambiar contraseña
+// POST /api/v2/users/me/change-password
+router.post(
+  '/me/change-password',
+  authenticate,
+  validate(changePasswordSchema),
+  UserController.changePassword
+);
 
-// Eliminar usuario (admin o propio)
-// router.delete('/:id', authenticate, validate(userIdSchema), UserController.delete);
+// Obtener participaciones propias
+// GET /api/v2/users/me/participations
+router.get('/me/participations', authenticate, UserController.getOwnParticipations);
 
-// TODO: Crear UserController y descomentar estas rutas
+// ============================================
+// RUTAS DE PARTICIPACIONES
+// ============================================
+
+// Obtener participación en una edición específica
+// GET /api/v2/users/me/participations/:editionId
+router.get(
+  '/me/participations/:editionId',
+  authenticate,
+  validate(editionIdParamSchema),
+  UserEditionController.getParticipation
+);
+
+// Crear o actualizar participación en una edición
+// POST /api/v2/users/me/participations/:editionId
+router.post(
+  '/me/participations/:editionId',
+  authenticate,
+  validate(editionIdParamSchema),
+  validate(userEditionSchema),
+  UserEditionController.upsertParticipation
+);
+
+// PUT /api/v2/users/me/participations/:editionId (alias)
+router.put(
+  '/me/participations/:editionId',
+  authenticate,
+  validate(editionIdParamSchema),
+  validate(userEditionSchema),
+  UserEditionController.upsertParticipation
+);
+
+// Eliminar participación
+// DELETE /api/v2/users/me/participations/:editionId
+router.delete(
+  '/me/participations/:editionId',
+  authenticate,
+  validate(editionIdParamSchema),
+  UserEditionController.deleteParticipation
+);
 
 export default router;

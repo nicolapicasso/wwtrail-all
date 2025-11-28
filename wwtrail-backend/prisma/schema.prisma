@@ -118,6 +118,12 @@ enum PodiumType {
   CATEGORY
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+}
+
 // ===================================
 // USER & AUTH
 // ===================================
@@ -138,6 +144,17 @@ model User {
   country     String?   @db.VarChar(2)
   language    Language  @default(ES)
   lastLoginAt DateTime?
+
+  // Nuevos campos de perfil
+  gender      Gender?
+  birthDate   DateTime?
+  isPublic    Boolean   @default(false)
+
+  // Redes sociales
+  instagramUrl String?  @db.Text
+  facebookUrl  String?  @db.Text
+  twitterUrl   String?  @db.Text
+  youtubeUrl   String?  @db.Text
 
   // Relaciones
   refreshTokens         RefreshToken[]
@@ -496,6 +513,10 @@ model UserEdition {
   position          Int?
   categoryPosition  Int?
   bibNumber         String? @db.VarChar(20)
+
+  // Categoría de participación (como en podios)
+  categoryType PodiumType? // GENERAL, MALE, FEMALE, CATEGORY
+  categoryName String?     @db.VarChar(100) // Nombre si categoryType=CATEGORY
 
   // Notas personales
   notes          String?   @db.Text

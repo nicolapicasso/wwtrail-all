@@ -127,6 +127,34 @@ router.delete(
 );
 
 // ============================================
+// RUTAS ADMIN - CONTENIDO PENDIENTE DE REVISIÓN
+// ============================================
+
+/**
+ * @route   GET /api/v1/admin/pending/count
+ * @desc    Obtener contadores de contenido pendiente (para badge)
+ * @access  Admin
+ */
+router.get(
+  '/admin/pending/count',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.getPendingContentCounts(req, res, next)
+);
+
+/**
+ * @route   GET /api/v1/admin/pending
+ * @desc    Obtener listado de todo el contenido pendiente de revisión
+ * @access  Admin
+ */
+router.get(
+  '/admin/pending',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.getPendingContent(req, res, next)
+);
+
+// ============================================
 // RUTAS ADMIN - GESTIÓN DE COMPETICIONES
 // ============================================
 

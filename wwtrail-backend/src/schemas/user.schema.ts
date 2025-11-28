@@ -17,6 +17,15 @@ export const updateUserSchema = z.object({
     country: z.string().min(2).max(2).optional(), // ISO country code
     city: z.string().max(100).optional(),
     language: z.enum(['ES', 'EN', 'IT', 'CA', 'FR', 'DE']).optional(),
+    // Nuevos campos de perfil
+    gender: z.enum(['MALE', 'FEMALE', 'NON_BINARY']).optional().nullable(),
+    birthDate: z.string().datetime().optional().nullable(),
+    isPublic: z.boolean().optional(),
+    // Redes sociales
+    instagramUrl: z.string().url().optional().or(z.literal('')).nullable(),
+    facebookUrl: z.string().url().optional().or(z.literal('')).nullable(),
+    twitterUrl: z.string().url().optional().or(z.literal('')).nullable(),
+    youtubeUrl: z.string().url().optional().or(z.literal('')).nullable(),
   }),
 });
 
@@ -56,6 +65,27 @@ export const getUsersSchema = z.object({
   }),
 });
 
+// Schema para obtener usuario por username (perfil público)
+export const usernameSchema = z.object({
+  params: z.object({
+    username: z.string().min(3).max(50),
+  }),
+});
+
+// Schema para listar usuarios públicos
+export const getPublicUsersSchema = z.object({
+  query: z.object({
+    page: z.string().optional().default('1').transform(Number),
+    limit: z.string().optional().default('20').transform(Number),
+    search: z.string().optional(),
+    country: z.string().min(2).max(2).optional(), // ISO country code
+    minAge: z.string().optional().transform((val) => val ? Number(val) : undefined),
+    maxAge: z.string().optional().transform((val) => val ? Number(val) : undefined),
+    editionId: z.string().uuid().optional(), // Filtrar por participación en edición
+  }),
+});
+
 export type UpdateUserInput = z.infer<typeof updateUserSchema>['body'];
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>['body'];
 export type GetUsersQuery = z.infer<typeof getUsersSchema>['query'];
+export type GetPublicUsersQuery = z.infer<typeof getPublicUsersSchema>['query'];

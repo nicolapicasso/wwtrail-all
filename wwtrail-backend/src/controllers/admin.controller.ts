@@ -256,6 +256,42 @@ class AdminController {
       }
     }
   }
+
+  /**
+   * @route   GET /api/v1/admin/pending/count
+   * @desc    Obtener contadores de contenido pendiente de revisión
+   * @access  Admin
+   */
+  async getPendingContentCounts(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const counts = await AdminService.getPendingContentCounts();
+
+      res.status(200).json({
+        success: true,
+        data: counts,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/admin/pending
+   * @desc    Obtener listado de contenido pendiente de revisión
+   * @access  Admin
+   */
+  async getPendingContent(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const content = await AdminService.getPendingContent();
+
+      res.status(200).json({
+        success: true,
+        data: content,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new AdminController();
