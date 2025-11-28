@@ -493,6 +493,263 @@ class AdminService {
   }
 
   /**
+   * Obtener contadores de contenido pendiente (DRAFT) para badge de admin
+   */
+  async getPendingContentCounts() {
+    const [
+      pendingEvents,
+      pendingCompetitions,
+      pendingServices,
+      pendingOrganizers,
+      pendingSpecialSeries,
+      pendingPosts,
+      pendingPromotions,
+    ] = await Promise.all([
+      prisma.event.count({ where: { status: 'DRAFT' } }),
+      prisma.competition.count({ where: { status: 'DRAFT' } }),
+      prisma.service.count({ where: { status: 'DRAFT' } }),
+      prisma.organizer.count({ where: { status: 'DRAFT' } }),
+      prisma.specialSeries.count({ where: { status: 'DRAFT' } }),
+      prisma.post.count({ where: { status: 'DRAFT' } }),
+      prisma.promotion.count({ where: { status: 'DRAFT' } }),
+    ]);
+
+    const total =
+      pendingEvents +
+      pendingCompetitions +
+      pendingServices +
+      pendingOrganizers +
+      pendingSpecialSeries +
+      pendingPosts +
+      pendingPromotions;
+
+    return {
+      total,
+      breakdown: {
+        events: pendingEvents,
+        competitions: pendingCompetitions,
+        services: pendingServices,
+        organizers: pendingOrganizers,
+        specialSeries: pendingSpecialSeries,
+        posts: pendingPosts,
+        promotions: pendingPromotions,
+      },
+    };
+  }
+
+  /**
+   * Obtener listado de contenido pendiente de revisión
+   */
+  async getPendingContent() {
+    const [events, competitions, services, organizers, specialSeries, posts, promotions] =
+      await Promise.all([
+        prisma.event.findMany({
+          where: { status: 'DRAFT' },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            country: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        }),
+        prisma.competition.findMany({
+          where: { status: 'DRAFT' },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            createdAt: true,
+            event: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            organizer: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        }),
+        prisma.service.findMany({
+          where: { status: 'DRAFT' },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            country: true,
+            createdAt: true,
+            organizer: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        }),
+        prisma.organizer.findMany({
+          where: { status: 'DRAFT' },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            country: true,
+            createdAt: true,
+            createdBy: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        }),
+        prisma.specialSeries.findMany({
+          where: { status: 'DRAFT' },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            country: true,
+            createdAt: true,
+            createdBy: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        }),
+        prisma.post.findMany({
+          where: { status: 'DRAFT' },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            category: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        }),
+        prisma.promotion.findMany({
+          where: { status: 'DRAFT' },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            type: true,
+            createdAt: true,
+            createdBy: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        }),
+      ]);
+
+    return {
+      events: events.map((e) => ({
+        ...e,
+        type: 'event',
+        createdByName: e.user
+          ? `${e.user.firstName || ''} ${e.user.lastName || ''}`.trim() || e.user.username
+          : 'Unknown',
+      })),
+      competitions: competitions.map((c) => ({
+        ...c,
+        type: 'competition',
+        eventName: c.event?.name,
+        createdByName: c.organizer
+          ? `${c.organizer.firstName || ''} ${c.organizer.lastName || ''}`.trim() ||
+            c.organizer.username
+          : 'Unknown',
+      })),
+      services: services.map((s) => ({
+        ...s,
+        type: 'service',
+        createdByName: s.organizer
+          ? `${s.organizer.firstName || ''} ${s.organizer.lastName || ''}`.trim() ||
+            s.organizer.username
+          : 'Unknown',
+      })),
+      organizers: organizers.map((o) => ({
+        ...o,
+        type: 'organizer',
+        createdByName: o.createdBy
+          ? `${o.createdBy.firstName || ''} ${o.createdBy.lastName || ''}`.trim() ||
+            o.createdBy.username
+          : 'Unknown',
+      })),
+      specialSeries: specialSeries.map((ss) => ({
+        ...ss,
+        type: 'specialSeries',
+        createdByName: ss.createdBy
+          ? `${ss.createdBy.firstName || ''} ${ss.createdBy.lastName || ''}`.trim() ||
+            ss.createdBy.username
+          : 'Unknown',
+      })),
+      posts: posts.map((p) => ({
+        ...p,
+        type: 'post',
+        createdByName: p.author
+          ? `${p.author.firstName || ''} ${p.author.lastName || ''}`.trim() || p.author.username
+          : 'Unknown',
+      })),
+      promotions: promotions.map((pr) => ({
+        ...pr,
+        type: 'promotion',
+        createdByName: pr.createdBy
+          ? `${pr.createdBy.firstName || ''} ${pr.createdBy.lastName || ''}`.trim() ||
+            pr.createdBy.username
+          : 'Unknown',
+      })),
+    };
+  }
+
+  /**
    * Obtener estadísticas de un usuario específico
    */
   async getUserStats(userId: string): Promise<UserStats> {

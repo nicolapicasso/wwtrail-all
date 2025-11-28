@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { EditionController } from '../controllers/edition.controller';
+import { UserController } from '../controllers/user.controller';
+import { UserEditionController } from '../controllers/userEdition.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import {
@@ -11,6 +13,7 @@ import {
   editionByYearSchema,
   createBulkEditionsSchema,
 } from '../schemas/edition.schema';
+import { searchEditionsSchema } from '../schemas/userEdition.schema';
 import { editionRatingsRouter } from './editionRating.routes';
 import { editionPodiumsRouter, editionChronicleRouter } from './editionPodium.routes';
 import { editionPhotosRouter } from './editionPhoto.routes';
@@ -21,6 +24,10 @@ console.log('✅ Edition routes file loaded!');
 
 // Ruta raíz para listar todas las ediciones
 router.get('/', EditionController.getAll);
+
+// Búsqueda de ediciones (para selector de participaciones)
+// GET /api/v2/editions/search?search=utmb&page=1&limit=20
+router.get('/search', validate(searchEditionsSchema), UserEditionController.searchEditions);
 
 /**
  * RUTAS ANIDADAS BAJO COMPETICIONES
@@ -133,6 +140,12 @@ router.use('/:editionId/photos', editionPhotosRouter);
 // GET  /api/v2/editions/:editionId/weather
 // POST /api/v2/editions/:editionId/weather/fetch
 router.use('/:editionId/weather', editionWeatherRouter);
+
+// ===================================
+// RUTAS ANIDADAS - PARTICIPANTS
+// ===================================
+// GET /api/v2/editions/:editionId/participants
+router.get('/:editionId/participants', UserController.getEditionParticipants);
 
 // GET /api/v2/editions/:id - Por ID
 router.get(
