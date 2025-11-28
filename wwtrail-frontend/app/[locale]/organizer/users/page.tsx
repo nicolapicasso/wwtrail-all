@@ -351,7 +351,7 @@ export default function AdminUsersPage() {
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
-          ) : users.length === 0 ? (
+          ) : (users || []).length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
               <p className="text-gray-500">No se encontraron usuarios</p>
@@ -371,7 +371,7 @@ export default function AdminUsersPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user) => (
+                    {(users || []).map((user) => (
                       <tr key={user.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
