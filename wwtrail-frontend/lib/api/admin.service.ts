@@ -1,6 +1,7 @@
 // lib/api/admin.service.ts
 
 import { apiClientV1 } from './client';
+import apiClientV2 from './client-v2';
 
 export interface AdminStats {
   totalUsers: number;
@@ -104,10 +105,59 @@ export interface CompetitionsPagination {
   hasPrev: boolean;
 }
 
+/**
+ * Interface para contadores de contenido pendiente
+ */
+export interface PendingContentCounts {
+  competitions: number;
+  editions: number;
+  events: number;
+  services: number;
+  magazines: number;
+  total: number;
+}
+
+/**
+ * Interface para item de contenido pendiente
+ */
+export interface PendingContentItem {
+  id: string;
+  type: 'competition' | 'edition' | 'event' | 'service' | 'magazine';
+  name: string;
+  status: string;
+  createdAt: string;
+  createdBy?: {
+    id: string;
+    username: string;
+    email: string;
+  };
+}
+
 class AdminService {
   // Dashboard stats
   async getStats(): Promise<AdminStats> {
     const { data } = await apiClientV1.get('/admin/stats');
+    return data.data;
+  }
+
+  // ============================================
+  // PENDING CONTENT (V2 API)
+  // ============================================
+
+  /**
+   * Obtener contadores de contenido pendiente
+   * Para mostrar badge en el menú admin
+   */
+  async getPendingContentCounts(): Promise<PendingContentCounts> {
+    const { data } = await apiClientV2.get('/admin/pending/count');
+    return data.data;
+  }
+
+  /**
+   * Obtener listado de todo el contenido pendiente
+   */
+  async getPendingContent(): Promise<PendingContentItem[]> {
+    const { data } = await apiClientV2.get('/admin/pending');
     return data.data;
   }
 
