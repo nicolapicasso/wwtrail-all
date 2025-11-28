@@ -308,7 +308,7 @@ export default function AdminUsersPage() {
             <div className="text-center">
               <Crown className="w-8 h-8 mx-auto mb-2 text-red-600" />
               <p className="text-2xl font-bold">
-                {users.filter((u) => u.role === 'ADMIN').length}
+                {(users || []).filter((u) => u.role === 'ADMIN').length}
               </p>
               <p className="text-sm text-gray-500">Administradores</p>
             </div>
@@ -319,7 +319,7 @@ export default function AdminUsersPage() {
             <div className="text-center">
               <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-blue-600" />
               <p className="text-2xl font-bold">
-                {users.filter((u) => u.role === 'ORGANIZER').length}
+                {(users || []).filter((u) => u.role === 'ORGANIZER').length}
               </p>
               <p className="text-sm text-gray-500">Organizadores</p>
             </div>
@@ -330,7 +330,7 @@ export default function AdminUsersPage() {
             <div className="text-center">
               <UserCheck className="w-8 h-8 mx-auto mb-2 text-green-600" />
               <p className="text-2xl font-bold">
-                {users.filter((u) => u.role === 'ATHLETE').length}
+                {(users || []).filter((u) => u.role === 'ATHLETE').length}
               </p>
               <p className="text-sm text-gray-500">Atletas</p>
             </div>
