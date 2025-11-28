@@ -1,15 +1,53 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserStatsCards } from '@/components/UserStatsCards';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Calendar, MapPin, Edit, Lock } from 'lucide-react';
+import {
+  User,
+  Mail,
+  Calendar,
+  MapPin,
+  Edit,
+  Lock,
+  Trophy,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Medal,
+  ArrowRight,
+  Globe,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { userService, UserParticipation } from '@/lib/api/user.service';
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
+
+  const [participations, setParticipations] = useState<UserParticipation[]>([]);
+  const [loadingParticipations, setLoadingParticipations] = useState(true);
+
+  useEffect(() => {
+    const fetchParticipations = async () => {
+      try {
+        const data = await userService.getOwnParticipations();
+        setParticipations(data);
+      } catch (err) {
+        console.error('Error fetching participations:', err);
+      } finally {
+        setLoadingParticipations(false);
+      }
+    };
+
+    if (user) {
+      fetchParticipations();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -71,18 +109,26 @@ export default function ProfilePage() {
                   </h2>
                   <p className="text-muted-foreground">@{user.username}</p>
                   <div className="mt-4 w-full space-y-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
-                      onClick={() => router.push('/profile/edit')}
+                      onClick={() => router.push(`/${locale}/profile/edit`)}
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Editar Perfil
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
-                      onClick={() => router.push('/profile/change-password')}
+                      onClick={() => router.push(`/${locale}/profile/participations`)}
+                    >
+                      <Trophy className="w-4 h-4 mr-2" />
+                      Mis Participaciones
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => router.push(`/${locale}/profile/change-password`)}
                     >
                       <Lock className="w-4 h-4 mr-2" />
                       Cambiar Contraseña
@@ -109,6 +155,30 @@ export default function ProfilePage() {
                       {user.role === 'VIEWER' && '👀 Visitante'}
                     </span>
                   </div>
+                </div>
+
+                {/* Profile Visibility */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Visibilidad</span>
+                  <span
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                      user.isPublic
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {user.isPublic ? (
+                      <>
+                        <Globe className="w-3 h-3" />
+                        Público
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3 h-3" />
+                        Privado
+                      </>
+                    )}
+                  </span>
                 </div>
 
                 {/* Member Since */}
@@ -190,6 +260,100 @@ export default function ProfilePage() {
 
             {/* Statistics */}
             <UserStatsCards />
+
+            {/* Recent Participations */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5" />
+                  Participaciones recientes
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(`/${locale}/profile/participations`)}
+                >
+                  Ver todas
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {loadingParticipations ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : participations.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-muted-foreground mb-3">
+                      No tienes participaciones registradas
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/${locale}/profile/participations`)}
+                    >
+                      Añadir participación
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {participations.slice(0, 5).map((participation) => (
+                      <div
+                        key={participation.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`p-2 rounded-full ${
+                              participation.status === 'COMPLETED'
+                                ? 'bg-green-100'
+                                : 'bg-orange-100'
+                            }`}
+                          >
+                            {participation.status === 'COMPLETED' ? (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-orange-600" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {participation.edition.competition.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {participation.edition.year} •{' '}
+                              {participation.edition.competition.event.country}
+                            </p>
+                          </div>
+                        </div>
+                        {participation.status === 'COMPLETED' && (
+                          <div className="flex items-center gap-3 text-sm">
+                            {participation.finishTime && (
+                              <span className="flex items-center gap-1 text-gray-600">
+                                <Clock className="w-3 h-3" />
+                                {participation.finishTime}
+                              </span>
+                            )}
+                            {participation.position && (
+                              <span className="flex items-center gap-1 text-yellow-600 font-medium">
+                                <Medal className="w-3 h-3" />
+                                #{participation.position}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {participations.length > 5 && (
+                      <p className="text-center text-sm text-muted-foreground pt-2">
+                        Y {participations.length - 5} más...
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

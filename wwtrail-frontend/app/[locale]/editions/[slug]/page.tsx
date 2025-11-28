@@ -10,6 +10,7 @@ import EditionDetailTabs from '@/components/EditionDetailTabs';
 import EventGallery from '@/components/EventGallery';
 import EventMap from '@/components/EventMap';
 import { RelatedArticles } from '@/components/RelatedArticles';
+import { EditionParticipants } from '@/components/EditionParticipants';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Event } from '@/types/api';
@@ -204,6 +205,13 @@ export default async function EditionDetailPage({
                 />
               </div>
             )}
+
+            {/* Participants */}
+            <EditionParticipants
+              editionId={edition.id}
+              editionYear={edition.year}
+              competitionName={competition.name}
+            />
           </div>
 
           {/* Sidebar */}

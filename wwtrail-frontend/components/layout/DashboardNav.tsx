@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -25,7 +25,9 @@ import {
   Settings,
   Globe,
   Layout,
+  AlertCircle,
 } from 'lucide-react';
+import { adminService, PendingContentCounts } from '@/lib/api/admin.service';
 
 interface NavItem {
   label: string;
@@ -33,6 +35,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
   badge?: string;
+  dynamicBadge?: boolean; // For pending content count
   children?: NavItem[];
 }
 
@@ -41,6 +44,13 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    label: 'Contenido Pendiente',
+    href: '/organizer/pending',
+    icon: AlertCircle,
+    adminOnly: true,
+    dynamicBadge: true,
   },
   {
     label: 'Configuración Home',
@@ -163,9 +173,8 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Usuarios',
-    href: '/users',
+    href: '/organizer/users',
     icon: Users,
-    badge: 'Pronto',
     adminOnly: true,
   },
   {
@@ -181,6 +190,26 @@ export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO']);
+  const [pendingCounts, setPendingCounts] = useState<PendingContentCounts | null>(null);
+
+  // Fetch pending content counts for admins
+  useEffect(() => {
+    const fetchPendingCounts = async () => {
+      if (isAdmin) {
+        try {
+          const counts = await adminService.getPendingContentCounts();
+          setPendingCounts(counts);
+        } catch (err) {
+          console.error('Error fetching pending counts:', err);
+        }
+      }
+    };
+
+    fetchPendingCounts();
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchPendingCounts, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [isAdmin]);
 
   const filteredItems = navItems.filter((item) => {
     if (item.adminOnly) {
@@ -238,6 +267,31 @@ export function DashboardNav() {
                   </span>
                 )}
               </div>
+            ) : item.dynamicBadge ? (
+              <Link
+                href={item.href!}
+                className={`
+                  flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg
+                  transition-colors
+                  ${
+                    active
+                      ? 'bg-red-50 text-red-700'
+                      : pendingCounts && pendingCounts.total > 0
+                      ? 'text-red-600 hover:bg-red-50 hover:text-red-700'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-5 h-5 ${pendingCounts && pendingCounts.total > 0 ? 'text-red-500' : ''}`} />
+                  <span>{item.label}</span>
+                </div>
+                {pendingCounts && pendingCounts.total > 0 && (
+                  <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">
+                    {pendingCounts.total > 99 ? '99+' : pendingCounts.total}
+                  </span>
+                )}
+              </Link>
             ) : hasChildren ? (
               <button
                 onClick={() => toggleExpand(item.label)}
