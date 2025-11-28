@@ -1,0 +1,127 @@
+[
+  {
+    "id": "f009cfb9-66d5-91ba-6c9a-8d5a643e2dae",
+    "slug": "badwater-qualifyier",
+    "name": "BadWater Qualifyier"
+  },
+  {
+    "id": "6b857e12-78bb-b632-91da-2ad117621338",
+    "slug": "golden-trail-world-series",
+    "name": "Golden Trail World Series"
+  },
+  {
+    "id": "cd511a50-75fb-ac18-eeb8-85b2d3ca2a9c",
+    "slug": "gran-canaria-world-majors",
+    "name": "Gran Canaria World Majors"
+  },
+  {
+    "id": "1747fc9f-44e3-5841-68d3-e2079dfe777b",
+    "slug": "hardrock-qualifying",
+    "name": "Hardrock Qualifying"
+  },
+  {
+    "id": "d3f6fa46-a7df-1819-1db3-d77cc3f97c74",
+    "slug": "itra-national-ligue",
+    "name": "Itra national Ligue"
+  },
+  {
+    "id": "8388b267-9f90-0134-72a3-986841c55315",
+    "slug": "pax10",
+    "name": "PAX10"
+  },
+  {
+    "id": "74dd8585-fae3-f86e-38d0-e53d4a7143c5",
+    "slug": "pax100",
+    "name": "PAX100"
+  },
+  {
+    "id": "594d6016-1823-04c1-eca4-bb27c033f3dc",
+    "slug": "pax15",
+    "name": "PAX15"
+  },
+  {
+    "id": "7050dc42-b023-9eaf-94e4-442d16e86e75",
+    "slug": "pax2",
+    "name": "PAX2"
+  },
+  {
+    "id": "60c6013e-c43e-4747-ad66-f4b09faafd75",
+    "slug": "pax50",
+    "name": "PAX50"
+  },
+  {
+    "id": "ab53a898-e057-3504-ba29-a18100994e8b",
+    "slug": "tor-experience",
+    "name": "TOR eXperience"
+  },
+  {
+    "id": "253c75f5-e6f9-4048-f9a5-3ef1372da98b",
+    "slug": "utmb-index",
+    "name": "UTMB Index"
+  },
+  {
+    "id": "0f914e79-1f5b-febe-5d60-354e907440f7",
+    "slug": "utmb-index-100k",
+    "name": "UTMB Index 100K"
+  },
+  {
+    "id": "ea3bd106-9fcd-486a-60d3-0a1f572da88f",
+    "slug": "utmb-index-100m",
+    "name": "UTMB Index 100M"
+  },
+  {
+    "id": "f2e51cc2-ce83-2a02-3423-d2e9ffdf5f82",
+    "slug": "utmb-index-20k",
+    "name": "UTMB Index 20K"
+  },
+  {
+    "id": "c6fed98e-94ad-fa76-ff5f-7df9f8da677a",
+    "slug": "utmb-index-50k",
+    "name": "UTMB Index 50K"
+  },
+  {
+    "id": "79b8415c-28c3-856a-ca41-f2dcbbeeac51",
+    "slug": "utmb-world-series-events",
+    "name": "UTMB World Series Events"
+  },
+  {
+    "id": "e3fb2a9a-6db3-71d9-4cdc-1ed6b97cdec0",
+    "slug": "utmb-world-series-majors",
+    "name": "Utmb World Series Majors"
+  },
+  {
+    "id": "e4054cec-2a1b-8a1d-7255-57972a4bbec7",
+    "slug": "utmb-wse-100k",
+    "name": "UTMB WSE 100K"
+  },
+  {
+    "id": "198062c5-a6a0-7d20-a73d-901131dc2971",
+    "slug": "utmb-wse-100m",
+    "name": "UTMB WSE 100M"
+  },
+  {
+    "id": "175cc893-bb93-90c7-e049-62dcc8028218",
+    "slug": "utmb-wse-20k",
+    "name": "UTMB WSE 20K"
+  },
+  {
+    "id": "3fe8d9b6-7371-ac0a-e59a-ea14d1f9a204",
+    "slug": "utmb-wse-50k",
+    "name": "UTMB WSE 50K"
+  },
+  {
+    "id": "51a53962-16bd-cb11-2d0e-ee2b9042cedf",
+    "slug": "utmb-wsm-100k",
+    "name": "UTMB WSM 100K"
+  },
+  {
+    "id": "2b22b8f6-58d5-038b-4bbb-3ffe51968edc",
+    "slug": "western-states-qualifying-race",
+    "name": "Western States qualifying race"
+  },
+  {
+    "id": "b1e61c54-fcbf-113f-c7a7-a15488648589",
+    "slug": "xterra-world-series",
+    "name": "xterra world series"
+  }
+]

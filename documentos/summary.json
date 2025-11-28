@@ -1,0 +1,26 @@
+{
+  "exportDate": "2025-11-26T11:17:04.343817",
+  "source": "WordPress WWTRAIL",
+  "version": "v4 - con correcciones",
+  "counts": {
+    "organizers": 45,
+    "series": 25,
+    "events": 359,
+    "competitions": 464
+  },
+  "languageStats": {
+    "ES": 319,
+    "IT": 53,
+    "EN": 83,
+    "FR": 7,
+    "DE": 2
+  },
+  "notes": [
+    "ITRA points mapeados de IDs a valores 0-6",
+    "Terreno mapeado a valor único de lista predefinida",
+    "Instagram URLs construidas desde campo Twitter",
+    "Descripciones en texto plano (HTML eliminado)",
+    "Idioma detectado automáticamente",
+    "Códigos de país ISO en lugar de nombres"
+  ]
+}
