@@ -141,10 +141,91 @@ export interface PendingContentItem {
   };
 }
 
+// Comprehensive stats interface
+export interface ComprehensiveStats {
+  overview: {
+    totalUsers: number;
+    totalEvents: number;
+    totalCompetitions: number;
+    totalEditions: number;
+    totalSpecialSeries: number;
+    totalServices: number;
+    totalReviews: number;
+    totalOrganizers: number;
+    totalCategories: number;
+    totalParticipants: number;
+    totalFavorites: number;
+  };
+  users: {
+    total: number;
+    active: number;
+    inactive: number;
+    insiders: number;
+    publicProfiles: number;
+    privateProfiles: number;
+    newThisMonth: number;
+    newThisWeek: number;
+    byRole: Array<{ role: string; count: number }>;
+  };
+  events: {
+    total: number;
+    newThisMonth: number;
+    byStatus: Array<{ status: string; count: number }>;
+    byCountry: Array<{ country: string; count: number }>;
+  };
+  competitions: {
+    total: number;
+    newThisMonth: number;
+    byStatus: Array<{ status: string; count: number }>;
+    byType: Array<{ type: string; count: number }>;
+  };
+  editions: {
+    total: number;
+    upcoming: number;
+    past: number;
+    newThisMonth: number;
+    byStatus: Array<{ status: string; count: number }>;
+  };
+  specialSeries: {
+    total: number;
+    byStatus: Array<{ status: string; count: number }>;
+  };
+  services: {
+    total: number;
+    featured: number;
+    byStatus: Array<{ status: string; count: number }>;
+    byCategory: Array<{ categoryId: string; categoryName: string; count: number }>;
+  };
+  reviews: {
+    total: number;
+    thisMonth: number;
+    thisWeek: number;
+    averageRating: number;
+  };
+  organizers: {
+    total: number;
+    verified: number;
+    unverified: number;
+  };
+  recentActivity: {
+    usersThisWeek: number;
+    eventsThisMonth: number;
+    competitionsThisMonth: number;
+    editionsThisMonth: number;
+    reviewsThisWeek: number;
+  };
+}
+
 class AdminService {
   // Dashboard stats
   async getStats(): Promise<AdminStats> {
     const { data } = await apiClientV1.get('/admin/stats');
+    return data.data;
+  }
+
+  // Comprehensive stats
+  async getComprehensiveStats(): Promise<ComprehensiveStats> {
+    const { data } = await apiClientV1.get('/admin/stats/comprehensive');
     return data.data;
   }
 
