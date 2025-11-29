@@ -32,13 +32,20 @@ export interface User {
   fullName: string;
   role: 'ADMIN' | 'ORGANIZER' | 'ATHLETE' | 'VIEWER';
   isActive: boolean;
+  isInsider?: boolean;
+  avatar?: string;
+  country?: string;
+  gender?: string;
   createdAt: string;
   updatedAt: string;
-  stats: {
+  stats?: {
     competitions: number;
     reviews: number;
   };
 }
+
+// Alias for backwards compatibility
+export type AdminUser = User;
 
 export interface UsersPagination {
   currentPage: number;
@@ -201,6 +208,88 @@ class AdminService {
   async deleteUser(userId: string) {
     const { data } = await apiClientV1.delete(`/admin/users/${userId}`);
     return data;
+  }
+
+  /**
+   * Create a new user (admin only)
+   */
+  async createUser(userData: {
+    email: string;
+    username: string;
+    firstName: string;
+    lastName?: string;
+    role: string;
+    country?: string;
+    gender?: string;
+  }): Promise<{ user: User; generatedPassword: string }> {
+    const { data } = await apiClientV1.post('/admin/users', userData);
+    return {
+      user: data.data,
+      generatedPassword: data.generatedPassword,
+    };
+  }
+
+  /**
+   * Toggle insider status for a user
+   */
+  async toggleInsiderStatus(userId: string): Promise<User> {
+    const { data } = await apiClientV1.patch(`/admin/users/${userId}/toggle-insider`);
+    return data.data;
+  }
+
+  // ============================================
+  // INSIDERS MANAGEMENT
+  // ============================================
+
+  /**
+   * Get all insiders with stats
+   */
+  async getInsiders(): Promise<{
+    insiders: Array<User & { isInsider: boolean }>;
+    stats: {
+      total: number;
+      byCountry: Record<string, number>;
+      byGender: Record<string, number>;
+    };
+  }> {
+    const { data } = await apiClientV1.get('/admin/insiders');
+    return {
+      insiders: data.data,
+      stats: data.stats,
+    };
+  }
+
+  /**
+   * Get insider config (badge and intro texts)
+   */
+  async getInsiderConfig(): Promise<{
+    id: string;
+    badgeUrl?: string;
+    introTextES?: string;
+    introTextEN?: string;
+    introTextIT?: string;
+    introTextCA?: string;
+    introTextFR?: string;
+    introTextDE?: string;
+  }> {
+    const { data } = await apiClientV1.get('/admin/insiders/config');
+    return data.data;
+  }
+
+  /**
+   * Update insider config
+   */
+  async updateInsiderConfig(configData: {
+    badgeUrl?: string;
+    introTextES?: string;
+    introTextEN?: string;
+    introTextIT?: string;
+    introTextCA?: string;
+    introTextFR?: string;
+    introTextDE?: string;
+  }): Promise<any> {
+    const { data } = await apiClientV1.put('/admin/insiders/config', configData);
+    return data.data;
   }
 
   // ============================================
