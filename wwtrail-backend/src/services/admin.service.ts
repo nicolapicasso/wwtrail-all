@@ -325,7 +325,7 @@ class AdminService {
         by: ['categoryId'],
         _count: { id: true },
       }),
-      prisma.service.count({ where: { isFeatured: true } }),
+      prisma.service.count({ where: { featured: true } }),
 
       // === REVIEWS ===
       prisma.review.count(),
@@ -337,7 +337,7 @@ class AdminService {
 
       // === ORGANIZERS ===
       prisma.organizer.count(),
-      prisma.organizer.count({ where: { verified: true } }),
+      prisma.organizer.count({ where: { status: 'PUBLISHED' } }),
 
       // === CATEGORIES ===
       prisma.category.count(),
