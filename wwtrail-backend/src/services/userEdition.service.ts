@@ -235,30 +235,39 @@ class UserEditionService {
     const { search, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.EditionWhereInput = {
-      competition: {
-        status: 'PUBLISHED',
-        event: {
-          status: 'PUBLISHED',
-        },
+    const baseFilter = {
+      status: 'PUBLISHED' as const,
+      event: {
+        status: 'PUBLISHED' as const,
       },
     };
 
+    let where: Prisma.EditionWhereInput = {
+      competition: baseFilter,
+    };
+
     if (search) {
-      where.OR = [
-        {
-          competition: {
-            name: { contains: search, mode: 'insensitive' },
+      where = {
+        AND: [
+          { competition: baseFilter },
+          {
+            OR: [
+              {
+                competition: {
+                  name: { contains: search, mode: 'insensitive' },
+                },
+              },
+              {
+                competition: {
+                  event: {
+                    name: { contains: search, mode: 'insensitive' },
+                  },
+                },
+              },
+            ],
           },
-        },
-        {
-          competition: {
-            event: {
-              name: { contains: search, mode: 'insensitive' },
-            },
-          },
-        },
-      ];
+        ],
+      };
     }
 
     const [editions, total] = await Promise.all([
