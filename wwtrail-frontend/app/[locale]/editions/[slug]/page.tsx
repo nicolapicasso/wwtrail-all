@@ -285,7 +285,7 @@ export default async function EditionDetailPage({
             {(competition.terrainType || competition.specialSeries || competition.itraPoints !== undefined || competition.utmbIndex) && (
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Award className="h-5 w-5 text-purple-600" />
+                  <Award className="h-5 w-5 text-black" />
                   Clasificación
                 </h3>
                 <div className="space-y-4 text-sm">
@@ -305,14 +305,14 @@ export default async function EditionDetailPage({
                   {/* Special Series */}
                   {competition.specialSeries && (
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-                        <Sparkles className="h-5 w-5 text-purple-600" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                        <Sparkles className="h-5 w-5 text-black" />
                       </div>
                       <div className="flex-1">
                         <p className="text-xs text-gray-500">Serie Especial</p>
                         <Link
                           href={`/special-series/${competition.specialSeries.slug}`}
-                          className="font-semibold hover:text-purple-600 transition-colors"
+                          className="font-semibold hover:text-gray-600 transition-colors"
                         >
                           {competition.specialSeries.name}
                         </Link>

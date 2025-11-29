@@ -121,8 +121,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Logo */}
         <div className="flex h-16 items-center border-b border-gray-200 px-6">
           <Link href="/admin" className="flex items-center">
-            <span className="text-2xl font-bold text-purple-600">WWTRAIL</span>
-            <span className="ml-2 rounded bg-purple-100 px-2 py-1 text-xs font-semibold text-purple-600">
+            <span className="text-2xl font-bold text-black">WWTRAIL</span>
+            <span className="ml-2 rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-black">
               ADMIN
             </span>
           </Link>
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* User info */}
         <div className="border-b border-gray-200 p-4">
           <div className="flex items-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-600 font-semibold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-black font-semibold">
               {getUserInitial()}
             </div>
             <div className="ml-3">
@@ -156,12 +156,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors
                     ${
                       active
-                        ? 'bg-purple-50 text-purple-600'
+                        ? 'bg-gray-50 text-black'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
                 >
-                  <Icon className={`mr-3 h-5 w-5 ${active ? 'text-purple-600' : 'text-gray-400'}`} />
+                  <Icon className={`mr-3 h-5 w-5 ${active ? 'text-black' : 'text-gray-400'}`} />
                   {item.title}
                 </Link>
 
@@ -180,12 +180,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors
                             ${
                               subActive
-                                ? 'bg-purple-50 text-purple-600'
+                                ? 'bg-gray-50 text-black'
                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             }
                           `}
                         >
-                          <SubIcon className={`mr-3 h-4 w-4 ${subActive ? 'text-purple-600' : 'text-gray-400'}`} />
+                          <SubIcon className={`mr-3 h-4 w-4 ${subActive ? 'text-black' : 'text-gray-400'}`} />
                           {subItem.title}
                         </Link>
                       );

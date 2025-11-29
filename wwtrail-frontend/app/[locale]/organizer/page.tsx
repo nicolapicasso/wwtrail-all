@@ -63,8 +63,8 @@ export default function OrganizerDashboard() {
       description: 'Crear una edición de una competición',
       icon: Calendar,
       href: '/organizer/editions/new',
-      color: 'bg-purple-500',
-      hoverColor: 'hover:bg-purple-600',
+      color: 'bg-gray-800',
+      hoverColor: 'hover:bg-black',
       disabled: true,
       note: 'Requiere seleccionar una competición primero',
     },
@@ -97,9 +97,9 @@ export default function OrganizerDashboard() {
       icon: Calendar,
       href: '/organizer/editions',
       count: stats.editions,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
+      color: 'text-black',
+      bgColor: 'bg-gray-50',
+      borderColor: 'border-gray-200',
     },
     {
       title: 'Artículos',
@@ -170,7 +170,7 @@ export default function OrganizerDashboard() {
                 <p className="text-3xl font-bold text-gray-900">{stats.editions}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-purple-600" />
+                <Calendar className="w-6 h-6 text-black" />
               </div>
             </div>
           </div>
