@@ -114,6 +114,18 @@ router.patch(
 );
 
 /**
+ * @route   PATCH /api/v1/admin/users/:id
+ * @desc    Actualizar datos de un usuario
+ * @access  Admin
+ */
+router.patch(
+  '/admin/users/:id',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.updateUser(req, res, next)
+);
+
+/**
  * @route   DELETE /api/v1/admin/users/:id
  * @desc    Eliminar un usuario
  * @access  Admin

@@ -85,12 +85,14 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [insiderFilter, setInsiderFilter] = useState(false);
 
   // Dialogs
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<string>('');
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -107,6 +109,16 @@ export default function AdminUsersPage() {
   const [createdUserPassword, setCreatedUserPassword] = useState<string | null>(null);
   const [passwordCopied, setPasswordCopied] = useState(false);
 
+  // Edit user form
+  const [editUserForm, setEditUserForm] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    country: '',
+    gender: '',
+  });
+
   const fetchUsers = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -118,6 +130,7 @@ export default function AdminUsersPage() {
       if (searchQuery) params.search = searchQuery;
       if (roleFilter) params.role = roleFilter;
       if (statusFilter) params.isActive = statusFilter === 'active';
+      if (insiderFilter) params.isInsider = true;
 
       const { users: usersData, pagination: paginationData } = await adminService.getAllUsers(params);
       setUsers(usersData);
@@ -132,7 +145,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, roleFilter, statusFilter]);
+  }, [searchQuery, roleFilter, statusFilter, insiderFilter]);
 
   useEffect(() => {
     fetchUsers();
@@ -164,6 +177,48 @@ export default function AdminUsersPage() {
   const handleOpenDeleteDialog = (user: AdminUser) => {
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (user: AdminUser) => {
+    setSelectedUser(user);
+    setEditUserForm({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      username: user.username || '',
+      email: user.email || '',
+      country: user.country || '',
+      gender: user.gender || '',
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setIsEditDialogOpen(false);
+    setSelectedUser(null);
+    setEditUserForm({
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      country: '',
+      gender: '',
+    });
+  };
+
+  const handleEditUser = async () => {
+    if (!selectedUser) return;
+
+    setActionLoading(true);
+    try {
+      await adminService.updateUser(selectedUser.id, editUserForm);
+      await fetchUsers(pagination.currentPage);
+      handleCloseEditDialog();
+    } catch (err: any) {
+      console.error('Error updating user:', err);
+      setError(err.response?.data?.message || 'Error al actualizar el usuario');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleUpdateRole = async () => {
@@ -365,6 +420,16 @@ export default function AdminUsersPage() {
                 <option value="inactive">Inactivos</option>
               </select>
             </div>
+            <label className="flex items-center gap-2 px-3 py-2 border border-input bg-background rounded-md cursor-pointer hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={insiderFilter}
+                onChange={(e) => setInsiderFilter(e.target.checked)}
+                className="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
+              />
+              <Star className={`w-4 h-4 ${insiderFilter ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
+              <span className="text-sm">Solo Insiders</span>
+            </label>
             <Button type="submit" variant="outline">
               <Filter className="w-4 h-4 mr-2" />
               Filtrar
@@ -518,6 +583,10 @@ export default function AdminUsersPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                               <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleOpenEditDialog(user)}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar usuario
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleOpenRoleDialog(user)}>
                                 <Shield className="w-4 h-4 mr-2" />
                                 Cambiar rol
@@ -798,6 +867,102 @@ export default function AdminUsersPage() {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => !open && handleCloseEditDialog()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar usuario</DialogTitle>
+            <DialogDescription>
+              Modificando los datos de <strong>{selectedUser?.fullName || selectedUser?.username}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="editFirstName">Nombre</Label>
+                <Input
+                  id="editFirstName"
+                  value={editUserForm.firstName}
+                  onChange={(e) => setEditUserForm({ ...editUserForm, firstName: e.target.value })}
+                  placeholder="Juan"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editLastName">Apellidos</Label>
+                <Input
+                  id="editLastName"
+                  value={editUserForm.lastName}
+                  onChange={(e) => setEditUserForm({ ...editUserForm, lastName: e.target.value })}
+                  placeholder="García"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editEmail">Email</Label>
+              <Input
+                id="editEmail"
+                type="email"
+                value={editUserForm.email}
+                onChange={(e) => setEditUserForm({ ...editUserForm, email: e.target.value })}
+                placeholder="usuario@ejemplo.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editUsername">Nombre de usuario</Label>
+              <Input
+                id="editUsername"
+                value={editUserForm.username}
+                onChange={(e) => setEditUserForm({ ...editUserForm, username: e.target.value })}
+                placeholder="juangarcia"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="editCountry">País</Label>
+                <select
+                  id="editCountry"
+                  value={editUserForm.country}
+                  onChange={(e) => setEditUserForm({ ...editUserForm, country: e.target.value })}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Seleccionar...</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editGender">Género</Label>
+                <select
+                  id="editGender"
+                  value={editUserForm.gender}
+                  onChange={(e) => setEditUserForm({ ...editUserForm, gender: e.target.value })}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="MALE">Hombre</option>
+                  <option value="FEMALE">Mujer</option>
+                  <option value="NON_BINARY">No binario</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseEditDialog} disabled={actionLoading}>
+              Cancelar
+            </Button>
+            <Button onClick={handleEditUser} disabled={actionLoading}>
+              {actionLoading ? 'Guardando...' : 'Guardar cambios'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

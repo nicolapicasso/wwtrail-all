@@ -186,6 +186,34 @@ class AdminController {
   }
 
   /**
+   * @route   PATCH /api/v1/admin/users/:id
+   * @desc    Actualizar datos de un usuario
+   * @access  Admin
+   */
+  async updateUser(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const user = await AdminService.updateUser(id, updateData);
+
+      res.json({
+        success: true,
+        data: user,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  /**
    * @route   DELETE /api/v1/admin/users/:id
    * @desc    Eliminar un usuario
    * @access  Admin

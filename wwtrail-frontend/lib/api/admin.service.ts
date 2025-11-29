@@ -211,6 +211,21 @@ class AdminService {
   }
 
   /**
+   * Update user data (admin only)
+   */
+  async updateUser(userId: string, userData: {
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    email?: string;
+    country?: string;
+    gender?: string;
+  }): Promise<User> {
+    const { data } = await apiClientV1.patch(`/admin/users/${userId}`, userData);
+    return data.data;
+  }
+
+  /**
    * Create a new user (admin only)
    */
   async createUser(userData: {
