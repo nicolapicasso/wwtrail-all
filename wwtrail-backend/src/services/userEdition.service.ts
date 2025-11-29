@@ -235,38 +235,32 @@ class UserEditionService {
     const { search, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
-    const baseFilter = {
-      status: 'PUBLISHED' as const,
-      event: {
-        status: 'PUBLISHED' as const,
-      },
-    };
-
-    let where: Prisma.EditionWhereInput = {
-      competition: baseFilter,
-    };
+    // Build where clause - simplified structure
+    let where: Prisma.EditionWhereInput;
 
     if (search) {
+      // With search: filter by name in competition or event
       where = {
-        AND: [
-          { competition: baseFilter },
-          {
-            OR: [
-              {
-                competition: {
-                  name: { contains: search, mode: 'insensitive' },
-                },
-              },
-              {
-                competition: {
-                  event: {
-                    name: { contains: search, mode: 'insensitive' },
-                  },
-                },
-              },
-            ],
+        competition: {
+          status: 'PUBLISHED',
+          event: {
+            status: 'PUBLISHED',
           },
-        ],
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { event: { name: { contains: search, mode: 'insensitive' } } },
+          ],
+        },
+      };
+    } else {
+      // Without search: just filter by status
+      where = {
+        competition: {
+          status: 'PUBLISHED',
+          event: {
+            status: 'PUBLISHED',
+          },
+        },
       };
     }
 
