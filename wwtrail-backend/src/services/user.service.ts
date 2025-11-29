@@ -657,12 +657,11 @@ class UserService {
     // Obtener configuración de insiders
     const config = await prisma.insiderConfig.findFirst();
 
-    // Obtener lista de insiders públicos
+    // Obtener lista de insiders (no requiere isPublic, ya que los insiders son corresponsales públicos)
     const insiders = await prisma.user.findMany({
       where: {
         isInsider: true,
         isActive: true,
-        isPublic: true,
       },
       select: {
         id: true,

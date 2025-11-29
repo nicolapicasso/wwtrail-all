@@ -57,6 +57,12 @@ class AdminController {
             : req.query.isActive === 'false'
             ? false
             : undefined,
+        isInsider:
+          req.query.isInsider === 'true'
+            ? true
+            : req.query.isInsider === 'false'
+            ? false
+            : undefined,
         sortBy: (req.query.sortBy as any) || 'createdAt',
         sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'desc',
       };
@@ -416,6 +422,34 @@ class AdminController {
       res.status(200).json({
         success: true,
         message: `User ${updatedUser.isInsider ? 'marked as' : 'removed from'} Insider`,
+        data: updatedUser,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  /**
+   * @route   PATCH /api/v1/admin/users/:id/toggle-public
+   * @desc    Toggle public status for a user
+   * @access  Admin
+   */
+  async togglePublicStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const updatedUser = await AdminService.togglePublicStatus(id);
+
+      res.status(200).json({
+        success: true,
+        message: `User profile ${updatedUser.isPublic ? 'made public' : 'made private'}`,
         data: updatedUser,
       });
     } catch (error) {

@@ -49,6 +49,8 @@ import {
   Star,
   Copy,
   Check,
+  Globe,
+  Lock,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -324,6 +326,19 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleTogglePublic = async (user: AdminUser) => {
+    setActionLoading(true);
+    try {
+      await adminService.togglePublicStatus(user.id);
+      await fetchUsers(pagination.currentPage);
+    } catch (err: any) {
+      console.error('Error toggling public status:', err);
+      setError(err.response?.data?.message || 'Error al cambiar la visibilidad del perfil');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const roleOption = ROLE_OPTIONS.find((r) => r.value === role);
     if (!roleOption) return null;
@@ -594,6 +609,19 @@ export default function AdminUsersPage() {
                               <DropdownMenuItem onClick={() => handleToggleInsider(user)}>
                                 <Star className={`w-4 h-4 mr-2 ${user.isInsider ? 'fill-yellow-400 text-yellow-400' : ''}`} />
                                 {user.isInsider ? 'Quitar Insider' : 'Hacer Insider'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleTogglePublic(user)}>
+                                {user.isPublic ? (
+                                  <>
+                                    <Lock className="w-4 h-4 mr-2" />
+                                    Hacer privado
+                                  </>
+                                ) : (
+                                  <>
+                                    <Globe className="w-4 h-4 mr-2 text-green-600" />
+                                    Hacer público
+                                  </>
+                                )}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
                                 {user.isActive ? (
