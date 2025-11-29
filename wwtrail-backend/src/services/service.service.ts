@@ -271,8 +271,9 @@ export class ServiceService {
         where.categoryId = filters.categoryId;
       }
 
-      if (filters.featured !== undefined) {
-        where.featured = filters.featured;
+      // Parse featured as boolean (query params come as strings)
+      if (filters.featured !== undefined && filters.featured !== null && filters.featured !== '') {
+        where.featured = filters.featured === true || filters.featured === 'true';
       }
 
       if (filters.status) {
