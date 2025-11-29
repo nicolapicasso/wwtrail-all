@@ -165,6 +165,7 @@ app.use('/api/v2/footer', footerRoutes);
 app.use('/api/v2/landings', landingRoutes);
 app.use('/api/v2/users', userRoutes);
 app.use('/api/v2', catalogRoutes);
+app.use('/api/v2', adminRoutes); // Admin routes for V2
 
 // ============================================
 // ERROR HANDLERS
