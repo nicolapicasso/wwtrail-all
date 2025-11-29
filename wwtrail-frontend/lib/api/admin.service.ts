@@ -177,10 +177,10 @@ class AdminService {
     isActive?: boolean;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
-  }): Promise<{ data: User[]; pagination: UsersPagination }> {
+  }): Promise<{ users: User[]; pagination: UsersPagination }> {
     const { data } = await apiClientV1.get('/admin/users', { params });
     return {
-      data: data.data,
+      users: data.data,
       pagination: data.pagination,
     };
   }
