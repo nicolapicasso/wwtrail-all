@@ -3,8 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import {
   Upload,
   Database,
@@ -19,6 +17,7 @@ import {
   FileJson,
   Play,
   Loader2,
+  XCircle,
 } from 'lucide-react';
 import { adminService } from '@/lib/api/admin.service';
 
@@ -319,11 +318,13 @@ export default function ImportPage() {
               />
             </div>
           ) : (
-            <Alert variant="destructive">
-              <AlertCircle className="w-4 h-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>No se pudieron cargar las estadísticas</AlertDescription>
-            </Alert>
+            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <div>
+                <p className="font-medium">Error</p>
+                <p className="text-sm">No se pudieron cargar las estadísticas</p>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
