@@ -28,6 +28,10 @@ router.get('/', validate(getPublicUsersSchema), UserController.getPublicUsers);
 // GET /api/v2/users/profile/:username
 router.get('/profile/:username', validate(usernameSchema), UserController.getPublicProfile);
 
+// Obtener insiders públicos con configuración
+// GET /api/v2/users/insiders
+router.get('/insiders', UserController.getPublicInsiders);
+
 // ============================================
 // RUTAS PROTEGIDAS (Autenticado)
 // ============================================

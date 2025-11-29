@@ -17,6 +17,7 @@ export interface PublicUser {
   bio: string | null;
   gender: 'MALE' | 'FEMALE' | 'NON_BINARY' | null;
   age: number | null;
+  isInsider: boolean;
   participationsCount: number;
   finishesCount: number;
 }
@@ -60,6 +61,7 @@ export interface PublicUserProfile {
   city: string | null;
   gender: 'MALE' | 'FEMALE' | 'NON_BINARY' | null;
   age: number | null;
+  isInsider: boolean;
   instagramUrl: string | null;
   facebookUrl: string | null;
   twitterUrl: string | null;
@@ -199,6 +201,37 @@ export const userService = {
   async getPublicProfile(username: string) {
     const response = await apiClientV2.get(`/users/profile/${username}`);
     return response.data.data as PublicUserProfile;
+  },
+
+  /**
+   * Obtener insiders públicos con configuración
+   */
+  async getPublicInsiders() {
+    const response = await apiClientV2.get('/users/insiders');
+    return response.data.data as {
+      config: {
+        badgeUrl: string | null;
+        introTextES: string | null;
+        introTextEN: string | null;
+        introTextIT: string | null;
+        introTextCA: string | null;
+        introTextFR: string | null;
+        introTextDE: string | null;
+      } | null;
+      insiders: Array<{
+        id: string;
+        username: string;
+        fullName: string;
+        avatar: string | null;
+        country: string | null;
+        city: string | null;
+        bio: string | null;
+      }>;
+      stats: {
+        total: number;
+        byCountry: Record<string, number>;
+      };
+    };
   },
 
   // ============================================

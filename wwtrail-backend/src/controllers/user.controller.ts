@@ -243,6 +243,27 @@ export class UserController {
       next(error);
     }
   }
+
+  /**
+   * Obtener insiders públicos con configuración
+   * GET /api/v2/users/insiders
+   */
+  static async getPublicInsiders(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const result = await userService.getPublicInsiders();
+
+      return res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default UserController;

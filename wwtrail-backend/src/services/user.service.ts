@@ -32,6 +32,7 @@ interface PublicUserSummary {
   bio: string | null;
   gender: Gender | null;
   age: number | null;
+  isInsider: boolean;
   participationsCount: number;
   finishesCount: number;
 }
@@ -48,6 +49,7 @@ interface PublicUserProfile {
   city: string | null;
   gender: Gender | null;
   age: number | null;
+  isInsider: boolean;
   instagramUrl: string | null;
   facebookUrl: string | null;
   twitterUrl: string | null;
@@ -166,6 +168,7 @@ class UserService {
         gender: true,
         birthDate: true,
         isPublic: true,
+        isInsider: true,
         instagramUrl: true,
         facebookUrl: true,
         twitterUrl: true,
@@ -240,6 +243,7 @@ class UserService {
       city: user.city,
       gender: user.gender,
       age: user.birthDate ? this.calculateAge(user.birthDate) : null,
+      isInsider: user.isInsider,
       instagramUrl: user.instagramUrl,
       facebookUrl: user.facebookUrl,
       twitterUrl: user.twitterUrl,
@@ -343,6 +347,7 @@ class UserService {
           bio: true,
           gender: true,
           birthDate: true,
+          isInsider: true,
           _count: {
             select: {
               userEditions: {
@@ -383,6 +388,7 @@ class UserService {
         bio: user.bio,
         gender: user.gender,
         age: user.birthDate ? this.calculateAge(user.birthDate) : null,
+        isInsider: user.isInsider,
         participationsCount: user._count.userEditions,
         finishesCount: user.userEditions.length,
       })),
@@ -638,6 +644,68 @@ class UserService {
     }
 
     return age;
+  }
+
+  /**
+   * Obtener insiders públicos con configuración
+   */
+  async getPublicInsiders() {
+    // Obtener configuración de insiders
+    const config = await prisma.insiderConfig.findFirst();
+
+    // Obtener lista de insiders públicos
+    const insiders = await prisma.user.findMany({
+      where: {
+        isInsider: true,
+        isActive: true,
+        isPublic: true,
+      },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        country: true,
+        city: true,
+        bio: true,
+      },
+      orderBy: { firstName: 'asc' },
+    });
+
+    // Calcular stats por país
+    const byCountry: Record<string, number> = {};
+    insiders.forEach((i) => {
+      const country = i.country || 'unknown';
+      byCountry[country] = (byCountry[country] || 0) + 1;
+    });
+
+    return {
+      config: config
+        ? {
+            badgeUrl: config.badgeUrl,
+            introTextES: config.introTextES,
+            introTextEN: config.introTextEN,
+            introTextIT: config.introTextIT,
+            introTextCA: config.introTextCA,
+            introTextFR: config.introTextFR,
+            introTextDE: config.introTextDE,
+          }
+        : null,
+      insiders: insiders.map((i) => ({
+        id: i.id,
+        username: i.username,
+        fullName: `${i.firstName || ''} ${i.lastName || ''}`.trim() || i.username,
+        avatar: i.avatar,
+        country: i.country,
+        city: i.city,
+        bio: i.bio,
+      })),
+      stats: {
+        total: insiders.length,
+        byCountry,
+      },
+    };
   }
 }
 
