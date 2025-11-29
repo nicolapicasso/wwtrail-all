@@ -176,8 +176,13 @@ export class CompetitionService {
       }
     }
 
+    // Many-to-many: Filter by special series
     if (specialSeriesId) {
-      where.specialSeriesId = specialSeriesId;
+      where.specialSeries = {
+        some: {
+          id: specialSeriesId,
+        },
+      };
     }
 
     const competitions = await prisma.competition.findMany({
@@ -288,6 +293,11 @@ export class CompetitionService {
     const baseSlug = `${event.slug}-${slugify(data.name)}`;
     const slug = await this.generateUniqueSlug(baseSlug);
 
+    // Prepare special series connection for many-to-many
+    const specialSeriesConnect = data.specialSeriesIds && data.specialSeriesIds.length > 0
+      ? { connect: data.specialSeriesIds.map((id: string) => ({ id })) }
+      : undefined;
+
     const competition = await prisma.competition.create({
       data: {
         eventId,
@@ -299,7 +309,7 @@ export class CompetitionService {
         baseElevation: data.baseElevation,
         baseMaxParticipants: data.baseMaxParticipants,
         terrainTypeId: data.terrainTypeId,
-        specialSeriesId: data.specialSeriesId,
+        specialSeries: specialSeriesConnect,
         itraPoints: data.itraPoints,
         utmbIndex: data.utmbIndex,
         organizerId: userId,
@@ -584,6 +594,12 @@ export class CompetitionService {
       throw new Error('Unauthorized');
     }
 
+    // Prepare special series update for many-to-many
+    // If specialSeriesIds is provided (even empty array), update the relationship
+    const specialSeriesUpdate = data.specialSeriesIds !== undefined
+      ? { set: data.specialSeriesIds.map((id: string) => ({ id })) }
+      : undefined;
+
     const competition = await prisma.competition.update({
       where: { id },
       data: {
@@ -594,7 +610,7 @@ export class CompetitionService {
         baseElevation: data.baseElevation,
         baseMaxParticipants: data.baseMaxParticipants,
         terrainTypeId: data.terrainTypeId,
-        specialSeriesId: data.specialSeriesId,
+        specialSeries: specialSeriesUpdate,
         itraPoints: data.itraPoints,
         utmbIndex: data.utmbIndex,
         // Image fields
