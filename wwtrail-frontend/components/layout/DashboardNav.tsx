@@ -28,6 +28,7 @@ import {
   AlertCircle,
   Star,
   UserCog,
+  Upload,
 } from 'lucide-react';
 import { adminService, PendingContentCounts } from '@/lib/api/admin.service';
 
@@ -194,6 +195,12 @@ const navItems: NavItem[] = [
     label: 'Estadísticas',
     href: '/organizer/stats',
     icon: BarChart3,
+    adminOnly: true,
+  },
+  {
+    label: 'Importación',
+    href: '/organizer/import',
+    icon: Upload,
     adminOnly: true,
   },
 ];

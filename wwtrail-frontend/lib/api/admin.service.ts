@@ -587,6 +587,103 @@ class AdminService {
       };
     }
   }
+
+  // ============================================
+  // IMPORT SYSTEM
+  // ============================================
+
+  /**
+   * Get import statistics
+   */
+  async getImportStats(): Promise<{
+    organizers: number;
+    specialSeries: number;
+    events: number;
+    competitions: number;
+    terrainTypes: number;
+  }> {
+    const { data } = await apiClientV1.get('/admin/import/stats');
+    return data.data;
+  }
+
+  /**
+   * Ensure terrain types exist
+   */
+  async ensureTerrainTypes(): Promise<{
+    created: number;
+    skipped: number;
+    errors: Array<{ identifier: string; error: string }>;
+  }> {
+    const { data } = await apiClientV1.post('/admin/import/terrain-types');
+    return data.data;
+  }
+
+  /**
+   * Import organizers
+   */
+  async importOrganizers(organizers: Array<{ id: string; slug: string; name: string }>): Promise<{
+    created: number;
+    skipped: number;
+    errors: Array<{ identifier: string; error: string }>;
+  }> {
+    const { data } = await apiClientV1.post('/admin/import/organizers', organizers);
+    return data.data;
+  }
+
+  /**
+   * Import special series
+   */
+  async importSeries(series: Array<{ id: string; slug: string; name: string }>): Promise<{
+    created: number;
+    skipped: number;
+    errors: Array<{ identifier: string; error: string }>;
+  }> {
+    const { data } = await apiClientV1.post('/admin/import/series', series);
+    return data.data;
+  }
+
+  /**
+   * Import events
+   */
+  async importEvents(events: any[]): Promise<{
+    created: number;
+    skipped: number;
+    errors: Array<{ identifier: string; error: string }>;
+  }> {
+    const { data } = await apiClientV1.post('/admin/import/events', events);
+    return data.data;
+  }
+
+  /**
+   * Import competitions
+   */
+  async importCompetitions(competitions: any[]): Promise<{
+    created: number;
+    skipped: number;
+    errors: Array<{ identifier: string; error: string }>;
+  }> {
+    const { data } = await apiClientV1.post('/admin/import/competitions', competitions);
+    return data.data;
+  }
+
+  /**
+   * Full import (organizers + series + events + competitions)
+   */
+  async importFull(importData: {
+    organizers?: any[];
+    series?: any[];
+    events?: any[];
+    competitions?: any[];
+  }): Promise<{
+    organizers?: { created: number; skipped: number; errors: any[] };
+    series?: { created: number; skipped: number; errors: any[] };
+    events?: { created: number; skipped: number; errors: any[] };
+    competitions?: { created: number; skipped: number; errors: any[] };
+    terrainTypes?: { created: number; skipped: number; errors: any[] };
+  }> {
+    const { data } = await apiClientV1.post('/admin/import/full', importData);
+    return data.data;
+  }
 }
 
 export const adminService = new AdminService();
