@@ -40,6 +40,24 @@ class AdminController {
   }
 
   /**
+   * @route   GET /api/v1/admin/stats/comprehensive
+   * @desc    Obtener estadísticas completas del portal
+   * @access  Admin
+   */
+  async getComprehensiveStats(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const stats = await AdminService.getComprehensiveStats();
+
+      res.status(200).json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * @route   GET /api/v1/admin/users
    * @desc    Listar usuarios con filtros y paginación
    * @access  Admin

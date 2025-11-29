@@ -192,9 +192,8 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Estadísticas',
-    href: '/stats',
+    href: '/organizer/stats',
     icon: BarChart3,
-    badge: 'Pronto',
     adminOnly: true,
   },
 ];

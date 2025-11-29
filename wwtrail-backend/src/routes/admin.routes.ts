@@ -44,6 +44,18 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => AdminController.getStats(req, res, next)
 );
 
+/**
+ * @route   GET /api/v1/admin/stats/comprehensive
+ * @desc    Obtener estadísticas completas del portal
+ * @access  Admin
+ */
+router.get(
+  '/admin/stats/comprehensive',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.getComprehensiveStats(req, res, next)
+);
+
 // ============================================
 // RUTAS ADMIN - GESTIÓN DE USUARIOS
 // ============================================

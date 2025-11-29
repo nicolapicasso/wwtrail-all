@@ -191,6 +191,274 @@ class AdminService {
   }
 
   /**
+   * Obtener estadísticas completas del portal
+   */
+  async getComprehensiveStats() {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Ejecutar todas las queries en paralelo
+    const [
+      // Users
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      insiders,
+      publicProfiles,
+      usersByRole,
+      usersThisMonth,
+      usersThisWeek,
+
+      // Events
+      totalEvents,
+      eventsByStatus,
+      eventsByCountry,
+      eventsThisMonth,
+
+      // Competitions
+      totalCompetitions,
+      competitionsByStatus,
+      competitionsByType,
+      competitionsThisMonth,
+
+      // Editions
+      totalEditions,
+      editionsByStatus,
+      upcomingEditions,
+      pastEditions,
+      editionsThisMonth,
+
+      // Special Series
+      totalSpecialSeries,
+      specialSeriesByStatus,
+
+      // Services
+      totalServices,
+      servicesByStatus,
+      servicesByCategory,
+      featuredServices,
+
+      // Reviews
+      totalReviews,
+      reviewsThisMonth,
+      reviewsThisWeek,
+      avgRating,
+
+      // Organizers
+      totalOrganizers,
+      verifiedOrganizers,
+
+      // Categories
+      totalCategories,
+
+      // Participants
+      totalParticipants,
+
+      // Favorites
+      totalFavorites,
+    ] = await Promise.all([
+      // === USERS ===
+      prisma.user.count(),
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.user.count({ where: { isActive: false } }),
+      prisma.user.count({ where: { isInsider: true } }),
+      prisma.user.count({ where: { isPublic: true } }),
+      prisma.user.groupBy({
+        by: ['role'],
+        _count: { id: true },
+      }),
+      prisma.user.count({ where: { createdAt: { gte: firstDayOfMonth } } }),
+      prisma.user.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+
+      // === EVENTS ===
+      prisma.event.count(),
+      prisma.event.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+      prisma.event.groupBy({
+        by: ['country'],
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 10,
+      }),
+      prisma.event.count({ where: { createdAt: { gte: firstDayOfMonth } } }),
+
+      // === COMPETITIONS ===
+      prisma.competition.count(),
+      prisma.competition.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+      prisma.competition.groupBy({
+        by: ['type'],
+        _count: { id: true },
+      }),
+      prisma.competition.count({ where: { createdAt: { gte: firstDayOfMonth } } }),
+
+      // === EDITIONS ===
+      prisma.edition.count(),
+      prisma.edition.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+      prisma.edition.count({ where: { startDate: { gte: now } } }),
+      prisma.edition.count({ where: { startDate: { lt: now } } }),
+      prisma.edition.count({ where: { createdAt: { gte: firstDayOfMonth } } }),
+
+      // === SPECIAL SERIES ===
+      prisma.specialSeries.count(),
+      prisma.specialSeries.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+
+      // === SERVICES ===
+      prisma.service.count(),
+      prisma.service.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+      prisma.service.groupBy({
+        by: ['categoryId'],
+        _count: { id: true },
+      }),
+      prisma.service.count({ where: { isFeatured: true } }),
+
+      // === REVIEWS ===
+      prisma.review.count(),
+      prisma.review.count({ where: { createdAt: { gte: firstDayOfMonth } } }),
+      prisma.review.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+      prisma.review.aggregate({
+        _avg: { rating: true },
+      }),
+
+      // === ORGANIZERS ===
+      prisma.organizer.count(),
+      prisma.organizer.count({ where: { verified: true } }),
+
+      // === CATEGORIES ===
+      prisma.category.count(),
+
+      // === PARTICIPANTS ===
+      prisma.participant.count(),
+
+      // === FAVORITES ===
+      prisma.favorite.count(),
+    ]);
+
+    // Obtener nombres de categorías de servicios
+    const serviceCategories = await prisma.serviceCategory.findMany({
+      select: { id: true, name: true },
+    });
+    const categoryMap = new Map(serviceCategories.map(c => [c.id, c.name]));
+
+    return {
+      overview: {
+        totalUsers,
+        totalEvents,
+        totalCompetitions,
+        totalEditions,
+        totalSpecialSeries,
+        totalServices,
+        totalReviews,
+        totalOrganizers,
+        totalCategories,
+        totalParticipants,
+        totalFavorites,
+      },
+      users: {
+        total: totalUsers,
+        active: activeUsers,
+        inactive: inactiveUsers,
+        insiders,
+        publicProfiles,
+        privateProfiles: totalUsers - publicProfiles,
+        newThisMonth: usersThisMonth,
+        newThisWeek: usersThisWeek,
+        byRole: usersByRole.map(item => ({
+          role: item.role,
+          count: item._count.id,
+        })),
+      },
+      events: {
+        total: totalEvents,
+        newThisMonth: eventsThisMonth,
+        byStatus: eventsByStatus.map(item => ({
+          status: item.status,
+          count: item._count.id,
+        })),
+        byCountry: eventsByCountry.map(item => ({
+          country: item.country,
+          count: item._count.id,
+        })),
+      },
+      competitions: {
+        total: totalCompetitions,
+        newThisMonth: competitionsThisMonth,
+        byStatus: competitionsByStatus.map(item => ({
+          status: item.status,
+          count: item._count.id,
+        })),
+        byType: competitionsByType.map(item => ({
+          type: item.type,
+          count: item._count.id,
+        })),
+      },
+      editions: {
+        total: totalEditions,
+        upcoming: upcomingEditions,
+        past: pastEditions,
+        newThisMonth: editionsThisMonth,
+        byStatus: editionsByStatus.map(item => ({
+          status: item.status,
+          count: item._count.id,
+        })),
+      },
+      specialSeries: {
+        total: totalSpecialSeries,
+        byStatus: specialSeriesByStatus.map(item => ({
+          status: item.status,
+          count: item._count.id,
+        })),
+      },
+      services: {
+        total: totalServices,
+        featured: featuredServices,
+        byStatus: servicesByStatus.map(item => ({
+          status: item.status,
+          count: item._count.id,
+        })),
+        byCategory: servicesByCategory.map(item => ({
+          categoryId: item.categoryId,
+          categoryName: categoryMap.get(item.categoryId) || 'Sin categoría',
+          count: item._count.id,
+        })),
+      },
+      reviews: {
+        total: totalReviews,
+        thisMonth: reviewsThisMonth,
+        thisWeek: reviewsThisWeek,
+        averageRating: avgRating._avg.rating ? Math.round(avgRating._avg.rating * 10) / 10 : 0,
+      },
+      organizers: {
+        total: totalOrganizers,
+        verified: verifiedOrganizers,
+        unverified: totalOrganizers - verifiedOrganizers,
+      },
+      recentActivity: {
+        usersThisWeek,
+        eventsThisMonth,
+        competitionsThisMonth,
+        editionsThisMonth,
+        reviewsThisWeek,
+      },
+    };
+  }
+
+  /**
    * Listar usuarios con filtros y paginación
    */
   async getUsers(filters: GetUsersFilters): Promise<PaginatedUsers> {
