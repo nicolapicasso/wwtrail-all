@@ -247,7 +247,120 @@ class AdminService {
    */
   async getPendingContent(): Promise<PendingContentItem[]> {
     const { data } = await apiClientV2.get('/admin/pending');
-    return data.data;
+    const result = data.data;
+
+    // Flatten the grouped response into a single array
+    const items: PendingContentItem[] = [];
+
+    if (result.events) {
+      items.push(...result.events.map((e: any) => ({
+        id: e.id,
+        type: 'event' as const,
+        name: e.name,
+        status: 'DRAFT',
+        createdAt: e.createdAt,
+        createdBy: e.user ? {
+          id: e.user.id,
+          username: e.user.username,
+          email: '',
+        } : undefined,
+      })));
+    }
+
+    if (result.competitions) {
+      items.push(...result.competitions.map((c: any) => ({
+        id: c.id,
+        type: 'competition' as const,
+        name: c.name,
+        status: 'DRAFT',
+        createdAt: c.createdAt,
+        createdBy: c.organizer ? {
+          id: c.organizer.id,
+          username: c.organizer.username,
+          email: '',
+        } : undefined,
+      })));
+    }
+
+    if (result.services) {
+      items.push(...result.services.map((s: any) => ({
+        id: s.id,
+        type: 'service' as const,
+        name: s.name,
+        status: 'DRAFT',
+        createdAt: s.createdAt,
+        createdBy: s.organizer ? {
+          id: s.organizer.id,
+          username: s.organizer.username,
+          email: '',
+        } : undefined,
+      })));
+    }
+
+    if (result.organizers) {
+      items.push(...result.organizers.map((o: any) => ({
+        id: o.id,
+        type: 'service' as const, // organizers shown as service type for compatibility
+        name: o.name,
+        status: 'DRAFT',
+        createdAt: o.createdAt,
+        createdBy: o.createdBy ? {
+          id: o.createdBy.id,
+          username: o.createdBy.username,
+          email: '',
+        } : undefined,
+      })));
+    }
+
+    if (result.specialSeries) {
+      items.push(...result.specialSeries.map((ss: any) => ({
+        id: ss.id,
+        type: 'edition' as const, // special series shown as edition type for compatibility
+        name: ss.name,
+        status: 'DRAFT',
+        createdAt: ss.createdAt,
+        createdBy: ss.createdBy ? {
+          id: ss.createdBy.id,
+          username: ss.createdBy.username,
+          email: '',
+        } : undefined,
+      })));
+    }
+
+    if (result.posts) {
+      items.push(...result.posts.map((p: any) => ({
+        id: p.id,
+        type: 'magazine' as const,
+        name: p.title,
+        status: 'DRAFT',
+        createdAt: p.createdAt,
+        createdBy: p.author ? {
+          id: p.author.id,
+          username: p.author.username,
+          email: '',
+        } : undefined,
+      })));
+    }
+
+    if (result.promotions) {
+      items.push(...result.promotions.map((pr: any) => ({
+        id: pr.id,
+        type: 'service' as const, // promotions shown as service type
+        name: pr.title,
+        status: 'DRAFT',
+        createdAt: pr.createdAt,
+        createdBy: pr.createdBy ? {
+          id: pr.createdBy.id,
+          username: pr.createdBy.username,
+          email: '',
+        } : undefined,
+      })));
+    }
+
+    // Sort by createdAt descending
+    items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return items;
   }
 
   // Users management
