@@ -257,10 +257,10 @@ export default function EditProfilePage() {
                   </div>
                   <div className="flex-1">
                     <FileUpload
-                      onUploadComplete={(url) => {
+                      onUpload={(url) => {
                         setFormData((prev) => ({ ...prev, avatar: url }));
                       }}
-                      folder="avatars"
+                      currentUrl={formData.avatar}
                       accept="image/*"
                       buttonText="Subir foto"
                     />
