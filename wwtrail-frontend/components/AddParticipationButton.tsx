@@ -278,7 +278,6 @@ export function AddParticipationButton({
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Sin categoría</option>
-                    <option value="GENERAL">General / Absoluta</option>
                     <option value="MALE">Masculina</option>
                     <option value="FEMALE">Femenina</option>
                     <option value="CATEGORY">Otra categoría</option>

@@ -325,7 +325,7 @@ export default function ParticipationsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-12">
+      <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white py-12">
         <div className="container mx-auto px-4">
           <Button
             variant="ghost"
@@ -693,7 +693,6 @@ export default function ParticipationsPage() {
                         className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                       >
                         <option value="">Sin categoría</option>
-                        <option value="GENERAL">General / Absoluta</option>
                         <option value="MALE">Masculina</option>
                         <option value="FEMALE">Femenina</option>
                         <option value="CATEGORY">Otra categoría</option>
@@ -871,7 +870,6 @@ export default function ParticipationsPage() {
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Sin categoría</option>
-                    <option value="GENERAL">General / Absoluta</option>
                     <option value="MALE">Masculina</option>
                     <option value="FEMALE">Femenina</option>
                     <option value="CATEGORY">Otra categoría</option>
