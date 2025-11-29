@@ -42,7 +42,7 @@ export function SpecialSeriesCard({
         {/* Status Badge */}
         {specialSeries.status === 'DRAFT' && (
           <div className="absolute top-2 right-2 z-10">
-            <span className="inline-flex items-center rounded-full bg-yellow-500 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
+            <span className="inline-flex items-center rounded-none bg-black px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
               Draft
             </span>
           </div>

@@ -87,27 +87,27 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
         {/* Status Badges */}
         <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
+            className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
               edition.status === 'UPCOMING'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-[#163D89] text-white'
                 : edition.status === 'ONGOING'
-                ? 'bg-green-500 text-white'
+                ? 'bg-[#0E612F] text-white'
                 : edition.status === 'FINISHED'
-                ? 'bg-gray-500 text-white'
-                : 'bg-red-500 text-white'
+                ? 'bg-black text-white'
+                : 'bg-[#991B1B] text-white'
             }`}
           >
             {edition.status}
           </span>
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
+            className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold shadow-lg ${
               edition.registrationStatus === 'OPEN'
-                ? 'bg-green-500 text-white'
+                ? 'bg-[#0E612F] text-white'
                 : edition.registrationStatus === 'FULL'
-                ? 'bg-orange-500 text-white'
+                ? 'bg-[#991B1B] text-white'
                 : edition.registrationStatus === RegistrationStatus.COMING_SOON
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-500 text-white'
+                ? 'bg-[#163D89] text-white'
+                : 'bg-black text-white'
             }`}
           >
             {edition.registrationStatus.replace('_', ' ')}

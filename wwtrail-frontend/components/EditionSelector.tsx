@@ -121,17 +121,17 @@ export function EditionSelector({
                       <span className="flex items-center gap-2">
                         <span className="font-semibold">{year}</span>
                         {isCurrent && (
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                          <span className="inline-flex items-center rounded-none bg-[#163D89] px-2 py-0.5 text-xs font-medium text-white">
                             Current
                           </span>
                         )}
                         {isFuture && (
-                          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                          <span className="inline-flex items-center rounded-none bg-[#0E612F] px-2 py-0.5 text-xs font-medium text-white">
                             Upcoming
                           </span>
                         )}
                         {isPast && (
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                          <span className="inline-flex items-center rounded-none bg-black px-2 py-0.5 text-xs font-medium text-white">
                             Past
                           </span>
                         )}
@@ -169,25 +169,25 @@ export function EditionSelector({
             </div>
             <div className="flex flex-col items-end gap-1">
               <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold ${
                   edition.status === 'UPCOMING'
-                    ? 'bg-blue-100 text-blue-800'
+                    ? 'bg-[#163D89] text-white'
                     : edition.status === 'ONGOING'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-[#0E612F] text-white'
                     : edition.status === 'FINISHED'
-                    ? 'bg-gray-100 text-gray-800'
-                    : 'bg-red-100 text-red-800'
+                    ? 'bg-black text-white'
+                    : 'bg-[#991B1B] text-white'
                 }`}
               >
                 {edition.status}
               </span>
               <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold ${
                   edition.registrationStatus === 'OPEN'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-[#0E612F] text-white'
                     : edition.registrationStatus === 'FULL'
-                    ? 'bg-orange-100 text-orange-800'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-[#991B1B] text-white'
+                    : 'bg-black text-white'
                 }`}
               >
                 {edition.registrationStatus.replace('_', ' ')}
