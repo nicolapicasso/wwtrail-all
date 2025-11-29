@@ -403,9 +403,9 @@ export default async function EditionDetailPage({
                     href={edition.registrationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                    className="block w-full px-4 py-2 bg-black text-white text-center rounded-lg hover:bg-gray-800 transition-colors font-semibold"
                   >
-                    Inscribirme
+                    Inscripciones
                   </a>
                 </div>
               </div>
