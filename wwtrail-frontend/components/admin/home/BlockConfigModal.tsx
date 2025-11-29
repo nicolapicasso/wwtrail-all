@@ -53,7 +53,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
     if (block?.config) {
       const config = block.config;
 
-      if (block.type === 'EVENTS' || block.type === 'COMPETITIONS' || block.type === 'EDITIONS' || block.type === 'SERVICES') {
+      if (block.type === 'EVENTS' || block.type === 'COMPETITIONS' || block.type === 'EDITIONS' || block.type === 'SERVICES' || block.type === 'POSTS') {
         const contentConfig = config as ContentBlockConfig;
         setLimit(contentConfig.limit);
         setViewType(contentConfig.viewType);
@@ -71,7 +71,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   }, [block]);
 
   const buildConfig = () => {
-    if (blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES') {
+    if (blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES' || blockType === 'POSTS') {
       const config: ContentBlockConfig = {
         limit,
         viewType,
@@ -171,6 +171,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               <option value="COMPETITIONS">Competiciones</option>
               <option value="EDITIONS">Ediciones</option>
               <option value="SERVICES">Servicios</option>
+              <option value="POSTS">Artículos (Magazine)</option>
               <option value="TEXT">Texto</option>
               <option value="LINKS">Enlaces</option>
             </select>
@@ -204,7 +205,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
           </div>
 
           {/* Config específica por tipo */}
-          {(blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES') && (
+          {(blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES' || blockType === 'POSTS') && (
             <div className="space-y-4 border-t pt-4">
               <h3 className="font-semibold text-gray-900">Configuración de Contenido</h3>
 
@@ -245,7 +246,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="featuredOnly" className="text-sm font-medium text-gray-700">
-                  Solo {blockType === 'EVENTS' ? 'eventos' : blockType === 'COMPETITIONS' ? 'competiciones' : 'ediciones'} destacados
+                  Solo elementos destacados
                 </label>
               </div>
             </div>

@@ -23,14 +23,17 @@ export function EventsBlock({ config }: EventsBlockProps) {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        console.log('[EventsBlock] Fetching events with config:', { limit, featuredOnly });
         const response = await eventsService.getAll({
           limit,
           isFeatured: featuredOnly,
           status: 'PUBLISHED'
         });
+        console.log('[EventsBlock] API Response:', response);
+        console.log('[EventsBlock] Events count:', response?.data?.length || 0);
         setEvents(response?.data || []);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('[EventsBlock] Error fetching events:', error);
         setEvents([]);
       } finally {
         setLoading(false);
