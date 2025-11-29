@@ -684,6 +684,63 @@ class AdminService {
     const { data } = await apiClientV1.post('/admin/import/full', importData);
     return data.data;
   }
+
+  // ============================================
+  // BULK DELETE METHODS
+  // ============================================
+
+  /**
+   * Delete all competitions
+   */
+  async deleteAllCompetitions(): Promise<{ deleted: number }> {
+    const { data } = await apiClientV1.delete('/admin/import/competitions');
+    return data.data;
+  }
+
+  /**
+   * Delete all events (and competitions)
+   */
+  async deleteAllEvents(): Promise<{ deleted: number }> {
+    const { data } = await apiClientV1.delete('/admin/import/events');
+    return data.data;
+  }
+
+  /**
+   * Delete all series
+   */
+  async deleteAllSeries(): Promise<{ deleted: number }> {
+    const { data } = await apiClientV1.delete('/admin/import/series');
+    return data.data;
+  }
+
+  /**
+   * Delete all organizers
+   */
+  async deleteAllOrganizers(): Promise<{ deleted: number }> {
+    const { data } = await apiClientV1.delete('/admin/import/organizers');
+    return data.data;
+  }
+
+  /**
+   * Delete all editions
+   */
+  async deleteAllEditions(): Promise<{ deleted: number }> {
+    const { data } = await apiClientV1.delete('/admin/import/editions');
+    return data.data;
+  }
+
+  /**
+   * Delete all imported data (full reset)
+   */
+  async deleteAllImportedData(): Promise<{
+    competitions: number;
+    events: number;
+    series: number;
+    organizers: number;
+  }> {
+    const { data } = await apiClientV1.delete('/admin/import/all');
+    return data.data;
+  }
 }
 
 export const adminService = new AdminService();

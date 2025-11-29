@@ -205,6 +205,118 @@ class ImportController {
       next(error);
     }
   }
+
+  // ============================================
+  // BULK DELETE ENDPOINTS
+  // ============================================
+
+  /**
+   * Delete all competitions
+   * DELETE /api/v1/admin/import/competitions
+   */
+  async deleteAllCompetitions(_req: Request, res: Response, next: NextFunction): Promise<void | Response> {
+    try {
+      const result = await importService.deleteAllCompetitions();
+
+      return res.status(200).json({
+        success: true,
+        message: `${result.deleted} competitions deleted`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete all events
+   * DELETE /api/v1/admin/import/events
+   */
+  async deleteAllEvents(_req: Request, res: Response, next: NextFunction): Promise<void | Response> {
+    try {
+      const result = await importService.deleteAllEvents();
+
+      return res.status(200).json({
+        success: true,
+        message: `${result.deleted} events deleted`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete all series
+   * DELETE /api/v1/admin/import/series
+   */
+  async deleteAllSeries(_req: Request, res: Response, next: NextFunction): Promise<void | Response> {
+    try {
+      const result = await importService.deleteAllSeries();
+
+      return res.status(200).json({
+        success: true,
+        message: `${result.deleted} series deleted`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete all organizers
+   * DELETE /api/v1/admin/import/organizers
+   */
+  async deleteAllOrganizers(_req: Request, res: Response, next: NextFunction): Promise<void | Response> {
+    try {
+      const result = await importService.deleteAllOrganizers();
+
+      return res.status(200).json({
+        success: true,
+        message: `${result.deleted} organizers deleted`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete all editions
+   * DELETE /api/v1/admin/import/editions
+   */
+  async deleteAllEditions(_req: Request, res: Response, next: NextFunction): Promise<void | Response> {
+    try {
+      const result = await importService.deleteAllEditions();
+
+      return res.status(200).json({
+        success: true,
+        message: `${result.deleted} editions deleted`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete all imported data (full reset)
+   * DELETE /api/v1/admin/import/all
+   */
+  async deleteAllImportedData(_req: Request, res: Response, next: NextFunction): Promise<void | Response> {
+    try {
+      const result = await importService.deleteAllImportedData();
+
+      return res.status(200).json({
+        success: true,
+        message: `Deleted: ${result.competitions} competitions, ${result.events} events, ${result.series} series, ${result.organizers} organizers`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const importController = new ImportController();

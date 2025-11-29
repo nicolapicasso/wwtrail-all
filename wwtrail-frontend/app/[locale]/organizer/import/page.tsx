@@ -18,6 +18,8 @@ import {
   Play,
   Loader2,
   XCircle,
+  Trash2,
+  Calendar,
 } from 'lucide-react';
 import { adminService } from '@/lib/api/admin.service';
 
@@ -185,6 +187,7 @@ export default function ImportPage() {
   const [stats, setStats] = useState<ImportStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<FullImportResult | null>(null);
   const [importData, setImportData] = useState<ImportData>({
     organizers: null,
@@ -245,6 +248,56 @@ export default function ImportPage() {
     } catch (error: any) {
       console.error('Error:', error);
       alert(`Error: ${error.message || 'Error desconocido'}`);
+    }
+  };
+
+  const handleDelete = async (type: 'competitions' | 'events' | 'series' | 'organizers' | 'editions' | 'all') => {
+    const messages: Record<string, string> = {
+      competitions: '¿Eliminar TODAS las competiciones? Esto también eliminará ediciones relacionadas.',
+      events: '¿Eliminar TODOS los eventos? Esto también eliminará competiciones y ediciones.',
+      series: '¿Eliminar TODAS las series especiales?',
+      organizers: '¿Eliminar TODOS los organizadores?',
+      editions: '¿Eliminar TODAS las ediciones?',
+      all: '¿Eliminar TODOS los datos importados (organizadores, series, eventos, competiciones)?',
+    };
+
+    if (!confirm(messages[type])) return;
+
+    setDeleting(type);
+    try {
+      let result;
+      switch (type) {
+        case 'competitions':
+          result = await adminService.deleteAllCompetitions();
+          alert(`${result.deleted} competiciones eliminadas`);
+          break;
+        case 'events':
+          result = await adminService.deleteAllEvents();
+          alert(`${result.deleted} eventos eliminados`);
+          break;
+        case 'series':
+          result = await adminService.deleteAllSeries();
+          alert(`${result.deleted} series eliminadas`);
+          break;
+        case 'organizers':
+          result = await adminService.deleteAllOrganizers();
+          alert(`${result.deleted} organizadores eliminados`);
+          break;
+        case 'editions':
+          result = await adminService.deleteAllEditions();
+          alert(`${result.deleted} ediciones eliminadas`);
+          break;
+        case 'all':
+          result = await adminService.deleteAllImportedData();
+          alert(`Eliminados: ${result.competitions} competiciones, ${result.events} eventos, ${result.series} series, ${result.organizers} organizadores`);
+          break;
+      }
+      await fetchStats();
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert(`Error: ${error.message || 'Error desconocido'}`);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -460,6 +513,103 @@ export default function ImportPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Section */}
+      <Card className="border-red-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600">
+            <Trash2 className="w-5 h-5" />
+            Eliminar Datos
+          </CardTitle>
+          <CardDescription>
+            Elimina datos importados para poder reimportar con correcciones
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50"
+              onClick={() => handleDelete('editions')}
+              disabled={deleting !== null}
+            >
+              {deleting === 'editions' ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Calendar className="w-4 h-4 mr-2" />
+              )}
+              Ediciones
+            </Button>
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50"
+              onClick={() => handleDelete('competitions')}
+              disabled={deleting !== null}
+            >
+              {deleting === 'competitions' ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Trophy className="w-4 h-4 mr-2" />
+              )}
+              Competiciones
+            </Button>
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50"
+              onClick={() => handleDelete('events')}
+              disabled={deleting !== null}
+            >
+              {deleting === 'events' ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <MapPin className="w-4 h-4 mr-2" />
+              )}
+              Eventos
+            </Button>
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50"
+              onClick={() => handleDelete('series')}
+              disabled={deleting !== null}
+            >
+              {deleting === 'series' ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Award className="w-4 h-4 mr-2" />
+              )}
+              Series
+            </Button>
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50"
+              onClick={() => handleDelete('organizers')}
+              disabled={deleting !== null}
+            >
+              {deleting === 'organizers' ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Building2 className="w-4 h-4 mr-2" />
+              )}
+              Organizadores
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleDelete('all')}
+              disabled={deleting !== null}
+            >
+              {deleting === 'all' ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4 mr-2" />
+              )}
+              Eliminar Todo
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            Nota: Eliminar eventos también elimina sus competiciones. Eliminar competiciones también elimina sus ediciones.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Instructions */}
       <Card>

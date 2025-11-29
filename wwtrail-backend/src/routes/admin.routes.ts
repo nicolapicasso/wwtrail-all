@@ -416,4 +416,80 @@ router.post(
   (req: Request, res: Response, next: NextFunction) => importController.importFull(req, res, next)
 );
 
+// ============================================
+// RUTAS ADMIN - ELIMINACIÓN MASIVA DE DATOS
+// ============================================
+
+/**
+ * @route   DELETE /api/v1/admin/import/competitions
+ * @desc    Delete all competitions
+ * @access  Admin
+ */
+router.delete(
+  '/admin/import/competitions',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.deleteAllCompetitions(req, res, next)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/import/events
+ * @desc    Delete all events (and competitions)
+ * @access  Admin
+ */
+router.delete(
+  '/admin/import/events',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.deleteAllEvents(req, res, next)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/import/series
+ * @desc    Delete all special series
+ * @access  Admin
+ */
+router.delete(
+  '/admin/import/series',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.deleteAllSeries(req, res, next)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/import/organizers
+ * @desc    Delete all organizers
+ * @access  Admin
+ */
+router.delete(
+  '/admin/import/organizers',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.deleteAllOrganizers(req, res, next)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/import/editions
+ * @desc    Delete all editions
+ * @access  Admin
+ */
+router.delete(
+  '/admin/import/editions',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.deleteAllEditions(req, res, next)
+);
+
+/**
+ * @route   DELETE /api/v1/admin/import/all
+ * @desc    Delete all imported data (full reset)
+ * @access  Admin
+ */
+router.delete(
+  '/admin/import/all',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.deleteAllImportedData(req, res, next)
+);
+
 export default router;
