@@ -20,15 +20,19 @@ import {
   Youtube,
   ArrowLeft,
   Flag,
+  Star,
 } from 'lucide-react';
 import { userService, PublicUserProfile, UserParticipation } from '@/lib/api/user.service';
 import { getCountryName, getCountryFlag } from '@/lib/utils/countries';
+import { InsiderBadge } from '@/components/InsiderBadge';
+import { useInsiderBadge } from '@/contexts/InsiderContext';
 
 export default function UserProfilePage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
   const username = params.username as string;
+  const { badgeUrl } = useInsiderBadge();
 
   const [profile, setProfile] = useState<PublicUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -126,7 +130,16 @@ export default function UserProfilePage() {
                   <UserIcon className="w-16 h-16 text-gray-400" />
                 </div>
               )}
+              {profile.isInsider && <InsiderBadge badgeUrl={badgeUrl} size="lg" />}
             </div>
+
+            {/* Insider label */}
+            {profile.isInsider && (
+              <div className="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-medium">
+                <Star className="w-4 h-4 fill-white" />
+                WWTrail Insider
+              </div>
+            )}
 
             {/* Info */}
             <div className="text-center md:text-left">

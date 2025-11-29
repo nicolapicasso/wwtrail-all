@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { InsiderProvider } from "@/contexts/InsiderContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Toaster } from 'sonner';
@@ -41,14 +42,16 @@ export default async function RootLayout({
       <body className={inter.className}>
         <IntlProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <Navbar />
-            <div className="flex flex-col min-h-screen">
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
-            <Toaster position="top-right" />
+            <InsiderProvider>
+              <Navbar />
+              <div className="flex flex-col min-h-screen">
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <Toaster position="top-right" />
+            </InsiderProvider>
           </AuthProvider>
         </IntlProvider>
       </body>

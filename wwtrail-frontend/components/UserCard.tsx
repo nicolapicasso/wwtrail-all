@@ -7,6 +7,8 @@ import { useLocale } from 'next-intl';
 import { MapPin, Trophy, Flag, User as UserIcon } from 'lucide-react';
 import { PublicUser } from '@/lib/api/user.service';
 import { getCountryName } from '@/lib/utils/countries';
+import { InsiderBadge } from '@/components/InsiderBadge';
+import { useInsiderBadge } from '@/contexts/InsiderContext';
 
 interface UserCardProps {
   user: PublicUser;
@@ -15,6 +17,7 @@ interface UserCardProps {
 
 export default function UserCard({ user, viewMode = 'grid' }: UserCardProps) {
   const locale = useLocale();
+  const { badgeUrl } = useInsiderBadge();
 
   const genderLabel = user.gender === 'MALE' ? 'Hombre' :
                       user.gender === 'FEMALE' ? 'Mujer' :
@@ -38,6 +41,7 @@ export default function UserCard({ user, viewMode = 'grid' }: UserCardProps) {
                 <UserIcon className="w-8 h-8 text-gray-400" />
               </div>
             )}
+            {user.isInsider && <InsiderBadge badgeUrl={badgeUrl} size="md" />}
           </div>
 
           {/* Info */}
@@ -96,6 +100,7 @@ export default function UserCard({ user, viewMode = 'grid' }: UserCardProps) {
                   <UserIcon className="w-12 h-12 text-gray-400" />
                 </div>
               )}
+              {user.isInsider && <InsiderBadge badgeUrl={badgeUrl} size="lg" />}
             </div>
           </div>
         </div>
