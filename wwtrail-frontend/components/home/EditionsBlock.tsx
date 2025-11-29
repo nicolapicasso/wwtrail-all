@@ -44,7 +44,7 @@ export function EditionsBlock({ config }: EditionsBlockProps) {
       <div className="w-full bg-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center py-12">
-            <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin" />
           </div>
         </div>
       </div>
@@ -62,14 +62,14 @@ export function EditionsBlock({ config }: EditionsBlockProps) {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Calendar className="w-8 h-8 text-purple-600" />
+              <Calendar className="w-8 h-8 text-black" />
               Últimas Ediciones
             </h2>
             <p className="text-gray-600 mt-2">Inscríbete en las próximas carreras</p>
           </div>
           <Link
             href="/editions"
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium transition-colors"
+            className="flex items-center gap-2 text-black hover:text-gray-700 font-medium transition-colors"
           >
             Ver todas
             <ArrowRight className="w-5 h-5" />

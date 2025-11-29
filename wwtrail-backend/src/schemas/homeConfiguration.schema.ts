@@ -4,7 +4,7 @@ import { z } from 'zod';
 // ENUMS
 // ===================================
 
-export const HomeBlockTypeSchema = z.enum(['EVENTS', 'COMPETITIONS', 'EDITIONS', 'TEXT', 'LINKS']);
+export const HomeBlockTypeSchema = z.enum(['EVENTS', 'COMPETITIONS', 'EDITIONS', 'SERVICES', 'TEXT', 'LINKS']);
 export const HomeBlockViewTypeSchema = z.enum(['LIST', 'CARDS']);
 export const HomeTextSizeSchema = z.enum(['SM', 'MD', 'LG', 'XL']);
 export const HomeTextVariantSchema = z.enum(['PARAGRAPH', 'HEADING']);
@@ -13,10 +13,11 @@ export const HomeTextVariantSchema = z.enum(['PARAGRAPH', 'HEADING']);
 // CONFIG SCHEMAS (por tipo de bloque)
 // ===================================
 
-// Config para bloques EVENTS, COMPETITIONS, EDITIONS
+// Config para bloques EVENTS, COMPETITIONS, EDITIONS, SERVICES
 export const ContentBlockConfigSchema = z.object({
   limit: z.number().int().min(1).max(50).default(6),
   viewType: HomeBlockViewTypeSchema.default('CARDS'),
+  featuredOnly: z.boolean().default(false),
 });
 
 // Config para bloques TEXT

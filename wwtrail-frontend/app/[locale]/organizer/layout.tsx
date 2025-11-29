@@ -28,7 +28,7 @@ export default function OrganizerLayout({
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent mx-auto"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
       </div>
@@ -48,7 +48,7 @@ export default function OrganizerLayout({
           {/* Logo */}
           <div className="border-b border-gray-200 p-6">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black">
                 <Trophy className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -97,7 +97,7 @@ export default function OrganizerLayout({
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-200 p-4">
                 <Link href="/dashboard" className="flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-600">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black">
                     <Trophy className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -151,7 +151,7 @@ export default function OrganizerLayout({
               <Menu className="h-6 w-6" />
             </button>
             <div className="flex items-center gap-2">
-              <Trophy className="h-6 w-6 text-purple-600" />
+              <Trophy className="h-6 w-6 text-black" />
               <span className="font-bold text-gray-900">WWTRAIL</span>
             </div>
             <div className="w-10" /> {/* Spacer */}

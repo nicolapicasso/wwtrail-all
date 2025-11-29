@@ -156,8 +156,8 @@ export function CompetitionCard({
           {/* Max Participants */}
           {competition.baseMaxParticipants && (
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
-                <Users className="h-4 w-4 text-purple-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+                <Users className="h-4 w-4 text-gray-600" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Max</p>

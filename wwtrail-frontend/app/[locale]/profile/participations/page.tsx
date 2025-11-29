@@ -393,7 +393,7 @@ export default function ParticipationsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <Calendar className="w-8 h-8 mx-auto mb-2 text-purple-600" />
+                <Calendar className="w-8 h-8 mx-auto mb-2 text-black" />
                 <p className="text-2xl font-bold">{sortedYears.length}</p>
                 <p className="text-sm text-gray-500">Temporadas</p>
               </div>

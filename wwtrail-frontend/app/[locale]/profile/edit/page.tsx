@@ -160,7 +160,7 @@ export default function EditProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-12">
+      <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white py-12">
         <div className="container mx-auto px-4">
           <Button
             variant="ghost"

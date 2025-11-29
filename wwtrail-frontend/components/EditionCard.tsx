@@ -118,7 +118,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
       {/* Content Section */}
       <div className="p-4 flex flex-col flex-1">
         {/* Title */}
-        <h3 className="text-lg font-semibold group-hover:text-purple-600 transition-colors mb-2">
+        <h3 className="text-lg font-semibold group-hover:text-gray-600 transition-colors mb-2">
           {competitionName} {edition.year}
         </h3>
 
@@ -190,8 +190,8 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
           {/* Participants */}
           {maxParticipants && (
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
-                <Users className="h-4 w-4 text-purple-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+                <Users className="h-4 w-4 text-gray-600" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Participants</p>
@@ -219,15 +219,16 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
         {/* Registration URL */}
         {edition.registrationUrl && edition.registrationStatus === 'OPEN' && (
           <div className="mt-4">
-            <a
-              href={edition.registrationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-              onClick={(e) => e.stopPropagation()}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(edition.registrationUrl, '_blank', 'noopener,noreferrer');
+              }}
+              className="inline-flex w-full items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
               Register Now
-            </a>
+            </button>
           </div>
         )}
       </div>

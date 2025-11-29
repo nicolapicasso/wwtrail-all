@@ -251,6 +251,7 @@ export default function ServiceDetailPage() {
                   event={{
                     id: service.id,
                     name: service.name,
+                    slug: service.slug,
                     city: service.city,
                     country: service.country,
                     latitude: service.latitude,
@@ -281,6 +282,7 @@ export default function ServiceDetailPage() {
                       longitude: s.longitude!,
                       categoryIcon: (s as any).categoryIcon,
                     }))}
+                  mainLinkPrefix="/services/"
                   nearbyLinkPrefix="/services/"
                 />
                 <div className="mt-4">

@@ -80,17 +80,19 @@ function spreadOverlappingMarkers<T extends { latitude: number; longitude: numbe
 }
 
 interface EventMapProps {
-  event: Event & { categoryIcon?: string }; // Agregamos soporte para icono de categoría
+  event: Event & { categoryIcon?: string; type?: 'event' | 'service' }; // Agregamos soporte para icono de categoría y tipo
   nearbyEvents?: Event[];
   nearbyServices?: Event[]; // Services passed as Event-like objects with categoryIcon
   nearbyLinkPrefix?: string; // Prefijo para links de nearby (default: '/events/')
+  mainLinkPrefix?: string; // Prefijo para link del marcador principal (default: '/events/')
 }
 
 export default function EventMap({
   event,
   nearbyEvents = [],
   nearbyServices = [],
-  nearbyLinkPrefix = '/events/'
+  nearbyLinkPrefix = '/events/',
+  mainLinkPrefix = '/events/'
 }: EventMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -202,28 +204,32 @@ export default function EventMap({
         title: event.name,
       }).addTo(map);
 
-      // Popup del evento principal
+      // Popup del marcador principal
+      const mainType = mainLinkPrefix === '/services/' ? 'Servicio' : 'Evento';
+      const mainLinkText = mainLinkPrefix === '/services/' ? 'Ver servicio →' : 'Ver evento →';
       mainMarker.bindPopup(`
         <div style="min-width: 200px; padding: 16px;">
           <h3 style="font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #000; line-height: 1.3;">
             ${event.name}
           </h3>
           <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
-            <strong>Tipo:</strong> Evento
+            <strong>Tipo:</strong> ${mainType}
           </p>
           <p style="font-size: 14px; color: #000; margin-bottom: 6px;">
             <strong>Lugar:</strong> ${event.city}, ${event.country}
           </p>
+          ${event.slug ? `
           <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
             <a
-              href="/events/${event.slug}"
+              href="${mainLinkPrefix}${event.slug}"
               style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s;"
               onmouseover="this.style.color='#B66916'"
               onmouseout="this.style.color='#000'"
             >
-              Ver evento →
+              ${mainLinkText}
             </a>
           </div>
+          ` : ''}
         </div>
       `);
 
