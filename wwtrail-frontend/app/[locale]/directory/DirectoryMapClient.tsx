@@ -175,7 +175,9 @@ export default function DirectoryMapClient() {
       const bounds = L.latLngBounds([]);
 
       // Load events if needed
-      if (filters.itemType === 'all' || filters.itemType === 'events') {
+      // When a special series is selected, only show competitions (not events or services)
+      const showEvents = !filters.specialSeriesId && (filters.itemType === 'all' || filters.itemType === 'events');
+      if (showEvents) {
         try {
           const eventsData = await eventsService.getAll({
             status: 'PUBLISHED',
@@ -259,8 +261,9 @@ export default function DirectoryMapClient() {
           }
 
           if (filters.specialSeriesId) {
+            // Many-to-many: Check if competition belongs to the selected special series
             filteredCompetitions = filteredCompetitions.filter(
-              (c: any) => c.specialSeriesId === filters.specialSeriesId
+              (c: any) => c.specialSeries?.some((s: any) => s.id === filters.specialSeriesId)
             );
           }
 
@@ -360,7 +363,9 @@ export default function DirectoryMapClient() {
       }
 
       // Load services if needed
-      if (filters.itemType === 'all' || filters.itemType === 'services') {
+      // When a special series is selected, only show competitions (not events or services)
+      const showServices = !filters.specialSeriesId && (filters.itemType === 'all' || filters.itemType === 'services');
+      if (showServices) {
         try {
           const servicesData = await servicesService.getAll({
             status: 'PUBLISHED',

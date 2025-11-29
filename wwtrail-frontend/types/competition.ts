@@ -39,8 +39,8 @@ export interface Competition {
   // Nuevos campos de clasificación
   terrainTypeId?: string;
   terrainType?: TerrainType;
-  specialSeriesId?: string;
-  specialSeries?: SpecialSeries;
+  // Many-to-many: Una competición puede pertenecer a múltiples special series
+  specialSeries?: SpecialSeries[];
   itraPoints?: number;     // Puntos ITRA (0-6)
   utmbIndex?: UTMBIndex;   // Índice UTMB
 

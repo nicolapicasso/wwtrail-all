@@ -349,8 +349,8 @@ model Competition {
   terrainTypeId String?
   terrainType   TerrainType? @relation(fields: [terrainTypeId], references: [id], onDelete: SetNull)
 
-  specialSeriesId String?
-  specialSeries   SpecialSeries? @relation("SpecialSeriesCompetitions", fields: [specialSeriesId], references: [id], onDelete: SetNull)
+  // Many-to-many: Una competición puede pertenecer a múltiples special series
+  specialSeries SpecialSeries[] @relation("CompetitionSpecialSeries")
 
   itraPoints Int? // Puntos ITRA (0-6)
   utmbIndex  UTMBIndex? // Índice UTMB
@@ -383,7 +383,6 @@ model Competition {
   @@index([type])
   @@index([organizerId])
   @@index([terrainTypeId])
-  @@index([specialSeriesId])
   @@map("competitions")
 }
 
@@ -939,8 +938,8 @@ model SpecialSeries {
   createdById String
   createdBy   User   @relation("SpecialSeriesCreator", fields: [createdById], references: [id])
 
-  // Relaciones
-  competitions Competition[] @relation("SpecialSeriesCompetitions")
+  // Relaciones - Many-to-many con Competition
+  competitions Competition[] @relation("CompetitionSpecialSeries")
   translations SpecialSeriesTranslation[]
 
   createdAt DateTime @default(now())

@@ -59,7 +59,7 @@ export default function CompetitionForm({
     featured: competition?.featured || false,
     // Classification fields
     terrainTypeId: competition?.terrainTypeId || '',
-    specialSeriesId: competition?.specialSeriesId || '',
+    specialSeriesIds: competition?.specialSeries?.map((s: any) => s.id) || [],
     itraPoints: competition?.itraPoints?.toString() || '',
     utmbIndex: competition?.utmbIndex || '',
   });
@@ -149,7 +149,7 @@ export default function CompetitionForm({
         featured: formData.featured,
         // Classification fields
         terrainTypeId: formData.terrainTypeId || undefined,
-        specialSeriesId: formData.specialSeriesId || undefined,
+        specialSeriesIds: formData.specialSeriesIds.length > 0 ? formData.specialSeriesIds : [],
         itraPoints: formData.itraPoints ? parseInt(formData.itraPoints) : undefined,
         utmbIndex: (formData.utmbIndex as UTMBIndex) || undefined,
       };
@@ -432,27 +432,53 @@ export default function CompetitionForm({
               </p>
             </div>
 
-            {/* Special Series */}
-            <div>
-              <label htmlFor="specialSeriesId" className="block text-sm font-medium text-gray-700 mb-1">
-                Serie Especial
+            {/* Special Series - Multi-select */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Series Especiales
               </label>
-              <select
-                id="specialSeriesId"
-                value={formData.specialSeriesId}
-                onChange={(e) => setFormData({ ...formData, specialSeriesId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="">-- No pertenece a ninguna serie --</option>
-                {specialSeriesList.map((series) => (
-                  <option key={series.id} value={series.id}>
-                    {series.name}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Ej: UTMB World Series, Golden Trail Series
+              <p className="text-xs text-gray-500 mb-2">
+                Selecciona todas las series a las que pertenece esta competición
               </p>
+              <div className="border border-gray-300 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                {specialSeriesList.length === 0 ? (
+                  <p className="text-sm text-gray-500">No hay series disponibles</p>
+                ) : (
+                  specialSeriesList.map((series) => (
+                    <label
+                      key={series.id}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.specialSeriesIds.includes(series.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({
+                              ...formData,
+                              specialSeriesIds: [...formData.specialSeriesIds, series.id],
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              specialSeriesIds: formData.specialSeriesIds.filter(
+                                (id: string) => id !== series.id
+                              ),
+                            });
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{series.name}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+              {formData.specialSeriesIds.length > 0 && (
+                <p className="text-xs text-blue-600 mt-2">
+                  {formData.specialSeriesIds.length} serie(s) seleccionada(s)
+                </p>
+              )}
             </div>
 
             {/* ITRA Points */}
