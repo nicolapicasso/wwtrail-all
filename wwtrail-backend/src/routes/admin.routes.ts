@@ -3,6 +3,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import CompetitionAdminController from '../controllers/competition-admin.controller';
 import AdminController from '../controllers/admin.controller';
+import { importController } from '../controllers/import.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { requireAdmin, requireOrganizer } from '../middlewares/authorize.middleware';
 import { validate } from '../middlewares/validate.middleware';
@@ -325,6 +326,94 @@ router.get(
   requireOrganizer,
   validate(getOrganizerCompetitionsSchema),
   CompetitionAdminController.getMyCompetitions
+);
+
+// ============================================
+// RUTAS ADMIN - IMPORTACIÓN DE DATOS
+// ============================================
+
+/**
+ * @route   GET /api/v1/admin/import/stats
+ * @desc    Get import statistics
+ * @access  Admin
+ */
+router.get(
+  '/admin/import/stats',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.getStats(req, res, next)
+);
+
+/**
+ * @route   POST /api/v1/admin/import/terrain-types
+ * @desc    Ensure all terrain types exist
+ * @access  Admin
+ */
+router.post(
+  '/admin/import/terrain-types',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.ensureTerrainTypes(req, res, next)
+);
+
+/**
+ * @route   POST /api/v1/admin/import/organizers
+ * @desc    Import organizers
+ * @access  Admin
+ */
+router.post(
+  '/admin/import/organizers',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.importOrganizers(req, res, next)
+);
+
+/**
+ * @route   POST /api/v1/admin/import/series
+ * @desc    Import special series
+ * @access  Admin
+ */
+router.post(
+  '/admin/import/series',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.importSeries(req, res, next)
+);
+
+/**
+ * @route   POST /api/v1/admin/import/events
+ * @desc    Import events
+ * @access  Admin
+ */
+router.post(
+  '/admin/import/events',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.importEvents(req, res, next)
+);
+
+/**
+ * @route   POST /api/v1/admin/import/competitions
+ * @desc    Import competitions
+ * @access  Admin
+ */
+router.post(
+  '/admin/import/competitions',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.importCompetitions(req, res, next)
+);
+
+/**
+ * @route   POST /api/v1/admin/import/full
+ * @desc    Full import (organizers + series + events + competitions)
+ * @access  Admin
+ */
+router.post(
+  '/admin/import/full',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.importFull(req, res, next)
 );
 
 export default router;
