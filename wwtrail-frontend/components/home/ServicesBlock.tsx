@@ -25,7 +25,8 @@ export function ServicesBlock({ config }: ServicesBlockProps) {
       try {
         const data = await servicesService.getAll({
           limit,
-          featured: featuredOnly
+          featured: featuredOnly,
+          status: 'PUBLISHED'
         });
         setServices(data?.data || []);
       } catch (error) {
