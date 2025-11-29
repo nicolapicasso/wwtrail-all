@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Menu, ChevronDown, MapPin, Award, Settings } from 'lucide-react';
+import { User, LogOut, Menu, ChevronDown, MapPin, Award, Settings, Users, Star, Gift } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -138,12 +138,38 @@ export default function Navbar() {
               >
                 Mapa
               </Link>
-              <Link
-                href="/promotions"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
-              >
-                {t('promotions')}
-              </Link>
+
+              {/* Comunidad dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
+                    Comunidad
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/users" className="cursor-pointer flex items-center">
+                      <Users className="mr-2 h-4 w-4" />
+                      Directorio de usuarios
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/users/insiders" className="cursor-pointer flex items-center">
+                      <Star className="mr-2 h-4 w-4" />
+                      Insiders
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/promotions" className="cursor-pointer flex items-center">
+                      <Gift className="mr-2 h-4 w-4" />
+                      Ventajas
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Link
                 href="/magazine"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
@@ -257,12 +283,30 @@ export default function Navbar() {
             >
               Mapa
             </Link>
+            {/* Comunidad section */}
+            <div className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300">
+              Comunidad
+            </div>
             <Link
-              href="/promotions"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              href="/users"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {t('promotions')}
+              → Directorio de usuarios
+            </Link>
+            <Link
+              href="/users/insiders"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              → Insiders
+            </Link>
+            <Link
+              href="/promotions"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              → Ventajas
             </Link>
             <Link
               href="/magazine"

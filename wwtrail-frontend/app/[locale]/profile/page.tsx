@@ -70,9 +70,10 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-primary text-primary-foreground py-12">
-        <div className="container mx-auto px-4">
+      {/* Header with gradient */}
+      <div className="relative bg-gradient-to-r from-blue-600 to-green-600 text-white py-12">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-2">Mi Perfil</h1>
           <p className="text-lg opacity-90">
             Gestiona tu información personal
