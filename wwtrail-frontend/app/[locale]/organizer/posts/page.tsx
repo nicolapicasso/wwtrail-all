@@ -58,21 +58,21 @@ export default function OrganizerPostsPage() {
     switch (status) {
       case 'PUBLISHED':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2.5 py-0.5 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1 rounded-none bg-[#0E612F] text-white px-2.5 py-0.5 text-xs font-semibold">
             <CheckCircle className="h-3 w-3" />
             Publicado
           </span>
         );
       case 'DRAFT':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-800 px-2.5 py-0.5 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1 rounded-none bg-black text-white px-2.5 py-0.5 text-xs font-semibold">
             <Clock className="h-3 w-3" />
             Borrador
           </span>
         );
       case 'ARCHIVED':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 px-2.5 py-0.5 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1 rounded-none bg-[#B66916] text-white px-2.5 py-0.5 text-xs font-semibold">
             <XCircle className="h-3 w-3" />
             Archivado
           </span>

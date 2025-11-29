@@ -9,26 +9,26 @@ export function EventStatusBadge({ status, className = '' }: EventStatusBadgePro
   const statusConfig = {
     [EventStatus.DRAFT]: {
       label: 'Borrador',
-      className: 'bg-gray-100 text-gray-800 border-gray-200'
+      className: 'bg-black text-white'
     },
     [EventStatus.PUBLISHED]: {
       label: 'Publicado',
-      className: 'bg-green-100 text-green-800 border-green-200'
+      className: 'bg-[#0E612F] text-white'
     },
     [EventStatus.CANCELLED]: {
       label: 'Cancelado',
-      className: 'bg-red-100 text-red-800 border-red-200'
+      className: 'bg-[#991B1B] text-white'
     },
     [EventStatus.ARCHIVED]: {
       label: 'Archivado',
-      className: 'bg-orange-100 text-orange-800 border-orange-200'
+      className: 'bg-[#B66916] text-white'
     }
   };
 
   const config = statusConfig[status] || statusConfig[EventStatus.DRAFT];
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className} ${className}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-none text-xs font-semibold ${config.className} ${className}`}>
       {config.label}
     </span>
   );

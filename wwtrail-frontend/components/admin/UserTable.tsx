@@ -24,10 +24,10 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
 
   const getRoleBadge = (role: string) => {
     const styles = {
-      ADMIN: 'bg-purple-100 text-purple-700 border-purple-200',
-      ORGANIZER: 'bg-blue-100 text-blue-700 border-blue-200',
-      ATHLETE: 'bg-green-100 text-green-700 border-green-200',
-      VIEWER: 'bg-gray-100 text-gray-700 border-gray-200',
+      ADMIN: 'bg-[#991B1B] text-white',
+      ORGANIZER: 'bg-[#163D89] text-white',
+      ATHLETE: 'bg-[#0E612F] text-white',
+      VIEWER: 'bg-black text-white',
     };
 
     const icons = {
@@ -41,7 +41,7 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
     const style = styles[role as keyof typeof styles] || styles.VIEWER;
 
     return (
-      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${style}`}>
+      <span className={`inline-flex items-center gap-1 rounded-none px-2.5 py-0.5 text-xs font-medium ${style}`}>
         <Icon className="h-3 w-3" />
         {role}
       </span>
@@ -50,12 +50,12 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
 
   const getStatusBadge = (isActive: boolean) => {
     return isActive ? (
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 border border-green-200 px-2.5 py-0.5 text-xs font-medium">
+      <span className="inline-flex items-center gap-1 rounded-none bg-[#0E612F] text-white px-2.5 py-0.5 text-xs font-medium">
         <UserCheck className="h-3 w-3" />
         Activo
       </span>
     ) : (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-700 border border-red-200 px-2.5 py-0.5 text-xs font-medium">
+      <span className="inline-flex items-center gap-1 rounded-none bg-[#991B1B] text-white px-2.5 py-0.5 text-xs font-medium">
         <UserX className="h-3 w-3" />
         Inactivo
       </span>

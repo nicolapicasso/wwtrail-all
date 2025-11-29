@@ -18,13 +18,13 @@ export default function EventApprovalQueue({
 }: EventApprovalQueueProps) {
   const getStatusBadge = (status: string) => {
     const styles = {
-      DRAFT: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-      PUBLISHED: 'bg-green-100 text-green-700 border-green-200',
-      REJECTED: 'bg-red-100 text-red-700 border-red-200',
+      DRAFT: 'bg-black text-white',
+      PUBLISHED: 'bg-[#0E612F] text-white',
+      REJECTED: 'bg-[#991B1B] text-white',
     };
 
     return (
-      <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles[status as keyof typeof styles]}`}>
+      <span className={`inline-flex rounded-none px-2.5 py-0.5 text-xs font-medium ${styles[status as keyof typeof styles]}`}>
         {status}
       </span>
     );
