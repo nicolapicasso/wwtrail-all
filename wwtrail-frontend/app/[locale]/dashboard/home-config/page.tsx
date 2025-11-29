@@ -134,21 +134,25 @@ export default function HomeConfigPage() {
       EVENTS: 'Eventos',
       COMPETITIONS: 'Competiciones',
       EDITIONS: 'Ediciones',
+      SERVICES: 'Servicios',
+      POSTS: 'Artículos',
       TEXT: 'Texto',
       LINKS: 'Enlaces',
     };
-    return labels[type];
+    return labels[type] || type;
   };
 
   const getBlockTypeColor = (type: HomeBlockType): string => {
     const colors: Record<HomeBlockType, string> = {
       EVENTS: 'bg-blue-100 text-blue-800',
       COMPETITIONS: 'bg-green-100 text-green-800',
-      EDITIONS: 'bg-purple-100 text-purple-800',
+      EDITIONS: 'bg-black text-white',
+      SERVICES: 'bg-orange-100 text-orange-800',
+      POSTS: 'bg-emerald-100 text-emerald-800',
       TEXT: 'bg-gray-100 text-gray-800',
-      LINKS: 'bg-orange-100 text-orange-800',
+      LINKS: 'bg-amber-100 text-amber-800',
     };
-    return colors[type];
+    return colors[type] || 'bg-gray-100 text-gray-800';
   };
 
   if (loading) {

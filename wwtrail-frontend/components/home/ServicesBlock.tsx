@@ -23,14 +23,17 @@ export function ServicesBlock({ config }: ServicesBlockProps) {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const data = await servicesService.getAll({
+        console.log('[ServicesBlock] Fetching services with config:', { limit, featuredOnly });
+        const response = await servicesService.getAll({
           limit,
           featured: featuredOnly,
           status: 'PUBLISHED'
         });
-        setServices(data?.data || []);
+        console.log('[ServicesBlock] API Response:', response);
+        console.log('[ServicesBlock] Services count:', response?.data?.length || 0);
+        setServices(response?.data || []);
       } catch (error) {
-        console.error('Error fetching services:', error);
+        console.error('[ServicesBlock] Error fetching services:', error);
         setServices([]);
       } finally {
         setLoading(false);
