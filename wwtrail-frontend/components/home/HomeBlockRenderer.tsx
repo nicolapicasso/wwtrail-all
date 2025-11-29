@@ -7,6 +7,7 @@ import { EventsBlock } from './EventsBlock';
 import { CompetitionsBlock } from './CompetitionsBlock';
 import { EditionsBlock } from './EditionsBlock';
 import { ServicesBlock } from './ServicesBlock';
+import { PostsBlock } from './PostsBlock';
 import { TextBlock } from './TextBlock';
 import { LinksBlock } from './LinksBlock';
 
@@ -37,6 +38,9 @@ export function HomeBlockRenderer({ block }: HomeBlockRendererProps) {
 
     case HomeBlockType.SERVICES:
       return <ServicesBlock config={block.config as ContentBlockConfig} />;
+
+    case HomeBlockType.POSTS:
+      return <PostsBlock config={block.config as ContentBlockConfig} />;
 
     case HomeBlockType.TEXT:
       return <TextBlock config={block.config as TextBlockConfig} />;
