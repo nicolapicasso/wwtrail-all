@@ -11,6 +11,7 @@ import EventGallery from '@/components/EventGallery';
 import EventMap from '@/components/EventMap';
 import { RelatedArticles } from '@/components/RelatedArticles';
 import { EditionParticipants } from '@/components/EditionParticipants';
+import { AddParticipationButton } from '@/components/AddParticipationButton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Event } from '@/types/api';
@@ -153,9 +154,14 @@ export default async function EditionDetailPage({
               </div>
             </div>
 
-            {/* Status Badge */}
-            <div className="ml-4">
+            {/* Status Badge & Participation Button */}
+            <div className="ml-4 flex flex-col gap-2 items-end">
               <StatusBadge status={edition.status} />
+              <AddParticipationButton
+                editionId={edition.id}
+                editionName={competition.name}
+                editionYear={edition.year}
+              />
             </div>
           </div>
         </div>
