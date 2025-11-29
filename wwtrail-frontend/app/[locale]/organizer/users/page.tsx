@@ -45,6 +45,10 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  Plus,
+  Star,
+  Copy,
+  Check,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -55,6 +59,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { adminService, AdminUser } from '@/lib/api/admin.service';
+import { COUNTRIES } from '@/lib/utils/countries';
 
 const ROLE_OPTIONS = [
   { value: 'ADMIN', label: 'Administrador', icon: Crown, color: 'text-red-600 bg-red-100' },
@@ -85,8 +90,22 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<string>('');
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Create user form
+  const [createUserForm, setCreateUserForm] = useState({
+    email: '',
+    username: '',
+    firstName: '',
+    lastName: '',
+    role: 'ATHLETE',
+    country: '',
+    gender: '',
+  });
+  const [createdUserPassword, setCreatedUserPassword] = useState<string | null>(null);
+  const [passwordCopied, setPasswordCopied] = useState(false);
 
   const fetchUsers = useCallback(async (page = 1) => {
     try {
@@ -194,6 +213,62 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!createUserForm.email || !createUserForm.username || !createUserForm.firstName || !createUserForm.role) {
+      setError('Por favor completa los campos obligatorios: email, username, nombre y rol');
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const result = await adminService.createUser(createUserForm);
+      setCreatedUserPassword(result.generatedPassword);
+      await fetchUsers(1);
+    } catch (err: any) {
+      console.error('Error creating user:', err);
+      setError(err.response?.data?.message || 'Error al crear el usuario');
+      setIsCreateDialogOpen(false);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCloseCreateDialog = () => {
+    setIsCreateDialogOpen(false);
+    setCreatedUserPassword(null);
+    setPasswordCopied(false);
+    setCreateUserForm({
+      email: '',
+      username: '',
+      firstName: '',
+      lastName: '',
+      role: 'ATHLETE',
+      country: '',
+      gender: '',
+    });
+  };
+
+  const handleCopyPassword = () => {
+    if (createdUserPassword) {
+      navigator.clipboard.writeText(createdUserPassword);
+      setPasswordCopied(true);
+      setTimeout(() => setPasswordCopied(false), 2000);
+    }
+  };
+
+  const handleToggleInsider = async (user: AdminUser) => {
+    setActionLoading(true);
+    try {
+      await adminService.toggleInsiderStatus(user.id);
+      await fetchUsers(pagination.currentPage);
+    } catch (err: any) {
+      console.error('Error toggling insider status:', err);
+      setError(err.response?.data?.message || 'Error al cambiar el estado de Insider');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const roleOption = ROLE_OPTIONS.find((r) => r.value === role);
     if (!roleOption) return null;
@@ -228,10 +303,16 @@ export default function AdminUsersPage() {
             Administra los usuarios de la plataforma
           </p>
         </div>
-        <Button variant="outline" onClick={() => fetchUsers(pagination.currentPage)} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => fetchUsers(pagination.currentPage)} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Crear Usuario
+          </Button>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -441,6 +522,10 @@ export default function AdminUsersPage() {
                                 <Shield className="w-4 h-4 mr-2" />
                                 Cambiar rol
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleInsider(user)}>
+                                <Star className={`w-4 h-4 mr-2 ${user.isInsider ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                                {user.isInsider ? 'Quitar Insider' : 'Hacer Insider'}
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
                                 {user.isActive ? (
                                   <>
@@ -568,6 +653,153 @@ export default function AdminUsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create User Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={(open) => !open && handleCloseCreateDialog()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Crear nuevo usuario</DialogTitle>
+            <DialogDescription>
+              {createdUserPassword
+                ? 'Usuario creado exitosamente. Guarda la contraseña generada.'
+                : 'Completa los datos del nuevo usuario'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {createdUserPassword ? (
+            <div className="py-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-green-800 font-medium mb-2">Usuario creado correctamente</p>
+                <p className="text-sm text-green-700">
+                  Contraseña generada (cópiala antes de cerrar):
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <code className="flex-1 px-3 py-2 bg-white border rounded text-sm font-mono">
+                    {createdUserPassword}
+                  </code>
+                  <Button variant="outline" size="sm" onClick={handleCopyPassword}>
+                    {passwordCopied ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <Button className="w-full" onClick={handleCloseCreateDialog}>
+                Cerrar
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">Nombre *</Label>
+                    <Input
+                      id="firstName"
+                      value={createUserForm.firstName}
+                      onChange={(e) => setCreateUserForm({ ...createUserForm, firstName: e.target.value })}
+                      placeholder="Juan"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Apellidos</Label>
+                    <Input
+                      id="lastName"
+                      value={createUserForm.lastName}
+                      onChange={(e) => setCreateUserForm({ ...createUserForm, lastName: e.target.value })}
+                      placeholder="García"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={createUserForm.email}
+                    onChange={(e) => setCreateUserForm({ ...createUserForm, email: e.target.value })}
+                    placeholder="usuario@ejemplo.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="username">Nombre de usuario *</Label>
+                  <Input
+                    id="username"
+                    value={createUserForm.username}
+                    onChange={(e) => setCreateUserForm({ ...createUserForm, username: e.target.value })}
+                    placeholder="juangarcia"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role">Rol *</Label>
+                  <select
+                    id="role"
+                    value={createUserForm.role}
+                    onChange={(e) => setCreateUserForm({ ...createUserForm, role: e.target.value })}
+                    className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    {ROLE_OPTIONS.map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="country">País</Label>
+                    <select
+                      id="country"
+                      value={createUserForm.country}
+                      onChange={(e) => setCreateUserForm({ ...createUserForm, country: e.target.value })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">Seleccionar...</option>
+                      {COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Género</Label>
+                    <select
+                      id="gender"
+                      value={createUserForm.gender}
+                      onChange={(e) => setCreateUserForm({ ...createUserForm, gender: e.target.value })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="MALE">Hombre</option>
+                      <option value="FEMALE">Mujer</option>
+                      <option value="NON_BINARY">No binario</option>
+                    </select>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-500">
+                  * Campos obligatorios. Se generará una contraseña aleatoria que podrás enviar al usuario.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={handleCloseCreateDialog} disabled={actionLoading}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleCreateUser} disabled={actionLoading}>
+                  {actionLoading ? 'Creando...' : 'Crear Usuario'}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
