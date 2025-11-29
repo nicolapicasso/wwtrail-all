@@ -247,8 +247,13 @@ class AdminService {
           username: true,
           firstName: true,
           lastName: true,
+          avatar: true,
+          country: true,
+          gender: true,
           role: true,
           isActive: true,
+          isInsider: true,
+          isPublic: true,
           createdAt: true,
           updatedAt: true,
           _count: {
@@ -273,8 +278,13 @@ class AdminService {
         firstName: user.firstName,
         lastName: user.lastName,
         fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+        avatar: user.avatar,
+        country: user.country,
+        gender: user.gender,
         role: user.role,
         isActive: user.isActive,
+        isInsider: user.isInsider,
+        isPublic: user.isPublic,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         stats: {
@@ -1019,6 +1029,35 @@ class AdminService {
         firstName: true,
         lastName: true,
         isInsider: true,
+      },
+    });
+
+    return updatedUser;
+  }
+
+  /**
+   * Toggle public status for a user
+   */
+  async togglePublicStatus(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, isPublic: true },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { isPublic: !user.isPublic },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        isPublic: true,
       },
     });
 

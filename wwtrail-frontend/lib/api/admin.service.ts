@@ -33,6 +33,7 @@ export interface User {
   role: 'ADMIN' | 'ORGANIZER' | 'ATHLETE' | 'VIEWER';
   isActive: boolean;
   isInsider?: boolean;
+  isPublic?: boolean;
   avatar?: string;
   country?: string;
   gender?: string;
@@ -249,6 +250,14 @@ class AdminService {
    */
   async toggleInsiderStatus(userId: string): Promise<User> {
     const { data } = await apiClientV1.patch(`/admin/users/${userId}/toggle-insider`);
+    return data.data;
+  }
+
+  /**
+   * Toggle public status for a user
+   */
+  async togglePublicStatus(userId: string): Promise<User> {
+    const { data } = await apiClientV1.patch(`/admin/users/${userId}/toggle-public`);
     return data.data;
   }
 

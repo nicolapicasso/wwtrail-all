@@ -162,6 +162,18 @@ router.patch(
   (req: Request, res: Response, next: NextFunction) => AdminController.toggleInsiderStatus(req, res, next)
 );
 
+/**
+ * @route   PATCH /api/v1/admin/users/:id/toggle-public
+ * @desc    Toggle public status for a user
+ * @access  Admin
+ */
+router.patch(
+  '/admin/users/:id/toggle-public',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.togglePublicStatus(req, res, next)
+);
+
 // ============================================
 // RUTAS ADMIN - INSIDERS
 // ============================================
