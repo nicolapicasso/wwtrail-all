@@ -263,14 +263,18 @@ class UserService {
    */
   async getPublicUsers(filters: GetPublicUsersQuery): Promise<PaginatedPublicUsers> {
     const {
-      page = 1,
-      limit = 20,
+      page: pageParam = 1,
+      limit: limitParam = 20,
       search,
       country,
       minAge,
       maxAge,
       editionId,
     } = filters;
+
+    // Ensure page and limit are integers
+    const page = typeof pageParam === 'string' ? parseInt(pageParam, 10) : pageParam;
+    const limit = typeof limitParam === 'string' ? parseInt(limitParam, 10) : limitParam;
 
     // Construir where clause
     const where: Prisma.UserWhereInput = {

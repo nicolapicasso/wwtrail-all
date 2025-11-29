@@ -26,6 +26,8 @@ import {
   Globe,
   Layout,
   AlertCircle,
+  Star,
+  UserCog,
 } from 'lucide-react';
 import { adminService, PendingContentCounts } from '@/lib/api/admin.service';
 
@@ -173,9 +175,20 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Usuarios',
-    href: '/organizer/users',
     icon: Users,
     adminOnly: true,
+    children: [
+      {
+        label: 'Gestión de usuarios',
+        href: '/organizer/users',
+        icon: UserCog,
+      },
+      {
+        label: 'Insiders',
+        href: '/organizer/insiders',
+        icon: Star,
+      },
+    ],
   },
   {
     label: 'Estadísticas',
@@ -189,7 +202,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO', 'Usuarios']);
   const [pendingCounts, setPendingCounts] = useState<PendingContentCounts | null>(null);
 
   // Fetch pending content counts for admins
