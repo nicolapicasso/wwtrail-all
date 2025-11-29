@@ -126,6 +126,70 @@ router.delete(
   (req: Request, res: Response, next: NextFunction) => AdminController.deleteUser(req, res, next)
 );
 
+/**
+ * @route   POST /api/v1/admin/users
+ * @desc    Crear un nuevo usuario
+ * @access  Admin
+ */
+router.post(
+  '/admin/users',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.createUser(req, res, next)
+);
+
+/**
+ * @route   PATCH /api/v1/admin/users/:id/toggle-insider
+ * @desc    Toggle insider status for a user
+ * @access  Admin
+ */
+router.patch(
+  '/admin/users/:id/toggle-insider',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.toggleInsiderStatus(req, res, next)
+);
+
+// ============================================
+// RUTAS ADMIN - INSIDERS
+// ============================================
+
+/**
+ * @route   GET /api/v1/admin/insiders
+ * @desc    Get all insiders with stats
+ * @access  Admin
+ */
+router.get(
+  '/admin/insiders',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.getInsiders(req, res, next)
+);
+
+/**
+ * @route   GET /api/v1/admin/insiders/config
+ * @desc    Get insider config (badge, intro texts)
+ * @access  Admin
+ */
+router.get(
+  '/admin/insiders/config',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.getInsiderConfig(req, res, next)
+);
+
+/**
+ * @route   PUT /api/v1/admin/insiders/config
+ * @desc    Update insider config
+ * @access  Admin
+ */
+router.put(
+  '/admin/insiders/config',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.updateInsiderConfig(req, res, next)
+);
+
 // ============================================
 // RUTAS ADMIN - CONTENIDO PENDIENTE DE REVISIÓN
 // ============================================

@@ -149,6 +149,7 @@ model User {
   gender      Gender?
   birthDate   DateTime?
   isPublic    Boolean   @default(false)
+  isInsider   Boolean   @default(false) // WWTrail Insider - corresponsal especial
 
   // Redes sociales
   instagramUrl String?  @db.Text
@@ -181,6 +182,7 @@ model User {
   @@index([email])
   @@index([username])
   @@index([role])
+  @@index([isInsider])
   @@map("users")
 }
 
@@ -1413,6 +1415,29 @@ model SEO {
   @@index([entityType, entityId, language])
   @@index([entityType, slug, language])
   @@map("seo_metadata")
+}
+
+// ===================================
+// INSIDER CONFIG - Configuración de WWTrail Insiders
+// ===================================
+model InsiderConfig {
+  id          String  @id @default(uuid())
+
+  // Badge que se muestra sobre la foto de los insiders
+  badgeUrl    String? @db.Text
+
+  // Texto introductorio por idioma (aparece en la página de listado de Insiders)
+  introTextES String? @db.Text
+  introTextEN String? @db.Text
+  introTextIT String? @db.Text
+  introTextCA String? @db.Text
+  introTextFR String? @db.Text
+  introTextDE String? @db.Text
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("insider_config")
 }
 
 // ==========================================

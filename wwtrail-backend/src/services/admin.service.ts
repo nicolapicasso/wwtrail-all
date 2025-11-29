@@ -1,7 +1,8 @@
 // src/services/admin.service.ts
 
-import { UserRole, Prisma } from '@prisma/client';
+import { UserRole, Prisma, Gender } from '@prisma/client';
 import prisma from '../config/database';
+import bcrypt from 'bcrypt';
 
 // ============================================
 // INTERFACES
@@ -802,6 +803,216 @@ class AdminService {
     };
 
     return stats;
+  }
+
+  // ============================================
+  // USER CREATION
+  // ============================================
+
+  /**
+   * Crear un nuevo usuario (admin only)
+   */
+  async createUser(data: {
+    email: string;
+    username: string;
+    firstName: string;
+    lastName?: string;
+    role: UserRole;
+    country?: string;
+    gender?: Gender;
+  }) {
+    // Check if email already exists
+    const existingEmail = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existingEmail) {
+      throw new Error('Email already exists');
+    }
+
+    // Check if username already exists
+    const existingUsername = await prisma.user.findUnique({
+      where: { username: data.username },
+    });
+    if (existingUsername) {
+      throw new Error('Username already exists');
+    }
+
+    // Generate random password
+    const randomPassword = this.generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.username,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: data.role,
+        country: data.country,
+        gender: data.gender,
+        password: hashedPassword,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        country: true,
+        gender: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      user,
+      generatedPassword: randomPassword,
+    };
+  }
+
+  /**
+   * Generate a random password
+   */
+  private generateRandomPassword(length: number = 12): string {
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return password;
+  }
+
+  // ============================================
+  // INSIDER MANAGEMENT
+  // ============================================
+
+  /**
+   * Get all insiders with stats
+   */
+  async getInsiders() {
+    const insiders = await prisma.user.findMany({
+      where: { isInsider: true },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        country: true,
+        gender: true,
+        isActive: true,
+        createdAt: true,
+      },
+      orderBy: { firstName: 'asc' },
+    });
+
+    // Get stats
+    const byCountry: Record<string, number> = {};
+    const byGender: Record<string, number> = { MALE: 0, FEMALE: 0, NON_BINARY: 0, unknown: 0 };
+
+    insiders.forEach((insider) => {
+      // Count by country
+      const country = insider.country || 'unknown';
+      byCountry[country] = (byCountry[country] || 0) + 1;
+
+      // Count by gender
+      const gender = insider.gender || 'unknown';
+      byGender[gender] = (byGender[gender] || 0) + 1;
+    });
+
+    return {
+      insiders: insiders.map((i) => ({
+        ...i,
+        fullName: `${i.firstName || ''} ${i.lastName || ''}`.trim() || i.username,
+      })),
+      stats: {
+        total: insiders.length,
+        byCountry,
+        byGender,
+      },
+    };
+  }
+
+  /**
+   * Toggle insider status for a user
+   */
+  async toggleInsiderStatus(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, isInsider: true },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { isInsider: !user.isInsider },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        isInsider: true,
+      },
+    });
+
+    return updatedUser;
+  }
+
+  // ============================================
+  // INSIDER CONFIG
+  // ============================================
+
+  /**
+   * Get insider config (badge and intro texts)
+   */
+  async getInsiderConfig() {
+    let config = await prisma.insiderConfig.findFirst();
+
+    // Create default config if not exists
+    if (!config) {
+      config = await prisma.insiderConfig.create({
+        data: {},
+      });
+    }
+
+    return config;
+  }
+
+  /**
+   * Update insider config
+   */
+  async updateInsiderConfig(data: {
+    badgeUrl?: string;
+    introTextES?: string;
+    introTextEN?: string;
+    introTextIT?: string;
+    introTextCA?: string;
+    introTextFR?: string;
+    introTextDE?: string;
+  }) {
+    let config = await prisma.insiderConfig.findFirst();
+
+    if (config) {
+      config = await prisma.insiderConfig.update({
+        where: { id: config.id },
+        data,
+      });
+    } else {
+      config = await prisma.insiderConfig.create({
+        data,
+      });
+    }
+
+    return config;
   }
 }
 

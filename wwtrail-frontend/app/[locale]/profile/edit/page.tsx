@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { userService, OwnProfile, UpdateProfileData } from '@/lib/api/user.service';
 import { COUNTRIES } from '@/lib/utils/countries';
+import FileUpload from '@/components/FileUpload';
 
 export default function EditProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -233,35 +234,51 @@ export default function EditProfilePage() {
               <CardTitle>Informaci&oacute;n B&aacute;sica</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Avatar */}
-              <div className="flex items-center gap-6">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100">
-                  {formData.avatar ? (
-                    <Image
-                      src={formData.avatar}
-                      alt="Avatar"
-                      fill
-                      className="object-cover"
+              {/* Avatar with FileUpload */}
+              <div className="space-y-4">
+                <Label className="flex items-center gap-2">
+                  <Camera className="w-4 h-4" />
+                  Foto de perfil
+                </Label>
+                <div className="flex items-start gap-6">
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                    {formData.avatar ? (
+                      <Image
+                        src={formData.avatar}
+                        alt="Avatar"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="w-16 h-16 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <FileUpload
+                      onUploadComplete={(url) => {
+                        setFormData((prev) => ({ ...prev, avatar: url }));
+                      }}
+                      folder="avatars"
+                      accept="image/*"
+                      buttonText="Subir foto"
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <User className="w-12 h-12 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="avatar">URL de la foto de perfil</Label>
-                  <Input
-                    id="avatar"
-                    name="avatar"
-                    type="url"
-                    value={formData.avatar || ''}
-                    onChange={handleChange}
-                    placeholder="https://ejemplo.com/mi-foto.jpg"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Ingresa la URL de una imagen para usar como foto de perfil
-                  </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Recomendado: imagen cuadrada de al menos 200x200 píxeles
+                    </p>
+                    {formData.avatar && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => setFormData((prev) => ({ ...prev, avatar: '' }))}
+                      >
+                        Eliminar foto
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 

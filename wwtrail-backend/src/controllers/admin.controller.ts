@@ -292,6 +292,152 @@ class AdminController {
       next(error);
     }
   }
+
+  // ============================================
+  // USER CREATION
+  // ============================================
+
+  /**
+   * @route   POST /api/v1/admin/users
+   * @desc    Crear un nuevo usuario
+   * @access  Admin
+   */
+  async createUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, username, firstName, lastName, role, country, gender } = req.body;
+
+      if (!email || !username || !firstName || !role) {
+        res.status(400).json({
+          success: false,
+          message: 'Email, username, firstName and role are required',
+        });
+        return;
+      }
+
+      const result = await AdminService.createUser({
+        email,
+        username,
+        firstName,
+        lastName,
+        role,
+        country,
+        gender,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'User created successfully',
+        data: result.user,
+        generatedPassword: result.generatedPassword,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Email already exists') {
+          res.status(409).json({
+            success: false,
+            message: 'Email already exists',
+          });
+        } else if (error.message === 'Username already exists') {
+          res.status(409).json({
+            success: false,
+            message: 'Username already exists',
+          });
+        } else {
+          next(error);
+        }
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  // ============================================
+  // INSIDER MANAGEMENT
+  // ============================================
+
+  /**
+   * @route   GET /api/v1/admin/insiders
+   * @desc    Get all insiders with stats
+   * @access  Admin
+   */
+  async getInsiders(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await AdminService.getInsiders();
+
+      res.status(200).json({
+        success: true,
+        data: result.insiders,
+        stats: result.stats,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @route   PATCH /api/v1/admin/users/:id/toggle-insider
+   * @desc    Toggle insider status for a user
+   * @access  Admin
+   */
+  async toggleInsiderStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const updatedUser = await AdminService.toggleInsiderStatus(id);
+
+      res.status(200).json({
+        success: true,
+        message: `User ${updatedUser.isInsider ? 'marked as' : 'removed from'} Insider`,
+        data: updatedUser,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/admin/insiders/config
+   * @desc    Get insider config (badge, intro texts)
+   * @access  Admin
+   */
+  async getInsiderConfig(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const config = await AdminService.getInsiderConfig();
+
+      res.status(200).json({
+        success: true,
+        data: config,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/admin/insiders/config
+   * @desc    Update insider config
+   * @access  Admin
+   */
+  async updateInsiderConfig(req: Request, res: Response, next: NextFunction) {
+    try {
+      const config = await AdminService.updateInsiderConfig(req.body);
+
+      res.status(200).json({
+        success: true,
+        message: 'Insider config updated',
+        data: config,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new AdminController();
