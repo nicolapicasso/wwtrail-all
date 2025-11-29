@@ -232,7 +232,10 @@ class UserEditionService {
    * Buscar ediciones para selector (con buscador)
    */
   async searchEditions(query: SearchEditionsQuery) {
-    const { search, page = 1, limit = 20 } = query;
+    const { search } = query;
+    // Parse page and limit to integers (query params come as strings)
+    const page = typeof query.page === 'string' ? parseInt(query.page, 10) : (query.page || 1);
+    const limit = typeof query.limit === 'string' ? parseInt(query.limit, 10) : (query.limit || 20);
     const skip = (page - 1) * limit;
 
     // Build where clause - simplified structure
