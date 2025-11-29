@@ -14,6 +14,7 @@ interface GetUsersFilters {
   search?: string;
   role?: UserRole;
   isActive?: boolean;
+  isInsider?: boolean;
   sortBy?: 'createdAt' | 'firstName' | 'email' | 'role';
   sortOrder?: 'asc' | 'desc';
 }
@@ -199,6 +200,7 @@ class AdminService {
       search,
       role,
       isActive,
+      isInsider,
       sortBy = 'createdAt',
       sortOrder = 'desc',
     } = filters;
@@ -221,6 +223,10 @@ class AdminService {
 
     if (isActive !== undefined) {
       where.isActive = isActive;
+    }
+
+    if (isInsider !== undefined) {
+      where.isInsider = isInsider;
     }
 
     // Calcular offset
@@ -417,6 +423,58 @@ class AdminService {
         lastName: true,
         role: true,
         isActive: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      ...updatedUser,
+      fullName: `${updatedUser.firstName || ''} ${updatedUser.lastName || ''}`.trim() || updatedUser.username,
+    };
+  }
+
+  /**
+   * Actualizar datos de un usuario
+   */
+  async updateUser(userId: string, data: {
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    email?: string;
+    country?: string;
+    gender?: string;
+  }) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+        email: data.email,
+        country: data.country,
+        gender: data.gender as any,
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        role: true,
+        isActive: true,
+        isInsider: true,
+        country: true,
+        gender: true,
+        createdAt: true,
         updatedAt: true,
       },
     });
