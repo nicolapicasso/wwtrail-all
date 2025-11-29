@@ -402,6 +402,107 @@ export class ImportService {
 
     return { organizers, specialSeries, events, competitions, terrainTypes };
   }
+
+  // ============================================
+  // BULK DELETE METHODS
+  // ============================================
+
+  /**
+   * Delete all competitions (and related data)
+   */
+  async deleteAllCompetitions(): Promise<{ deleted: number }> {
+    // First delete related data
+    await prisma.competitionTranslation.deleteMany({});
+    await prisma.userCompetition.deleteMany({});
+    await prisma.review.deleteMany({});
+    await prisma.favorite.deleteMany({});
+    await prisma.category.deleteMany({});
+    await prisma.result.deleteMany({});
+    await prisma.participant.deleteMany({});
+
+    // Delete editions first (they depend on competitions)
+    await prisma.editionRating.deleteMany({});
+    await prisma.editionPodium.deleteMany({});
+    await prisma.editionPhoto.deleteMany({});
+    await prisma.userEdition.deleteMany({});
+    await prisma.edition.deleteMany({});
+
+    // Now delete competitions
+    const result = await prisma.competition.deleteMany({});
+    return { deleted: result.count };
+  }
+
+  /**
+   * Delete all events (and related competitions)
+   */
+  async deleteAllEvents(): Promise<{ deleted: number }> {
+    // Delete competitions first
+    await this.deleteAllCompetitions();
+
+    // Delete event translations
+    await prisma.eventTranslation.deleteMany({});
+
+    // Delete events
+    const result = await prisma.event.deleteMany({});
+    return { deleted: result.count };
+  }
+
+  /**
+   * Delete all special series
+   */
+  async deleteAllSeries(): Promise<{ deleted: number }> {
+    // Delete translations first
+    await prisma.specialSeriesTranslation.deleteMany({});
+
+    // Delete series (competitions will lose their series connections automatically)
+    const result = await prisma.specialSeries.deleteMany({});
+    return { deleted: result.count };
+  }
+
+  /**
+   * Delete all organizers
+   */
+  async deleteAllOrganizers(): Promise<{ deleted: number }> {
+    // Events will have their organizerId set to null due to onDelete: SetNull
+    const result = await prisma.organizer.deleteMany({});
+    return { deleted: result.count };
+  }
+
+  /**
+   * Delete all editions
+   */
+  async deleteAllEditions(): Promise<{ deleted: number }> {
+    // Delete related data first
+    await prisma.editionRating.deleteMany({});
+    await prisma.editionPodium.deleteMany({});
+    await prisma.editionPhoto.deleteMany({});
+    await prisma.userEdition.deleteMany({});
+
+    const result = await prisma.edition.deleteMany({});
+    return { deleted: result.count };
+  }
+
+  /**
+   * Delete all imported data (full reset)
+   */
+  async deleteAllImportedData(): Promise<{
+    competitions: number;
+    events: number;
+    series: number;
+    organizers: number;
+  }> {
+    const competitions = await this.deleteAllCompetitions();
+    const events = await this.deleteAllEvents();
+    const series = await this.deleteAllSeries();
+    const organizers = await this.deleteAllOrganizers();
+
+    return {
+      competitions: competitions.deleted,
+      events: events.deleted,
+      series: series.deleted,
+      organizers: organizers.deleted,
+    };
+  }
 }
 
 export const importService = new ImportService();
