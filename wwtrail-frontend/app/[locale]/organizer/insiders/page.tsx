@@ -256,8 +256,8 @@ export default function InsidersAdminPage() {
                   </div>
                   <div className="flex-1">
                     <FileUpload
-                      onUploadComplete={(url) => setFormConfig({ ...formConfig, badgeUrl: url })}
-                      folder="insiders"
+                      onUpload={(url) => setFormConfig({ ...formConfig, badgeUrl: url })}
+                      currentUrl={formConfig.badgeUrl}
                       accept="image/*"
                       buttonText="Subir distintivo"
                     />
