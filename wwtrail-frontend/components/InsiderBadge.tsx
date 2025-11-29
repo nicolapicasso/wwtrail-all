@@ -31,7 +31,7 @@ export function InsiderBadge({ badgeUrl, size = 'md', className = '' }: InsiderB
   const positionClass = positionClasses[size];
 
   return (
-    <div className={`absolute ${positionClass} ${sizeClass} ${className}`}>
+    <div className={`absolute ${positionClass} ${sizeClass} z-10 ${className}`}>
       {badgeUrl ? (
         <Image
           src={badgeUrl}

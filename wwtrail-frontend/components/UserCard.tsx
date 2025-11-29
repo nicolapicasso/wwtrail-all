@@ -28,19 +28,21 @@ export default function UserCard({ user, viewMode = 'grid' }: UserCardProps) {
       <Link href={`/${locale}/users/${user.username}`}>
         <div className="flex items-center gap-4 p-4 bg-white rounded-lg border hover:shadow-md transition-shadow">
           {/* Avatar */}
-          <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-            {user.avatar ? (
-              <Image
-                src={user.avatar}
-                alt={user.fullName}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <UserIcon className="w-8 h-8 text-gray-400" />
-              </div>
-            )}
+          <div className="relative w-16 h-16 flex-shrink-0">
+            <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
+              {user.avatar ? (
+                <Image
+                  src={user.avatar}
+                  alt={user.fullName}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <UserIcon className="w-8 h-8 text-gray-400" />
+                </div>
+              )}
+            </div>
             {user.isInsider && <InsiderBadge badgeUrl={badgeUrl} size="md" />}
           </div>
 
@@ -87,19 +89,21 @@ export default function UserCard({ user, viewMode = 'grid' }: UserCardProps) {
         {/* Avatar Section */}
         <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden bg-white shadow-lg">
-              {user.avatar ? (
-                <Image
-                  src={user.avatar}
-                  alt={user.fullName}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <UserIcon className="w-12 h-12 text-gray-400" />
-                </div>
-              )}
+            <div className="relative w-24 h-24">
+              <div className="w-full h-full rounded-full overflow-hidden bg-white shadow-lg">
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.fullName}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <UserIcon className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+              </div>
               {user.isInsider && <InsiderBadge badgeUrl={badgeUrl} size="lg" />}
             </div>
           </div>

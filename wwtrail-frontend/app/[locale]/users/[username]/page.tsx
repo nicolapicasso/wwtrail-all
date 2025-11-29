@@ -117,19 +117,21 @@ export default function UserProfilePage() {
           {/* Profile header */}
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Avatar */}
-            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-white shadow-lg">
-              {profile.avatar ? (
-                <Image
-                  src={profile.avatar}
-                  alt={profile.fullName}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <UserIcon className="w-16 h-16 text-gray-400" />
-                </div>
-              )}
+            <div className="relative w-32 h-32 md:w-40 md:h-40">
+              <div className="w-full h-full rounded-full overflow-hidden bg-white shadow-lg">
+                {profile.avatar ? (
+                  <Image
+                    src={profile.avatar}
+                    alt={profile.fullName}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <UserIcon className="w-16 h-16 text-gray-400" />
+                  </div>
+                )}
+              </div>
               {profile.isInsider && <InsiderBadge badgeUrl={badgeUrl} size="lg" />}
             </div>
 

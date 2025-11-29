@@ -191,7 +191,7 @@ export default function InsidersPage() {
                         </div>
                         {/* Insider badge overlay */}
                         {data.config?.badgeUrl && (
-                          <div className="absolute -bottom-1 -right-1 w-8 h-8">
+                          <div className="absolute -bottom-1 -right-1 w-8 h-8 z-10">
                             <Image
                               src={data.config.badgeUrl}
                               alt="Insider"
