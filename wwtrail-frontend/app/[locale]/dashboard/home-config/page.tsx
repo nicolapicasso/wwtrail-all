@@ -30,7 +30,7 @@ export default function HomeConfigPage() {
   const [editingBlock, setEditingBlock] = useState<HomeBlock | null>(null);
 
   // Hero form state
-  const [heroImage, setHeroImage] = useState('');
+  const [heroImages, setHeroImages] = useState<string[]>([]);
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
 
@@ -42,7 +42,9 @@ export default function HomeConfigPage() {
     try {
       const data = await homeService.getActiveConfiguration();
       setConfig(data);
-      setHeroImage(data.heroImage || '');
+      // Compatibilidad: usar heroImages si existe, sino heroImage como array
+      const images = data.heroImages || (data.heroImage ? [data.heroImage] : []);
+      setHeroImages(images);
       setHeroTitle(data.heroTitle || '');
       setHeroSubtitle(data.heroSubtitle || '');
     } catch (error) {
@@ -58,7 +60,8 @@ export default function HomeConfigPage() {
     setSaving(true);
     try {
       await homeService.updateConfiguration(config.id, {
-        heroImage,
+        heroImages,
+        heroImage: heroImages[0] || null, // Mantener compatibilidad con heroImage legacy
         heroTitle,
         heroSubtitle,
       });
@@ -194,12 +197,12 @@ export default function HomeConfigPage() {
 
       {/* Hero Configuration */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Hero Section</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Hero Section (Slider)</h2>
         <HeroConfigForm
-          heroImage={heroImage}
+          heroImages={heroImages}
           heroTitle={heroTitle}
           heroSubtitle={heroSubtitle}
-          onImageChange={setHeroImage}
+          onImagesChange={setHeroImages}
           onTitleChange={setHeroTitle}
           onSubtitleChange={setHeroSubtitle}
           onSave={handleSaveHero}

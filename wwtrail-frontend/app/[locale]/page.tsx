@@ -58,11 +58,14 @@ export default function HomePage() {
   console.log('Home Config:', config);
   console.log('Sorted Blocks:', sortedBlocks);
 
+  // Obtener imágenes del hero: usar heroImages si existe, sino heroImage como fallback
+  const heroImages = config.heroImages || (config.heroImage ? [config.heroImage] : []);
+
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
+      {/* Hero Section con Slider */}
       <HeroSection
-        image={config.heroImage}
+        images={heroImages}
         title={config.heroTitle}
         subtitle={config.heroSubtitle}
       />

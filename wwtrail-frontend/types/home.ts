@@ -68,6 +68,7 @@ export interface HomeBlock {
 export interface HomeConfiguration {
   id: string;
   heroImage?: string;
+  heroImages?: string[]; // Array de URLs para el slider de imágenes
   heroTitle?: string;
   heroSubtitle?: string;
   isActive: boolean;
@@ -93,6 +94,7 @@ export interface UpdateHomeBlockDTO {
 
 export interface UpdateHomeConfigurationDTO {
   heroImage?: string | null;
+  heroImages?: string[] | null; // Array de URLs para el slider
   heroTitle?: string | null;
   heroSubtitle?: string | null;
   isActive?: boolean;
@@ -100,6 +102,7 @@ export interface UpdateHomeConfigurationDTO {
 
 export interface UpdateFullHomeConfigDTO {
   heroImage?: string | null;
+  heroImages?: string[] | null; // Array de URLs para el slider
   heroTitle?: string | null;
   heroSubtitle?: string | null;
   blocks: Array<{

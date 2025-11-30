@@ -1090,7 +1090,8 @@ enum EmailTemplateType {
 
 model HomeConfiguration {
   id           String  @id @default(uuid())
-  heroImage    String? @db.Text // URL de la imagen del hero
+  heroImage    String? @db.Text // URL de la imagen del hero (legacy, usar heroImages)
+  heroImages   Json?   // Array de URLs de imágenes para el slider ["url1", "url2", ...]
   heroTitle    String? @db.Text // Título principal del hero
   heroSubtitle String? @db.Text // Subtítulo del hero
   isActive     Boolean @default(true) // Solo una configuración activa a la vez
