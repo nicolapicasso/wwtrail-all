@@ -75,6 +75,7 @@ export const updateHomeBlockSchema = z.object({
 export const createHomeConfigurationSchema = z.object({
   body: z.object({
     heroImage: z.string().url().optional(),
+    heroImages: z.array(z.string().url()).optional(), // Array de URLs para el slider
     heroTitle: z.string().min(1).max(200).optional(),
     heroSubtitle: z.string().min(1).max(500).optional(),
     isActive: z.boolean().default(true),
@@ -84,6 +85,7 @@ export const createHomeConfigurationSchema = z.object({
 export const updateHomeConfigurationSchema = z.object({
   body: z.object({
     heroImage: z.string().url().optional().nullable(),
+    heroImages: z.array(z.string().url()).optional().nullable(), // Array de URLs para el slider
     heroTitle: z.string().min(1).max(200).optional().nullable(),
     heroSubtitle: z.string().min(1).max(500).optional().nullable(),
     isActive: z.boolean().optional(),
@@ -97,6 +99,7 @@ export const updateHomeConfigurationSchema = z.object({
 export const updateFullHomeConfigSchema = z.object({
   body: z.object({
     heroImage: z.string().url().optional().nullable(),
+    heroImages: z.array(z.string().url()).optional().nullable(), // Array de URLs para el slider
     heroTitle: z.string().min(1).max(200).optional().nullable(),
     heroSubtitle: z.string().min(1).max(500).optional().nullable(),
     blocks: z.array(
