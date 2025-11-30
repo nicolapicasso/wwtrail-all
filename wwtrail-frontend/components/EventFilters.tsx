@@ -14,9 +14,11 @@ import { eventsService } from '@/lib/api/v2';
 interface EventFiltersProps {
   searchValue?: string;  // ✅ CRÍTICO: Valor controlado desde EventList
   onSearch: (query: string) => void;
-  onFilterMonth: (month: string) => void;  // ✅ CAMBIO: mes en lugar de status
+  onFilterMonth?: (month: string) => void;  // Para páginas públicas (calendario)
+  onFilterStatus?: (status: string) => void;  // Para páginas de gestión (admin/organizer)
   onFilterCountry: (country: string) => void;
   onFilterCity?: (city: string) => void;  // Nuevo filtro de ciudad
+  onFilterOrganizer?: (organizerId: string) => void;  // Para admin
   selectedCountry?: string;  // País seleccionado para filtrar ciudades
   selectedCity?: string;  // Ciudad seleccionada
   onFilterHighlighted?: (highlighted: boolean | null) => void;
@@ -24,26 +26,33 @@ interface EventFiltersProps {
   showCityFilter?: boolean;  // Mostrar filtro de ciudad
   showOrganizerFilter?: boolean;
   showHighlightedFilter?: boolean;
+  showStatusFilter?: boolean;  // Mostrar filtro de status (para gestión)
+  showMonthFilter?: boolean;  // Mostrar filtro de mes (para público)
   isLoading?: boolean;
 }
 
 export default function EventFilters({
   searchValue = '',  // ✅ CRÍTICO: Recibir valor controlado
   onSearch,
-  onFilterMonth,  // ✅ CAMBIO
+  onFilterMonth,
+  onFilterStatus,
   onFilterCountry,
-  onFilterCity,  // Nuevo
-  selectedCountry = '',  // País seleccionado desde EventList
-  selectedCity = '',  // Ciudad seleccionada desde EventList
+  onFilterCity,
+  onFilterOrganizer,
+  selectedCountry = '',
+  selectedCity = '',
   onFilterHighlighted,
   showCountryFilter = true,
-  showCityFilter = false,  // Nuevo
+  showCityFilter = false,
   showOrganizerFilter = false,
   showHighlightedFilter = false,
+  showStatusFilter = false,  // Para páginas de gestión
+  showMonthFilter = true,  // Por defecto mostrar mes (páginas públicas)
   isLoading = false,
 }: EventFiltersProps) {
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState('');  // ✅ CAMBIO
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedHighlighted, setSelectedHighlighted] = useState<string>('all');
   const [availableCities, setAvailableCities] = useState<string[]>([]);
 
@@ -107,11 +116,21 @@ export default function EventFilters({
     }
   }, [onFilterCity]);
 
-  // ✅ CAMBIO: Handler para mes
+  // Handler para mes
   const handleMonthChange = useCallback((month: string) => {
     setSelectedMonth(month);
-    onFilterMonth(month);
+    if (onFilterMonth) {
+      onFilterMonth(month);
+    }
   }, [onFilterMonth]);
+
+  // Handler para status (gestión)
+  const handleStatusChange = useCallback((status: string) => {
+    setSelectedStatus(status);
+    if (onFilterStatus) {
+      onFilterStatus(status);
+    }
+  }, [onFilterStatus]);
 
   // Handler para highlighted
   const handleHighlightedChange = useCallback((value: string) => {
@@ -134,19 +153,25 @@ export default function EventFilters({
   // Limpiar todos los filtros
   const clearAllFilters = useCallback(() => {
     setSelectedMonth('');
+    setSelectedStatus('ALL');
     setSelectedHighlighted('all');
     onSearch('');
     onFilterCountry('');
     if (onFilterCity) {
       onFilterCity('');
     }
-    onFilterMonth('');
+    if (onFilterMonth) {
+      onFilterMonth('');
+    }
+    if (onFilterStatus) {
+      onFilterStatus('ALL');
+    }
     if (onFilterHighlighted) {
       onFilterHighlighted(null);
     }
-  }, [onSearch, onFilterCountry, onFilterCity, onFilterMonth, onFilterHighlighted]);
+  }, [onSearch, onFilterCountry, onFilterCity, onFilterMonth, onFilterStatus, onFilterHighlighted]);
 
-  const hasActiveFilters = searchValue || selectedCountry || selectedCity || selectedMonth || selectedHighlighted !== 'all';
+  const hasActiveFilters = searchValue || selectedCountry || selectedCity || selectedMonth || selectedStatus !== 'ALL' || selectedHighlighted !== 'all';
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -233,25 +258,47 @@ export default function EventFilters({
             </div>
           )}
 
-          {/* ✅ CAMBIO: Month Filter en lugar de Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              Mes del evento
-            </label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => handleMonthChange(e.target.value)}
-              disabled={isLoading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {months.map((month) => (
-                <option key={month.value} value={month.value}>
-                  {month.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Status Filter (para gestión) */}
+          {showStatusFilter && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Estado
+              </label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                disabled={isLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="ALL">Todos los estados</option>
+                <option value="PUBLISHED">Publicados</option>
+                <option value="DRAFT">Borradores</option>
+                <option value="CANCELLED">Cancelados</option>
+              </select>
+            </div>
+          )}
+
+          {/* Month Filter (para páginas públicas) */}
+          {showMonthFilter && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                Mes del evento
+              </label>
+              <select
+                value={selectedMonth}
+                onChange={(e) => handleMonthChange(e.target.value)}
+                disabled={isLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {months.map((month) => (
+                  <option key={month.value} value={month.value}>
+                    {month.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Highlighted Filter */}
           {showHighlightedFilter && (

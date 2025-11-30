@@ -65,7 +65,8 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
   useEffect(() => {
     const loadOrganizers = async () => {
       try {
-        const response = await organizersService.getAll({ status: 'PUBLISHED' });
+        // Get all organizers (limit: 1000 to ensure we get all)
+        const response = await organizersService.getAll({ status: 'PUBLISHED', limit: 1000 });
         setOrganizers(response.data.map(org => ({ id: org.id, name: org.name })));
       } catch (error) {
         console.error('Error loading organizers:', error);
