@@ -208,10 +208,13 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
    */
   static async getMyEvents(userId: string, userRole: string, filters: any = {}) {
     try {
-      // ✅ CORREGIDO: Convertir a números explícitamente
       const page = parseInt(filters.page) || 1;
       const limit = parseInt(filters.limit) || 20;
       const status = filters.status;
+      const search = filters.search;
+      const country = filters.country;
+      const typicalMonth = filters.typicalMonth;
+      const organizerId = filters.organizerId;
       const skip = (page - 1) * limit;
 
       // Base where clause
@@ -225,6 +228,33 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       // Filtro de status si se proporciona
       if (status) {
         where.status = status;
+      }
+
+      // Filtro de búsqueda
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { city: { contains: search, mode: 'insensitive' } },
+          { country: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      // Filtro por país
+      if (country) {
+        where.country = country;
+      }
+
+      // Filtro por mes típico
+      if (typicalMonth !== undefined && typicalMonth !== null && typicalMonth !== '') {
+        const month = Number(typicalMonth);
+        if (month >= 1 && month <= 12) {
+          where.typicalMonth = month;
+        }
+      }
+
+      // Filtro por organizador (solo para admin)
+      if (organizerId && userRole === 'ADMIN') {
+        where.organizerId = organizerId;
       }
 
       // Obtener eventos

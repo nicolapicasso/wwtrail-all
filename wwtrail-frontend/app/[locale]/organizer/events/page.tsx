@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, LayoutGrid, LayoutList } from 'lucide-react';
 import EventStats from '@/components/EventStats';
 import EventFilters from '@/components/EventFilters';
 import EventCard from '@/components/EventCard';
@@ -11,6 +11,8 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import eventsService from '@/lib/api/v2/events.service';
 import { Event, EventStatus, EventStats as EventStatsType } from '@/lib/types/event';
 import { useAuth } from '@/hooks/useAuth';
+
+type ViewMode = 'list' | 'grid';
 
 export default function MyEventsPage() {
   const router = useRouter();
@@ -29,6 +31,9 @@ export default function MyEventsPage() {
 
   // Selection state
   const [selectedEventIds, setSelectedEventIds] = useState<Set<string>>(new Set());
+
+  // View mode state
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   // Filters - separate input value from debounced API value
   const [searchQuery, setSearchQuery] = useState('');
@@ -458,19 +463,47 @@ export default function MyEventsPage() {
           isLoading={isLoading}
         />
 
-        {/* Select All */}
+        {/* Controls: Select All + View Toggle */}
         {events.length > 0 && (
-          <div className="mb-4 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="select-all"
-              checked={selectedEventIds.size === events.length && events.length > 0}
-              onChange={selectAllEvents}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="select-all" className="text-sm text-gray-700 cursor-pointer">
-              Seleccionar todos ({events.length})
-            </label>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="select-all"
+                checked={selectedEventIds.size === events.length && events.length > 0}
+                onChange={selectAllEvents}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="select-all" className="text-sm text-gray-700 cursor-pointer">
+                Seleccionar todos ({events.length})
+              </label>
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                title="Vista lista"
+              >
+                <LayoutList className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                title="Vista cuadrícula"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -491,12 +524,17 @@ export default function MyEventsPage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className={
+            viewMode === 'grid'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
+              : 'space-y-4'
+          }>
             {events.map((event) => (
               <EventCard
                 key={event.id}
                 event={event}
-                managementMode={true} 
+                viewMode={viewMode}
+                managementMode={true}
                 userRole={user?.role || 'ATHLETE'}
                 isSelected={selectedEventIds.has(event.id)}
                 onSelect={() => toggleEventSelection(event.id)}
