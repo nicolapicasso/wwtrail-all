@@ -36,6 +36,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
   const mainImage = edition.coverImage || (edition as any).competition?.coverImage;
   const logoImage = (edition as any).competition?.logoUrl || (edition as any).competition?.event?.logoUrl;
   const competitionName = (edition as any).competition?.name || '';
+  const eventName = (edition as any).event?.name || '';
 
   const renderImage = () => {
     if (mainImage && !imageError) {
@@ -118,9 +119,16 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
       {/* Content Section */}
       <div className="p-4 flex flex-col flex-1">
         {/* Title */}
-        <h3 className="text-lg font-semibold group-hover:text-gray-600 transition-colors mb-2">
-          {competitionName} {edition.year}
-        </h3>
+        <div className="mb-2">
+          <h3 className="text-lg font-semibold group-hover:text-gray-600 transition-colors">
+            {competitionName} {edition.year}
+          </h3>
+          {eventName && (
+            <p className="text-sm text-gray-500">
+              Parte de: {eventName}
+            </p>
+          )}
+        </div>
 
         {/* Date */}
         <p className="text-sm text-muted-foreground mb-3">
