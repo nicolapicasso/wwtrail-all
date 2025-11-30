@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Loader2 } from 'lucide-react';
 import EventStats from '@/components/EventStats';
@@ -30,12 +30,17 @@ export default function MyEventsPage() {
   // Selection state
   const [selectedEventIds, setSelectedEventIds] = useState<Set<string>>(new Set());
 
-  // Filters
+  // Filters - separate input value from debounced API value
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<EventStatus | 'ALL'>('ALL');
   const [countryFilter, setCountryFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
   const [organizerFilter, setOrganizerFilter] = useState('');
   const [page, setPage] = useState(1);
+
+  // Debounce timer ref
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Pagination
   const [totalPages, setTotalPages] = useState(1);
@@ -94,18 +99,19 @@ export default function MyEventsPage() {
   };
 
   /**
-   * Fetch events
+   * Fetch events - uses debouncedSearch to prevent excessive API calls
    */
   const fetchEvents = useCallback(async () => {
     try {
       setIsLoading(true);
-      
-      const filters = {
+
+      const filters: Record<string, any> = {
         page,
         limit: 10,
-        search: searchQuery || undefined,
+        search: debouncedSearch || undefined,
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
         country: countryFilter || undefined,
+        month: monthFilter || undefined,
         organizerId: isAdmin && organizerFilter ? organizerFilter : undefined,
       };
 
@@ -115,7 +121,7 @@ export default function MyEventsPage() {
 
       setEvents(response.data);
       setTotalPages(response.pagination.pages);
-      
+
       // Clear selection when data changes
       setSelectedEventIds(new Set());
     } catch (error: any) {
@@ -124,7 +130,7 @@ export default function MyEventsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, searchQuery, statusFilter, countryFilter, organizerFilter, isAdmin]);
+  }, [page, debouncedSearch, statusFilter, countryFilter, monthFilter, organizerFilter, isAdmin]);
 
   /**
    * Fetch stats
@@ -147,12 +153,32 @@ export default function MyEventsPage() {
   }, [fetchEvents, fetchStats]);
 
   /**
-   * Handle search
+   * Handle search with debounce - updates input immediately, debounces API call
    */
   const handleSearch = (query: string) => {
+    // Update input value immediately for responsive UI
     setSearchQuery(query);
-    setPage(1);
+
+    // Clear any existing debounce timer
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    // Debounce the API call (300ms delay)
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(query);
+      setPage(1);
+    }, 300);
   };
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Handle status filter
@@ -167,6 +193,14 @@ export default function MyEventsPage() {
    */
   const handleFilterCountry = (country: string) => {
     setCountryFilter(country);
+    setPage(1);
+  };
+
+  /**
+   * Handle month filter
+   */
+  const handleFilterMonth = (month: string) => {
+    setMonthFilter(month);
     setPage(1);
   };
 
@@ -414,11 +448,13 @@ export default function MyEventsPage() {
           onSearch={handleSearch}
           onFilterStatus={handleFilterStatus}
           onFilterCountry={handleFilterCountry}
+          onFilterMonth={handleFilterMonth}
           onFilterOrganizer={isAdmin ? handleFilterOrganizer : undefined}
-          showCountryFilter={false}
+          selectedCountry={countryFilter}
+          showCountryFilter={true}
           showOrganizerFilter={isAdmin}
           showStatusFilter={true}
-          showMonthFilter={false}
+          showMonthFilter={true}
           isLoading={isLoading}
         />
 

@@ -7,9 +7,9 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Search, Filter, X, Calendar, MapPin } from 'lucide-react';
+import { Search, Filter, X, Calendar, MapPin, Building2 } from 'lucide-react';
 import CountrySelect from './CountrySelect';
-import { eventsService } from '@/lib/api/v2';
+import { eventsService, organizersService } from '@/lib/api/v2';
 
 interface EventFiltersProps {
   searchValue?: string;  // ✅ CRÍTICO: Valor controlado desde EventList
@@ -53,8 +53,10 @@ export default function EventFilters({
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
+  const [selectedOrganizer, setSelectedOrganizer] = useState('');
   const [selectedHighlighted, setSelectedHighlighted] = useState<string>('all');
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableOrganizers, setAvailableOrganizers] = useState<Array<{ id: string; name: string }>>([]);
 
   // ✅ MESES DEL AÑO
   const months = [
@@ -99,6 +101,23 @@ export default function EventFilters({
     }
   }, [selectedCountry, showCityFilter]);
 
+  // Cargar organizadores disponibles para el filtro de admin
+  useEffect(() => {
+    const loadOrganizers = async () => {
+      try {
+        const response = await organizersService.getAll({ status: 'PUBLISHED', limit: 1000 });
+        setAvailableOrganizers(response.data.map(org => ({ id: org.id, name: org.name })));
+      } catch (error) {
+        console.error('Error loading organizers:', error);
+        setAvailableOrganizers([]);
+      }
+    };
+
+    if (showOrganizerFilter) {
+      loadOrganizers();
+    }
+  }, [showOrganizerFilter]);
+
   // ✅ CRÍTICO: NO hacer debounce aquí - ya se hace en EventList
   const handleSearchChange = useCallback((value: string) => {
     onSearch(value);  // Llamar directamente
@@ -132,6 +151,14 @@ export default function EventFilters({
     }
   }, [onFilterStatus]);
 
+  // Handler para organizador (admin)
+  const handleOrganizerChange = useCallback((organizerId: string) => {
+    setSelectedOrganizer(organizerId);
+    if (onFilterOrganizer) {
+      onFilterOrganizer(organizerId);
+    }
+  }, [onFilterOrganizer]);
+
   // Handler para highlighted
   const handleHighlightedChange = useCallback((value: string) => {
     setSelectedHighlighted(value);
@@ -154,6 +181,7 @@ export default function EventFilters({
   const clearAllFilters = useCallback(() => {
     setSelectedMonth('');
     setSelectedStatus('ALL');
+    setSelectedOrganizer('');
     setSelectedHighlighted('all');
     onSearch('');
     onFilterCountry('');
@@ -166,12 +194,15 @@ export default function EventFilters({
     if (onFilterStatus) {
       onFilterStatus('ALL');
     }
+    if (onFilterOrganizer) {
+      onFilterOrganizer('');
+    }
     if (onFilterHighlighted) {
       onFilterHighlighted(null);
     }
-  }, [onSearch, onFilterCountry, onFilterCity, onFilterMonth, onFilterStatus, onFilterHighlighted]);
+  }, [onSearch, onFilterCountry, onFilterCity, onFilterMonth, onFilterStatus, onFilterOrganizer, onFilterHighlighted]);
 
-  const hasActiveFilters = searchValue || selectedCountry || selectedCity || selectedMonth || selectedStatus !== 'ALL' || selectedHighlighted !== 'all';
+  const hasActiveFilters = searchValue || selectedCountry || selectedCity || selectedMonth || selectedStatus !== 'ALL' || selectedOrganizer || selectedHighlighted !== 'all';
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -294,6 +325,31 @@ export default function EventFilters({
                 {months.map((month) => (
                   <option key={month.value} value={month.value}>
                     {month.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Organizer Filter (para admin) */}
+          {showOrganizerFilter && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                <Building2 className="h-4 w-4" />
+                Organizador
+              </label>
+              <select
+                value={selectedOrganizer}
+                onChange={(e) => handleOrganizerChange(e.target.value)}
+                disabled={isLoading || availableOrganizers.length === 0}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {availableOrganizers.length === 0 ? 'Cargando...' : 'Todos los organizadores'}
+                </option>
+                {availableOrganizers.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
                   </option>
                 ))}
               </select>
