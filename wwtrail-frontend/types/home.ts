@@ -27,6 +27,12 @@ export enum HomeTextVariant {
   HEADING = 'HEADING',
 }
 
+export enum HomeTextAlign {
+  LEFT = 'LEFT',
+  CENTER = 'CENTER',
+  RIGHT = 'RIGHT',
+}
+
 // Configuraciones específicas por tipo de bloque
 export interface ContentBlockConfig {
   limit: number;
@@ -38,6 +44,7 @@ export interface TextBlockConfig {
   content: string;
   size: HomeTextSize;
   variant: HomeTextVariant;
+  align?: HomeTextAlign; // Alineación del texto
 }
 
 export interface LinkItem {
@@ -48,6 +55,14 @@ export interface LinkItem {
 
 export interface LinksBlockConfig {
   items: LinkItem[];
+  // Título de la sección
+  title?: string;
+  titleSize?: HomeTextSize;
+  titleAlign?: HomeTextAlign;
+  // Subtítulo de la sección
+  subtitle?: string;
+  subtitleSize?: HomeTextSize;
+  subtitleAlign?: HomeTextAlign;
 }
 
 export type BlockConfig = ContentBlockConfig | TextBlockConfig | LinksBlockConfig;

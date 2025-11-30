@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { LinksBlockConfig } from '@/types/home';
+import { HomeTextSize, HomeTextAlign, type LinksBlockConfig } from '@/types/home';
 
 interface LinksBlockProps {
   config: LinksBlockConfig;
@@ -14,6 +14,31 @@ export function LinksBlock({ config }: LinksBlockProps) {
   // Backward compatibility: aceptar tanto 'items' como 'links'
   const items = (config as any).items || (config as any).links || [];
 
+  // Configuración de título y subtítulo
+  const {
+    title,
+    titleSize = HomeTextSize.XL,
+    titleAlign = HomeTextAlign.CENTER,
+    subtitle,
+    subtitleSize = HomeTextSize.MD,
+    subtitleAlign = HomeTextAlign.CENTER,
+  } = config;
+
+  // Mapeo de tamaños
+  const sizeClasses = {
+    [HomeTextSize.SM]: 'text-sm md:text-base',
+    [HomeTextSize.MD]: 'text-base md:text-lg',
+    [HomeTextSize.LG]: 'text-lg md:text-xl',
+    [HomeTextSize.XL]: 'text-xl md:text-2xl lg:text-3xl',
+  };
+
+  // Clases de alineación
+  const alignClasses = {
+    [HomeTextAlign.LEFT]: 'text-left',
+    [HomeTextAlign.CENTER]: 'text-center',
+    [HomeTextAlign.RIGHT]: 'text-right',
+  };
+
   if (!items || items.length === 0) {
     return null;
   }
@@ -21,8 +46,34 @@ export function LinksBlock({ config }: LinksBlockProps) {
   return (
     <div className="w-full bg-gray-50 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {items.map((item, index) => (
+        {/* Título y Subtítulo */}
+        {(title || subtitle) && (
+          <div className="mb-10">
+            {title && (
+              <h2
+                className={`font-bold text-gray-900 mb-3 ${sizeClasses[titleSize]} ${alignClasses[titleAlign]}`}
+              >
+                {title}
+              </h2>
+            )}
+            {subtitle && (
+              <p
+                className={`text-gray-600 ${sizeClasses[subtitleSize]} ${alignClasses[subtitleAlign]}`}
+              >
+                {subtitle}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Grid con auto-fill para adaptarse a la cantidad de elementos */}
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 280px), 1fr))`,
+          }}
+        >
+          {items.map((item: any, index: number) => (
             <Link
               key={index}
               href={item.url}
@@ -37,7 +88,7 @@ export function LinksBlock({ config }: LinksBlockProps) {
                   alt={item.title}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 280px"
                 />
                 {/* Overlay en hover */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
