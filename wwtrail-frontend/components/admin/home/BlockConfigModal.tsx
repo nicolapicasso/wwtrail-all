@@ -15,6 +15,7 @@ import type {
   HomeBlockViewType,
   HomeTextSize,
   HomeTextVariant,
+  HomeTextAlign,
   LinkItem,
 } from '@/types/home';
 
@@ -42,9 +43,16 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   const [textContent, setTextContent] = useState('');
   const [textSize, setTextSize] = useState<HomeTextSize>('MD');
   const [textVariant, setTextVariant] = useState<HomeTextVariant>('PARAGRAPH');
+  const [textAlign, setTextAlign] = useState<HomeTextAlign>('LEFT');
 
   // Links block config
   const [items, setItems] = useState<LinkItem[]>([]);
+  const [linksTitle, setLinksTitle] = useState('');
+  const [linksTitleSize, setLinksTitleSize] = useState<HomeTextSize>('XL');
+  const [linksTitleAlign, setLinksTitleAlign] = useState<HomeTextAlign>('CENTER');
+  const [linksSubtitle, setLinksSubtitle] = useState('');
+  const [linksSubtitleSize, setLinksSubtitleSize] = useState<HomeTextSize>('MD');
+  const [linksSubtitleAlign, setLinksSubtitleAlign] = useState<HomeTextAlign>('CENTER');
 
   const [saving, setSaving] = useState(false);
 
@@ -63,9 +71,16 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         setTextContent(textConfig.content);
         setTextSize(textConfig.size);
         setTextVariant(textConfig.variant);
+        setTextAlign(textConfig.align || 'LEFT');
       } else if (block.type === 'LINKS') {
         const linksConfig = config as LinksBlockConfig;
-        setItems(linksConfig.items);
+        setItems(linksConfig.items || []);
+        setLinksTitle(linksConfig.title || '');
+        setLinksTitleSize(linksConfig.titleSize || 'XL');
+        setLinksTitleAlign(linksConfig.titleAlign || 'CENTER');
+        setLinksSubtitle(linksConfig.subtitle || '');
+        setLinksSubtitleSize(linksConfig.subtitleSize || 'MD');
+        setLinksSubtitleAlign(linksConfig.subtitleAlign || 'CENTER');
       }
     }
   }, [block]);
@@ -83,10 +98,17 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         content: textContent,
         size: textSize,
         variant: textVariant,
+        align: textAlign,
       } as TextBlockConfig;
     } else if (blockType === 'LINKS') {
       return {
         items,
+        title: linksTitle || undefined,
+        titleSize: linksTitleSize,
+        titleAlign: linksTitleAlign,
+        subtitle: linksSubtitle || undefined,
+        subtitleSize: linksSubtitleSize,
+        subtitleAlign: linksSubtitleAlign,
       } as LinksBlockConfig;
     }
     return {};
@@ -137,6 +159,35 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   const removeLink = (index: number) => {
     setItems(items.filter((_, i) => i !== index));
   };
+
+  // Selector de alineación reutilizable
+  const AlignSelect = ({ value, onChange, id }: { value: HomeTextAlign; onChange: (v: HomeTextAlign) => void; id: string }) => (
+    <select
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value as HomeTextAlign)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    >
+      <option value="LEFT">Izquierda</option>
+      <option value="CENTER">Centrado</option>
+      <option value="RIGHT">Derecha</option>
+    </select>
+  );
+
+  // Selector de tamaño reutilizable
+  const SizeSelect = ({ value, onChange, id }: { value: HomeTextSize; onChange: (v: HomeTextSize) => void; id: string }) => (
+    <select
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value as HomeTextSize)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    >
+      <option value="SM">Pequeño</option>
+      <option value="MD">Mediano</option>
+      <option value="LG">Grande</option>
+      <option value="XL">Extra Grande</option>
+    </select>
+  );
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -268,20 +319,20 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tamaño
-                </label>
-                <select
-                  value={textSize}
-                  onChange={(e) => setTextSize(e.target.value as HomeTextSize)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="SM">Pequeño</option>
-                  <option value="MD">Mediano</option>
-                  <option value="LG">Grande</option>
-                  <option value="XL">Extra Grande</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tamaño
+                  </label>
+                  <SizeSelect value={textSize} onChange={setTextSize} id="textSize" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Alineación
+                  </label>
+                  <AlignSelect value={textAlign} onChange={setTextAlign} id="textAlign" />
+                </div>
               </div>
 
               <div>
@@ -302,69 +353,131 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
           {blockType === 'LINKS' && (
             <div className="space-y-4 border-t pt-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">Enlaces</h3>
-                <button
-                  onClick={addLink}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-                >
-                  Agregar Enlace
-                </button>
+              {/* Título y Subtítulo de la sección */}
+              <h3 className="font-semibold text-gray-900">Título de la Sección</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Título
+                </label>
+                <input
+                  type="text"
+                  value={linksTitle}
+                  onChange={(e) => setLinksTitle(e.target.value)}
+                  placeholder="Título de la sección (opcional)"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
 
-              {items.map((item, index) => (
-                <div key={index} className="border rounded-md p-4 space-y-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Enlace {index + 1}</span>
-                    <button
-                      onClick={() => removeLink(index)}
-                      className="text-red-600 hover:text-red-700 text-sm"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Título</label>
-                    <input
-                      type="text"
-                      placeholder="Título del enlace"
-                      value={item.title}
-                      onChange={(e) => updateLink(index, 'title', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">URL</label>
-                    <input
-                      type="text"
-                      placeholder="https://ejemplo.com"
-                      value={item.url}
-                      onChange={(e) => updateLink(index, 'url', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Imagen</label>
-                    <FileUpload
-                      onUpload={(url) => updateLink(index, 'imageUrl', url)}
-                      currentUrl={item.imageUrl}
-                      buttonText="Subir imagen"
-                      fieldname="link"
-                      maxSizeMB={5}
-                      showPreview={true}
-                    />
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tamaño del título
+                  </label>
+                  <SizeSelect value={linksTitleSize} onChange={setLinksTitleSize} id="linksTitleSize" />
                 </div>
-              ))}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Alineación del título
+                  </label>
+                  <AlignSelect value={linksTitleAlign} onChange={setLinksTitleAlign} id="linksTitleAlign" />
+                </div>
+              </div>
 
-              {items.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  No hay enlaces. Agrega al menos uno.
-                </p>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Subtítulo
+                </label>
+                <input
+                  type="text"
+                  value={linksSubtitle}
+                  onChange={(e) => setLinksSubtitle(e.target.value)}
+                  placeholder="Subtítulo de la sección (opcional)"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tamaño del subtítulo
+                  </label>
+                  <SizeSelect value={linksSubtitleSize} onChange={setLinksSubtitleSize} id="linksSubtitleSize" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Alineación del subtítulo
+                  </label>
+                  <AlignSelect value={linksSubtitleAlign} onChange={setLinksSubtitleAlign} id="linksSubtitleAlign" />
+                </div>
+              </div>
+
+              {/* Enlaces */}
+              <div className="border-t pt-4 mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900">Enlaces</h3>
+                  <button
+                    onClick={addLink}
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                  >
+                    Agregar Enlace
+                  </button>
+                </div>
+
+                {items.map((item, index) => (
+                  <div key={index} className="border rounded-md p-4 space-y-3 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Enlace {index + 1}</span>
+                      <button
+                        onClick={() => removeLink(index)}
+                        className="text-red-600 hover:text-red-700 text-sm"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Título</label>
+                      <input
+                        type="text"
+                        placeholder="Título del enlace"
+                        value={item.title}
+                        onChange={(e) => updateLink(index, 'title', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://ejemplo.com"
+                        value={item.url}
+                        onChange={(e) => updateLink(index, 'url', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Imagen</label>
+                      <FileUpload
+                        onUpload={(url) => updateLink(index, 'imageUrl', url)}
+                        currentUrl={item.imageUrl}
+                        buttonText="Subir imagen"
+                        fieldname="link"
+                        maxSizeMB={5}
+                        showPreview={true}
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                {items.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No hay enlaces. Agrega al menos uno.
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>

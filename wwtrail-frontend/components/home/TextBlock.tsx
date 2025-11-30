@@ -2,14 +2,14 @@
 
 'use client';
 
-import { HomeTextSize, HomeTextVariant, type TextBlockConfig } from '@/types/home';
+import { HomeTextSize, HomeTextVariant, HomeTextAlign, type TextBlockConfig } from '@/types/home';
 
 interface TextBlockProps {
   config: TextBlockConfig;
 }
 
 export function TextBlock({ config }: TextBlockProps) {
-  const { content, size, variant } = config;
+  const { content, size, variant, align = HomeTextAlign.LEFT } = config;
 
   // Mapeo de tamaños
   const sizeClasses = {
@@ -25,7 +25,14 @@ export function TextBlock({ config }: TextBlockProps) {
     [HomeTextVariant.HEADING]: 'font-bold text-gray-900 leading-tight',
   };
 
-  const className = `${sizeClasses[size]} ${variantClasses[variant]}`;
+  // Clases de alineación
+  const alignClasses = {
+    [HomeTextAlign.LEFT]: 'text-left',
+    [HomeTextAlign.CENTER]: 'text-center',
+    [HomeTextAlign.RIGHT]: 'text-right',
+  };
+
+  const className = `${sizeClasses[size]} ${variantClasses[variant]} ${alignClasses[align]}`;
 
   return (
     <div className="w-full bg-white py-12 px-4 sm:px-6 lg:px-8">
