@@ -545,6 +545,36 @@ class AdminService {
   }
 
   /**
+   * Aprobar cualquier tipo de contenido pendiente
+   * @param type - Tipo de contenido (event, competition, service, magazine)
+   * @param id - ID del elemento
+   */
+  async approveContent(type: string, id: string): Promise<any> {
+    switch (type) {
+      case 'competition':
+        return this.approveEvent(id);
+      case 'event':
+        // Publicar evento directamente
+        const { data: eventData } = await apiClientV2.patch(`/events/${id}`, { status: 'PUBLISHED' });
+        return eventData.data;
+      case 'service':
+        // Publicar servicio directamente
+        const { data: serviceData } = await apiClientV2.patch(`/services/${id}`, { status: 'PUBLISHED' });
+        return serviceData.data;
+      case 'magazine':
+        // Publicar post directamente
+        const { data: postData } = await apiClientV2.patch(`/posts/${id}`, { status: 'PUBLISHED' });
+        return postData.data;
+      case 'edition':
+        // Las ediciones normalmente no tienen status de aprobación, pero si lo tienen:
+        const { data: editionData } = await apiClientV2.patch(`/editions/${id}`, { status: 'PUBLISHED' });
+        return editionData.data;
+      default:
+        throw new Error(`Tipo de contenido no soportado: ${type}`);
+    }
+  }
+
+  /**
    * Rechazar una competición
    * Acepta razón opcional
    */
