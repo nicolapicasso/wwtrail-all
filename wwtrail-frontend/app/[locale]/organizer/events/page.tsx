@@ -410,12 +410,15 @@ export default function MyEventsPage() {
 
         {/* Filters */}
         <EventFilters
+          searchValue={searchQuery}
           onSearch={handleSearch}
           onFilterStatus={handleFilterStatus}
           onFilterCountry={handleFilterCountry}
           onFilterOrganizer={isAdmin ? handleFilterOrganizer : undefined}
           showCountryFilter={false}
           showOrganizerFilter={isAdmin}
+          showStatusFilter={true}
+          showMonthFilter={false}
           isLoading={isLoading}
         />
 
