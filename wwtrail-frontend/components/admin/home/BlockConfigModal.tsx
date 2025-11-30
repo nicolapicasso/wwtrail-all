@@ -147,7 +147,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   };
 
   const addLink = () => {
-    setItems([...items, { title: '', url: '', imageUrl: '' }]);
+    setItems([...items, { title: '', url: '', imageUrl: '', text: '' }]);
   };
 
   const updateLink = (index: number, field: keyof LinkItem, value: string) => {
@@ -443,6 +443,17 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                         placeholder="Título del enlace"
                         value={item.title}
                         onChange={(e) => updateLink(index, 'title', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Texto (opcional)</label>
+                      <textarea
+                        placeholder="Descripción o párrafo bajo el título"
+                        value={item.text || ''}
+                        onChange={(e) => updateLink(index, 'text', e.target.value)}
+                        rows={2}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                       />
                     </div>

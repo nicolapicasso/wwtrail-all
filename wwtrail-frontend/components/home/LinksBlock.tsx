@@ -66,12 +66,13 @@ export function LinksBlock({ config }: LinksBlockProps) {
           </div>
         )}
 
-        {/* Grid con auto-fill para adaptarse a la cantidad de elementos */}
+        {/* Grid adaptativo según cantidad de elementos */}
         <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, 280px), 1fr))`,
-          }}
+          className={`grid gap-6 grid-cols-1 ${
+            items.length === 2 ? 'md:grid-cols-2' :
+            items.length === 3 ? 'md:grid-cols-3' :
+            items.length >= 4 ? 'md:grid-cols-4' : 'md:grid-cols-1'
+          }`}
         >
           {items.map((item: any, index: number) => (
             <Link
@@ -94,11 +95,16 @@ export function LinksBlock({ config }: LinksBlockProps) {
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </div>
 
-              {/* Título */}
+              {/* Título y Texto */}
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                   {item.title}
                 </h3>
+                {item.text && (
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+                    {item.text}
+                  </p>
+                )}
               </div>
 
               {/* Indicador de enlace externo */}
