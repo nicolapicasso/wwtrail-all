@@ -55,11 +55,12 @@ interface EventFilters {
   limit?: number | string;
   search?: string;
   country?: string;
-  city?: string;  // Filtro por ciudad
+  city?: string;
   featured?: boolean;
   status?: EventStatus;
-  typicalMonth?: number | string;  // ✅ NUEVO: Filtro por mes típico del evento
-  language?: string;  // ✅ NUEVO: Idioma para traducciones
+  typicalMonth?: number | string;  // Filtro por mes típico del evento
+  organizerId?: string;  // Filtro por entidad organizadora
+  language?: string;  // Idioma para traducciones
   sortBy?: 'name' | 'createdAt' | 'viewCount' | 'firstEditionYear';
   sortOrder?: 'asc' | 'desc';
 }
@@ -453,10 +454,11 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     const limit = Number(filters.limit) || 20;
     const search = filters.search;
     const country = filters.country;
-    const city = filters.city;  // Filtro por ciudad
+    const city = filters.city;
     const featured = filters.featured;
     const status = filters.status;
-    const typicalMonth = filters.typicalMonth;  // ✅ NUEVO
+    const typicalMonth = filters.typicalMonth;
+    const organizerId = filters.organizerId;
     const language = parseLanguage(filters.language);  // ✅ NUEVO: Parse language
     const sortBy = filters.sortBy || 'createdAt';
     const sortOrder = filters.sortOrder || 'desc';
@@ -501,12 +503,17 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       where.status = status;
     }
 
-    // ✅ NUEVO: Filtro por mes típico del evento
+    // Filtro por mes típico del evento
     if (typicalMonth !== undefined && typicalMonth !== null && typicalMonth !== '') {
       const month = Number(typicalMonth);
       if (month >= 1 && month <= 12) {
         where.typicalMonth = month;
       }
+    }
+
+    // Filtro por entidad organizadora
+    if (organizerId) {
+      where.organizerId = organizerId;
     }
 
     // Ejecutar query
