@@ -97,7 +97,7 @@ export function LinksBlock({ config }: LinksBlockProps) {
 
               {/* Título y Texto */}
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#B37408] transition-colors line-clamp-2">
                   {item.title}
                 </h3>
                 {item.text && (
