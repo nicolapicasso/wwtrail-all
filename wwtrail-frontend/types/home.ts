@@ -51,6 +51,7 @@ export interface LinkItem {
   url: string;
   title: string;
   imageUrl: string;
+  text?: string; // Párrafo opcional debajo del título
 }
 
 export interface LinksBlockConfig {
