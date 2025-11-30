@@ -72,8 +72,8 @@ export default function WeatherCard({
     );
   }
 
-  // Weather fetched but data is null (shouldn't happen, but handle it)
-  if (!weather) {
+  // Weather fetched but data is null or incomplete (shouldn't happen, but handle it)
+  if (!weather || !weather.temperature || weather.temperature.avg === undefined) {
     return (
       <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-8">
         <div className="text-center">

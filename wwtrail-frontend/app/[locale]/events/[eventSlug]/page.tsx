@@ -226,11 +226,11 @@ export default async function EventDetailPage({
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold text-lg">{competition.name}</h3>
-                          {competition._count?.editions && (
-                            <p className="text-sm text-gray-600">
-                              {competition._count.editions} ediciones
-                            </p>
-                          )}
+                          <p className="text-sm text-gray-600">
+                            {competition._count?.editions && competition._count.editions > 0
+                              ? `${competition._count.editions} ediciones`
+                              : 'Aún sin ediciones creadas'}
+                          </p>
                         </div>
                         <span className="text-green-600 font-semibold">→</span>
                       </div>
@@ -306,7 +306,22 @@ export default async function EventDetailPage({
                 </h3>
                 <EventMap
                   event={event}
-                  nearbyEvents={nearbyEvents}
+                  nearbyEvents={[
+                    // Incluir competiciones del evento como pines (mismas coordenadas, se distribuirán en círculo)
+                    ...(event.competitions || []).map(comp => ({
+                      id: comp.id,
+                      name: comp.name,
+                      slug: `${event.slug}/${comp.slug}`,
+                      city: event.city,
+                      country: event.country,
+                      latitude: event.latitude!,
+                      longitude: event.longitude!,
+                      categoryIcon: '🏆',
+                      type: 'competition',
+                    } as any)),
+                    // Eventos cercanos (de otros eventos)
+                    ...nearbyEvents,
+                  ]}
                   nearbyServices={nearbyServices
                     .filter(s => s.latitude && s.longitude)
                     .map(s => ({
