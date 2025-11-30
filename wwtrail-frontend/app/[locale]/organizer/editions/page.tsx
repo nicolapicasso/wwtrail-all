@@ -103,14 +103,25 @@ export default function OrganizerEditionsPage() {
 
         for (const comp of compsToFetch) {
           const eds = await editionsService.getByCompetition(comp.id);
-          allEditions.push(...eds);
+          // Agregar información de la competición a cada edición
+          const edsWithCompetition = eds.map(ed => ({
+            ...ed,
+            competition: { id: comp.id, name: comp.name, slug: comp.slug }
+          }));
+          allEditions.push(...edsWithCompetition);
         }
 
         setEditions(allEditions);
       } else {
         // Cargar solo de la competición seleccionada
         const eds = await editionsService.getByCompetition(selectedCompetitionId);
-        setEditions(eds);
+        // Encontrar la competición para agregar su info
+        const selectedComp = competitions.find(c => c.id === selectedCompetitionId);
+        const edsWithCompetition = eds.map(ed => ({
+          ...ed,
+          competition: selectedComp ? { id: selectedComp.id, name: selectedComp.name, slug: selectedComp.slug } : undefined
+        }));
+        setEditions(edsWithCompetition);
       }
     } catch (error: any) {
       console.error('Error fetching editions:', error);
@@ -365,6 +376,11 @@ export default function OrganizerEditionsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-3xl font-bold text-blue-600">{edition.year}</span>
+                        {(edition as any).competition?.name && (
+                          <span className="text-lg font-semibold text-gray-700">
+                            {(edition as any).competition.name}
+                          </span>
+                        )}
 
                         {edition.status && (
                           <span

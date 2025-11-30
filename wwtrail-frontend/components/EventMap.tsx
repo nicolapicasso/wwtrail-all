@@ -35,6 +35,9 @@ function spreadOverlappingMarkers<T extends { latitude: number; longitude: numbe
 ): (T & { originalLat?: number; originalLon?: number })[] {
   if (items.length === 0) return [];
 
+  // Clave del marcador principal (centro)
+  const mainKey = `${centerLat.toFixed(5)},${centerLon.toFixed(5)}`;
+
   // Agrupar items por coordenadas
   const groups = new Map<string, T[]>();
 
@@ -53,13 +56,21 @@ function spreadOverlappingMarkers<T extends { latitude: number; longitude: numbe
 
   // Procesar cada grupo
   groups.forEach((groupItems, key) => {
-    if (groupItems.length === 1) {
-      // Si solo hay un item, no necesita ajuste
+    // Verificar si este grupo se solapa con el marcador principal
+    const overlapsWithMain = key === mainKey;
+
+    if (groupItems.length === 1 && !overlapsWithMain) {
+      // Si solo hay un item y no se solapa con el principal, no necesita ajuste
       result.push(groupItems[0]);
     } else {
-      // Si hay múltiples items en la misma posición, distribuirlos en círculo
+      // Si hay múltiples items en la misma posición o se solapa con el principal, distribuirlos en círculo
+      // Calcular el total de items a distribuir (incluir espacio para el principal si se solapa)
+      const totalInCircle = overlapsWithMain ? groupItems.length + 1 : groupItems.length;
+      // Si se solapa con principal, empezar desde índice 1 para dejar espacio al marcador principal
+      const startIndex = overlapsWithMain ? 1 : 0;
+
       groupItems.forEach((item, index) => {
-        const angle = (360 / groupItems.length) * index;
+        const angle = (360 / totalInCircle) * (index + startIndex);
         const angleRad = (angle * Math.PI) / 180;
 
         const newLat = Number(item.latitude) + radius * Math.cos(angleRad);
