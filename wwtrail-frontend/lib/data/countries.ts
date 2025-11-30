@@ -26,17 +26,23 @@ export const COUNTRIES: Country[] = [
   // Otros europeos
   { code: 'AD', name: 'Andorra', flag: '🇦🇩' },
   { code: 'BE', name: 'Bélgica', flag: '🇧🇪' },
+  { code: 'BG', name: 'Bulgaria', flag: '🇧🇬' },
   { code: 'CZ', name: 'República Checa', flag: '🇨🇿' },
   { code: 'DK', name: 'Dinamarca', flag: '🇩🇰' },
   { code: 'FI', name: 'Finlandia', flag: '🇫🇮' },
   { code: 'GR', name: 'Grecia', flag: '🇬🇷' },
+  { code: 'HR', name: 'Croacia', flag: '🇭🇷' },
+  { code: 'HU', name: 'Hungría', flag: '🇭🇺' },
   { code: 'IE', name: 'Irlanda', flag: '🇮🇪' },
   { code: 'IS', name: 'Islandia', flag: '🇮🇸' },
   { code: 'NL', name: 'Países Bajos', flag: '🇳🇱' },
   { code: 'PL', name: 'Polonia', flag: '🇵🇱' },
   { code: 'RO', name: 'Rumanía', flag: '🇷🇴' },
+  { code: 'RS', name: 'Serbia', flag: '🇷🇸' },
   { code: 'SI', name: 'Eslovenia', flag: '🇸🇮' },
   { code: 'SK', name: 'Eslovaquia', flag: '🇸🇰' },
+  { code: 'TR', name: 'Turquía', flag: '🇹🇷' },
+  { code: 'UA', name: 'Ucrania', flag: '🇺🇦' },
   
   // América
   { code: 'US', name: 'Estados Unidos', flag: '🇺🇸' },
