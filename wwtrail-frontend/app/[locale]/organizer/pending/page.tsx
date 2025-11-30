@@ -18,6 +18,8 @@ import {
   ExternalLink,
   RefreshCw,
   CheckCircle,
+  Check,
+  Loader2,
 } from 'lucide-react';
 import { adminService, PendingContentCounts, PendingContentItem } from '@/lib/api/admin.service';
 
@@ -29,6 +31,23 @@ export default function PendingContentPage() {
   const [items, setItems] = useState<PendingContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  const handleApprove = async (item: PendingContentItem) => {
+    if (!confirm(`¿Estás seguro de aprobar "${item.name}"?`)) return;
+
+    setApprovingId(item.id);
+    try {
+      await adminService.approveContent(item.type, item.id);
+      // Recargar la lista
+      await fetchData();
+    } catch (err: any) {
+      console.error('Error approving content:', err);
+      alert(`Error al aprobar: ${err.message || 'Error desconocido'}`);
+    } finally {
+      setApprovingId(null);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -264,12 +283,28 @@ export default function PendingContentPage() {
                       </div>
                     </div>
                   </div>
-                  <Link href={getReviewLink(item)}>
-                    <Button variant="outline" size="sm">
-                      Revisar
-                      <ExternalLink className="w-4 h-4 ml-2" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => handleApprove(item)}
+                      disabled={approvingId === item.id}
+                    >
+                      {approvingId === item.id ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4 mr-2" />
+                      )}
+                      Aprobar
                     </Button>
-                  </Link>
+                    <Link href={getReviewLink(item)}>
+                      <Button variant="outline" size="sm">
+                        Revisar
+                        <ExternalLink className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
