@@ -771,6 +771,211 @@ class AdminService {
     const { data } = await apiClientV1.delete('/admin/import/all');
     return data.data;
   }
+
+  // ============================================
+  // EXPORT SYSTEM
+  // ============================================
+
+  /**
+   * Get export statistics (counts)
+   */
+  async getExportStats(): Promise<{
+    events: number;
+    competitions: number;
+    editions: number;
+    organizers: number;
+    specialSeries: number;
+    services: number;
+    posts: number;
+    users: number;
+  }> {
+    const { data } = await apiClientV2.get('/admin/export/stats');
+    return data.data;
+  }
+
+  /**
+   * Export all data (full backup) - returns download URL
+   */
+  async exportAll(includeRelations = true): Promise<Blob> {
+    const { data } = await apiClientV2.get('/admin/export/full', {
+      params: { includeRelations },
+      responseType: 'blob',
+    });
+    return data;
+  }
+
+  /**
+   * Export specific entity type
+   */
+  async exportEntity(
+    entityType: 'events' | 'competitions' | 'editions' | 'organizers' | 'series' | 'services' | 'posts' | 'users',
+    includeRelations = true
+  ): Promise<Blob> {
+    const { data } = await apiClientV2.get(`/admin/export/${entityType}`, {
+      params: { includeRelations },
+      responseType: 'blob',
+    });
+    return data;
+  }
+
+  // ============================================
+  // BULK EDIT SYSTEM
+  // ============================================
+
+  /**
+   * Get metadata for all entities (fields, types, etc.)
+   */
+  async getBulkEditMetadata(): Promise<EntityMetadata[]> {
+    const { data } = await apiClientV2.get('/admin/bulk-edit/metadata');
+    return data.data;
+  }
+
+  /**
+   * Get options for a relation field (for dropdowns)
+   */
+  async getBulkEditRelationOptions(relationEntity: string): Promise<{ id: string; name: string }[]> {
+    const { data } = await apiClientV2.get(`/admin/bulk-edit/relations/${relationEntity}`);
+    return data.data;
+  }
+
+  /**
+   * Query records with filters (for preview)
+   */
+  async bulkEditQuery(
+    entityType: BulkEditEntityType,
+    filters: BulkEditFilters,
+    limit = 100
+  ): Promise<{ count: number; data: any[] }> {
+    const { data } = await apiClientV2.post('/admin/bulk-edit/query', {
+      entityType,
+      filters,
+      limit,
+    });
+    return { count: data.count, data: data.data };
+  }
+
+  /**
+   * Preview bulk edit operation
+   */
+  async bulkEditPreview(
+    entityType: BulkEditEntityType,
+    filters: BulkEditFilters,
+    operation: BulkEditOperation
+  ): Promise<BulkEditPreview> {
+    const { data } = await apiClientV2.post('/admin/bulk-edit/preview', {
+      entityType,
+      filters,
+      operation,
+    });
+    return data.data;
+  }
+
+  /**
+   * Execute bulk edit operation
+   */
+  async bulkEditExecute(
+    entityType: BulkEditEntityType,
+    filters: BulkEditFilters,
+    operation: BulkEditOperation
+  ): Promise<BulkEditResult> {
+    const { data } = await apiClientV2.post('/admin/bulk-edit/execute', {
+      entityType,
+      filters,
+      operation,
+    });
+    return data.data;
+  }
+
+  /**
+   * Disconnect special series from competitions
+   */
+  async bulkDisconnectSeries(
+    filters: BulkEditFilters,
+    seriesId: string
+  ): Promise<BulkEditResult> {
+    const { data } = await apiClientV2.post('/admin/bulk-edit/disconnect-series', {
+      filters,
+      seriesId,
+    });
+    return data.data;
+  }
+}
+
+// ============================================
+// BULK EDIT TYPES
+// ============================================
+
+export type BulkEditEntityType =
+  | 'event'
+  | 'competition'
+  | 'edition'
+  | 'organizer'
+  | 'specialSeries'
+  | 'service'
+  | 'post';
+
+export type FilterOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'starts_with'
+  | 'ends_with'
+  | 'greater_than'
+  | 'less_than'
+  | 'in'
+  | 'is_null'
+  | 'is_not_null';
+
+export interface FilterCondition {
+  field: string;
+  operator: FilterOperator;
+  value: any;
+}
+
+export interface BulkEditFilters {
+  conditions: FilterCondition[];
+  logic?: 'AND' | 'OR';
+}
+
+export interface BulkEditOperation {
+  field: string;
+  value: any;
+}
+
+export interface BulkEditResult {
+  success: boolean;
+  entityType: BulkEditEntityType;
+  updatedCount: number;
+  updatedIds: string[];
+  errors?: string[];
+}
+
+export interface BulkEditPreview {
+  entityType: BulkEditEntityType;
+  matchingCount: number;
+  matchingRecords: {
+    id: string;
+    displayName: string;
+    currentValue: any;
+    newValue: any;
+  }[];
+  field: string;
+}
+
+export interface FieldMetadata {
+  name: string;
+  label: string;
+  type: 'string' | 'number' | 'boolean' | 'enum' | 'date' | 'relation';
+  enumValues?: string[];
+  relationEntity?: string;
+  filterable: boolean;
+  editable: boolean;
+}
+
+export interface EntityMetadata {
+  name: BulkEditEntityType;
+  label: string;
+  fields: FieldMetadata[];
 }
 
 export const adminService = new AdminService();

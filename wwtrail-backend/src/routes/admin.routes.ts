@@ -4,6 +4,8 @@ import { Router, Request, Response, NextFunction } from 'express';
 import CompetitionAdminController from '../controllers/competition-admin.controller';
 import AdminController from '../controllers/admin.controller';
 import { importController } from '../controllers/import.controller';
+import { exportController } from '../controllers/export.controller';
+import { bulkEditController } from '../controllers/bulk-edit.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { requireAdmin, requireOrganizer } from '../middlewares/authorize.middleware';
 import { validate } from '../middlewares/validate.middleware';
@@ -490,6 +492,206 @@ router.delete(
   authenticate,
   requireAdmin,
   (req: Request, res: Response, next: NextFunction) => importController.deleteAllImportedData(req, res, next)
+);
+
+// ============================================
+// RUTAS ADMIN - EXPORTACION DE DATOS
+// ============================================
+
+/**
+ * @route   GET /api/v2/admin/export/stats
+ * @desc    Get export statistics (counts)
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/stats',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.getStats(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/full
+ * @desc    Export all data (full backup)
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/full',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportAll(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/events
+ * @desc    Export all events
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/events',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportEvents(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/competitions
+ * @desc    Export all competitions
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/competitions',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportCompetitions(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/editions
+ * @desc    Export all editions
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/editions',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportEditions(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/organizers
+ * @desc    Export all organizers
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/organizers',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportOrganizers(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/series
+ * @desc    Export all special series
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/series',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportSpecialSeries(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/services
+ * @desc    Export all services
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/services',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportServices(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/posts
+ * @desc    Export all posts
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/posts',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportPosts(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/export/users
+ * @desc    Export all users (excluding sensitive data)
+ * @access  Admin
+ */
+router.get(
+  '/admin/export/users',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => exportController.exportUsers(req, res, next)
+);
+
+// ============================================
+// RUTAS ADMIN - EDICION MASIVA (BULK EDIT)
+// ============================================
+
+/**
+ * @route   GET /api/v2/admin/bulk-edit/metadata
+ * @desc    Get metadata for all entities (fields, types, etc.)
+ * @access  Admin
+ */
+router.get(
+  '/admin/bulk-edit/metadata',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => bulkEditController.getMetadata(req, res, next)
+);
+
+/**
+ * @route   GET /api/v2/admin/bulk-edit/relations/:relationEntity
+ * @desc    Get options for a relation field (for dropdowns)
+ * @access  Admin
+ */
+router.get(
+  '/admin/bulk-edit/relations/:relationEntity',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => bulkEditController.getRelationOptions(req, res, next)
+);
+
+/**
+ * @route   POST /api/v2/admin/bulk-edit/query
+ * @desc    Query records with filters (for preview)
+ * @access  Admin
+ */
+router.post(
+  '/admin/bulk-edit/query',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => bulkEditController.queryRecords(req, res, next)
+);
+
+/**
+ * @route   POST /api/v2/admin/bulk-edit/preview
+ * @desc    Preview bulk edit operation (shows what will change)
+ * @access  Admin
+ */
+router.post(
+  '/admin/bulk-edit/preview',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => bulkEditController.preview(req, res, next)
+);
+
+/**
+ * @route   POST /api/v2/admin/bulk-edit/execute
+ * @desc    Execute bulk edit operation
+ * @access  Admin
+ */
+router.post(
+  '/admin/bulk-edit/execute',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => bulkEditController.execute(req, res, next)
+);
+
+/**
+ * @route   POST /api/v2/admin/bulk-edit/disconnect-series
+ * @desc    Disconnect special series from competitions (many-to-many)
+ * @access  Admin
+ */
+router.post(
+  '/admin/bulk-edit/disconnect-series',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => bulkEditController.disconnectSeries(req, res, next)
 );
 
 export default router;
