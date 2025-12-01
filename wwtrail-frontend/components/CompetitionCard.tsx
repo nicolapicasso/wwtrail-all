@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Competition } from '@/types/v2';
-import { Mountain, TrendingUp, Users, Calendar, MapPin } from 'lucide-react';
+import { Mountain, TrendingUp, Users, Calendar, MapPin, Star } from 'lucide-react';
 
 const COUNTRY_FLAGS: { [key: string]: string } = {
   'ES': '🇪🇸', 'FR': '🇫🇷', 'IT': '🇮🇹', 'CH': '🇨🇭',
@@ -19,18 +19,20 @@ interface CompetitionCardProps {
   eventSlug?: string;
   onClick?: () => void;
   className?: string;
+  simplified?: boolean;
 }
 
 export function CompetitionCard({
   competition,
   eventSlug,
   onClick,
-  className = ''
+  className = '',
+  simplified = false
 }: CompetitionCardProps) {
   const [imageError, setImageError] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
-  const mainImage = competition.coverImage;
+  const mainImage = competition.coverImage || (competition as any).event?.coverImage;
   const logoImage = competition.logoUrl || (competition as any).event?.logoUrl;
 
   const renderImage = () => {
@@ -40,7 +42,7 @@ export function CompetitionCard({
           src={mainImage}
           alt={competition.name}
           fill
-          className="object-cover"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onError={() => setImageError(true)}
         />
@@ -53,6 +55,77 @@ export function CompetitionCard({
       );
     }
   };
+
+  // Get the correct link
+  const finalEventSlug = eventSlug || (competition as any).event?.slug;
+  const href = finalEventSlug
+    ? `/events/${finalEventSlug}/${competition.slug}`
+    : `/competitions/${competition.slug}`;
+
+  // Simplified mode - just image + logo + featured badge
+  if (simplified) {
+    return (
+      <Link href={href} className="block">
+        <div className="group relative overflow-hidden rounded-lg shadow-sm transition-all hover:shadow-md bg-white border-gray-200 h-48">
+          <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-green-50 to-blue-50">
+            {renderImage()}
+
+            {/* Overlay Gradient */}
+            {mainImage && !imageError && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+            )}
+
+            {/* Logo Overlay */}
+            {logoImage && !logoError && (
+              <div className="absolute bottom-3 left-3 bg-white rounded-lg p-2 shadow-lg z-10">
+                <div className="relative w-12 h-12">
+                  <Image
+                    src={logoImage}
+                    alt={`${competition.name} logo`}
+                    fill
+                    className="object-contain"
+                    onError={() => setLogoError(true)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Featured Badge */}
+            {(competition as any).featured && (
+              <div className="absolute top-2 right-2 z-10">
+                <span className="inline-flex items-center gap-1 rounded-none bg-[#B66916] px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
+                  <Star className="h-3 w-3 fill-current" />
+                  Featured
+                </span>
+              </div>
+            )}
+
+            {/* Distance Badge */}
+            {competition.baseDistance && (
+              <div className="absolute bottom-3 right-3 bg-gray-800 text-white px-3 py-1 rounded-none text-xs font-semibold shadow-lg z-10">
+                {competition.baseDistance}km
+              </div>
+            )}
+
+            {/* Name Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+              <h3 className="text-white font-semibold text-sm line-clamp-1">
+                {competition.name}
+              </h3>
+              {(competition as any).event?.city && (
+                <p className="text-white/80 text-xs mt-0.5">
+                  {COUNTRY_FLAGS[(competition as any).event?.country] || '🌍'} {(competition as any).event?.city}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Hover effect */}
+          <div className="absolute inset-0 bg-hover/0 transition-colors group-hover:bg-hover/5 pointer-events-none" />
+        </div>
+      </Link>
+    );
+  }
 
   const content = (
     <div className={`group relative overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:shadow-md flex flex-col h-full ${className}`}>
