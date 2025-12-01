@@ -22,6 +22,7 @@ import { RelatedArticles } from '@/components/RelatedArticles';
 import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 import Head from 'next/head';
+import { AdminEditButtonFloating } from '@/components/AdminEditButton';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -563,6 +564,12 @@ export default function CompetitionDetailPage() {
           <SEOFaqSchema faq={seo.llmFaq} visible={true} />
         )}
       </div>
+
+      {/* Admin Edit Button (floating) */}
+      <AdminEditButtonFloating
+        editUrl={`/organizer/competitions/edit/${competition.id}`}
+        label="Editar Competición"
+      />
     </div>
   );
 }

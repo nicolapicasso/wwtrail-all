@@ -12,7 +12,7 @@ import { seoService } from '@/lib/api/seo.service';
 import servicesService from '@/lib/api/v2/services.service';
 import { Event } from '@/types/api';
 import { Service } from '@/types/v2';
-import { 
+import {
   MapPin, Calendar, Globe, Mail, Phone, Facebook, Instagram, Twitter, Youtube,
   Trophy, Eye, Clock, Image as ImageIcon
 } from 'lucide-react';
@@ -25,6 +25,7 @@ import OrganizerCard from '@/components/OrganizerCard';
 import { RelatedArticles } from '@/components/RelatedArticles';
 import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
+import { AdminEditButtonFloating } from '@/components/AdminEditButton';
 
 // ============================================================================
 // 📋 METADATA
@@ -501,6 +502,12 @@ export default async function EventDetailPage({
           <SEOFaqSchema faq={seo.llmFaq} visible={true} />
         )}
       </div>
+
+      {/* Admin Edit Button (floating) */}
+      <AdminEditButtonFloating
+        editUrl={`/organizer/events/edit/${event.id}`}
+        label="Editar Evento"
+      />
     </div>
   );
 }
