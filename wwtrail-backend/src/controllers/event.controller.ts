@@ -504,9 +504,9 @@ export class EventController {
           organizer: {
             select: {
               id: true,
-              username: true,
-              firstName: true,
-              lastName: true,
+              name: true,
+              slug: true,
+              logoUrl: true,
             },
           },
         },
