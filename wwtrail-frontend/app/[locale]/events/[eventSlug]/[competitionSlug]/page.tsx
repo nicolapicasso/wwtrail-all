@@ -432,7 +432,7 @@ export default function CompetitionDetailPage() {
             </div>
 
             {/* Classification & Certifications */}
-            {(competition.terrainType || competition.specialSeries || competition.itraPoints !== undefined || competition.utmbIndex) && (
+            {(competition.terrainType || (competition.specialSeries && competition.specialSeries.length > 0) || competition.itraPoints !== undefined || competition.utmbIndex) && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <h3 className="mb-4 font-semibold flex items-center gap-2">
                   <Award className="h-5 w-5 text-purple-600" />
@@ -452,28 +452,34 @@ export default function CompetitionDetailPage() {
                     </div>
                   )}
 
-                  {/* Special Series */}
-                  {competition.specialSeries && (
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-                        <Sparkles className="h-5 w-5 text-purple-600" />
+                  {/* Special Series (many-to-many) */}
+                  {competition.specialSeries && competition.specialSeries.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-purple-600" />
+                        <p className="text-xs text-muted-foreground">
+                          {competition.specialSeries.length === 1 ? 'Serie Especial' : 'Series Especiales'}
+                        </p>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-muted-foreground">Serie Especial</p>
-                        <Link
-                          href={`/special-series/${competition.specialSeries.slug}`}
-                          className="font-semibold hover:text-purple-600 transition-colors"
-                        >
-                          {competition.specialSeries.name}
-                        </Link>
-                      </div>
-                      {competition.specialSeries.logoUrl && (
-                        <img
-                          src={normalizeImageUrl(competition.specialSeries.logoUrl)}
-                          alt={competition.specialSeries.name}
-                          className="h-8 w-8 object-contain"
-                        />
-                      )}
+                      {competition.specialSeries.map((series: any) => (
+                        <div key={series.id} className="flex items-center gap-3 pl-6">
+                          <div className="flex-1">
+                            <Link
+                              href={`/special-series/${series.slug}`}
+                              className="font-semibold hover:text-purple-600 transition-colors"
+                            >
+                              {series.name}
+                            </Link>
+                          </div>
+                          {series.logoUrl && (
+                            <img
+                              src={normalizeImageUrl(series.logoUrl)}
+                              alt={series.name}
+                              className="h-8 w-8 object-contain"
+                            />
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
 
