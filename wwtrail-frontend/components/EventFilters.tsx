@@ -208,7 +208,7 @@ export default function EventFilters({
     <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
       {/* Search Bar */}
       <div className="flex flex-col md:flex-row gap-4">
-        {/* ✅ CRÍTICO: Input controlado desde fuera */}
+        {/* ✅ CRÍTICO: Input controlado desde fuera - NO deshabilitado durante carga para evitar pérdida de foco */}
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
@@ -216,8 +216,7 @@ export default function EventFilters({
             placeholder="Buscar eventos por nombre o ubicación..."
             value={searchValue}  // ✅ Valor controlado
             onChange={(e) => handleSearchChange(e.target.value)}
-            disabled={isLoading}
-            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
           {searchValue && (
             <button
