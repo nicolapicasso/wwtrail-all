@@ -42,6 +42,7 @@ export default function MyEventsPage() {
   const [countryFilter, setCountryFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
   const [organizerFilter, setOrganizerFilter] = useState('');
+  const [featuredFilter, setFeaturedFilter] = useState<boolean | null>(null);
   const [page, setPage] = useState(1);
 
   // Debounce timer ref
@@ -118,6 +119,7 @@ export default function MyEventsPage() {
         country: countryFilter || undefined,
         month: monthFilter || undefined,
         organizerId: isAdmin && organizerFilter ? organizerFilter : undefined,
+        featured: featuredFilter,
       };
 
       const response = isAdmin && organizerFilter
@@ -135,7 +137,7 @@ export default function MyEventsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, debouncedSearch, statusFilter, countryFilter, monthFilter, organizerFilter, isAdmin]);
+  }, [page, debouncedSearch, statusFilter, countryFilter, monthFilter, organizerFilter, featuredFilter, isAdmin]);
 
   /**
    * Fetch stats
@@ -214,6 +216,14 @@ export default function MyEventsPage() {
    */
   const handleFilterOrganizer = (organizerId: string) => {
     setOrganizerFilter(organizerId);
+    setPage(1);
+  };
+
+  /**
+   * Handle featured filter
+   */
+  const handleFilterFeatured = (featured: boolean | null) => {
+    setFeaturedFilter(featured);
     setPage(1);
   };
 
@@ -455,11 +465,13 @@ export default function MyEventsPage() {
           onFilterCountry={handleFilterCountry}
           onFilterMonth={handleFilterMonth}
           onFilterOrganizer={isAdmin ? handleFilterOrganizer : undefined}
+          onFilterHighlighted={handleFilterFeatured}
           selectedCountry={countryFilter}
           showCountryFilter={true}
           showOrganizerFilter={isAdmin}
           showStatusFilter={true}
           showMonthFilter={true}
+          showHighlightedFilter={true}
           isLoading={isLoading}
         />
 

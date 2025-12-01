@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Loader2, Calendar, Mountain, TrendingUp, Users, Edit, Trash2, Eye, MapPin } from 'lucide-react';
+import { Plus, Loader2, Calendar, Mountain, TrendingUp, Users, Edit, Trash2, Eye, MapPin, Star } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import editionsService from '@/lib/api/v2/editions.service';
@@ -29,6 +29,7 @@ export default function OrganizerEditionsPage() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [featuredFilter, setFeaturedFilter] = useState<string>('all');
 
   // Confirm Dialog
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -201,8 +202,15 @@ export default function OrganizerEditionsPage() {
    * Filter editions
    */
   const filteredEditions = editions.filter((edition) => {
-    if (searchQuery) {
-      return edition.year.toString().includes(searchQuery);
+    // Search by year
+    if (searchQuery && !edition.year.toString().includes(searchQuery)) {
+      return false;
+    }
+    // Featured filter
+    if (featuredFilter !== 'all') {
+      const isFeatured = (edition as any).featured === true;
+      if (featuredFilter === 'true' && !isFeatured) return false;
+      if (featuredFilter === 'false' && isFeatured) return false;
     }
     return true;
   });
@@ -225,7 +233,7 @@ export default function OrganizerEditionsPage() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Event Filter */}
             <div>
               <label htmlFor="event-filter" className="block text-sm font-medium text-gray-700 mb-2">
@@ -268,6 +276,24 @@ export default function OrganizerEditionsPage() {
                     {comp.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Featured Filter */}
+            <div>
+              <label htmlFor="featured-filter" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                <Star className="h-4 w-4" />
+                Destacados
+              </label>
+              <select
+                id="featured-filter"
+                value={featuredFilter}
+                onChange={(e) => setFeaturedFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="all">Todas las ediciones</option>
+                <option value="true">Solo destacadas</option>
+                <option value="false">No destacadas</option>
               </select>
             </div>
 
