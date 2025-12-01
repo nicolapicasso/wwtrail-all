@@ -5,63 +5,123 @@ import { Edition, EditionFull, EditionStats } from '@/types/edition';
 
 /**
  * Editions Service - USA V2
- * CORREGIDO: Obtiene editions desde competition.editions
+ * CORREGIDO: Maneja tanto formato anidado como plano del backend
  */
 
-// Backend response structure (flat fields)
-interface EditionWithInheritanceResponse extends Edition {
+// Backend response structure - puede venir en formato anidado o plano
+interface EditionBackendResponse extends Edition {
   // Resolved fields
-  distance: number;
-  elevation: number;
-  maxParticipants: number;
-  city: string;
+  distance?: number;
+  elevation?: number;
+  maxParticipants?: number;
+  city?: string;
 
-  // Flat fields from backend
-  eventId: string;
-  eventName: string;
-  eventSlug: string;
-  eventCountry: string;
+  // Formato ANIDADO (de /editions con findAllWithInheritance)
+  competition?: {
+    id: string;
+    name: string;
+    slug: string;
+    type?: string;
+    baseDistance?: number;
+    baseElevation?: number;
+    baseMaxParticipants?: number;
+    logoUrl?: string;
+    event?: {
+      id: string;
+      name: string;
+      slug: string;
+      country?: string;
+      city?: string;
+      logoUrl?: string;
+      latitude?: number;
+      longitude?: number;
+    };
+  };
+
+  // Formato PLANO (de /editions/:id/with-inheritance)
+  eventId?: string;
+  eventName?: string;
+  eventSlug?: string;
+  eventCountry?: string;
   eventLogoUrl?: string;
   eventLatitude?: number;
   eventLongitude?: number;
-  competitionName: string;
-  competitionSlug: string;
-  competitionType: string;
+  competitionName?: string;
+  competitionSlug?: string;
+  competitionType?: string;
   competitionLogoUrl?: string;
   baseDistance?: number;
   baseElevation?: number;
   baseMaxParticipants?: number;
 }
 
-// Transform backend response to EditionFull format
-function transformToEditionFull(response: EditionWithInheritanceResponse): EditionFull {
-  return {
-    ...response,
-    resolvedDistance: response.distance,
-    resolvedElevation: response.elevation,
-    resolvedMaxParticipants: response.maxParticipants,
-    resolvedCity: response.city,
-    competition: {
-      id: response.competitionId,
-      slug: response.competitionSlug,
-      name: response.competitionName,
-      type: response.competitionType,
-      baseDistance: response.baseDistance,
-      baseElevation: response.baseElevation,
-      baseMaxParticipants: response.baseMaxParticipants,
-      logoUrl: response.competitionLogoUrl,
-    },
-    event: {
-      id: response.eventId,
-      slug: response.eventSlug,
-      name: response.eventName,
-      country: response.eventCountry,
-      city: response.city,
-      logoUrl: response.eventLogoUrl,
-      latitude: response.eventLatitude,
-      longitude: response.eventLongitude,
-    },
-  };
+// Transform backend response to EditionFull format (handles both nested and flat)
+function transformToEditionFull(response: EditionBackendResponse): EditionFull {
+  // Check if data comes in nested format (from /editions endpoint)
+  const hasNestedCompetition = response.competition && typeof response.competition === 'object';
+
+  if (hasNestedCompetition) {
+    // Formato ANIDADO
+    const comp = response.competition!;
+    const event = comp.event || {};
+
+    return {
+      ...response,
+      resolvedDistance: response.distance ?? comp.baseDistance ?? 0,
+      resolvedElevation: response.elevation ?? comp.baseElevation ?? 0,
+      resolvedMaxParticipants: response.maxParticipants ?? comp.baseMaxParticipants ?? 0,
+      resolvedCity: response.city ?? event.city ?? '',
+      competition: {
+        id: comp.id || response.competitionId,
+        slug: comp.slug,
+        name: comp.name,
+        type: comp.type || 'TRAIL',
+        baseDistance: comp.baseDistance,
+        baseElevation: comp.baseElevation,
+        baseMaxParticipants: comp.baseMaxParticipants,
+        logoUrl: comp.logoUrl,
+      },
+      event: {
+        id: event.id || '',
+        slug: event.slug || '',
+        name: event.name || '',
+        country: event.country || '',
+        city: event.city || response.city || '',
+        logoUrl: event.logoUrl,
+        latitude: event.latitude,
+        longitude: event.longitude,
+      },
+    };
+  } else {
+    // Formato PLANO
+    return {
+      ...response,
+      resolvedDistance: response.distance ?? 0,
+      resolvedElevation: response.elevation ?? 0,
+      resolvedMaxParticipants: response.maxParticipants ?? 0,
+      resolvedCity: response.city ?? '',
+      competition: {
+        id: response.competitionId,
+        slug: response.competitionSlug || '',
+        name: response.competitionName || '',
+        type: response.competitionType || 'TRAIL',
+        baseDistance: response.baseDistance,
+        baseElevation: response.baseElevation,
+        baseMaxParticipants: response.baseMaxParticipants,
+        logoUrl: response.competitionLogoUrl,
+      },
+      event: {
+        id: response.eventId || '',
+        slug: response.eventSlug || '',
+        name: response.eventName || '',
+        country: response.eventCountry || '',
+        city: response.city || '',
+        logoUrl: response.eventLogoUrl,
+        latitude: response.eventLatitude,
+        longitude: response.eventLongitude,
+      },
+    };
+  }
 }
 
 export const editionsService = {
@@ -77,10 +137,10 @@ export const editionsService = {
 
     const response = await apiClientV2.get<{
       status: string;
-      data: { editions: EditionWithInheritanceResponse[] };
+      data: { editions: EditionBackendResponse[] };
     }>(`/editions${params.toString() ? `?${params.toString()}` : ''}`);
 
-    // Transform all editions to EditionFull format
+    // Transform all editions to EditionFull format (handles nested format)
     const editions = (response.data.data?.editions || []).map(transformToEditionFull);
     return { editions };
   },
@@ -149,7 +209,7 @@ export const editionsService = {
   async getBySlugWithInheritance(slug: string): Promise<EditionFull> {
     const response = await apiClientV2.get<{
       status: string;
-      data: EditionWithInheritanceResponse;
+      data: EditionBackendResponse;
     }>(`/editions/slug/${slug}/with-inheritance`);
     return transformToEditionFull(response.data.data);
   },
@@ -171,7 +231,7 @@ export const editionsService = {
   async getWithInheritance(id: string): Promise<EditionFull> {
     const response = await apiClientV2.get<{
       status: string;
-      data: EditionWithInheritanceResponse;
+      data: EditionBackendResponse;
     }>(`/editions/${id}/with-inheritance`);
     return transformToEditionFull(response.data.data);
   },
