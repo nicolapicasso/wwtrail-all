@@ -45,6 +45,7 @@ class EventsService {
     if (filters?.city) params.append('city', filters.city);
     if (filters?.month) params.append('typicalMonth', filters.month);  // Backend uses typicalMonth
     if (filters?.organizerId) params.append('organizerId', filters.organizerId);
+    if (filters?.isFeatured !== undefined) params.append('featured', filters.isFeatured.toString());
 
     const response = await apiClientV2.get<EventsResponse>(`/events/my-events?${params.toString()}`);
     return response.data;
