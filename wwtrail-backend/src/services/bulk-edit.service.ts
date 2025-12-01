@@ -230,6 +230,9 @@ export class BulkEditService {
     }
   }
 
+  // Many-to-many relation fields that need special handling
+  private readonly MANY_TO_MANY_FIELDS = ['specialSeries'];
+
   /**
    * Build Prisma where clause from filters
    */
@@ -241,6 +244,23 @@ export class BulkEditService {
     const conditions = filters.conditions.map((condition) => {
       const { field, operator, value } = condition;
 
+      // Handle many-to-many relations (like specialSeries)
+      if (this.MANY_TO_MANY_FIELDS.includes(field)) {
+        switch (operator) {
+          case 'equals':
+            return { [field]: { some: { id: value } } };
+          case 'not_equals':
+            return { [field]: { none: { id: value } } };
+          case 'is_null':
+            return { [field]: { none: {} } };
+          case 'is_not_null':
+            return { [field]: { some: {} } };
+          default:
+            return { [field]: { some: { id: value } } };
+        }
+      }
+
+      // Standard field handling
       switch (operator) {
         case 'equals':
           return { [field]: value };
