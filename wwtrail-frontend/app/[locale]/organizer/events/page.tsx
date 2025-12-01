@@ -119,7 +119,7 @@ export default function MyEventsPage() {
         country: countryFilter || undefined,
         month: monthFilter || undefined,
         organizerId: isAdmin && organizerFilter ? organizerFilter : undefined,
-        featured: featuredFilter,
+        isFeatured: featuredFilter,
       };
 
       const response = isAdmin && organizerFilter
