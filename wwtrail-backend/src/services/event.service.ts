@@ -257,6 +257,11 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
         where.organizerId = organizerId;
       }
 
+      // Filtro por destacados
+      if (filters.featured !== undefined && filters.featured !== null && filters.featured !== '') {
+        where.featured = filters.featured === 'true' || filters.featured === true;
+      }
+
       // Obtener eventos
       const [events, total] = await Promise.all([
         prisma.event.findMany({
