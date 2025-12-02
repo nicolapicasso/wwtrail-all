@@ -18,7 +18,7 @@ type TranslationStatus = 'idle' | 'loading' | 'success' | 'error';
 
 /**
  * Button to generate AI translations for an entity
- * Only visible for ORGANIZER and ADMIN users
+ * Only visible for ADMIN users
  */
 export function GenerateTranslationsButton({
   entityType,
@@ -31,8 +31,8 @@ export function GenerateTranslationsButton({
   const [status, setStatus] = useState<TranslationStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Only show for ORGANIZER or ADMIN users
-  if (!user || (user.role !== 'ORGANIZER' && user.role !== 'ADMIN')) {
+  // Only show for ADMIN users
+  if (!user || user.role !== 'ADMIN') {
     return null;
   }
 
