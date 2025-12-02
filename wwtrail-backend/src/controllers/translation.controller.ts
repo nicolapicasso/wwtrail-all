@@ -2,6 +2,72 @@ import { Request, Response, NextFunction } from 'express';
 import { TranslationService } from '../services/translation.service';
 import logger from '../utils/logger';
 import { Language } from '@prisma/client';
+import prisma from '../config/database';
+
+// Todos los idiomas soportados por el sistema
+const ALL_LANGUAGES: Language[] = ['ES', 'EN', 'IT', 'CA', 'FR', 'DE'];
+
+/**
+ * Obtiene los idiomas de destino: todos excepto el idioma base del contenido
+ */
+async function getTargetLanguages(
+  entityType: 'event' | 'competition' | 'post' | 'service' | 'specialSeries',
+  entityId: string,
+  providedLanguages?: Language[]
+): Promise<Language[]> {
+  // Si se proporcionan idiomas específicos, usarlos
+  if (providedLanguages && Array.isArray(providedLanguages) && providedLanguages.length > 0) {
+    return providedLanguages;
+  }
+
+  // Obtener el idioma base del contenido
+  let sourceLanguage: Language = 'ES'; // Default
+
+  try {
+    switch (entityType) {
+      case 'event':
+        const event = await prisma.event.findUnique({
+          where: { id: entityId },
+          select: { language: true },
+        });
+        if (event) sourceLanguage = event.language;
+        break;
+      case 'competition':
+        const competition = await prisma.competition.findUnique({
+          where: { id: entityId },
+          select: { language: true },
+        });
+        if (competition) sourceLanguage = competition.language;
+        break;
+      case 'post':
+        const post = await prisma.post.findUnique({
+          where: { id: entityId },
+          select: { language: true },
+        });
+        if (post) sourceLanguage = post.language;
+        break;
+      case 'service':
+        const service = await prisma.service.findUnique({
+          where: { id: entityId },
+          select: { language: true },
+        });
+        if (service) sourceLanguage = service.language;
+        break;
+      case 'specialSeries':
+        const specialSeries = await prisma.specialSeries.findUnique({
+          where: { id: entityId },
+          select: { language: true },
+        });
+        if (specialSeries) sourceLanguage = specialSeries.language;
+        break;
+    }
+  } catch (error) {
+    logger.warn(`No se pudo obtener idioma base de ${entityType} ${entityId}, usando ES`);
+  }
+
+  // Retornar todos los idiomas excepto el idioma base
+  return ALL_LANGUAGES.filter((lang) => lang !== sourceLanguage);
+}
 
 /**
  * TranslationController - Maneja peticiones HTTP para traducciones automáticas
@@ -59,9 +125,12 @@ export class TranslationController {
   static async autoTranslateCompetition(req: Request, res: Response, next: NextFunction) {
     try {
       const { competitionId } = req.params;
-      const { targetLanguages, overwrite } = req.body;
+      const { targetLanguages: providedLanguages, overwrite } = req.body;
 
-      logger.info(`Auto-traduciendo competición ${competitionId}`);
+      // Obtener idiomas de destino (todos excepto el idioma base si no se especifican)
+      const targetLanguages = await getTargetLanguages('competition', competitionId, providedLanguages);
+
+      logger.info(`Auto-traduciendo competición ${competitionId} a idiomas: ${targetLanguages.join(', ')}`);
 
       const translations = await TranslationService.autoTranslateCompetition(
         competitionId,
@@ -88,9 +157,12 @@ export class TranslationController {
   static async autoTranslatePost(req: Request, res: Response, next: NextFunction) {
     try {
       const { postId } = req.params;
-      const { targetLanguages, overwrite } = req.body;
+      const { targetLanguages: providedLanguages, overwrite } = req.body;
 
-      logger.info(`Auto-traduciendo post ${postId}`);
+      // Obtener idiomas de destino (todos excepto el idioma base si no se especifican)
+      const targetLanguages = await getTargetLanguages('post', postId, providedLanguages);
+
+      logger.info(`Auto-traduciendo post ${postId} a idiomas: ${targetLanguages.join(', ')}`);
 
       const translations = await TranslationService.autoTranslatePost(
         postId,
@@ -117,9 +189,12 @@ export class TranslationController {
   static async autoTranslateEvent(req: Request, res: Response, next: NextFunction) {
     try {
       const { eventId } = req.params;
-      const { targetLanguages, overwrite } = req.body;
+      const { targetLanguages: providedLanguages, overwrite } = req.body;
 
-      logger.info(`Auto-traduciendo evento ${eventId}`);
+      // Obtener idiomas de destino (todos excepto el idioma base si no se especifican)
+      const targetLanguages = await getTargetLanguages('event', eventId, providedLanguages);
+
+      logger.info(`Auto-traduciendo evento ${eventId} a idiomas: ${targetLanguages.join(', ')}`);
 
       const translations = await TranslationService.autoTranslateEvent(
         eventId,
@@ -146,9 +221,12 @@ export class TranslationController {
   static async autoTranslateService(req: Request, res: Response, next: NextFunction) {
     try {
       const { serviceId } = req.params;
-      const { targetLanguages, overwrite } = req.body;
+      const { targetLanguages: providedLanguages, overwrite } = req.body;
 
-      logger.info(`Auto-traduciendo servicio ${serviceId}`);
+      // Obtener idiomas de destino (todos excepto el idioma base si no se especifican)
+      const targetLanguages = await getTargetLanguages('service', serviceId, providedLanguages);
+
+      logger.info(`Auto-traduciendo servicio ${serviceId} a idiomas: ${targetLanguages.join(', ')}`);
 
       const translations = await TranslationService.autoTranslateService(
         serviceId,
@@ -175,9 +253,12 @@ export class TranslationController {
   static async autoTranslateSpecialSeries(req: Request, res: Response, next: NextFunction) {
     try {
       const { specialSeriesId } = req.params;
-      const { targetLanguages, overwrite } = req.body;
+      const { targetLanguages: providedLanguages, overwrite } = req.body;
 
-      logger.info(`Auto-traduciendo serie especial ${specialSeriesId}`);
+      // Obtener idiomas de destino (todos excepto el idioma base si no se especifican)
+      const targetLanguages = await getTargetLanguages('specialSeries', specialSeriesId, providedLanguages);
+
+      logger.info(`Auto-traduciendo serie especial ${specialSeriesId} a idiomas: ${targetLanguages.join(', ')}`);
 
       const translations = await TranslationService.autoTranslateSpecialSeries(
         specialSeriesId,
