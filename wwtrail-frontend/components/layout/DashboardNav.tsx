@@ -32,6 +32,7 @@ import {
   Download,
   PenSquare,
   Database,
+  Languages,
 } from 'lucide-react';
 import { adminService, PendingContentCounts } from '@/lib/api/admin.service';
 
@@ -219,6 +220,11 @@ const navItems: NavItem[] = [
         label: 'Editor Masivo',
         href: '/organizer/bulk-edit',
         icon: PenSquare,
+      },
+      {
+        label: 'Traducciones',
+        href: '/organizer/translations',
+        icon: Languages,
       },
     ],
   },
