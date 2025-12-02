@@ -8,6 +8,7 @@ import eventsService from '@/lib/api/v2/events.service';
 import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import EventForm from '@/components/forms/EventForm';
 import { Button } from '@/components/ui/button';
+import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
 
 export default function EditEventPage() {
   const router = useRouter();
@@ -139,15 +140,21 @@ export default function EditEventPage() {
               <ArrowLeft className="h-5 w-5" />
               Volver
             </button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/organizer/seo')}
-              className="flex items-center gap-2"
-            >
-              <Search className="h-4 w-4" />
-              Gestionar SEO
-            </Button>
+            <div className="flex items-center gap-2">
+              <GenerateTranslationsButton
+                entityType="event"
+                entityId={eventId}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/organizer/seo')}
+                className="flex items-center gap-2"
+              >
+                <Search className="h-4 w-4" />
+                Gestionar SEO
+              </Button>
+            </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Editar Evento</h1>
           <p className="mt-2 text-gray-600">

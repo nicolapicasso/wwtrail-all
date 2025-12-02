@@ -8,6 +8,7 @@ import { Post } from '@/types/v2';
 import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
 
 export default function EditPostPage() {
   const params = useParams();
@@ -78,15 +79,21 @@ export default function EditPostPage() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Volver a Mis Artículos
             </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/organizer/seo')}
-              className="flex items-center gap-2"
-            >
-              <Search className="h-4 w-4" />
-              Gestionar SEO
-            </Button>
+            <div className="flex items-center gap-2">
+              <GenerateTranslationsButton
+                entityType="post"
+                entityId={id}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/organizer/seo')}
+                className="flex items-center gap-2"
+              >
+                <Search className="h-4 w-4" />
+                Gestionar SEO
+              </Button>
+            </div>
           </div>
           <h1 className="text-4xl font-bold mb-2">Editar Artículo</h1>
           <p className="text-muted-foreground">

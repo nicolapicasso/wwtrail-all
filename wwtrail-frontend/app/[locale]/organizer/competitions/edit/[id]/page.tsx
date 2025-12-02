@@ -10,6 +10,7 @@ import CompetitionForm from '@/components/forms/CompetitionForm';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import type { Competition } from '@/types/competition';
 import { Button } from '@/components/ui/button';
+import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
 
 interface EditCompetitionPageProps {
   params: {
@@ -86,15 +87,21 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
             <ArrowLeft className="w-4 h-4" />
             Volver al evento
           </Link>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push('/organizer/seo')}
-            className="flex items-center gap-2"
-          >
-            <Search className="h-4 w-4" />
-            Gestionar SEO
-          </Button>
+          <div className="flex items-center gap-2">
+            <GenerateTranslationsButton
+              entityType="competition"
+              entityId={params.id}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/organizer/seo')}
+              className="flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              Gestionar SEO
+            </Button>
+          </div>
         </div>
 
         {/* Competition Context */}

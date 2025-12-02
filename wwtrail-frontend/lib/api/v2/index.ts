@@ -11,5 +11,6 @@ export { default as organizersService } from './organizers.service';
 export { default as postsService } from './posts.service';
 export { default as promotionsService } from './promotions.service';
 export { default as emailTemplatesService } from './email-templates.service';
+export { default as translationsService } from './translations.service';
 
 // Types should be imported from @/types/v2 instead

@@ -3,9 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import SpecialSeriesForm from '@/components/forms/SpecialSeriesForm';
+import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
 
 export default function EditSpecialSeriesPage() {
   const params = useParams();
@@ -64,10 +66,35 @@ export default function EditSpecialSeriesPage() {
   }
 
   return (
-    <SpecialSeriesForm
-      mode="edit"
-      initialData={specialSeries}
-      specialSeriesId={specialSeriesId}
-    />
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/organizer/special-series"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Volver a Series Especiales
+            </Link>
+            <GenerateTranslationsButton
+              entityType="special-series"
+              entityId={specialSeriesId}
+            />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Editar Serie Especial</h1>
+          <p className="mt-2 text-gray-600">
+            Modifica la información de la serie especial
+          </p>
+        </div>
+
+        <SpecialSeriesForm
+          mode="edit"
+          initialData={specialSeries}
+          specialSeriesId={specialSeriesId}
+        />
+      </div>
+    </div>
   );
 }

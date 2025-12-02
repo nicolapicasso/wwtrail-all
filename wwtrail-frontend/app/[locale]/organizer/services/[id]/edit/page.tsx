@@ -11,6 +11,7 @@ import ServiceForm from '@/components/forms/ServiceForm';
 import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
 
 export default function EditServicePage() {
   const params = useParams();
@@ -95,15 +96,21 @@ export default function EditServicePage() {
               <ArrowLeft className="w-4 h-4" />
               Volver a Mis Servicios
             </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/organizer/seo')}
-              className="flex items-center gap-2"
-            >
-              <Search className="h-4 w-4" />
-              Gestionar SEO
-            </Button>
+            <div className="flex items-center gap-2">
+              <GenerateTranslationsButton
+                entityType="service"
+                entityId={serviceId}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/organizer/seo')}
+                className="flex items-center gap-2"
+              >
+                <Search className="h-4 w-4" />
+                Gestionar SEO
+              </Button>
+            </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Editar Servicio</h1>
           <p className="mt-2 text-gray-600">
