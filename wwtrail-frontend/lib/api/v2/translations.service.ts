@@ -20,13 +20,32 @@ interface TranslationResponse {
   };
 }
 
-interface TranslationStatusResponse {
+interface EntityStats {
+  total: number;
+  withTranslations: number;
+  missingTranslations: number;
+}
+
+interface TranslationStatsResponse {
   status: string;
   data: {
-    total: number;
-    translated: number;
-    pending: number;
+    events: EntityStats;
+    competitions: EntityStats;
+    posts: EntityStats;
+    services: EntityStats;
+    promotions: EntityStats;
+    specialSeries: EntityStats;
+  };
+}
+
+interface BulkTranslationResponse {
+  status: string;
+  message: string;
+  data: {
     entityType: string;
+    translated: number;
+    errors: number;
+    targetLanguages: string[];
   };
 }
 
@@ -102,14 +121,40 @@ class TranslationsService {
   }
 
   /**
-   * Get translation status for an entity type (admin only)
+   * Get translation statistics for all entity types (admin only)
    */
-  async getStatus(entityType?: string): Promise<TranslationStatusResponse> {
-    const url = entityType
-      ? `/translations/bulk/status?entityType=${entityType}`
-      : '/translations/bulk/status';
-    const response = await apiClientV2.get<TranslationStatusResponse>(url);
+  async getStats(): Promise<TranslationStatsResponse> {
+    const response = await apiClientV2.get<TranslationStatsResponse>('/translations/bulk/status');
     return response.data;
+  }
+
+  /**
+   * Bulk translate all pending entities of a specific type (admin only)
+   */
+  async bulkTranslate(entityType: string): Promise<BulkTranslationResponse> {
+    const response = await apiClientV2.post<BulkTranslationResponse>('/translations/bulk/generate', {
+      entityType,
+    });
+    return response.data;
+  }
+
+  /**
+   * Bulk translate all pending entities of all types (admin only)
+   */
+  async bulkTranslateAll(): Promise<BulkTranslationResponse[]> {
+    const entityTypes = ['event', 'competition', 'post', 'service', 'promotion', 'specialSeries'];
+    const results: BulkTranslationResponse[] = [];
+
+    for (const entityType of entityTypes) {
+      try {
+        const result = await this.bulkTranslate(entityType);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error bulk translating ${entityType}:`, error);
+      }
+    }
+
+    return results;
   }
 
   /**

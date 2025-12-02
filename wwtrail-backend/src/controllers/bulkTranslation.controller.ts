@@ -152,10 +152,33 @@ export class BulkTranslationController {
           break;
         }
 
+        case 'specialSeries': {
+          const specialSeriesList = await prisma.specialSeries.findMany({
+            include: { translations: true },
+          });
+
+          for (const specialSeries of specialSeriesList) {
+            try {
+              const existingLanguages = specialSeries.translations.map(t => t.language);
+              const missingLanguages = languages.filter(lang => !existingLanguages.includes(lang));
+
+              if (missingLanguages.length > 0) {
+                await TranslationService.translateSpecialSeries(specialSeries.id, missingLanguages as Language[]);
+                count++;
+                logger.info(`Translated specialSeries ${specialSeries.id} to ${missingLanguages.join(', ')}`);
+              }
+            } catch (error) {
+              logger.error(`Error translating specialSeries ${specialSeries.id}:`, error);
+              errors++;
+            }
+          }
+          break;
+        }
+
         default:
           return res.status(400).json({
             status: 'error',
-            message: 'Invalid entityType. Use: event, competition, post, service, promotion',
+            message: 'Invalid entityType. Use: event, competition, post, service, promotion, specialSeries',
           });
       }
 
@@ -210,6 +233,11 @@ export class BulkTranslationController {
           withTranslations: 0,
           missingTranslations: 0,
         },
+        specialSeries: {
+          total: 0,
+          withTranslations: 0,
+          missingTranslations: 0,
+        },
       };
 
       // Events
@@ -255,6 +283,14 @@ export class BulkTranslationController {
       stats.promotions.total = promotions.length;
       stats.promotions.withTranslations = promotions.filter(p => p._count.translations > 0).length;
       stats.promotions.missingTranslations = promotions.filter(p => p._count.translations === 0).length;
+
+      // Special Series
+      const specialSeriesList = await prisma.specialSeries.findMany({
+        include: { _count: { select: { translations: true } } },
+      });
+      stats.specialSeries.total = specialSeriesList.length;
+      stats.specialSeries.withTranslations = specialSeriesList.filter(s => s._count.translations > 0).length;
+      stats.specialSeries.missingTranslations = specialSeriesList.filter(s => s._count.translations === 0).length;
 
       res.json({
         status: 'success',
