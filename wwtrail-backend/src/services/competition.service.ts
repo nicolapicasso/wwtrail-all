@@ -274,7 +274,7 @@ export class CompetitionService {
   static async create(eventId: string, data: any, userId: string) {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { id: true, organizerId: true, slug: true },
+      select: { id: true, userId: true, slug: true },
     });
 
     if (!event) {
@@ -286,8 +286,16 @@ export class CompetitionService {
       select: { role: true },
     });
 
-    if (user?.role !== 'ADMIN' && event.organizerId !== userId) {
-      throw new Error('Unauthorized: Only event organizer or admin can create competitions');
+    // Verificar permisos (creador, manager asignado, o admin)
+    if (user?.role !== 'ADMIN') {
+      if (event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can create competitions');
+        }
+      }
     }
 
     const baseSlug = `${event.slug}-${slugify(data.name)}`;
@@ -576,7 +584,7 @@ export class CompetitionService {
       where: { id },
       include: {
         event: {
-          select: { organizerId: true },
+          select: { id: true, userId: true },
         },
       },
     });
@@ -590,8 +598,16 @@ export class CompetitionService {
       select: { role: true },
     });
 
-    if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
-      throw new Error('Unauthorized');
+    // Verificar permisos (creador, manager asignado, o admin)
+    if (user?.role !== 'ADMIN') {
+      if (existing.event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: existing.event.id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can update competitions');
+        }
+      }
     }
 
     // Prepare special series update for many-to-many
@@ -661,7 +677,7 @@ export class CompetitionService {
       where: { id },
       include: {
         event: {
-          select: { organizerId: true },
+          select: { id: true, userId: true },
         },
         _count: {
           select: {
@@ -680,8 +696,16 @@ export class CompetitionService {
       select: { role: true },
     });
 
-    if (user?.role !== 'ADMIN' && existing.event.organizerId !== userId) {
-      throw new Error('Unauthorized');
+    // Verificar permisos (creador, manager asignado, o admin)
+    if (user?.role !== 'ADMIN') {
+      if (existing.event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: existing.event.id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can delete competitions');
+        }
+      }
     }
 
     if (existing._count.editions > 0) {

@@ -740,11 +740,20 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       throw new Error('Event not found');
     }
 
-    // Verificar permisos (solo organizador o admin)
+    // Verificar permisos (creador, manager asignado, o admin)
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    
-    if (user?.role !== 'ADMIN' && event.organizerId !== userId) {
-      throw new Error('Unauthorized: Only the organizer or admin can update this event');
+
+    if (user?.role !== 'ADMIN') {
+      // Verificar si es el creador
+      if (event.userId !== userId) {
+        // Verificar si es un manager asignado
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only the creator, assigned manager, or admin can update this event');
+        }
+      }
     }
 
     // ✅ TRANSFORMACIÓN: Mapear websiteUrl a website si viene en data
@@ -841,11 +850,20 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       throw new Error('Event not found');
     }
 
-    // Verificar permisos
+    // Verificar permisos (creador, manager asignado, o admin)
     const user = await prisma.user.findUnique({ where: { id: userId } });
 
-    if (user?.role !== 'ADMIN' && event.organizerId !== userId) {
-      throw new Error('Unauthorized: Only the organizer or admin can delete this event');
+    if (user?.role !== 'ADMIN') {
+      // Verificar si es el creador
+      if (event.userId !== userId) {
+        // Verificar si es un manager asignado
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only the creator, assigned manager, or admin can delete this event');
+        }
+      }
     }
 
     // Eliminar (cascade eliminará competitions y editions)

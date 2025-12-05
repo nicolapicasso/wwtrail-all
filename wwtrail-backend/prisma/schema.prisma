@@ -175,6 +175,7 @@ model User {
   promotions            Promotion[]       @relation("PromotionCreator")
   landings              Landing[]         @relation("LandingCreator")
   ratings               EditionRating[]   @relation("UserRatings")
+  managedEvents         EventManager[]    @relation("EventManagers")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -306,6 +307,7 @@ model Event {
   competitions Competition[]
   translations EventTranslation[]
   posts        Post[]           @relation("PostEvent")
+  managers     EventManager[]   // Usuarios asignados para gestionar este evento
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -323,6 +325,32 @@ model Event {
   @@index([competitionTypeId])
   @@index([terrainTypeId])
   @@map("events")
+}
+
+// ===================================
+// EVENT MANAGERS (Usuarios asignados para gestionar eventos)
+// ===================================
+// Permite a los administradores asignar usuarios ORGANIZER a eventos
+// para que puedan gestionar el evento, sus competiciones y ediciones
+model EventManager {
+  id        String   @id @default(uuid())
+
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation("EventManagers", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Quién asignó este manager (siempre un admin)
+  assignedById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, userId]) // Un usuario solo puede ser manager una vez por evento
+  @@index([eventId])
+  @@index([userId])
+  @@map("event_managers")
 }
 
 // Nivel 2: COMPETITION (Distancia/carrera específica dentro del evento)

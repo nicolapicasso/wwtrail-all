@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import EventForm from '@/components/forms/EventForm';
 import { Button } from '@/components/ui/button';
 import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
+import { EventManagersPanel } from '@/components/EventManagersPanel';
 
 export default function EditEventPage() {
   const router = useRouter();
@@ -57,8 +58,10 @@ export default function EditEventPage() {
     }
   }, [eventId]);
 
-  // Verificar permisos
-  if (event && user && event.organizerId !== user.id && user.role !== 'ADMIN') {
+  // Verificar permisos básicos en frontend
+  // Nota: El backend hace la verificación completa incluyendo EventManagers
+  // Aquí solo verificamos el creador (userId) - los managers serán verificados por el backend
+  if (event && user && event.userId !== user.id && user.role !== 'ADMIN') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
@@ -168,6 +171,9 @@ export default function EditEventPage() {
           initialData={event}
           eventId={eventId}
         />
+
+        {/* Panel de gestores del evento (solo visible para ADMIN) */}
+        <EventManagersPanel eventId={eventId} eventName={event.name} />
       </div>
     </div>
   );

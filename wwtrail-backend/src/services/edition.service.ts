@@ -27,7 +27,8 @@ export class EditionService {
       include: {
         event: {
           select: {
-            organizerId: true,
+            id: true,
+            userId: true,
           },
         },
       },
@@ -37,14 +38,21 @@ export class EditionService {
       throw new Error('Competition not found');
     }
 
-    // Verificar permisos (organizador del evento o ADMIN)
+    // Verificar permisos (creador, manager asignado, o ADMIN)
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
 
-    if (user?.role !== 'ADMIN' && competition.event.organizerId !== userId) {
-      throw new Error('Unauthorized: Only event organizer or admin can create editions');
+    if (user?.role !== 'ADMIN') {
+      if (competition.event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: competition.event.id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can create editions');
+        }
+      }
     }
 
     // Verificar que no exista ya una edición para ese año
@@ -135,7 +143,8 @@ export class EditionService {
       include: {
         event: {
           select: {
-            organizerId: true,
+            id: true,
+            userId: true,
           },
         },
       },
@@ -150,8 +159,16 @@ export class EditionService {
       select: { role: true },
     });
 
-    if (user?.role !== 'ADMIN' && competition.event.organizerId !== userId) {
-      throw new Error('Unauthorized');
+    // Verificar permisos (creador, manager asignado, o ADMIN)
+    if (user?.role !== 'ADMIN') {
+      if (competition.event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: competition.event.id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can create editions');
+        }
+      }
     }
 
     // Crear ediciones en transacción
@@ -543,7 +560,8 @@ export class EditionService {
           include: {
             event: {
               select: {
-                organizerId: true,
+                id: true,
+                userId: true,
               },
             },
           },
@@ -555,14 +573,21 @@ export class EditionService {
       throw new Error('Edition not found');
     }
 
-    // Verificar permisos
+    // Verificar permisos (creador, manager asignado, o ADMIN)
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
 
-    if (user?.role !== 'ADMIN' && existing.competition.event.organizerId !== userId) {
-      throw new Error('Unauthorized');
+    if (user?.role !== 'ADMIN') {
+      if (existing.competition.event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: existing.competition.event.id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can update editions');
+        }
+      }
     }
 
     // Convertir fechas si existen
@@ -618,7 +643,8 @@ export class EditionService {
           include: {
             event: {
               select: {
-                organizerId: true,
+                id: true,
+                userId: true,
               },
             },
           },
@@ -639,14 +665,21 @@ export class EditionService {
       throw new Error('Edition not found');
     }
 
-    // Verificar permisos
+    // Verificar permisos (creador, manager asignado, o ADMIN)
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
 
-    if (user?.role !== 'ADMIN' && existing.competition.event.organizerId !== userId) {
-      throw new Error('Unauthorized');
+    if (user?.role !== 'ADMIN') {
+      if (existing.competition.event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: existing.competition.event.id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can delete editions');
+        }
+      }
     }
 
     // Advertir si tiene datos

@@ -6,6 +6,12 @@ import { authenticate } from '../middlewares/auth.middleware';
 import { authorize } from '../middlewares/authorize.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { checkEventOwnership } from '../middlewares/ownership.middleware';
+import {
+  getEventManagers,
+  addEventManager,
+  removeEventManager,
+  getAvailableOrganizers,
+} from '../controllers/eventManager.controller';
 
 import {
   createEventSchema,
@@ -103,6 +109,42 @@ router.get(
 // ===================================
 // PASO 4: RUTAS CON ID + ACCIONES
 // ===================================
+
+// ===================================
+// GESTIÓN DE MANAGERS (solo ADMIN)
+// ===================================
+
+// Obtener managers de un evento
+router.get(
+  '/:eventId/managers',
+  authenticate,
+  authorize('ADMIN'),
+  getEventManagers
+);
+
+// Obtener usuarios ORGANIZER disponibles para asignar
+router.get(
+  '/:eventId/available-organizers',
+  authenticate,
+  authorize('ADMIN'),
+  getAvailableOrganizers
+);
+
+// Añadir un manager a un evento
+router.post(
+  '/:eventId/managers',
+  authenticate,
+  authorize('ADMIN'),
+  addEventManager
+);
+
+// Eliminar un manager de un evento
+router.delete(
+  '/:eventId/managers/:userId',
+  authenticate,
+  authorize('ADMIN'),
+  removeEventManager
+);
 
 // Acciones de admin (protegidas)
 router.post(

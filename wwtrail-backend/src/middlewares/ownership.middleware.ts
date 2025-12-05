@@ -1,5 +1,6 @@
 // src/middlewares/ownership.middleware.ts
 // Middleware para verificar que el usuario es dueño del recurso
+// o tiene permisos asignados para gestionarlo
 
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/database';
@@ -7,8 +8,44 @@ import { ForbiddenError, NotFoundError } from '../utils/errors';
 import logger from '../utils/logger';
 
 /**
- * Verifica que el usuario es el organizador del evento
- * O que es ADMIN (los admin pueden editar cualquier cosa)
+ * Verifica si un usuario puede gestionar un evento.
+ * Puede gestionar si:
+ * - Es ADMIN
+ * - Es el creador del evento (userId)
+ * - Es un EventManager asignado al evento
+ */
+async function canUserManageEvent(userId: string, eventId: string): Promise<boolean> {
+  // Buscar el evento y verificar si es el creador
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { userId: true },
+  });
+
+  if (!event) {
+    return false;
+  }
+
+  // Es el creador
+  if (event.userId === userId) {
+    return true;
+  }
+
+  // Verificar si es un manager asignado
+  const manager = await prisma.eventManager.findUnique({
+    where: {
+      eventId_userId: {
+        eventId,
+        userId,
+      },
+    },
+  });
+
+  return !!manager;
+}
+
+/**
+ * Verifica que el usuario es el creador del evento,
+ * es un EventManager asignado, o es ADMIN
  */
 export const checkEventOwnership = async (
   req: Request,
@@ -29,15 +66,17 @@ export const checkEventOwnership = async (
     // Buscar el evento
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { organizerId: true, name: true },
+      select: { userId: true, name: true },
     });
 
     if (!event) {
       throw new NotFoundError('Event not found');
     }
 
-    // Verificar ownership
-    if (event.organizerId !== userId) {
+    // Verificar si puede gestionar el evento
+    const canManage = await canUserManageEvent(userId, eventId);
+
+    if (!canManage) {
       logger.warn(`User ${userId} attempted to access event ${eventId} without permission`);
       throw new ForbiddenError('You do not have permission to modify this event');
     }
@@ -49,8 +88,8 @@ export const checkEventOwnership = async (
 };
 
 /**
- * Verifica que el usuario es el organizador de la competición
- * O que es ADMIN
+ * Verifica que el usuario puede gestionar la competición
+ * (a través de los permisos del evento padre)
  */
 export const checkCompetitionOwnership = async (
   req: Request,
@@ -72,8 +111,9 @@ export const checkCompetitionOwnership = async (
     const competition = await prisma.competition.findUnique({
       where: { id: competitionId },
       select: {
+        eventId: true,
         event: {
-          select: { organizerId: true },
+          select: { userId: true },
         },
       },
     });
@@ -82,8 +122,10 @@ export const checkCompetitionOwnership = async (
       throw new NotFoundError('Competition not found');
     }
 
-    // Verificar ownership a través del evento
-    if (competition.event.organizerId !== userId) {
+    // Verificar si puede gestionar el evento padre
+    const canManage = await canUserManageEvent(userId, competition.eventId);
+
+    if (!canManage) {
       logger.warn(`User ${userId} attempted to access competition ${competitionId} without permission`);
       throw new ForbiddenError('You do not have permission to modify this competition');
     }
@@ -95,8 +137,8 @@ export const checkCompetitionOwnership = async (
 };
 
 /**
- * Verifica que el usuario es el organizador de la edición
- * O que es ADMIN
+ * Verifica que el usuario puede gestionar la edición
+ * (a través de los permisos del evento abuelo)
  */
 export const checkEditionOwnership = async (
   req: Request,
@@ -120,8 +162,9 @@ export const checkEditionOwnership = async (
       select: {
         competition: {
           select: {
+            eventId: true,
             event: {
-              select: { organizerId: true },
+              select: { userId: true },
             },
           },
         },
@@ -132,8 +175,10 @@ export const checkEditionOwnership = async (
       throw new NotFoundError('Edition not found');
     }
 
-    // Verificar ownership a través del evento
-    if (edition.competition.event.organizerId !== userId) {
+    // Verificar si puede gestionar el evento abuelo
+    const canManage = await canUserManageEvent(userId, edition.competition.eventId);
+
+    if (!canManage) {
       logger.warn(`User ${userId} attempted to access edition ${editionId} without permission`);
       throw new ForbiddenError('You do not have permission to modify this edition');
     }
@@ -143,3 +188,8 @@ export const checkEditionOwnership = async (
     next(error);
   }
 };
+
+/**
+ * Función helper exportada para usar en services
+ */
+export { canUserManageEvent };
