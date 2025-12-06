@@ -113,6 +113,13 @@ export default function EditionForm({
         return date.toISOString();
       };
 
+      // Convert date to ISO without forcing edition year (for registration dates)
+      const toISODateTimeFlexible = (dateString: string) => {
+        if (!dateString) return undefined;
+        const date = new Date(dateString);
+        return date.toISOString();
+      };
+
       // Build prices object
       const prices: any = {};
       if (formData.priceEarly) prices.early = parseFloat(formData.priceEarly);
@@ -134,10 +141,10 @@ export default function EditionForm({
         city: formData.city || undefined,
         registrationUrl: formData.registrationUrl || undefined,
         registrationOpenDate: formData.registrationOpenDate
-          ? toISODateTime(formData.registrationOpenDate, year)
+          ? toISODateTimeFlexible(formData.registrationOpenDate)
           : undefined,
         registrationCloseDate: formData.registrationCloseDate
-          ? toISODateTime(formData.registrationCloseDate, year)
+          ? toISODateTimeFlexible(formData.registrationCloseDate)
           : undefined,
         resultsUrl: formData.resultsUrl || undefined,
         status: formData.status,
@@ -531,11 +538,11 @@ export default function EditionForm({
               type="date"
               id="registrationOpenDate"
               value={formData.registrationOpenDate}
-              onChange={(e) => handleDateChange('registrationOpenDate', e.target.value)}
+              onChange={(e) => setFormData({ ...formData, registrationOpenDate: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Año de la edición: {formData.year}
+              Puede ser anterior al año de la edición
             </p>
           </div>
 
@@ -550,11 +557,11 @@ export default function EditionForm({
               type="date"
               id="registrationCloseDate"
               value={formData.registrationCloseDate}
-              onChange={(e) => handleDateChange('registrationCloseDate', e.target.value)}
+              onChange={(e) => setFormData({ ...formData, registrationCloseDate: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Año de la edición: {formData.year}
+              Puede ser anterior al año de la edición
             </p>
           </div>
         </div>
