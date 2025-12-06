@@ -7,16 +7,30 @@ import { CoastScene } from './CoastScene';
 import { PlainsScene } from './PlainsScene';
 
 export type SceneType = 'mountains' | 'desert' | 'coast' | 'plains';
+export type TimeOfDay = 'night' | 'sunrise' | 'day' | 'sunset';
 
 const SCENES: SceneType[] = ['mountains', 'desert', 'coast', 'plains'];
 const STORAGE_KEY = 'wwtrail-footer-scene';
 
 /**
- * Determines if it's night time (20:00 - 07:00)
+ * Determines the time of day based on current hour
+ * - Night: 21:00 - 6:00
+ * - Sunrise: 6:00 - 9:00
+ * - Day: 9:00 - 18:00
+ * - Sunset: 18:00 - 21:00
  */
-function isNightTime(): boolean {
+function getTimeOfDay(): TimeOfDay {
   const hour = new Date().getHours();
-  return hour < 7 || hour >= 20;
+
+  if (hour >= 6 && hour < 9) {
+    return 'sunrise';
+  } else if (hour >= 9 && hour < 18) {
+    return 'day';
+  } else if (hour >= 18 && hour < 21) {
+    return 'sunset';
+  } else {
+    return 'night';
+  }
 }
 
 /**
@@ -40,20 +54,20 @@ function getRandomScene(): SceneType {
 interface LandscapeBackgroundProps {
   /** Force a specific scene (optional, for testing) */
   forceScene?: SceneType;
-  /** Force day or night mode (optional, for testing) */
-  forceNight?: boolean;
+  /** Force a specific time of day (optional, for testing) */
+  forceTimeOfDay?: TimeOfDay;
 }
 
-export function LandscapeBackground({ forceScene, forceNight }: LandscapeBackgroundProps) {
+export function LandscapeBackground({ forceScene, forceTimeOfDay }: LandscapeBackgroundProps) {
   const [scene, setScene] = useState<SceneType>('mountains');
-  const [isNight, setIsNight] = useState(false);
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     setScene(forceScene || getRandomScene());
-    setIsNight(forceNight !== undefined ? forceNight : isNightTime());
-  }, [forceScene, forceNight]);
+    setTimeOfDay(forceTimeOfDay || getTimeOfDay());
+  }, [forceScene, forceTimeOfDay]);
 
   // Don't render until mounted to avoid hydration mismatch
   if (!mounted) {
@@ -61,10 +75,10 @@ export function LandscapeBackground({ forceScene, forceNight }: LandscapeBackgro
   }
 
   const sceneComponents: Record<SceneType, React.ReactNode> = {
-    mountains: <MountainsScene isNight={isNight} />,
-    desert: <DesertScene isNight={isNight} />,
-    coast: <CoastScene isNight={isNight} />,
-    plains: <PlainsScene isNight={isNight} />,
+    mountains: <MountainsScene timeOfDay={timeOfDay} />,
+    desert: <DesertScene timeOfDay={timeOfDay} />,
+    coast: <CoastScene timeOfDay={timeOfDay} />,
+    plains: <PlainsScene timeOfDay={timeOfDay} />,
   };
 
   return (

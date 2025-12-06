@@ -1,5 +1,5 @@
 export { LandscapeBackground } from './LandscapeBackground';
-export type { SceneType } from './LandscapeBackground';
+export type { SceneType, TimeOfDay } from './LandscapeBackground';
 export { MountainsScene } from './MountainsScene';
 export { DesertScene } from './DesertScene';
 export { CoastScene } from './CoastScene';
