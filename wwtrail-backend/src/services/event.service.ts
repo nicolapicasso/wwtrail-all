@@ -219,10 +219,24 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
       // Base where clause
       const where: any = {};
+      const andConditions: any[] = [];
 
-      // Si es ORGANIZER, solo ve los suyos (eventos creados por él)
+      // Si es ORGANIZER, ve sus eventos creados + eventos donde es manager asignado
       if (userRole !== 'ADMIN') {
-        where.userId = userId;
+        // Obtener IDs de eventos donde el usuario es manager
+        const managedEvents = await prisma.eventManager.findMany({
+          where: { userId },
+          select: { eventId: true },
+        });
+        const managedEventIds = managedEvents.map(m => m.eventId);
+
+        // Mostrar eventos propios O eventos donde es manager
+        andConditions.push({
+          OR: [
+            { userId },
+            { id: { in: managedEventIds } },
+          ],
+        });
       }
 
       // Filtro de status si se proporciona
@@ -232,11 +246,18 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
       // Filtro de búsqueda
       if (search) {
-        where.OR = [
-          { name: { contains: search, mode: 'insensitive' } },
-          { city: { contains: search, mode: 'insensitive' } },
-          { country: { contains: search, mode: 'insensitive' } },
-        ];
+        andConditions.push({
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { city: { contains: search, mode: 'insensitive' } },
+            { country: { contains: search, mode: 'insensitive' } },
+          ],
+        });
+      }
+
+      // Combinar condiciones AND si las hay
+      if (andConditions.length > 0) {
+        where.AND = andConditions;
       }
 
       // Filtro por país
@@ -291,10 +312,20 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       // ✅ Enriquecer con coordenadas PostGIS
       const enrichedEvents = await this.enrichWithCoordinates(events);
 
+      // Añadir información de ownership para usuarios no-admin
+      let eventsWithOwnership = enrichedEvents;
+      if (userRole !== 'ADMIN') {
+        eventsWithOwnership = enrichedEvents.map((event: any) => ({
+          ...event,
+          isOwner: event.userId === userId,
+          isManager: event.userId !== userId, // Si no es owner, es porque es manager
+        }));
+      }
+
       logger.info(`Retrieved ${events.length} events for user ${userId}`);
 
       return {
-        data: enrichedEvents,
+        data: eventsWithOwnership,
         pagination: {
           page,
           limit,
