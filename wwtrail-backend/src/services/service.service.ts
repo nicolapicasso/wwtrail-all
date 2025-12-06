@@ -464,6 +464,7 @@ export class ServiceService {
           logoUrl: data.logoUrl,
           coverImage: data.coverImage,
           gallery: data.gallery,
+          website: data.website,
           featured: data.featured,
           status: data.status,
         },
