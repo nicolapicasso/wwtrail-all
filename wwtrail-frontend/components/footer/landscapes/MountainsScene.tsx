@@ -61,12 +61,6 @@ export function MountainsScene({ isNight }: MountainsSceneProps) {
         style={{ clipPath: 'polygon(0% 100%, 0% 55%, 8% 42%, 16% 52%, 26% 28%, 36% 48%, 46% 22%, 56% 42%, 66% 18%, 76% 38%, 86% 12%, 100% 32%, 100% 100%)' }}
       />
 
-      {/* Snow caps */}
-      <div
-        className="absolute bottom-0 left-0 w-full h-[170px] bg-white opacity-90"
-        style={{ clipPath: 'polygon(26% 28%, 28% 36%, 24% 36%, 46% 22%, 48% 32%, 44% 32%, 66% 18%, 68% 28%, 64% 28%, 86% 12%, 88% 24%, 84% 24%)' }}
-      />
-
       {/* Mountains mid layer */}
       <div
         className="absolute bottom-0 left-0 w-full h-[135px] bg-gray-600"

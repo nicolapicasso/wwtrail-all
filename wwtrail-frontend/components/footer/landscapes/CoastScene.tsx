@@ -6,46 +6,6 @@ interface CoastSceneProps {
   isNight: boolean;
 }
 
-function Palm({ position, flip = false }: { position: string; flip?: boolean }) {
-  return (
-    <div
-      className="absolute bottom-[65px]"
-      style={{ left: position, transform: flip ? 'scale(0.8) scaleX(-1)' : undefined }}
-    >
-      {/* Trunk */}
-      <div className="w-1.5 h-[50px] bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 rounded -rotate-[5deg]" />
-      {/* Leaves container */}
-      <div className="absolute -top-[15px] -left-5 w-[50px] h-[30px]">
-        <div className="absolute w-[25px] h-2 bg-green-700 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right -rotate-[60deg] left-[10px]" />
-        <div className="absolute w-[25px] h-2 bg-green-700 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right -rotate-[30deg] left-[15px] top-[5px]" />
-        <div className="absolute w-[25px] h-2 bg-green-700 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right rotate-0 left-[18px] top-[10px]" />
-        <div className="absolute w-[25px] h-2 bg-green-700 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right rotate-[30deg] left-[15px] top-[15px]" />
-        <div className="absolute w-[25px] h-2 bg-green-700 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right rotate-[60deg] left-[10px] top-[20px]" />
-      </div>
-    </div>
-  );
-}
-
-function PalmNight({ position, flip = false }: { position: string; flip?: boolean }) {
-  return (
-    <div
-      className="absolute bottom-[65px]"
-      style={{ left: position, transform: flip ? 'scale(0.8) scaleX(-1)' : undefined }}
-    >
-      {/* Trunk */}
-      <div className="w-1.5 h-[50px] bg-slate-800 rounded -rotate-[5deg]" />
-      {/* Leaves container */}
-      <div className="absolute -top-[15px] -left-5 w-[50px] h-[30px]">
-        <div className="absolute w-[25px] h-2 bg-slate-900 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right -rotate-[60deg] left-[10px]" />
-        <div className="absolute w-[25px] h-2 bg-slate-900 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right -rotate-[30deg] left-[15px] top-[5px]" />
-        <div className="absolute w-[25px] h-2 bg-slate-900 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right rotate-0 left-[18px] top-[10px]" />
-        <div className="absolute w-[25px] h-2 bg-slate-900 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right rotate-[30deg] left-[15px] top-[15px]" />
-        <div className="absolute w-[25px] h-2 bg-slate-900 rounded-[50%_50%_50%_50%/80%_80%_20%_20%] origin-right rotate-[60deg] left-[10px] top-[20px]" />
-      </div>
-    </div>
-  );
-}
-
 export function CoastScene({ isNight }: CoastSceneProps) {
   if (isNight) {
     return (
@@ -77,10 +37,6 @@ export function CoastScene({ isNight }: CoastSceneProps) {
           className="absolute bottom-0 left-0 w-full h-[85px] bg-gradient-to-b from-slate-600 to-slate-700"
           style={{ clipPath: 'polygon(0% 100%, 0% 30%, 10% 45%, 25% 25%, 40% 40%, 55% 20%, 70% 35%, 85% 15%, 100% 30%, 100% 100%)' }}
         />
-
-        {/* Palms */}
-        <PalmNight position="8%" />
-        <PalmNight position="85%" flip />
       </div>
     );
   }
@@ -110,10 +66,6 @@ export function CoastScene({ isNight }: CoastSceneProps) {
         className="absolute bottom-0 left-0 w-full h-[85px] bg-gradient-to-b from-amber-100 via-amber-200 to-amber-300"
         style={{ clipPath: 'polygon(0% 100%, 0% 30%, 10% 45%, 25% 25%, 40% 40%, 55% 20%, 70% 35%, 85% 15%, 100% 30%, 100% 100%)' }}
       />
-
-      {/* Palms */}
-      <Palm position="8%" />
-      <Palm position="85%" flip />
     </div>
   );
 }
