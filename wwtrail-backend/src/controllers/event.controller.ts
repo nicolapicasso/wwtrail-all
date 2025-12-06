@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { EventService } from '../services/event.service';
+import prisma from '../config/database';
 import logger from '../utils/logger';
 
 /**
@@ -235,7 +236,7 @@ export class EventController {
   /**
    * GET /api/v2/events/:id
    * Obtener un evento por ID
-   * @auth No requerida
+   * @auth No requerida (pero si está autenticado, incluye info de permisos)
    */
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {
@@ -243,9 +244,33 @@ export class EventController {
 
       const event = await EventService.findById(id);
 
+      // Si el usuario está autenticado, añadir info de permisos
+      let eventWithPermissions = { ...event };
+      if (req.user) {
+        const userId = req.user.id;
+        const userRole = req.user.role;
+
+        if (userRole === 'ADMIN') {
+          eventWithPermissions.isOwner = false;
+          eventWithPermissions.isManager = false;
+          eventWithPermissions.canEdit = true;
+        } else {
+          const isOwner = event.userId === userId;
+          // Verificar si es manager asignado
+          const manager = await prisma.eventManager.findUnique({
+            where: { eventId_userId: { eventId: id, userId } },
+          });
+          const isManager = !!manager;
+
+          eventWithPermissions.isOwner = isOwner;
+          eventWithPermissions.isManager = isManager;
+          eventWithPermissions.canEdit = isOwner || isManager;
+        }
+      }
+
       res.json({
         status: 'success',
-        data: event,
+        data: eventWithPermissions,
       });
     } catch (error) {
       next(error);

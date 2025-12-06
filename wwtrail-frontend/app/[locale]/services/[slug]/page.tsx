@@ -310,17 +310,6 @@ export default function ServiceDetailPage() {
               </div>
             )}
 
-            {/* Organizer */}
-            {service.organizer && (
-              <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h3 className="mb-4 font-semibold">Publicado por</h3>
-                <p className="font-medium">
-                  {service.organizer.firstName && service.organizer.lastName
-                    ? `${service.organizer.firstName} ${service.organizer.lastName}`
-                    : service.organizer.username}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

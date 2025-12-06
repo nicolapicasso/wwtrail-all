@@ -60,8 +60,14 @@ export default function EditEventPage() {
 
   // Verificar permisos básicos en frontend
   // Nota: El backend hace la verificación completa incluyendo EventManagers
-  // Aquí solo verificamos el creador (userId) - los managers serán verificados por el backend
-  if (event && user && event.userId !== user.id && user.role !== 'ADMIN') {
+  // Los permisos de managers se verifican en el backend al guardar
+  // Si el evento tiene isManager:true, el usuario es un manager asignado
+  const isOwner = event && user && event.userId === user.id;
+  const isManager = event?.isManager === true;
+  const isAdmin = user?.role === 'ADMIN';
+  const hasAccess = isOwner || isManager || isAdmin;
+
+  if (event && user && !hasAccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">

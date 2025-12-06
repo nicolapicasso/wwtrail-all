@@ -37,12 +37,14 @@ export default function SpecialSeriesListPage() {
     try {
       setIsLoading(true);
 
-      const filters = {
+      const filters: any = {
         page,
         limit: 10,
         search: searchQuery || undefined,
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
         country: countryFilter || undefined,
+        // Organizadores solo ven las suyas, admins ven todas
+        mine: !isAdmin ? 'true' : undefined,
       };
 
       const response = await specialSeriesService.getAll(filters);
@@ -55,7 +57,7 @@ export default function SpecialSeriesListPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, searchQuery, statusFilter, countryFilter]);
+  }, [page, searchQuery, statusFilter, countryFilter, isAdmin]);
 
   /**
    * Initial load

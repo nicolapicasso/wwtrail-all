@@ -157,7 +157,16 @@ export class CompetitionController {
     try {
       const { id } = req.params;
       const userId = req.user!.id;
+      const userRole = req.user!.role;
       const data = req.body;
+
+      // Organizadores no pueden publicar directamente - solo ADMIN puede
+      if (userRole !== 'ADMIN' && data.status === 'PUBLISHED') {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.',
+        });
+      }
 
       const competition = await CompetitionService.update(id, data, userId);
 

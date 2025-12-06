@@ -138,6 +138,7 @@ const navItems: NavItem[] = [
   {
     label: 'Promociones',
     icon: Ticket,
+    adminOnly: true,
     children: [
       {
         label: 'Gestionar promociones',

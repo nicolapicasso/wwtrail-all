@@ -155,6 +155,14 @@ export class ServiceController {
         });
       }
 
+      // Organizadores no pueden publicar directamente - solo ADMIN puede
+      if (userRole !== 'ADMIN' && data.status === 'PUBLISHED') {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.',
+        });
+      }
+
       const service = await ServiceService.update(id, data);
 
       res.json({

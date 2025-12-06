@@ -41,12 +41,12 @@ export default function OrganizerLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar Desktop */}
-      <aside className="hidden w-64 border-r border-gray-200 bg-white md:block">
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar Desktop - Fixed position */}
+      <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col border-r border-gray-200 bg-white z-30">
         <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="border-b border-gray-200 p-6">
+          {/* Logo - Fixed at top */}
+          <div className="flex-shrink-0 border-b border-gray-200 p-6">
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black">
                 <Trophy className="h-6 w-6 text-white" />
@@ -60,13 +60,13 @@ export default function OrganizerLayout({
             </Link>
           </div>
 
-          {/* Navigation - Using unified DashboardNav */}
+          {/* Navigation - Scrollable middle section */}
           <nav className="flex-1 p-4 overflow-y-auto">
             <DashboardNav />
           </nav>
 
-          {/* User Info + Logout */}
-          <div className="border-t border-gray-200 p-4">
+          {/* User Info + Logout - Fixed at bottom */}
+          <div className="flex-shrink-0 border-t border-gray-200 p-4">
             <div className="mb-3 rounded-lg bg-gray-50 p-3">
               <p className="text-sm font-medium text-gray-900">{user.username}</p>
               <p className="text-xs text-gray-500">{user.email}</p>
@@ -139,10 +139,10 @@ export default function OrganizerLayout({
         </div>
       )}
 
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Main Content - With left margin for fixed sidebar */}
+      <div className="flex flex-1 flex-col md:pl-64">
         {/* Mobile Header */}
-        <header className="border-b border-gray-200 bg-white p-4 md:hidden">
+        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white p-4 md:hidden">
           <div className="flex items-center justify-between">
             <button
               onClick={() => setSidebarOpen(true)}

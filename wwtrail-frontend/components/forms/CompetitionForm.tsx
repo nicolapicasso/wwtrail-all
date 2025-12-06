@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, Loader2, AlertCircle, Image as ImageIcon, Tag, Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { terrainTypesService } from '@/lib/api/catalogs.service';
@@ -29,6 +30,7 @@ export default function CompetitionForm({
   onCancel,
 }: CompetitionFormProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -631,13 +633,20 @@ export default function CompetitionForm({
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={user?.role !== 'ADMIN' && formData.status !== 'DRAFT'}
             >
               <option value="DRAFT">Borrador</option>
-              <option value="PUBLISHED">Publicada</option>
-              <option value="CANCELLED">Cancelada</option>
+              {user?.role === 'ADMIN' && (
+                <option value="PUBLISHED">Publicada</option>
+              )}
+              {user?.role === 'ADMIN' && (
+                <option value="CANCELLED">Cancelada</option>
+              )}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              Solo las competiciones publicadas son visibles
+              {user?.role === 'ADMIN'
+                ? 'Solo las competiciones publicadas son visibles'
+                : 'Solo los administradores pueden publicar contenido. La competición quedará pendiente de revisión.'}
             </p>
           </div>
 

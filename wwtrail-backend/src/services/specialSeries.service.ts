@@ -39,6 +39,7 @@ interface SpecialSeriesFilters {
   status?: EventStatus;
   sortBy?: 'name' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
+  createdById?: string; // Filtrar por creador (para organizadores)
 }
 
 export class SpecialSeriesService {
@@ -122,6 +123,11 @@ export class SpecialSeriesService {
 
       if (filters.status) {
         where.status = filters.status;
+      }
+
+      // Filtro por creador (para organizadores que solo ven las suyas)
+      if (filters.createdById) {
+        where.createdById = filters.createdById;
       }
 
       // Query
@@ -307,6 +313,11 @@ export class SpecialSeriesService {
       // Solo el creador o ADMIN pueden editar
       if (userRole !== 'ADMIN' && existing.createdById !== userId) {
         throw new Error('Not authorized to edit this special series');
+      }
+
+      // Organizadores no pueden publicar directamente - solo ADMIN puede
+      if (userRole !== 'ADMIN' && data.status === 'PUBLISHED') {
+        throw new Error('Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.');
       }
 
       // Actualizar

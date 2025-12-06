@@ -1193,6 +1193,9 @@ model Service {
   coverImage String?  @db.Text
   gallery    String[] // Array de URLs para galería de fotos
 
+  // Sitio Web Oficial
+  website    String?  @db.Text
+
   // Meta
   organizerId String
   organizer   User        @relation("ServiceOrganizer", fields: [organizerId], references: [id])

@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import servicesService from '@/lib/api/v2/services.service';
 import serviceCategoriesService from '@/lib/api/v2/serviceCategories.service';
 import { ServiceCategory } from '@/types/v2';
-import { ArrowLeft, MapPin, Save, Loader2, Tag, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, Save, Loader2, Tag, Globe, Link2 } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import FileUpload from '@/components/FileUpload';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
@@ -44,6 +44,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
     logoUrl: initialData?.logoUrl || '',
     coverImage: initialData?.coverImage || '',
     gallery: initialData?.gallery || [],
+    website: initialData?.website || '',
     featured: initialData?.featured || false,
     status: initialData?.status || 'DRAFT',
   });
@@ -134,6 +135,7 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
         logoUrl: formData.logoUrl || undefined,
         coverImage: formData.coverImage || undefined,
         gallery: formData.gallery.length > 0 ? formData.gallery : undefined,
+        website: formData.website || undefined,
         featured: formData.featured,
         status: formData.status,
       };
@@ -255,13 +257,20 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className="w-full rounded-md border border-input bg-background px-3 py-2"
+                disabled={user?.role !== 'ADMIN' && formData.status !== 'DRAFT'}
               >
                 <option value="DRAFT">Borrador</option>
-                <option value="PUBLISHED">Publicado</option>
-                <option value="CANCELLED">Cancelado</option>
+                {user?.role === 'ADMIN' && (
+                  <option value="PUBLISHED">Publicado</option>
+                )}
+                {user?.role === 'ADMIN' && (
+                  <option value="CANCELLED">Cancelado</option>
+                )}
               </select>
               <p className="mt-1 text-xs text-muted-foreground">
-                Los servicios en borrador no son visibles públicamente
+                {user?.role === 'ADMIN'
+                  ? 'Los servicios en borrador no son visibles públicamente'
+                  : 'Solo los administradores pueden publicar contenido. Tu servicio quedará pendiente de revisión.'}
               </p>
             </div>
 
@@ -277,6 +286,26 @@ export default function ServiceForm({ mode, initialData, serviceId }: ServiceFor
                 className="w-full rounded-md border border-input bg-background px-3 py-2"
                 placeholder="Describe el servicio..."
               />
+            </div>
+
+            {/* Website */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                <span className="flex items-center gap-2">
+                  <Link2 className="h-4 w-4" />
+                  Sitio Web Oficial
+                </span>
+              </label>
+              <input
+                type="url"
+                value={formData.website}
+                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                placeholder="https://www.ejemplo.com"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                URL del sitio web oficial del servicio
+              </p>
             </div>
 
             {/* Language */}

@@ -67,14 +67,28 @@ export class SpecialSeriesController {
   /**
    * GET /api/v2/special-series
    * Listar special series con filtros
-   * @auth No requerida para ver PUBLISHED, pero si se incluyen DRAFT requiere ADMIN
+   * @auth No requerida para ver PUBLISHED
+   * @query mine=true - Para organizadores, ver solo las suyas (cualquier estado)
    */
   static async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const filters = req.query;
+      const filters: any = { ...req.query };
 
-      // Si no es admin, forzar filtro status=PUBLISHED
-      if (!req.user || req.user.role !== 'ADMIN') {
+      // Si el usuario pide ver "las mías" y está autenticado
+      if (filters.mine === 'true' && req.user) {
+        // Organizers ven solo las suyas
+        if (req.user.role !== 'ADMIN') {
+          filters.createdById = req.user.id;
+          // Permitir ver cualquier status de las suyas
+          delete filters.status;
+          if (req.query.status && req.query.status !== 'ALL') {
+            filters.status = req.query.status;
+          }
+        }
+        // Admin ve todas (no aplicar filtro createdById)
+        delete filters.mine;
+      } else if (!req.user || req.user.role !== 'ADMIN') {
+        // Público o usuario no-admin sin mine=true: solo PUBLISHED
         filters.status = 'PUBLISHED';
       }
 

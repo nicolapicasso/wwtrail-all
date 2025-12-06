@@ -19,6 +19,7 @@ interface CreateServiceInput {
   logoUrl?: string;
   coverImage?: string;
   gallery?: string[];
+  website?: string; // Sitio Web Oficial
   organizerId: string;
   featured?: boolean;
 }
@@ -34,6 +35,7 @@ interface UpdateServiceInput {
   logoUrl?: string;
   coverImage?: string;
   gallery?: string[];
+  website?: string; // Sitio Web Oficial
   featured?: boolean;
   status?: EventStatus;
 }
@@ -140,13 +142,13 @@ export class ServiceService {
         query = `
           INSERT INTO services (
             id, name, slug, description, "categoryId", country, city, location,
-            "logoUrl", "coverImage", gallery, "organizerId", status, featured, "createdAt", "updatedAt"
+            "logoUrl", "coverImage", gallery, website, "organizerId", status, featured, "createdAt", "updatedAt"
           )
           VALUES (
             gen_random_uuid()::text,
             $1, $2, $3, $4, $5, $6,
             ST_SetSRID(ST_MakePoint($7, $8), 4326),
-            $9, $10, $11, $12, 'DRAFT', $13, NOW(), NOW()
+            $9, $10, $11, $12, $13, 'DRAFT', $14, NOW(), NOW()
           )
         `;
         params = [
@@ -161,6 +163,7 @@ export class ServiceService {
           data.logoUrl || null,
           data.coverImage || null,
           data.gallery || [],
+          data.website || null,
           data.organizerId,
           data.featured || false,
         ];
@@ -168,12 +171,12 @@ export class ServiceService {
         query = `
           INSERT INTO services (
             id, name, slug, description, "categoryId", country, city, location,
-            "logoUrl", "coverImage", gallery, "organizerId", status, featured, "createdAt", "updatedAt"
+            "logoUrl", "coverImage", gallery, website, "organizerId", status, featured, "createdAt", "updatedAt"
           )
           VALUES (
             gen_random_uuid()::text,
             $1, $2, $3, $4, $5, $6, NULL,
-            $7, $8, $9, $10, 'DRAFT', $11, NOW(), NOW()
+            $7, $8, $9, $10, $11, 'DRAFT', $12, NOW(), NOW()
           )
         `;
         params = [
@@ -186,6 +189,7 @@ export class ServiceService {
           data.logoUrl || null,
           data.coverImage || null,
           data.gallery || [],
+          data.website || null,
           data.organizerId,
           data.featured || false,
         ];

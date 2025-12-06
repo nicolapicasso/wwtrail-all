@@ -785,6 +785,11 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
           throw new Error('Unauthorized: Only the creator, assigned manager, or admin can update this event');
         }
       }
+
+      // Organizadores no pueden publicar directamente - solo ADMIN puede
+      if (data.status === 'PUBLISHED') {
+        throw new Error('Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.');
+      }
     }
 
     // ✅ TRANSFORMACIÓN: Mapear websiteUrl a website si viene en data
