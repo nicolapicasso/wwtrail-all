@@ -31,15 +31,16 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   }
 
   // Public pages: show Navbar and Footer
+  // The page-content div has bg-white and z-10 to slide over the sticky footer
   return (
     <>
       <Navbar />
-      <div className="flex flex-col min-h-screen">
+      <div className="page-content relative z-10 bg-white min-h-screen">
         <main className="flex-1">
           {children}
         </main>
-        <Footer />
       </div>
+      <Footer />
     </>
   );
 }

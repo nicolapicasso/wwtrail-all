@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { footerService, FooterContent } from '@/lib/api/footer.service';
+import { LandscapeBackground } from '@/components/footer/landscapes';
 
 export default function Footer() {
   const locale = useLocale();
@@ -40,34 +41,45 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-black text-white mt-auto">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Left Column (1/4) */}
-          {content.leftColumn && (
-            <div
-              className="footer-column"
-              dangerouslySetInnerHTML={{ __html: content.leftColumn }}
-            />
-          )}
+    <div className="footer-wrapper sticky bottom-0 z-0 h-[360px]">
+      <footer className="absolute inset-0 overflow-hidden">
+        {/* Landscape Background Layer */}
+        <LandscapeBackground />
 
-          {/* Center Column (2/4) */}
-          {content.centerColumn && (
-            <div
-              className="footer-column md:col-span-2"
-              dangerouslySetInnerHTML={{ __html: content.centerColumn }}
-            />
-          )}
+        {/* Semi-transparent overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-10" />
 
-          {/* Right Column (1/4) */}
-          {content.rightColumn && (
-            <div
-              className="footer-column"
-              dangerouslySetInnerHTML={{ __html: content.rightColumn }}
-            />
-          )}
+        {/* Content Layer */}
+        <div className="absolute inset-x-0 bottom-0 z-20">
+          <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Left Column (1/4) */}
+              {content.leftColumn && (
+                <div
+                  className="footer-column"
+                  dangerouslySetInnerHTML={{ __html: content.leftColumn }}
+                />
+              )}
+
+              {/* Center Column (2/4) */}
+              {content.centerColumn && (
+                <div
+                  className="footer-column md:col-span-2"
+                  dangerouslySetInnerHTML={{ __html: content.centerColumn }}
+                />
+              )}
+
+              {/* Right Column (1/4) */}
+              {content.rightColumn && (
+                <div
+                  className="footer-column"
+                  dangerouslySetInnerHTML={{ __html: content.rightColumn }}
+                />
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      </footer>
 
       <style jsx>{`
         :global(.footer-column) {
@@ -81,13 +93,15 @@ export default function Footer() {
         :global(.footer-column h6) {
           color: white;
           margin-bottom: 1rem;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         :global(.footer-column p) {
           color: rgba(255, 255, 255, 0.9);
           margin-bottom: 0.5rem;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         :global(.footer-column a) {
-          color: rgba(255, 255, 255, 0.8);
+          color: rgba(255, 255, 255, 0.85);
           text-decoration: none;
           transition: color 0.2s;
         }
@@ -107,6 +121,6 @@ export default function Footer() {
           height: auto;
         }
       `}</style>
-    </footer>
+    </div>
   );
 }

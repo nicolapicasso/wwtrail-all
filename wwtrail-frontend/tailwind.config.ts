@@ -74,6 +74,43 @@ const config: Config = {
         sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
       },
+      keyframes: {
+        // Footer landscape animations
+        twinkle: {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '1' },
+        },
+        'cloud-float': {
+          'from': { transform: 'translateX(-150px)' },
+          'to': { transform: 'translateX(calc(100vw + 150px))' },
+        },
+        wave: {
+          '0%, 100%': { transform: 'translateX(-25%)' },
+          '50%': { transform: 'translateX(0%)' },
+        },
+        'wave-reverse': {
+          '0%, 100%': { transform: 'translateX(0%)' },
+          '50%': { transform: 'translateX(-25%)' },
+        },
+        'windmill-spin': {
+          'from': { transform: 'rotate(0deg)' },
+          'to': { transform: 'rotate(360deg)' },
+        },
+        firefly: {
+          '0%, 100%': { opacity: '0', transform: 'translate(0, 0)' },
+          '25%': { opacity: '1' },
+          '50%': { opacity: '1', transform: 'translate(10px, -15px)' },
+          '75%': { opacity: '0.5' },
+        },
+      },
+      animation: {
+        twinkle: 'twinkle 3s ease-in-out infinite',
+        'cloud-float': 'cloud-float 50s linear infinite',
+        wave: 'wave 8s ease-in-out infinite',
+        'wave-reverse': 'wave-reverse 6s ease-in-out infinite',
+        'windmill-spin': 'windmill-spin 8s linear infinite',
+        firefly: 'firefly 4s ease-in-out infinite',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
