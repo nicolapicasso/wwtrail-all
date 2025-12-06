@@ -104,10 +104,13 @@ export default function OrganizerEditionsPage() {
 
         for (const comp of compsToFetch) {
           const eds = await editionsService.getByCompetition(comp.id);
-          // Agregar información de la competición a cada edición
+          // Find the event for this competition
+          const event = events.find(e => e.id === comp.eventId);
+          // Agregar información de la competición y evento a cada edición
           const edsWithCompetition = eds.map(ed => ({
             ...ed,
-            competition: { id: comp.id, name: comp.name, slug: comp.slug }
+            competition: { id: comp.id, name: comp.name, slug: comp.slug },
+            eventName: event?.name || ''
           }));
           allEditions.push(...edsWithCompetition);
         }
@@ -116,11 +119,13 @@ export default function OrganizerEditionsPage() {
       } else {
         // Cargar solo de la competición seleccionada
         const eds = await editionsService.getByCompetition(selectedCompetitionId);
-        // Encontrar la competición para agregar su info
+        // Encontrar la competición y evento para agregar su info
         const selectedComp = competitions.find(c => c.id === selectedCompetitionId);
+        const event = events.find(e => e.id === selectedComp?.eventId);
         const edsWithCompetition = eds.map(ed => ({
           ...ed,
-          competition: selectedComp ? { id: selectedComp.id, name: selectedComp.name, slug: selectedComp.slug } : undefined
+          competition: selectedComp ? { id: selectedComp.id, name: selectedComp.name, slug: selectedComp.slug } : undefined,
+          eventName: event?.name || ''
         }));
         setEditions(edsWithCompetition);
       }
@@ -400,11 +405,11 @@ export default function OrganizerEditionsPage() {
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-3xl font-bold text-blue-600">{edition.year}</span>
+                      {/* L1: Competition Name + Year */}
+                      <div className="flex items-center gap-3 mb-1">
                         {(edition as any).competition?.name && (
-                          <span className="text-lg font-semibold text-gray-700">
-                            {(edition as any).competition.name}
+                          <span className="text-xl font-bold text-gray-900">
+                            {(edition as any).competition.name} {edition.year}
                           </span>
                         )}
 
@@ -443,6 +448,13 @@ export default function OrganizerEditionsPage() {
                           </span>
                         )}
                       </div>
+
+                      {/* L2: Event Name */}
+                      {(edition as any).eventName && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          {(edition as any).eventName}
+                        </p>
+                      )}
 
                       {/* Dates */}
                       {edition.specificDate && (

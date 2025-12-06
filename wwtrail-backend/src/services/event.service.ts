@@ -354,7 +354,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       ]);
 
       const stats = {
-        totalEvents: total,
+        total,
         published,
         draft,
         rejected,
