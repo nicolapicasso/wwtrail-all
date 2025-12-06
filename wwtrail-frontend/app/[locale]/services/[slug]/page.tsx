@@ -311,11 +311,11 @@ export default function ServiceDetailPage() {
             )}
 
             {/* Website */}
-            {(service as any).website && (
+            {service.website && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <h3 className="mb-4 font-semibold">Sitio Web Oficial</h3>
                 <a
-                  href={(service as any).website}
+                  href={service.website}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 flex items-center gap-2"

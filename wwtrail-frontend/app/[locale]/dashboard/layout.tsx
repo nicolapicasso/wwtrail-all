@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DashboardNav } from '@/components/layout/DashboardNav';
-import { Trophy, LogOut, Menu, X, ArrowLeft } from 'lucide-react';
+import { Trophy, LogOut, Menu, X } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -72,13 +72,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </span>
               )}
             </div>
-            <button
-              onClick={() => router.push('/')}
-              className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 mb-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver a WWTRAIL
-            </button>
             <button
               onClick={logout}
               className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"

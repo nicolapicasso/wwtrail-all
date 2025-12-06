@@ -32,8 +32,14 @@ export default function OrganizerServicesPage() {
 
     setIsLoading(true);
     try {
-      const response = await servicesService.getByOrganizer(user.id);
-      setServices(response.data);
+      // Admin sees ALL services, organizer only sees their own
+      if (user.role === 'ADMIN') {
+        const response = await servicesService.getAll({ limit: 100 });
+        setServices(response.data?.services || []);
+      } else {
+        const response = await servicesService.getByOrganizer(user.id);
+        setServices(response.data);
+      }
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
@@ -92,9 +98,13 @@ export default function OrganizerServicesPage() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Mis Servicios</h1>
+            <h1 className="text-4xl font-bold mb-2">
+              {user.role === 'ADMIN' ? 'Todos los Servicios' : 'Mis Servicios'}
+            </h1>
             <p className="text-muted-foreground">
-              Gestiona tus alojamientos, restaurantes y otros servicios
+              {user.role === 'ADMIN'
+                ? 'Gestiona todos los servicios de la plataforma'
+                : 'Gestiona tus alojamientos, restaurantes y otros servicios'}
             </p>
           </div>
           <button

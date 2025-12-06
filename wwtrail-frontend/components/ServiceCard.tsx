@@ -185,9 +185,9 @@ export default function ServiceCard({
           </div>
 
           {/* Website */}
-          {(service as any).website && !managementMode && (
+          {service.website && !managementMode && (
             <a
-              href={(service as any).website}
+              href={service.website}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}

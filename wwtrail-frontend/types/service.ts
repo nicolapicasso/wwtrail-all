@@ -41,6 +41,9 @@ export interface Service {
   coverImage?: string;
   gallery?: string[];
 
+  // Website
+  website?: string;
+
   // Meta
   organizerId: string;
   organizer?: {
@@ -72,6 +75,7 @@ export interface CreateServiceInput {
   logoUrl?: string;
   coverImage?: string;
   gallery?: string[];
+  website?: string;
   featured?: boolean;
 }
 
@@ -89,6 +93,7 @@ export interface UpdateServiceInput {
   logoUrl?: string;
   coverImage?: string;
   gallery?: string[];
+  website?: string;
   featured?: boolean;
   status?: ServiceStatus;
 }
