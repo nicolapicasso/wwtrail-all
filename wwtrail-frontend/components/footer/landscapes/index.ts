@@ -8,3 +8,5 @@ export { Stars } from './Stars';
 export { Fireflies } from './Fireflies';
 export { Tumbleweed } from './Tumbleweed';
 export { Birds } from './Birds';
+export { Clouds } from './Clouds';
+export { Waves } from './Waves';

@@ -1,6 +1,8 @@
 'use client';
 
 import { Stars } from './Stars';
+import { Clouds } from './Clouds';
+import { Waves } from './Waves';
 
 interface CoastSceneProps {
   isNight: boolean;
@@ -23,10 +25,8 @@ export function CoastScene({ isNight }: CoastSceneProps) {
 
         {/* Sea */}
         <div className="absolute bottom-0 left-0 w-full h-[150px] bg-gradient-to-b from-blue-900 to-blue-800">
-          {/* Waves */}
-          <div className="absolute bottom-[110px] w-[200%] h-5 bg-blue-300/10 rounded-full animate-wave" style={{ animationDuration: '8s' }} />
-          <div className="absolute bottom-[95px] w-[200%] h-5 bg-blue-300/10 rounded-full animate-wave-reverse opacity-60" style={{ animationDuration: '6s' }} />
-          <div className="absolute bottom-[80px] w-[200%] h-5 bg-blue-300/10 rounded-full animate-wave opacity-40" style={{ animationDuration: '10s' }} />
+          {/* Animated Waves */}
+          <Waves variant="night" />
 
           {/* Moon reflection */}
           <div className="absolute bottom-[90px] right-[18%] w-[60px] h-[80px] bg-gradient-to-b from-amber-100/30 to-transparent blur-lg scale-y-150" />
@@ -49,16 +49,13 @@ export function CoastScene({ isNight }: CoastSceneProps) {
       {/* Sun */}
       <div className="absolute top-[30px] right-[20%] w-[50px] h-[50px] bg-amber-400 rounded-full shadow-[0_0_50px_#fbbf24]" />
 
-      {/* Clouds */}
-      <div className="cloud absolute top-[20px] w-[80px] h-[24px] bg-white/90 rounded-[50px] animate-cloud-float" style={{ animationDuration: '55s' }} />
-      <div className="cloud absolute top-[48px] w-[60px] h-[18px] bg-white/90 rounded-[50px] animate-cloud-float" style={{ animationDuration: '65s', animationDelay: '-25s' }} />
+      {/* Animated Clouds */}
+      <Clouds count={2} />
 
       {/* Sea */}
       <div className="absolute bottom-0 left-0 w-full h-[150px] bg-gradient-to-b from-sky-600 to-sky-700">
-        {/* Waves */}
-        <div className="absolute bottom-[110px] w-[200%] h-5 bg-white/15 rounded-full animate-wave" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-[95px] w-[200%] h-5 bg-white/15 rounded-full animate-wave-reverse opacity-70" style={{ animationDuration: '6s' }} />
-        <div className="absolute bottom-[80px] w-[200%] h-5 bg-white/15 rounded-full animate-wave opacity-50" style={{ animationDuration: '10s' }} />
+        {/* Animated Waves */}
+        <Waves variant="day" />
       </div>
 
       {/* Beach */}

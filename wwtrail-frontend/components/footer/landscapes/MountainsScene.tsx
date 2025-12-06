@@ -1,6 +1,7 @@
 'use client';
 
 import { Stars } from './Stars';
+import { Clouds } from './Clouds';
 
 interface MountainsSceneProps {
   isNight: boolean;
@@ -20,6 +21,15 @@ export function MountainsScene({ isNight }: MountainsSceneProps) {
         <div className="moon absolute top-[30px] right-[14%] w-10 h-10 bg-amber-100 rounded-full shadow-[0_0_25px_rgba(254,243,199,0.4)]">
           <div className="absolute top-[3px] left-[-7px] w-9 h-9 bg-slate-900 rounded-full" />
         </div>
+
+        {/* Snow-capped peak (tallest mountain) */}
+        <div
+          className="absolute bottom-0 left-[38%] w-[24%] h-[220px]"
+          style={{
+            background: 'linear-gradient(to bottom, #e2e8f0 0%, #94a3b8 25%, #64748b 50%, #475569 100%)',
+            clipPath: 'polygon(50% 0%, 15% 100%, 85% 100%)',
+          }}
+        />
 
         {/* Mountains back layer */}
         <div
@@ -50,10 +60,17 @@ export function MountainsScene({ isNight }: MountainsSceneProps) {
       {/* Sun */}
       <div className="absolute top-[35px] right-[14%] w-[50px] h-[50px] bg-amber-400 rounded-full shadow-[0_0_50px_#fbbf24]" />
 
-      {/* Clouds */}
-      <div className="cloud absolute top-[22px] w-[85px] h-[26px] bg-white/90 rounded-[50px] animate-cloud-float" style={{ animationDuration: '50s' }} />
-      <div className="cloud absolute top-[50px] w-[65px] h-[20px] bg-white/90 rounded-[50px] animate-cloud-float" style={{ animationDuration: '60s', animationDelay: '-20s' }} />
-      <div className="cloud absolute top-[35px] w-[45px] h-[16px] bg-white/90 rounded-[50px] animate-cloud-float" style={{ animationDuration: '55s', animationDelay: '-35s' }} />
+      {/* Animated Clouds */}
+      <Clouds count={3} />
+
+      {/* Snow-capped peak (tallest mountain) - behind other mountains */}
+      <div
+        className="absolute bottom-0 left-[38%] w-[24%] h-[220px]"
+        style={{
+          background: 'linear-gradient(to bottom, #ffffff 0%, #e5e7eb 15%, #9ca3af 40%, #6b7280 70%, #4b5563 100%)',
+          clipPath: 'polygon(50% 0%, 15% 100%, 85% 100%)',
+        }}
+      />
 
       {/* Mountains back layer */}
       <div
