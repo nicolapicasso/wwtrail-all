@@ -166,6 +166,42 @@ router.post(
 );
 
 /**
+ * @route   GET /api/v1/admin/users/:id
+ * @desc    Obtener usuario por ID para edición
+ * @access  Admin
+ */
+router.get(
+  '/admin/users/:id',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.getUserById(req, res, next)
+);
+
+/**
+ * @route   PUT /api/v1/admin/users/:id
+ * @desc    Actualizar usuario por ID
+ * @access  Admin
+ */
+router.put(
+  '/admin/users/:id',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.updateUserById(req, res, next)
+);
+
+/**
+ * @route   POST /api/v1/admin/users/:id/regenerate-password
+ * @desc    Regenerar contraseña de un usuario
+ * @access  Admin
+ */
+router.post(
+  '/admin/users/:id/regenerate-password',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => AdminController.regeneratePassword(req, res, next)
+);
+
+/**
  * @route   PATCH /api/v1/admin/users/:id/toggle-insider
  * @desc    Toggle insider status for a user
  * @access  Admin

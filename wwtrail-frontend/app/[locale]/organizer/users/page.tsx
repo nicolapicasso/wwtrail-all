@@ -51,6 +51,8 @@ import {
   Check,
   Globe,
   Lock,
+  KeyRound,
+  UserCog,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -110,6 +112,11 @@ export default function AdminUsersPage() {
   });
   const [createdUserPassword, setCreatedUserPassword] = useState<string | null>(null);
   const [passwordCopied, setPasswordCopied] = useState(false);
+
+  // Regenerate password dialog
+  const [isRegeneratePasswordDialogOpen, setIsRegeneratePasswordDialogOpen] = useState(false);
+  const [regeneratedPassword, setRegeneratedPassword] = useState<string | null>(null);
+  const [regeneratePasswordCopied, setRegeneratePasswordCopied] = useState(false);
 
   // Edit user form
   const [editUserForm, setEditUserForm] = useState({
@@ -221,6 +228,47 @@ export default function AdminUsersPage() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleOpenRegeneratePasswordDialog = (user: AdminUser) => {
+    setSelectedUser(user);
+    setRegeneratedPassword(null);
+    setRegeneratePasswordCopied(false);
+    setIsRegeneratePasswordDialogOpen(true);
+  };
+
+  const handleRegeneratePassword = async () => {
+    if (!selectedUser) return;
+
+    setActionLoading(true);
+    try {
+      const result = await adminService.regeneratePassword(selectedUser.id);
+      setRegeneratedPassword(result.generatedPassword);
+    } catch (err: any) {
+      console.error('Error regenerating password:', err);
+      setError(err.response?.data?.message || 'Error al regenerar la contraseña');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCloseRegeneratePasswordDialog = () => {
+    setIsRegeneratePasswordDialogOpen(false);
+    setSelectedUser(null);
+    setRegeneratedPassword(null);
+    setRegeneratePasswordCopied(false);
+  };
+
+  const copyRegeneratedPassword = async () => {
+    if (regeneratedPassword) {
+      await navigator.clipboard.writeText(regeneratedPassword);
+      setRegeneratePasswordCopied(true);
+      setTimeout(() => setRegeneratePasswordCopied(false), 2000);
+    }
+  };
+
+  const handleEditFullProfile = (user: AdminUser) => {
+    router.push(`/${locale}/organizer/users/${user.id}/edit`);
   };
 
   const handleUpdateRole = async () => {
@@ -600,11 +648,19 @@ export default function AdminUsersPage() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handleOpenEditDialog(user)}>
                                 <Edit className="w-4 h-4 mr-2" />
-                                Editar usuario
+                                Editar datos básicos
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditFullProfile(user)}>
+                                <UserCog className="w-4 h-4 mr-2" />
+                                Editar perfil completo
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleOpenRoleDialog(user)}>
                                 <Shield className="w-4 h-4 mr-2" />
                                 Cambiar rol
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleOpenRegeneratePasswordDialog(user)}>
+                                <KeyRound className="w-4 h-4 mr-2" />
+                                Regenerar contraseña
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleInsider(user)}>
                                 <Star className={`w-4 h-4 mr-2 ${user.isInsider ? 'fill-yellow-400 text-yellow-400' : ''}`} />
@@ -750,6 +806,64 @@ export default function AdminUsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Regenerate Password Dialog */}
+      <Dialog open={isRegeneratePasswordDialogOpen} onOpenChange={(open) => !open && handleCloseRegeneratePasswordDialog()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Regenerar contraseña</DialogTitle>
+            <DialogDescription>
+              {regeneratedPassword
+                ? 'Contraseña regenerada exitosamente. Guárdala antes de cerrar.'
+                : `¿Regenerar contraseña para ${selectedUser?.firstName || selectedUser?.username}?`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {regeneratedPassword ? (
+            <div className="py-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800 font-medium mb-2">Nueva contraseña generada</p>
+                <p className="text-sm text-green-700">
+                  Copia esta contraseña antes de cerrar:
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <code className="flex-1 px-3 py-2 bg-white border rounded text-sm font-mono">
+                    {regeneratedPassword}
+                  </code>
+                  <Button variant="outline" size="sm" onClick={copyRegeneratedPassword}>
+                    {regeneratePasswordCopied ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="py-4">
+              <p className="text-sm text-gray-600">
+                Se generará una nueva contraseña aleatoria para el usuario{' '}
+                <strong>{selectedUser?.email}</strong>.
+              </p>
+              <p className="text-sm text-amber-600 mt-2">
+                ⚠️ La contraseña actual del usuario será reemplazada.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseRegeneratePasswordDialog}>
+              {regeneratedPassword ? 'Cerrar' : 'Cancelar'}
+            </Button>
+            {!regeneratedPassword && (
+              <Button onClick={handleRegeneratePassword} disabled={actionLoading}>
+                {actionLoading ? 'Regenerando...' : 'Regenerar contraseña'}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Create User Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={(open) => !open && handleCloseCreateDialog()}>

@@ -440,6 +440,49 @@ class AdminService {
   }
 
   /**
+   * Regenerate password for a user (admin only)
+   */
+  async regeneratePassword(userId: string): Promise<{ user: User; generatedPassword: string }> {
+    const { data } = await apiClientV1.post(`/admin/users/${userId}/regenerate-password`);
+    return {
+      user: data.data,
+      generatedPassword: data.generatedPassword,
+    };
+  }
+
+  /**
+   * Get user by ID for admin editing
+   */
+  async getUserById(userId: string): Promise<User> {
+    const { data } = await apiClientV1.get(`/admin/users/${userId}`);
+    return data.data;
+  }
+
+  /**
+   * Update user by ID (admin editing another user)
+   */
+  async updateUserById(userId: string, userData: {
+    firstName?: string;
+    lastName?: string;
+    bio?: string;
+    phone?: string;
+    city?: string;
+    country?: string;
+    language?: string;
+    gender?: string;
+    birthDate?: string;
+    isPublic?: boolean;
+    avatar?: string;
+    instagramUrl?: string;
+    facebookUrl?: string;
+    twitterUrl?: string;
+    youtubeUrl?: string;
+  }): Promise<User> {
+    const { data } = await apiClientV1.put(`/admin/users/${userId}`, userData);
+    return data.data;
+  }
+
+  /**
    * Toggle insider status for a user
    */
   async toggleInsiderStatus(userId: string): Promise<User> {

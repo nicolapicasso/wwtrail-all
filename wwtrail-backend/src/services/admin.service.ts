@@ -1211,6 +1211,148 @@ class AdminService {
   }
 
   /**
+   * Regenerate password for a user (admin only)
+   * Returns the new random password
+   */
+  async regenerateUserPassword(userId: string) {
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, username: true, firstName: true, lastName: true },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Generate new random password
+    const randomPassword = this.generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    // Update password
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return {
+      user,
+      generatedPassword: randomPassword,
+    };
+  }
+
+  /**
+   * Get user by ID for admin editing
+   */
+  async getUserById(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        avatar: true,
+        bio: true,
+        phone: true,
+        city: true,
+        country: true,
+        language: true,
+        gender: true,
+        birthDate: true,
+        isPublic: true,
+        isInsider: true,
+        instagramUrl: true,
+        facebookUrl: true,
+        twitterUrl: true,
+        youtubeUrl: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
+  }
+
+  /**
+   * Update user by ID (admin only)
+   */
+  async updateUserById(userId: string, data: {
+    firstName?: string;
+    lastName?: string;
+    bio?: string;
+    phone?: string;
+    city?: string;
+    country?: string;
+    language?: string;
+    gender?: string;
+    birthDate?: string;
+    isPublic?: boolean;
+    avatar?: string;
+    instagramUrl?: string;
+    facebookUrl?: string;
+    twitterUrl?: string;
+    youtubeUrl?: string;
+  }) {
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Prepare update data
+    const updateData: any = { ...data };
+
+    // Convert birthDate string to Date if provided
+    if (data.birthDate) {
+      updateData.birthDate = new Date(data.birthDate);
+    }
+
+    // Update user
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        avatar: true,
+        bio: true,
+        phone: true,
+        city: true,
+        country: true,
+        language: true,
+        gender: true,
+        birthDate: true,
+        isPublic: true,
+        isInsider: true,
+        instagramUrl: true,
+        facebookUrl: true,
+        twitterUrl: true,
+        youtubeUrl: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return updatedUser;
+  }
+
+  /**
    * Generate a random password
    */
   private generateRandomPassword(length: number = 12): string {

@@ -403,6 +403,91 @@ class AdminController {
     }
   }
 
+  /**
+   * @route   POST /api/v1/admin/users/:id/regenerate-password
+   * @desc    Regenerar contraseña de un usuario
+   * @access  Admin
+   */
+  async regeneratePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const result = await AdminService.regenerateUserPassword(id);
+
+      res.status(200).json({
+        success: true,
+        message: 'Password regenerated successfully',
+        data: result.user,
+        generatedPassword: result.generatedPassword,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/admin/users/:id
+   * @desc    Obtener usuario por ID para edición
+   * @access  Admin
+   */
+  async getUserById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const user = await AdminService.getUserById(id);
+
+      res.status(200).json({
+        success: true,
+        data: user,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/admin/users/:id
+   * @desc    Actualizar usuario por ID (admin editing another user's profile)
+   * @access  Admin
+   */
+  async updateUserById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const user = await AdminService.updateUserById(id, updateData);
+
+      res.status(200).json({
+        success: true,
+        message: 'User updated successfully',
+        data: user,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      } else {
+        next(error);
+      }
+    }
+  }
+
   // ============================================
   // INSIDER MANAGEMENT
   // ============================================
