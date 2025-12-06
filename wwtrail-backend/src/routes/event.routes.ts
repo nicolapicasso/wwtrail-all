@@ -2,7 +2,7 @@
 
 import { Router } from 'express';
 import { EventController } from '../controllers/event.controller';
-import { authenticate } from '../middlewares/auth.middleware';
+import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware';
 import { authorize } from '../middlewares/authorize.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { checkEventOwnership } from '../middlewares/ownership.middleware';
@@ -212,9 +212,10 @@ router.delete(
   EventController.delete
 );
 
-// Obtener evento por ID (público)
+// Obtener evento por ID (público, pero con auth opcional para permisos)
 router.get(
   '/:id',
+  optionalAuthenticate,
   validate(eventIdSchema),
   EventController.getById
 );

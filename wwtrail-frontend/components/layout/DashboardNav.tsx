@@ -106,12 +106,13 @@ const navItems: NavItem[] = [
         href: '/organizer/organizers',
         icon: Briefcase,
       },
-      {
-        label: 'Series Especiales',
-        href: '/organizer/special-series',
-        icon: Sparkles,
-      },
     ],
+  },
+  {
+    label: 'Series Especiales',
+    href: '/organizer/special-series',
+    icon: Sparkles,
+    adminOnly: true,
   },
   {
     label: 'Servicios',
@@ -122,12 +123,13 @@ const navItems: NavItem[] = [
         href: '/organizer/services',
         icon: Building2,
       },
-      {
-        label: 'Categorías',
-        href: '/organizer/services/categories',
-        icon: Tag,
-      },
     ],
+  },
+  {
+    label: 'Categorías de Servicios',
+    href: '/organizer/services/categories',
+    icon: Tag,
+    adminOnly: true,
   },
   {
     label: 'Blog y Artículos',

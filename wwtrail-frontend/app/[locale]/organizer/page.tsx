@@ -155,16 +155,6 @@ export default function OrganizerDashboard() {
       borderColor: 'border-orange-200',
     },
     {
-      title: 'Series Especiales',
-      description: 'Circuitos y series de competiciones',
-      icon: Layers,
-      href: '/organizer/special-series',
-      count: stats.specialSeries,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-200',
-    },
-    {
       title: 'Artículos',
       description: 'Gestiona tus artículos del magazine',
       icon: BookOpen,
@@ -188,6 +178,16 @@ export default function OrganizerDashboard() {
       bgColor: 'bg-red-50',
       borderColor: 'border-red-200',
       highlight: stats.pendingTotal > 0,
+    },
+    {
+      title: 'Series Especiales',
+      description: 'Circuitos y series de competiciones',
+      icon: Layers,
+      href: '/organizer/special-series',
+      count: stats.specialSeries,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+      borderColor: 'border-indigo-200',
     },
     {
       title: 'Usuarios',

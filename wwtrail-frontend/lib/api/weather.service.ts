@@ -28,14 +28,15 @@ export const weatherService = {
   },
 
   /**
-   * Fetch de datos meteorológicos desde Open-Meteo (admin only)
+   * Fetch de datos meteorológicos desde Open-Meteo (admin or organizer)
    * POST /api/v2/editions/:editionId/weather/fetch
    * @param force - Si true, refetch aunque ya existan datos
    */
   async fetch(editionId: string, force: boolean = false): Promise<EditionWeather> {
     const url = `/editions/${editionId}/weather/fetch${force ? '?force=true' : ''}`;
     const response = await apiClientV2.post(url);
-    return response.data.data;
+    // Backend returns { edition, weather } - extract weather
+    return response.data.data.weather;
   },
 };
 

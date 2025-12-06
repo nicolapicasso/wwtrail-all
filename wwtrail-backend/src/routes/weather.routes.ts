@@ -23,13 +23,13 @@ editionWeatherRouter.get('/', WeatherController.getEditionWeather);
 /**
  * POST /api/v2/editions/:editionId/weather/fetch
  * Fetch/Refetch datos climáticos
- * Requiere: AUTH + ADMIN
+ * Requiere: AUTH + (ADMIN o ORGANIZER)
  * Query param: ?force=true para refetch
  */
 editionWeatherRouter.post(
   '/fetch',
   authenticate,
-  authorize('ADMIN'),
+  authorize('ADMIN', 'ORGANIZER'),
   WeatherController.fetchWeather
 );
 
@@ -40,7 +40,7 @@ editionWeatherRouter.post(
 ✅ RUTAS PÚBLICAS (sin login):
    GET  /editions/:editionId/weather         → Obtener clima
 
-✅ RUTAS PROTEGIDAS (requieren ADMIN):
+✅ RUTAS PROTEGIDAS (requieren ADMIN o ORGANIZER):
    POST /editions/:editionId/weather/fetch   → Fetch/Refetch clima (query: ?force=true)
 */
 
