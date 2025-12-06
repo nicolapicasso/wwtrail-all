@@ -1,22 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { DashboardNav } from '@/components/layout/DashboardNav';
+import { Trophy, LogOut, Menu, X, ArrowLeft } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, isAuthenticated, isOrganizer, isAdmin } = useAuth();
+  const { user, isAuthenticated, isOrganizer, isAdmin, logout } = useAuth();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Verificar autenticación
   React.useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login?redirect=/dashboard'); // ✅ CORREGIDO: Ahora usa /auth/login
+      router.push('/auth/login?redirect=/dashboard');
     } else if (!isOrganizer && !isAdmin) {
       router.push('/');
     }
@@ -35,93 +38,138 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="hidden md:flex md:flex-shrink-0">
-          <div className="flex flex-col w-64 border-r border-gray-200 bg-white">
-            <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
-              {/* Logo / Título */}
-              <div className="flex items-center flex-shrink-0 px-4 mb-5">
-                <h1 className="text-xl font-bold text-primary-600">
-                  Dashboard
-                </h1>
+      {/* Sidebar Desktop - Fixed position */}
+      <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col border-r border-gray-200 bg-white z-30">
+        <div className="flex h-full flex-col">
+          {/* Logo - Fixed at top */}
+          <div className="flex-shrink-0 border-b border-gray-200 p-6">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black">
+                <Trophy className="h-6 w-6 text-white" />
               </div>
-
-              {/* Info del usuario */}
-              <div className="px-4 mb-5">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-900">
-                    {user?.username}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {user?.email}
-                  </p>
-                  {isAdmin && (
-                    <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">
-                      👑 Administrador
-                    </span>
-                  )}
-                  {isOrganizer && !isAdmin && (
-                    <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                      🎯 Organizador
-                    </span>
-                  )}
-                </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">WWTRAIL</h1>
+                <p className="text-xs text-gray-500">
+                  {isAdmin ? 'Admin' : 'Organizador'}
+                </p>
               </div>
+            </Link>
+          </div>
 
-              {/* Navegación */}
-              <div className="px-3 flex-1">
-                <DashboardNav />
-              </div>
+          {/* Navigation - Scrollable middle section */}
+          <nav className="flex-1 p-4 overflow-y-auto">
+            <DashboardNav />
+          </nav>
 
-              {/* Footer */}
-              <div className="px-4 pt-4 border-t border-gray-200">
+          {/* User Info + Logout - Fixed at bottom */}
+          <div className="flex-shrink-0 border-t border-gray-200 p-4">
+            <div className="mb-3 rounded-lg bg-gray-50 p-3">
+              <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+              <p className="text-xs text-gray-500">{user?.email}</p>
+              {isAdmin && (
+                <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
+                  Administrador
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => router.push('/')}
+              className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 mb-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver a WWTRAIL
+            </button>
+            <button
+              onClick={logout}
+              className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-gray-900/50"
+            onClick={() => setSidebarOpen(false)}
+          />
+
+          {/* Sidebar */}
+          <aside className="absolute left-0 top-0 h-full w-64 bg-white shadow-xl">
+            <div className="flex h-full flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-gray-200 p-4">
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-lg font-bold text-gray-900">WWTRAIL</h1>
+                    <p className="text-xs text-gray-500">
+                      {isAdmin ? 'Admin' : 'Organizador'}
+                    </p>
+                  </div>
+                </Link>
                 <button
-                  onClick={() => router.push('/')}
-                  className="w-full px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors text-left flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                  className="rounded-lg p-2 hover:bg-gray-100"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                  </svg>
-                  Volver a WWTRAIL
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Navigation */}
+              <nav className="flex-1 p-4 overflow-y-auto">
+                <DashboardNav />
+              </nav>
+
+              {/* User Info + Logout */}
+              <div className="border-t border-gray-200 p-4">
+                <div className="mb-3 rounded-lg bg-gray-50 p-3">
+                  <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
+                <button
+                  onClick={logout}
+                  className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Cerrar Sesión
                 </button>
               </div>
             </div>
-          </div>
-        </aside>
-
-        {/* Contenido principal */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Header móvil */}
-          <div className="md:hidden sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
-            <div className="flex-1 px-4 flex justify-between">
-              <div className="flex-1 flex items-center">
-                <h1 className="text-xl font-bold text-primary-600">
-                  Dashboard
-                </h1>
-              </div>
-            </div>
-          </div>
-
-          {/* Contenido */}
-          <main className="flex-1 relative overflow-y-auto focus:outline-none">
-            <div className="py-6">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                {children}
-              </div>
-            </div>
-          </main>
+          </aside>
         </div>
+      )}
+
+      {/* Main Content - With left margin for fixed sidebar */}
+      <div className="flex flex-1 flex-col md:pl-64">
+        {/* Mobile Header */}
+        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white p-4 md:hidden">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="rounded-lg p-2 hover:bg-gray-100"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Trophy className="h-6 w-6 text-black" />
+              <span className="font-bold text-gray-900">WWTRAIL</span>
+            </div>
+            <div className="w-10" /> {/* Spacer */}
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
       </div>
     </div>
   );
