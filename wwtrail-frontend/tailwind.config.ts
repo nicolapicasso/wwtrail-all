@@ -102,6 +102,20 @@ const config: Config = {
           '50%': { opacity: '1', transform: 'translate(10px, -15px)' },
           '75%': { opacity: '0.5' },
         },
+        tumbleweed: {
+          '0%': { transform: 'translateX(-30px) rotate(0deg)', opacity: '0' },
+          '5%': { opacity: '1' },
+          '95%': { opacity: '1' },
+          '100%': { transform: 'translateX(calc(100vw + 30px)) rotate(720deg)', opacity: '0' },
+        },
+        'bird-fly': {
+          '0%': { transform: 'translateX(-20px)' },
+          '100%': { transform: 'translateX(calc(100vw + 20px))' },
+        },
+        'bird-flap': {
+          '0%, 100%': { transform: 'scaleY(1)' },
+          '50%': { transform: 'scaleY(0.6)' },
+        },
       },
       animation: {
         twinkle: 'twinkle 3s ease-in-out infinite',
@@ -110,6 +124,9 @@ const config: Config = {
         'wave-reverse': 'wave-reverse 6s ease-in-out infinite',
         'windmill-spin': 'windmill-spin 8s linear infinite',
         firefly: 'firefly 4s ease-in-out infinite',
+        tumbleweed: 'tumbleweed 30s linear infinite',
+        'bird-fly': 'bird-fly 30s linear infinite',
+        'bird-flap': 'bird-flap 0.4s ease-in-out infinite',
       },
     },
   },

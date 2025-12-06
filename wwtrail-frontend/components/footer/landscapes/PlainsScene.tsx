@@ -2,6 +2,7 @@
 
 import { Stars } from './Stars';
 import { Fireflies } from './Fireflies';
+import { Birds } from './Birds';
 
 interface PlainsSceneProps {
   isNight: boolean;
@@ -86,6 +87,9 @@ export function PlainsScene({ isNight }: PlainsSceneProps) {
           }}
         />
       </div>
+
+      {/* Birds flying in the distance */}
+      <Birds count={5} color="#78350f" />
     </div>
   );
 }

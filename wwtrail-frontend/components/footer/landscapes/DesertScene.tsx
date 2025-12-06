@@ -1,6 +1,7 @@
 'use client';
 
 import { Stars } from './Stars';
+import { Tumbleweed } from './Tumbleweed';
 
 interface DesertSceneProps {
   isNight: boolean;
@@ -109,6 +110,9 @@ export function DesertScene({ isNight }: DesertSceneProps) {
       <Cactus position="12%" />
       <Cactus position="78%" scale={0.7} />
       <Cactus position="35%" scale={0.5} />
+
+      {/* Tumbleweeds rolling across */}
+      <Tumbleweed count={2} />
     </div>
   );
 }

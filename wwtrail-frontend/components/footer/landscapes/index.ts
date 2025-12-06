@@ -6,3 +6,5 @@ export { CoastScene } from './CoastScene';
 export { PlainsScene } from './PlainsScene';
 export { Stars } from './Stars';
 export { Fireflies } from './Fireflies';
+export { Tumbleweed } from './Tumbleweed';
+export { Birds } from './Birds';
