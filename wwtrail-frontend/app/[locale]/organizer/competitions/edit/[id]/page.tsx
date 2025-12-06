@@ -81,7 +81,7 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
         {/* Breadcrumbs */}
         <div className="mb-6 flex items-center justify-between">
           <Link
-            href={`/organizer/events/${competition.eventId}`}
+            href={`/organizer/events/edit/${competition.eventId}`}
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
