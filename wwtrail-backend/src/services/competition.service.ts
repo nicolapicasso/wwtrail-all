@@ -24,6 +24,41 @@ const prisma = new PrismaClient();
  */
 export class CompetitionService {
   /**
+   * Calcular isActive basado en si tiene ediciones futuras
+   * Una competición está activa si tiene al menos una edición con startDate > ahora
+   */
+  private static computeIsActive(competition: any): boolean {
+    const now = new Date();
+
+    // Si no tiene ediciones, está inactiva
+    if (!competition.editions || competition.editions.length === 0) {
+      return false;
+    }
+
+    // Verificar si hay al menos una edición futura
+    return competition.editions.some((edition: any) => {
+      if (!edition.startDate) return false;
+      return new Date(edition.startDate) > now;
+    });
+  }
+
+  /**
+   * Añadir campo isActive calculado a una competición
+   */
+  private static addComputedIsActive(competition: any): any {
+    return {
+      ...competition,
+      isActive: this.computeIsActive(competition),
+    };
+  }
+
+  /**
+   * Añadir campo isActive calculado a una lista de competiciones
+   */
+  private static addComputedIsActiveToList(competitions: any[]): any[] {
+    return competitions.map(comp => this.addComputedIsActive(comp));
+  }
+  /**
    * Disparar traducciones automáticas en background (no bloqueante)
    */
   private static triggerAutoTranslation(competitionId: string, status: EventStatus) {
@@ -215,6 +250,12 @@ export class CompetitionService {
           },
         },
         translations: true,  // ✅ NUEVO: Include translations
+        editions: {
+          select: {
+            id: true,
+            startDate: true,
+          },
+        },
         _count: {
           select: {
             editions: true,
@@ -265,7 +306,8 @@ export class CompetitionService {
       translatedCompetitions.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    return translatedCompetitions;
+    // Añadir isActive calculado basado en ediciones futuras
+    return this.addComputedIsActiveToList(translatedCompetitions);
   }
 
   /**
@@ -399,6 +441,12 @@ export class CompetitionService {
             logoUrl: true,
           },
         },
+        editions: {
+          select: {
+            id: true,
+            startDate: true,
+          },
+        },
         _count: {
           select: {
             editions: true,
@@ -410,7 +458,8 @@ export class CompetitionService {
       },
     });
 
-    return competitions;
+    // Añadir isActive calculado basado en ediciones futuras
+    return this.addComputedIsActiveToList(competitions);
   }
 
   /**
@@ -491,7 +540,8 @@ export class CompetitionService {
       // Si falla, continuar sin coordenadas
     }
 
-    return competition;
+    // Añadir isActive calculado basado en ediciones futuras
+    return this.addComputedIsActive(competition);
   }
 
   /**
@@ -573,7 +623,8 @@ export class CompetitionService {
       // Si falla, continuar sin coordenadas
     }
 
-    return competition;
+    // Añadir isActive calculado basado en ediciones futuras
+    return this.addComputedIsActive(competition);
   }
 
   /**
