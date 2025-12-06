@@ -15,15 +15,44 @@ export function Birds({ count = 5, color = '#1c1917' }: BirdsProps) {
       top: 60 + Math.random() * 80, // 60-140px from top
       delay: Math.random() * 30, // Random start delay
       duration: 25 + Math.random() * 20, // 25-45s to cross screen
+      flapSpeed: 0.3 + Math.random() * 0.3, // 0.3-0.6s flap cycle
     }));
   }, [count]);
 
   return (
     <>
+      <style jsx>{`
+        @keyframes fly-across {
+          0% {
+            left: -30px;
+          }
+          100% {
+            left: 100%;
+          }
+        }
+        @keyframes flap {
+          0%, 100% {
+            transform: scaleY(1);
+          }
+          50% {
+            transform: scaleY(0.5);
+          }
+        }
+        .bird {
+          animation-name: fly-across;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+        .bird-svg {
+          animation-name: flap;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+      `}</style>
       {birds.map((bird) => (
         <div
           key={bird.id}
-          className="bird absolute animate-bird-fly"
+          className="bird absolute"
           style={{
             top: `${bird.top}px`,
             animationDuration: `${bird.duration}s`,
@@ -36,10 +65,9 @@ export function Birds({ count = 5, color = '#1c1917' }: BirdsProps) {
             height={bird.size * 2}
             viewBox="0 0 24 16"
             fill="none"
-            className="animate-bird-flap"
+            className="bird-svg"
             style={{
-              animationDuration: '0.4s',
-              animationDelay: `${Math.random() * 0.4}s`,
+              animationDuration: `${bird.flapSpeed}s`,
             }}
           >
             <path
