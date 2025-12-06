@@ -35,7 +35,7 @@ export default function OrganizerServicesPage() {
       // Admin sees ALL services, organizer only sees their own
       if (user.role === 'ADMIN') {
         const response = await servicesService.getAll({ limit: 100 });
-        setServices(response.data?.services || []);
+        setServices(response.data || []);
       } else {
         const response = await servicesService.getByOrganizer(user.id);
         setServices(response.data);
