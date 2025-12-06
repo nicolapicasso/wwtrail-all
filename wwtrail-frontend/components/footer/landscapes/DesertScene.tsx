@@ -1,6 +1,7 @@
 'use client';
 
 import { Stars } from './Stars';
+import { NoiseTexture } from './NoiseTexture';
 
 interface DesertSceneProps {
   isNight: boolean;
@@ -15,12 +16,10 @@ export function DesertScene({ isNight }: DesertSceneProps) {
           className="absolute inset-0"
           style={{
             background: `linear-gradient(to bottom,
-              #0f0a1a 0%,
-              #1a1428 20%,
-              #251e38 40%,
-              #352a4a 60%,
-              #453858 80%,
-              #554668 100%
+              #1a1525 0%,
+              #252035 30%,
+              #352845 60%,
+              #453555 100%
             )`,
           }}
         />
@@ -30,95 +29,92 @@ export function DesertScene({ isNight }: DesertSceneProps) {
 
         {/* Moon */}
         <div className="moon absolute top-[30px] right-[18%] w-10 h-10 bg-amber-100 rounded-full shadow-[0_0_25px_rgba(254,243,199,0.4)]">
-          <div className="absolute top-[3px] left-[-7px] w-9 h-9 bg-[#0f0a1a] rounded-full" />
+          <div className="absolute top-[3px] left-[-7px] w-9 h-9 bg-[#1a1525] rounded-full" />
         </div>
 
         {/* Desert mesa silhouettes */}
         <div
-          className="absolute bottom-0 left-0 w-full h-[160px]"
+          className="absolute bottom-0 left-0 w-full h-[150px] bg-[#2a2040]"
           style={{
-            background: '#2a2040',
-            clipPath: 'polygon(0% 100%, 0% 65%, 8% 65%, 10% 45%, 18% 45%, 20% 65%, 35% 65%, 38% 40%, 48% 40%, 50% 65%, 65% 65%, 70% 50%, 85% 50%, 88% 65%, 100% 65%, 100% 100%)',
+            clipPath: 'polygon(0% 100%, 0% 65%, 10% 65%, 12% 42%, 22% 42%, 25% 65%, 45% 65%, 48% 38%, 58% 38%, 60% 65%, 80% 65%, 85% 48%, 95% 48%, 98% 65%, 100% 65%, 100% 100%)',
           }}
         />
         <div
-          className="absolute bottom-0 left-0 w-full h-[120px]"
-          style={{
-            background: '#1a1530',
-            clipPath: 'polygon(0% 100%, 0% 55%, 15% 55%, 18% 35%, 28% 35%, 30% 55%, 50% 55%, 55% 42%, 65% 42%, 68% 55%, 100% 55%, 100% 100%)',
-          }}
+          className="absolute bottom-0 left-0 w-full h-[100px] bg-[#1a1530]"
+          style={{ clipPath: 'polygon(0% 100%, 0% 50%, 30% 55%, 60% 45%, 100% 52%, 100% 100%)' }}
         />
-        <div
-          className="absolute bottom-0 left-0 w-full h-[80px] bg-[#0f0a20]"
-          style={{ clipPath: 'polygon(0% 100%, 0% 45%, 25% 50%, 50% 42%, 75% 48%, 100% 40%, 100% 100%)' }}
-        />
+
+        <NoiseTexture opacity={0.1} />
       </div>
     );
   }
 
   return (
     <div className="desert-day absolute inset-0 overflow-hidden">
-      {/* Photographic desert sunset - warm gradient */}
+      {/* Watercolor desert sky - warm terracotta tones */}
       <div
         className="absolute inset-0"
         style={{
           background: `linear-gradient(to bottom,
-            #4a6b8a 0%,
-            #6a8aaa 12%,
-            #8aa5b8 22%,
-            #c4a890 35%,
-            #d4a878 45%,
-            #e8a860 55%,
-            #f0a050 65%,
-            #f59840 75%,
-            #f89030 85%,
-            #fa8820 100%
+            #c8d5dc 0%,
+            #d5dce0 15%,
+            #e2ddd5 30%,
+            #e8d5c5 45%,
+            #e5c8b2 60%,
+            #ddb8a0 75%,
+            #d5a890 90%,
+            #c89880 100%
           )`,
         }}
       />
 
-      {/* Sun glow near horizon */}
+      {/* Soft sun glow */}
       <div
-        className="absolute bottom-[90px] left-[30%] w-[180px] h-[100px] opacity-70"
+        className="absolute bottom-[100px] left-[25%] w-[120px] h-[80px] opacity-45"
         style={{
-          background: 'radial-gradient(ellipse, rgba(255,200,100,0.8) 0%, rgba(255,160,80,0.4) 40%, transparent 70%)',
+          background: 'radial-gradient(ellipse, rgba(248,220,180,0.8) 0%, rgba(240,200,150,0.3) 60%, transparent 85%)',
+          filter: 'blur(10px)',
         }}
       />
 
-      {/* Atmospheric dust haze */}
+      {/* Dust haze */}
       <div
-        className="absolute bottom-[60px] left-0 w-full h-[120px] opacity-30"
+        className="absolute bottom-[60px] left-0 w-full h-[100px] opacity-30"
         style={{
-          background: 'linear-gradient(to bottom, transparent 0%, rgba(200,150,100,0.6) 100%)',
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(210,180,150,0.5) 100%)',
         }}
       />
 
-      {/* Mesa silhouettes - far */}
+      {/* Mesa formations - watercolor style */}
+      {/* Far mesas - hazy */}
       <div
-        className="absolute bottom-0 left-0 w-full h-[180px]"
+        className="absolute bottom-0 left-0 w-full h-[170px]"
         style={{
-          background: 'linear-gradient(to bottom, #7a6a5a 0%, #6a5a4a 100%)',
-          clipPath: 'polygon(0% 100%, 0% 60%, 5% 60%, 8% 38%, 18% 38%, 22% 60%, 40% 60%, 45% 45%, 55% 45%, 58% 60%, 75% 60%, 80% 35%, 92% 35%, 95% 60%, 100% 60%, 100% 100%)',
+          background: 'linear-gradient(to bottom, #c5b5a5 0%, #b5a595 50%, #a59585 100%)',
+          clipPath: 'polygon(0% 100%, 0% 62%, 8% 62%, 10% 38%, 20% 38%, 23% 62%, 42% 62%, 46% 45%, 56% 45%, 58% 62%, 78% 62%, 82% 35%, 94% 35%, 96% 62%, 100% 62%, 100% 100%)',
         }}
       />
 
-      {/* Mesa silhouettes - mid */}
+      {/* Mid mesas */}
       <div
-        className="absolute bottom-0 left-0 w-full h-[140px]"
+        className="absolute bottom-0 left-0 w-full h-[130px]"
         style={{
-          background: 'linear-gradient(to bottom, #5a4a3a 0%, #4a3a2a 100%)',
-          clipPath: 'polygon(0% 100%, 0% 52%, 12% 52%, 15% 32%, 25% 32%, 28% 52%, 48% 52%, 52% 38%, 62% 38%, 65% 52%, 85% 52%, 88% 42%, 95% 42%, 98% 52%, 100% 52%, 100% 100%)',
+          background: 'linear-gradient(to bottom, #a08878 0%, #907868 50%, #806858 100%)',
+          clipPath: 'polygon(0% 100%, 0% 55%, 15% 55%, 18% 35%, 30% 35%, 32% 55%, 55% 55%, 60% 42%, 72% 42%, 75% 55%, 100% 55%, 100% 100%)',
         }}
       />
 
-      {/* Desert floor silhouette - near */}
+      {/* Near desert floor */}
       <div
-        className="absolute bottom-0 left-0 w-full h-[90px]"
+        className="absolute bottom-0 left-0 w-full h-[85px]"
         style={{
-          background: 'linear-gradient(to bottom, #3a2a1a 0%, #2a1a0a 100%)',
-          clipPath: 'polygon(0% 100%, 0% 42%, 20% 48%, 40% 40%, 60% 45%, 80% 38%, 100% 42%, 100% 100%)',
+          background: 'linear-gradient(to bottom, #785848 0%, #685040 50%, #584838 100%)',
+          clipPath: 'polygon(0% 100%, 0% 45%, 25% 50%, 50% 42%, 75% 48%, 100% 44%, 100% 100%)',
         }}
       />
+
+      {/* Noise texture overlay */}
+      <NoiseTexture opacity={0.15} />
     </div>
   );
 }

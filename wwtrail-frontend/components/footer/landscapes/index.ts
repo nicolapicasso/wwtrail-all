@@ -10,3 +10,4 @@ export { Tumbleweed } from './Tumbleweed';
 export { Birds } from './Birds';
 export { Clouds } from './Clouds';
 export { Waves } from './Waves';
+export { NoiseTexture } from './NoiseTexture';

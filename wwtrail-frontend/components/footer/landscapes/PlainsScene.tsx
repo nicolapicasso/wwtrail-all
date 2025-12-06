@@ -2,6 +2,7 @@
 
 import { Stars } from './Stars';
 import { Fireflies } from './Fireflies';
+import { NoiseTexture } from './NoiseTexture';
 
 interface PlainsSceneProps {
   isNight: boolean;
@@ -28,7 +29,7 @@ export function PlainsScene({ isNight }: PlainsSceneProps) {
         {/* Stars */}
         <Stars count={60} />
 
-        {/* Moon - centered low on horizon */}
+        {/* Moon - centered */}
         <div className="moon absolute top-[40px] left-1/2 -translate-x-1/2 w-10 h-10 bg-amber-100 rounded-full shadow-[0_0_25px_rgba(254,243,199,0.4)]">
           <div className="absolute top-[3px] left-[-7px] w-9 h-9 bg-[#0a1018] rounded-full" />
         </div>
@@ -36,97 +37,103 @@ export function PlainsScene({ isNight }: PlainsSceneProps) {
         {/* Rolling hills silhouettes */}
         <div
           className="absolute bottom-0 left-0 w-full h-[140px] bg-[#181e25]"
-          style={{ clipPath: 'polygon(0% 100%, 0% 65%, 15% 55%, 30% 62%, 50% 48%, 70% 58%, 85% 50%, 100% 55%, 100% 100%)' }}
+          style={{ clipPath: 'polygon(0% 100%, 0% 65%, 15% 52%, 35% 62%, 55% 48%, 75% 58%, 100% 50%, 100% 100%)' }}
         />
         <div
-          className="absolute bottom-0 left-0 w-full h-[110px] bg-[#10151a]"
-          style={{ clipPath: 'polygon(0% 100%, 0% 55%, 20% 48%, 40% 55%, 60% 42%, 80% 52%, 100% 45%, 100% 100%)' }}
+          className="absolute bottom-0 left-0 w-full h-[105px] bg-[#10151a]"
+          style={{ clipPath: 'polygon(0% 100%, 0% 55%, 25% 45%, 50% 55%, 75% 42%, 100% 50%, 100% 100%)' }}
         />
 
-        {/* Dark grass/prairie foreground */}
+        {/* Dark foreground */}
         <div
-          className="absolute bottom-0 left-0 w-full h-[80px] bg-[#08101]"
-          style={{ clipPath: 'polygon(0% 100%, 0% 40%, 100% 45%, 100% 100%)' }}
+          className="absolute bottom-0 left-0 w-full h-[70px] bg-[#080c10]"
+          style={{ clipPath: 'polygon(0% 100%, 0% 42%, 100% 48%, 100% 100%)' }}
         />
 
         {/* Fireflies */}
         <Fireflies count={12} />
+
+        <NoiseTexture opacity={0.08} />
       </div>
     );
   }
 
   return (
     <div className="plains-day absolute inset-0 overflow-hidden">
-      {/* Photographic prairie sunset - warm golden tones */}
+      {/* Watercolor prairie sky - soft golden/lavender tones */}
       <div
         className="absolute inset-0"
         style={{
           background: `linear-gradient(to bottom,
-            #5a7090 0%,
-            #7a90a8 12%,
-            #9aa8b8 22%,
-            #c8b8a8 35%,
-            #d8c098 45%,
-            #e8c888 55%,
-            #f0c878 65%,
-            #f5c868 75%,
-            #f8c858 85%,
-            #fac848 100%
+            #b8c5d2 0%,
+            #c8d2dc 12%,
+            #d8dce2 25%,
+            #e2ddd8 40%,
+            #e5d8cc 52%,
+            #e8d2c0 64%,
+            #e5c8b2 76%,
+            #e0bca5 88%,
+            #d8b098 100%
           )`,
         }}
       />
 
-      {/* Sun - setting on horizon, centered */}
+      {/* Sun glow - setting, centered */}
       <div
-        className="absolute bottom-[95px] left-1/2 -translate-x-1/2 w-[100px] h-[50px] opacity-80"
+        className="absolute bottom-[100px] left-1/2 -translate-x-1/2 w-[140px] h-[70px] opacity-50"
         style={{
-          background: 'radial-gradient(ellipse at center bottom, rgba(255,220,150,1) 0%, rgba(255,200,100,0.6) 40%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center bottom, rgba(250,225,180,0.9) 0%, rgba(240,200,150,0.4) 50%, transparent 80%)',
+          filter: 'blur(10px)',
         }}
       />
 
-      {/* Atmospheric golden haze */}
+      {/* Atmospheric haze */}
       <div
-        className="absolute bottom-[50px] left-0 w-full h-[130px] opacity-35"
+        className="absolute bottom-[70px] left-0 w-full h-[90px] opacity-35"
         style={{
-          background: 'linear-gradient(to bottom, transparent 0%, rgba(200,180,120,0.5) 100%)',
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(210,195,180,0.5) 100%)',
         }}
       />
 
-      {/* Rolling hills silhouettes - far */}
+      {/* Rolling hills - watercolor layers */}
+      {/* Far hills - hazy */}
       <div
         className="absolute bottom-0 left-0 w-full h-[150px]"
         style={{
-          background: 'linear-gradient(to bottom, #7a7060 0%, #6a6050 100%)',
-          clipPath: 'polygon(0% 100%, 0% 62%, 12% 52%, 28% 60%, 45% 48%, 62% 58%, 78% 45%, 100% 52%, 100% 100%)',
+          background: 'linear-gradient(to bottom, #b8b0a5 0%, #a8a095 50%, #989085 100%)',
+          clipPath: 'polygon(0% 100%, 0% 60%, 12% 50%, 30% 58%, 50% 45%, 70% 55%, 88% 48%, 100% 52%, 100% 100%)',
         }}
       />
 
-      {/* Rolling hills silhouettes - mid */}
+      {/* Mid hills */}
       <div
         className="absolute bottom-0 left-0 w-full h-[115px]"
         style={{
-          background: 'linear-gradient(to bottom, #5a5040 0%, #4a4030 100%)',
-          clipPath: 'polygon(0% 100%, 0% 52%, 18% 45%, 38% 55%, 58% 40%, 78% 50%, 100% 42%, 100% 100%)',
+          background: 'linear-gradient(to bottom, #8a8578 0%, #7a7568 50%, #6a6558 100%)',
+          clipPath: 'polygon(0% 100%, 0% 52%, 18% 42%, 40% 55%, 62% 40%, 82% 52%, 100% 45%, 100% 100%)',
         }}
       />
 
-      {/* Prairie/grass foreground - darkest silhouette */}
+      {/* Prairie foreground - warm earth tones */}
       <div
         className="absolute bottom-0 left-0 w-full h-[80px]"
         style={{
-          background: 'linear-gradient(to bottom, #3a3020 0%, #2a2010 100%)',
-          clipPath: 'polygon(0% 100%, 0% 38%, 100% 42%, 100% 100%)',
+          background: 'linear-gradient(to bottom, #6a5d50 0%, #5a4d40 50%, #4a3d30 100%)',
+          clipPath: 'polygon(0% 100%, 0% 40%, 100% 45%, 100% 100%)',
         }}
       />
 
-      {/* Subtle grass texture on foreground */}
+      {/* Subtle grass texture */}
       <div
-        className="absolute bottom-0 left-0 w-full h-[50px] opacity-30"
+        className="absolute bottom-0 left-0 w-full h-[45px] opacity-25"
         style={{
-          background: 'repeating-linear-gradient(90deg, transparent 0px, transparent 3px, #1a1008 3px, #1a1008 4px)',
-          clipPath: 'polygon(0% 100%, 0% 0%, 1% 40%, 2% 0%, 3% 35%, 4% 0%, 5% 42%, 6% 0%, 7% 38%, 8% 0%, 9% 45%, 10% 0%, 11% 40%, 12% 0%, 13% 35%, 14% 0%, 15% 42%, 16% 0%, 17% 38%, 18% 0%, 19% 45%, 20% 0%, 21% 40%, 22% 0%, 23% 35%, 24% 0%, 25% 42%, 26% 0%, 27% 38%, 28% 0%, 29% 45%, 30% 0%, 31% 40%, 32% 0%, 33% 35%, 34% 0%, 35% 42%, 36% 0%, 37% 38%, 38% 0%, 39% 45%, 40% 0%, 41% 40%, 42% 0%, 43% 35%, 44% 0%, 45% 42%, 46% 0%, 47% 38%, 48% 0%, 49% 45%, 50% 0%, 51% 40%, 52% 0%, 53% 35%, 54% 0%, 55% 42%, 56% 0%, 57% 38%, 58% 0%, 59% 45%, 60% 0%, 61% 40%, 62% 0%, 63% 35%, 64% 0%, 65% 42%, 66% 0%, 67% 38%, 68% 0%, 69% 45%, 70% 0%, 71% 40%, 72% 0%, 73% 35%, 74% 0%, 75% 42%, 76% 0%, 77% 38%, 78% 0%, 79% 45%, 80% 0%, 81% 40%, 82% 0%, 83% 35%, 84% 0%, 85% 42%, 86% 0%, 87% 38%, 88% 0%, 89% 45%, 90% 0%, 91% 40%, 92% 0%, 93% 35%, 94% 0%, 95% 42%, 96% 0%, 97% 38%, 98% 0%, 99% 45%, 100% 0%, 100% 100%)',
+          background: 'repeating-linear-gradient(90deg, transparent 0px, transparent 4px, #3a2d20 4px, #3a2d20 5px)',
+          clipPath: 'polygon(0% 100%, 0% 0%, 2% 45%, 4% 0%, 6% 40%, 8% 0%, 10% 48%, 12% 0%, 14% 42%, 16% 0%, 18% 50%, 20% 0%, 22% 45%, 24% 0%, 26% 40%, 28% 0%, 30% 48%, 32% 0%, 34% 42%, 36% 0%, 38% 50%, 40% 0%, 42% 45%, 44% 0%, 46% 40%, 48% 0%, 50% 48%, 52% 0%, 54% 42%, 56% 0%, 58% 50%, 60% 0%, 62% 45%, 64% 0%, 66% 40%, 68% 0%, 70% 48%, 72% 0%, 74% 42%, 76% 0%, 78% 50%, 80% 0%, 82% 45%, 84% 0%, 86% 40%, 88% 0%, 90% 48%, 92% 0%, 94% 42%, 96% 0%, 98% 50%, 100% 0%, 100% 100%)',
         }}
       />
+
+      {/* Noise texture overlay */}
+      <NoiseTexture opacity={0.12} />
     </div>
   );
 }
