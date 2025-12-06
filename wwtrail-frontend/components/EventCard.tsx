@@ -124,7 +124,10 @@ export default function EventCard({
   // Permisos según rol (modo gestión)
   const statusConfig = getStatusConfig(event.status);
   const StatusIcon = statusConfig.icon;
-  const canEdit = managementMode && (userRole === 'ADMIN' || event.status !== 'PUBLISHED');
+  // Los organizadores pueden editar si: son owner, son manager asignado, o el evento está en DRAFT
+  // Los admin siempre pueden editar
+  const isOwnerOrManager = (event as any).isOwner || (event as any).isManager;
+  const canEdit = managementMode && (userRole === 'ADMIN' || isOwnerOrManager || event.status !== 'PUBLISHED');
   const canApprove = managementMode && userRole === 'ADMIN' && event.status === 'DRAFT';
   const canDelete = managementMode && userRole === 'ADMIN';
   const canAddCompetition = managementMode && event.status === 'PUBLISHED';

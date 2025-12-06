@@ -122,6 +122,7 @@ export interface PendingContentCounts {
   events: number;
   services: number;
   magazines: number;
+  specialSeries: number;
   total: number;
 }
 
@@ -130,7 +131,7 @@ export interface PendingContentCounts {
  */
 export interface PendingContentItem {
   id: string;
-  type: 'competition' | 'edition' | 'event' | 'service' | 'magazine';
+  type: 'competition' | 'edition' | 'event' | 'service' | 'magazine' | 'specialSeries';
   name: string;
   status: string;
   createdAt: string;
@@ -239,7 +240,17 @@ class AdminService {
    */
   async getPendingContentCounts(): Promise<PendingContentCounts> {
     const { data } = await apiClientV2.get('/admin/pending/count');
-    return data.data;
+    const breakdown = data.data.breakdown || data.data;
+
+    return {
+      competitions: breakdown.competitions || 0,
+      editions: breakdown.editions || 0,
+      events: breakdown.events || 0,
+      services: (breakdown.services || 0) + (breakdown.organizers || 0) + (breakdown.promotions || 0),
+      magazines: breakdown.posts || 0,
+      specialSeries: breakdown.specialSeries || 0,
+      total: data.data.total || 0,
+    };
   }
 
   /**
@@ -315,7 +326,7 @@ class AdminService {
     if (result.specialSeries) {
       items.push(...result.specialSeries.map((ss: any) => ({
         id: ss.id,
-        type: 'edition' as const, // special series shown as edition type for compatibility
+        type: 'specialSeries' as const,
         name: ss.name,
         status: 'DRAFT',
         createdAt: ss.createdAt,
@@ -589,7 +600,7 @@ class AdminService {
 
   /**
    * Aprobar cualquier tipo de contenido pendiente
-   * @param type - Tipo de contenido (event, competition, service, magazine)
+   * @param type - Tipo de contenido (event, competition, service, magazine, specialSeries)
    * @param id - ID del elemento
    */
   async approveContent(type: string, id: string): Promise<any> {
@@ -612,6 +623,40 @@ class AdminService {
         // Las ediciones normalmente no tienen status de aprobación, pero si lo tienen:
         const { data: editionData } = await apiClientV2.patch(`/editions/${id}`, { status: 'PUBLISHED' });
         return editionData.data;
+      case 'specialSeries':
+        // Publicar serie especial
+        const { data: seriesData } = await apiClientV2.patch(`/special-series/${id}`, { status: 'PUBLISHED' });
+        return seriesData.data;
+      default:
+        throw new Error(`Tipo de contenido no soportado: ${type}`);
+    }
+  }
+
+  /**
+   * Rechazar (eliminar) cualquier tipo de contenido pendiente
+   * @param type - Tipo de contenido (competition, event, service, magazine, edition, specialSeries)
+   * @param id - ID del elemento
+   */
+  async rejectContent(type: string, id: string): Promise<any> {
+    switch (type) {
+      case 'competition':
+        const { data: compData } = await apiClientV2.delete(`/competitions/${id}`);
+        return compData.data;
+      case 'event':
+        const { data: eventData } = await apiClientV2.delete(`/events/${id}`);
+        return eventData.data;
+      case 'service':
+        const { data: serviceData } = await apiClientV2.delete(`/services/${id}`);
+        return serviceData.data;
+      case 'magazine':
+        const { data: postData } = await apiClientV2.delete(`/posts/${id}`);
+        return postData.data;
+      case 'edition':
+        const { data: editionData } = await apiClientV2.delete(`/editions/${id}`);
+        return editionData.data;
+      case 'specialSeries':
+        const { data: seriesData } = await apiClientV2.delete(`/special-series/${id}`);
+        return seriesData.data;
       default:
         throw new Error(`Tipo de contenido no soportado: ${type}`);
     }

@@ -20,6 +20,8 @@ import {
   CheckCircle,
   Check,
   Loader2,
+  X,
+  Layers,
 } from 'lucide-react';
 import { adminService, PendingContentCounts, PendingContentItem } from '@/lib/api/admin.service';
 
@@ -32,6 +34,7 @@ export default function PendingContentPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   const handleApprove = async (item: PendingContentItem) => {
     if (!confirm(`¿Estás seguro de aprobar "${item.name}"?`)) return;
@@ -46,6 +49,22 @@ export default function PendingContentPage() {
       alert(`Error al aprobar: ${err.message || 'Error desconocido'}`);
     } finally {
       setApprovingId(null);
+    }
+  };
+
+  const handleReject = async (item: PendingContentItem) => {
+    if (!confirm(`¿Estás seguro de RECHAZAR y ELIMINAR "${item.name}"? Esta acción no se puede deshacer.`)) return;
+
+    setRejectingId(item.id);
+    try {
+      await adminService.rejectContent(item.type, item.id);
+      // Recargar la lista
+      await fetchData();
+    } catch (err: any) {
+      console.error('Error rejecting content:', err);
+      alert(`Error al rechazar: ${err.message || 'Error desconocido'}`);
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -81,6 +100,8 @@ export default function PendingContentPage() {
         return <MapPin className="w-5 h-5 text-green-500" />;
       case 'service':
         return <Building2 className="w-5 h-5 text-orange-500" />;
+      case 'specialSeries':
+        return <Layers className="w-5 h-5 text-indigo-500" />;
       case 'magazine':
         return <FileText className="w-5 h-5 text-pink-500" />;
       default:
@@ -98,6 +119,8 @@ export default function PendingContentPage() {
         return 'Evento';
       case 'service':
         return 'Servicio';
+      case 'specialSeries':
+        return 'Serie Especial';
       case 'magazine':
         return 'Artículo';
       default:
@@ -114,7 +137,9 @@ export default function PendingContentPage() {
       case 'event':
         return `/${locale}/organizer/events/edit/${item.id}`;
       case 'service':
-        return `/${locale}/organizer/services/edit/${item.id}`;
+        return `/${locale}/organizer/services/${item.id}/edit`;
+      case 'specialSeries':
+        return `/${locale}/organizer/special-series/edit/${item.id}`;
       case 'magazine':
         return `/${locale}/organizer/posts/edit/${item.id}`;
       default:
@@ -170,7 +195,7 @@ export default function PendingContentPage() {
 
       {/* Stats Cards */}
       {counts && (
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
           <Card className={counts.total > 0 ? 'border-red-200 bg-red-50' : ''}>
             <CardContent className="pt-6">
               <div className="text-center">
@@ -194,15 +219,6 @@ export default function PendingContentPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <Calendar className="w-8 h-8 mx-auto mb-2 text-purple-500" />
-                <p className="text-2xl font-bold">{counts.editions}</p>
-                <p className="text-sm text-gray-500">Ediciones</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
                 <MapPin className="w-8 h-8 mx-auto mb-2 text-green-500" />
                 <p className="text-2xl font-bold">{counts.events}</p>
                 <p className="text-sm text-gray-500">Eventos</p>
@@ -215,6 +231,15 @@ export default function PendingContentPage() {
                 <Building2 className="w-8 h-8 mx-auto mb-2 text-orange-500" />
                 <p className="text-2xl font-bold">{counts.services}</p>
                 <p className="text-sm text-gray-500">Servicios</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Layers className="w-8 h-8 mx-auto mb-2 text-indigo-500" />
+                <p className="text-2xl font-bold">{counts.specialSeries}</p>
+                <p className="text-sm text-gray-500">Series</p>
               </div>
             </CardContent>
           </Card>
@@ -289,7 +314,7 @@ export default function PendingContentPage() {
                       size="sm"
                       className="bg-green-600 hover:bg-green-700"
                       onClick={() => handleApprove(item)}
-                      disabled={approvingId === item.id}
+                      disabled={approvingId === item.id || rejectingId === item.id}
                     >
                       {approvingId === item.id ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -297,6 +322,19 @@ export default function PendingContentPage() {
                         <Check className="w-4 h-4 mr-2" />
                       )}
                       Aprobar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleReject(item)}
+                      disabled={approvingId === item.id || rejectingId === item.id}
+                    >
+                      {rejectingId === item.id ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <X className="w-4 h-4 mr-2" />
+                      )}
+                      Rechazar
                     </Button>
                     <Link href={getReviewLink(item)}>
                       <Button variant="outline" size="sm">

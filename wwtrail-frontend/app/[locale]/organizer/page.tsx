@@ -14,30 +14,73 @@ import {
   Users,
   Award,
   BarChart3,
-  BookOpen
+  BookOpen,
+  Building2,
+  Layers,
+  AlertCircle,
+  Settings,
+  FileText,
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { adminService } from '@/lib/api/admin.service';
 
 export default function OrganizerDashboard() {
   const router = useRouter();
+  const { isAdmin, isOrganizer } = useAuth();
   const [stats, setStats] = useState({
     events: 0,
     competitions: 0,
     editions: 0,
     upcomingEditions: 0,
+    services: 0,
+    specialSeries: 0,
+    posts: 0,
+    pendingTotal: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Fetch real stats from API
-    // For now, using placeholder data
-    setStats({
-      events: 0,
-      competitions: 0,
-      editions: 0,
-      upcomingEditions: 0,
-    });
-    setLoading(false);
-  }, []);
+    const fetchStats = async () => {
+      try {
+        if (isAdmin) {
+          // Admin gets comprehensive stats
+          const [comprehensiveStats, pendingCounts] = await Promise.all([
+            adminService.getComprehensiveStats(),
+            adminService.getPendingContentCounts(),
+          ]);
+
+          setStats({
+            events: comprehensiveStats.overview.totalEvents || 0,
+            competitions: comprehensiveStats.overview.totalCompetitions || 0,
+            editions: comprehensiveStats.overview.totalEditions || 0,
+            upcomingEditions: 0,
+            services: comprehensiveStats.overview.totalServices || 0,
+            specialSeries: comprehensiveStats.overview.totalSpecialSeries || 0,
+            posts: 0,
+            pendingTotal: pendingCounts.total || 0,
+          });
+        } else {
+          // Organizer gets their own stats
+          setStats({
+            events: 0,
+            competitions: 0,
+            editions: 0,
+            upcomingEditions: 0,
+            services: 0,
+            specialSeries: 0,
+            posts: 0,
+            pendingTotal: 0,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [isAdmin]);
 
   const quickActions = [
     {
@@ -102,16 +145,71 @@ export default function OrganizerDashboard() {
       borderColor: 'border-gray-200',
     },
     {
-      title: 'Artículos',
-      description: 'Gestiona tus artículos del magazine',
-      icon: BookOpen,
-      href: '/organizer/posts',
-      count: 0,
+      title: 'Servicios',
+      description: 'Gestiona alojamientos, restaurantes y más',
+      icon: Building2,
+      href: '/organizer/services',
+      count: stats.services,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       borderColor: 'border-orange-200',
     },
+    {
+      title: 'Series Especiales',
+      description: 'Circuitos y series de competiciones',
+      icon: Layers,
+      href: '/organizer/special-series',
+      count: stats.specialSeries,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+      borderColor: 'border-indigo-200',
+    },
+    {
+      title: 'Artículos',
+      description: 'Gestiona tus artículos del magazine',
+      icon: BookOpen,
+      href: '/organizer/posts',
+      count: stats.posts,
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-50',
+      borderColor: 'border-pink-200',
+    },
   ];
+
+  // Admin-only sections
+  const adminSections = isAdmin ? [
+    {
+      title: 'Contenido Pendiente',
+      description: 'Revisa y aprueba contenido de organizadores',
+      icon: AlertCircle,
+      href: '/organizer/pending',
+      count: stats.pendingTotal,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200',
+      highlight: stats.pendingTotal > 0,
+    },
+    {
+      title: 'Usuarios',
+      description: 'Gestiona usuarios y permisos',
+      icon: Users,
+      href: '/organizer/users',
+      count: 0,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
+    },
+    {
+      title: 'Traducciones',
+      description: 'Gestiona traducciones del sistema',
+      icon: FileText,
+      href: '/organizer/translations',
+      count: 0,
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-50',
+      borderColor: 'border-cyan-200',
+    },
+  ] : [];
 
   if (loading) {
     return (
@@ -235,8 +333,8 @@ export default function OrganizerDashboard() {
 
         {/* Main Sections */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión de Contenido</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sections.map((section) => (
               <Link
                 key={section.title}
@@ -259,6 +357,39 @@ export default function OrganizerDashboard() {
             ))}
           </div>
         </div>
+
+        {/* Admin Sections */}
+        {isAdmin && adminSections.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Administración</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {adminSections.map((section: any) => (
+                <Link
+                  key={section.title}
+                  href={section.href}
+                  className={`bg-white rounded-lg shadow border-l-4 ${section.borderColor} p-6 hover:shadow-lg transition-shadow ${
+                    section.highlight ? 'ring-2 ring-red-500 ring-offset-2' : ''
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`w-12 h-12 ${section.bgColor} rounded-lg flex items-center justify-center`}>
+                      <section.icon className={`w-6 h-6 ${section.color}`} />
+                    </div>
+                    {section.count > 0 && (
+                      <span className={`text-2xl font-bold ${section.color}`}>
+                        {section.count}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {section.title}
+                  </h3>
+                  <p className="text-sm text-gray-600">{section.description}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Help Section */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">

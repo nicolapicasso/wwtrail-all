@@ -11,7 +11,7 @@ import { servicesService } from '@/lib/api/v2';
 import { eventsService } from '@/lib/api/events.service';
 import { Service } from '@/types/v2';
 import { Event } from '@/types/api';
-import { MapPin, ArrowLeft, Eye, Tag, Star, Loader2 } from 'lucide-react';
+import { MapPin, ArrowLeft, Eye, Tag, Star, Loader2, ExternalLink } from 'lucide-react';
 import EventGallery from '@/components/EventGallery';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
@@ -307,6 +307,22 @@ export default function ServiceDetailPage() {
                   <span className="text-2xl">{service.category.icon}</span>
                   <span className="font-medium">{service.category.name}</span>
                 </div>
+              </div>
+            )}
+
+            {/* Website */}
+            {(service as any).website && (
+              <div className="rounded-lg border bg-white p-6 shadow-sm">
+                <h3 className="mb-4 font-semibold">Sitio Web Oficial</h3>
+                <a
+                  href={(service as any).website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Visitar sitio web
+                </a>
               </div>
             )}
 

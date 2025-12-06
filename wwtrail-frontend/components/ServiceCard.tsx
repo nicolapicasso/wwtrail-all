@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { Service } from '@/types/v2';
 import {
   MapPin, Eye, Edit, Trash2, Star,
-  Image as ImageIcon, Tag
+  Image as ImageIcon, Tag, ExternalLink
 } from 'lucide-react';
 
 interface ServiceCardProps {
@@ -183,6 +183,20 @@ export default function ServiceCard({
               {service.city}
             </span>
           </div>
+
+          {/* Website */}
+          {(service as any).website && !managementMode && (
+            <a
+              href={(service as any).website}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+            >
+              <ExternalLink className="mr-1 h-4 w-4" />
+              <span>Sitio web</span>
+            </a>
+          )}
 
           {/* Stats */}
           {showStats && !managementMode && (

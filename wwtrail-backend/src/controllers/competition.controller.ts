@@ -160,19 +160,19 @@ export class CompetitionController {
       const userRole = req.user!.role;
       const data = req.body;
 
-      // Organizadores no pueden publicar directamente - solo ADMIN puede
+      // Organizadores no pueden publicar directamente - forzar DRAFT
+      let statusWarning = '';
       if (userRole !== 'ADMIN' && data.status === 'PUBLISHED') {
-        return res.status(403).json({
-          status: 'error',
-          message: 'Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.',
-        });
+        data.status = 'DRAFT';
+        statusWarning = 'El contenido ha quedado en borrador pendiente de revisión por un administrador.';
       }
 
       const competition = await CompetitionService.update(id, data, userId);
 
       res.json({
         status: 'success',
-        message: 'Competition updated successfully',
+        message: statusWarning || 'Competition updated successfully',
+        warning: statusWarning || undefined,
         data: competition,
       });
     } catch (error) {

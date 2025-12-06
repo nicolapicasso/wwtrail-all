@@ -786,9 +786,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
         }
       }
 
-      // Organizadores no pueden publicar directamente - solo ADMIN puede
+      // Organizadores no pueden publicar directamente - forzar DRAFT
       if (data.status === 'PUBLISHED') {
-        throw new Error('Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.');
+        data.status = 'DRAFT' as any;
       }
     }
 

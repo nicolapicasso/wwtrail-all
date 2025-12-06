@@ -60,16 +60,15 @@ const navItems: NavItem[] = [
     dynamicBadge: true,
   },
   {
-    label: 'Configuración Home',
-    href: '/dashboard/home-config',
-    icon: Home,
-    adminOnly: true,
-  },
-  {
     label: 'Administración Web',
     icon: Globe,
     adminOnly: true,
     children: [
+      {
+        label: 'Configuración Home',
+        href: '/dashboard/home-config',
+        icon: Home,
+      },
       {
         label: 'Footer',
         href: '/organizer/footer',

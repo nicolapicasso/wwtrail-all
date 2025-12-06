@@ -155,19 +155,19 @@ export class ServiceController {
         });
       }
 
-      // Organizadores no pueden publicar directamente - solo ADMIN puede
+      // Organizadores no pueden publicar directamente - forzar DRAFT
+      let statusWarning = '';
       if (userRole !== 'ADMIN' && data.status === 'PUBLISHED') {
-        return res.status(403).json({
-          status: 'error',
-          message: 'Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.',
-        });
+        data.status = 'DRAFT';
+        statusWarning = 'El contenido ha quedado en borrador pendiente de revisión por un administrador.';
       }
 
       const service = await ServiceService.update(id, data);
 
       res.json({
         status: 'success',
-        message: 'Service updated successfully',
+        message: statusWarning || 'Service updated successfully',
+        warning: statusWarning || undefined,
         data: service,
       });
     } catch (error) {

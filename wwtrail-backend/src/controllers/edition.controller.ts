@@ -254,13 +254,8 @@ export class EditionController {
       const userRole = req.user!.role;
       const data = req.body;
 
-      // Organizadores no pueden publicar directamente - solo ADMIN puede
-      if (userRole !== 'ADMIN' && data.status === 'PUBLISHED') {
-        return res.status(403).json({
-          status: 'error',
-          message: 'Solo los administradores pueden publicar contenido. El contenido quedará en borrador para revisión.',
-        });
-      }
+      // Nota: Las ediciones usan EditionStatus (UPCOMING, ONGOING, etc.) no EventStatus (DRAFT, PUBLISHED)
+      // La visibilidad de la edición depende del status de su Competition padre
 
       const edition = await EditionService.update(id, data, userId);
 
