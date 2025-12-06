@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -17,11 +17,18 @@ import {
   Settings,
   Shield,
   Award,
+  AlertCircle,
+  BookOpen,
+  Layers,
+  Globe,
+  Ticket,
 } from 'lucide-react';
+import { adminService } from '@/lib/api/admin.service';
 
 export default function DashboardPage() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [pendingCount, setPendingCount] = useState(0);
 
   // Proteger la ruta - redirigir si no está autenticado
   useEffect(() => {
@@ -29,6 +36,21 @@ export default function DashboardPage() {
       router.push('/auth/login');
     }
   }, [loading, isAuthenticated, router]);
+
+  // Fetch pending count for admins
+  useEffect(() => {
+    const fetchPending = async () => {
+      if (user?.role === 'ADMIN') {
+        try {
+          const counts = await adminService.getPendingContentCounts();
+          setPendingCount(counts.total);
+        } catch (err) {
+          console.error('Error fetching pending counts:', err);
+        }
+      }
+    };
+    if (user) fetchPending();
+  }, [user]);
 
   // Mostrar loading mientras carga
   if (loading) {
@@ -44,81 +66,110 @@ export default function DashboardPage() {
     return null;
   }
 
-  // Secciones administrativas
-  const adminSections = [
+  const isAdmin = user.role === 'ADMIN';
+
+  // Secciones disponibles para todos
+  const mainSections = [
     {
-      title: 'Gestión de Organizadores',
+      title: 'Gestión de Eventos',
       description: 'Administra eventos, competiciones y ediciones',
       icon: Award,
       href: '/organizer',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
-      available: true,
       subsections: [
         { name: 'Eventos', href: '/organizer/events' },
         { name: 'Competiciones', href: '/organizer/competitions' },
         { name: 'Ediciones', href: '/organizer/editions' },
-        { name: 'Servicios', href: '/organizer/services' },
       ],
     },
     {
       title: 'Servicios',
-      description: 'Gestiona servicios (alojamientos, restaurantes, tiendas, etc.)',
+      description: 'Gestiona alojamientos, restaurantes, tiendas, etc.',
       icon: Building2,
       href: '/organizer/services',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      available: true,
-    },
-    {
-      title: 'Blog y Artículos',
-      description: 'Administra contenido editorial y noticias',
-      icon: FileText,
-      href: '/blog',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
-      available: false,
-      badge: 'Próximamente',
-    },
-    {
-      title: 'Ofertas y Cupones',
-      description: 'Gestiona descuentos y promociones',
-      icon: Tag,
-      href: '/offers',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       borderColor: 'border-orange-200',
-      available: false,
-      badge: 'Próximamente',
+    },
+    {
+      title: 'Blog y Artículos',
+      description: 'Gestiona contenido editorial y noticias',
+      icon: BookOpen,
+      href: '/organizer/posts',
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-50',
+      borderColor: 'border-pink-200',
+    },
+  ];
+
+  // Secciones solo para admin
+  const adminSections = isAdmin ? [
+    {
+      title: 'Contenido Pendiente',
+      description: 'Revisa y aprueba contenido de organizadores',
+      icon: AlertCircle,
+      href: '/organizer/pending',
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200',
+      count: pendingCount,
+      highlight: pendingCount > 0,
+    },
+    {
+      title: 'Administración Web',
+      description: 'Configura Home, Footer y Landings',
+      icon: Globe,
+      href: '/dashboard/home-config',
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-50',
+      borderColor: 'border-cyan-200',
+      subsections: [
+        { name: 'Config Home', href: '/dashboard/home-config' },
+        { name: 'Footer', href: '/organizer/footer' },
+        { name: 'Landings', href: '/organizer/landings' },
+      ],
+    },
+    {
+      title: 'Series Especiales',
+      description: 'Gestiona circuitos y series de competiciones',
+      icon: Layers,
+      href: '/organizer/special-series',
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+      borderColor: 'border-indigo-200',
+    },
+    {
+      title: 'Promociones',
+      description: 'Gestiona ofertas, cupones y promociones',
+      icon: Ticket,
+      href: '/organizer/promotions',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-200',
     },
     {
       title: 'Usuarios',
       description: 'Administra usuarios y permisos',
       icon: Users,
-      href: '/users',
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-200',
-      available: false,
-      badge: 'Próximamente',
+      href: '/organizer/users',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
     },
     {
       title: 'Estadísticas',
       description: 'Ver métricas y analíticas del sistema',
       icon: BarChart3,
-      href: '/stats',
-      color: 'text-pink-600',
-      bgColor: 'bg-pink-50',
-      borderColor: 'border-pink-200',
-      available: false,
-      badge: 'Próximamente',
+      href: '/organizer/stats',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200',
     },
-  ];
+  ] : [];
 
-  // Accesos rápidos comunes
+  // Accesos rápidos
   const quickLinks = [
     {
       title: 'Eventos',
@@ -138,8 +189,8 @@ export default function DashboardPage() {
       title: 'Ediciones',
       icon: Calendar,
       href: '/organizer/editions',
-      color: 'bg-purple-500',
-      hoverColor: 'hover:bg-purple-600',
+      color: 'bg-gray-800',
+      hoverColor: 'hover:bg-black',
     },
     {
       title: 'Servicios',
@@ -156,23 +207,23 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Panel de Administración
+            Panel de {isAdmin ? 'Administración' : 'Organizador'}
           </h1>
           <p className="text-gray-600">
-            Bienvenido, {user.firstName || user.username}! Gestiona todo el sistema desde aquí
+            Bienvenido, {user.firstName || user.username}! Gestiona tu contenido desde aquí
           </p>
         </div>
 
         {/* User Info Bar */}
         <div className="bg-white rounded-lg shadow p-4 mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Shield className="w-6 h-6 text-blue-600" />
+            <div className={`w-12 h-12 ${isAdmin ? 'bg-red-100' : 'bg-blue-100'} rounded-full flex items-center justify-center`}>
+              <Shield className={`w-6 h-6 ${isAdmin ? 'text-red-600' : 'text-blue-600'}`} />
             </div>
             <div>
               <p className="font-semibold text-gray-900">{user.email}</p>
               <p className="text-sm text-gray-600">
-                Rol: <span className="uppercase font-medium text-blue-600">{user.role}</span>
+                Rol: <span className={`uppercase font-medium ${isAdmin ? 'text-red-600' : 'text-blue-600'}`}>{user.role}</span>
               </p>
             </div>
           </div>
@@ -206,60 +257,84 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Admin Sections */}
+        {/* Main Sections */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Módulos de Administración</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión de Contenido</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {adminSections.map((section) => (
-              <div
+            {mainSections.map((section) => (
+              <Link
                 key={section.title}
-                className={`bg-white rounded-lg shadow border-l-4 ${section.borderColor} overflow-hidden ${
-                  !section.available ? 'opacity-60' : ''
-                }`}
+                href={section.href}
+                className={`bg-white rounded-lg shadow border-l-4 ${section.borderColor} p-6 hover:shadow-lg transition-shadow`}
               >
-                {section.available ? (
-                  <Link href={section.href} className="block p-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-12 h-12 ${section.bgColor} rounded-lg flex items-center justify-center`}>
-                        <section.icon className={`w-6 h-6 ${section.color}`} />
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
-                    <p className="text-sm text-gray-600 mb-4">{section.description}</p>
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-12 h-12 ${section.bgColor} rounded-lg flex items-center justify-center`}>
+                    <section.icon className={`w-6 h-6 ${section.color}`} />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
+                <p className="text-sm text-gray-600 mb-4">{section.description}</p>
 
-                    {section.subsections && (
-                      <div className="flex flex-wrap gap-2">
-                        {section.subsections.map((sub) => (
-                          <span
-                            key={sub.name}
-                            className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded"
-                          >
-                            {sub.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </Link>
-                ) : (
-                  <div className="p-6 cursor-not-allowed">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-12 h-12 ${section.bgColor} rounded-lg flex items-center justify-center`}>
-                        <section.icon className={`w-6 h-6 ${section.color}`} />
-                      </div>
-                      {section.badge && (
-                        <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded font-medium">
-                          {section.badge}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
-                    <p className="text-sm text-gray-600">{section.description}</p>
+                {section.subsections && (
+                  <div className="flex flex-wrap gap-2">
+                    {section.subsections.map((sub) => (
+                      <span
+                        key={sub.name}
+                        className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded"
+                      >
+                        {sub.name}
+                      </span>
+                    ))}
                   </div>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         </div>
+
+        {/* Admin Sections */}
+        {isAdmin && adminSections.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Administración</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {adminSections.map((section: any) => (
+                <Link
+                  key={section.title}
+                  href={section.href}
+                  className={`bg-white rounded-lg shadow border-l-4 ${section.borderColor} p-6 hover:shadow-lg transition-shadow ${
+                    section.highlight ? 'ring-2 ring-red-500 ring-offset-2' : ''
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`w-12 h-12 ${section.bgColor} rounded-lg flex items-center justify-center`}>
+                      <section.icon className={`w-6 h-6 ${section.color}`} />
+                    </div>
+                    {section.count > 0 && (
+                      <span className={`text-2xl font-bold ${section.color}`}>
+                        {section.count}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
+                  <p className="text-sm text-gray-600 mb-4">{section.description}</p>
+
+                  {section.subsections && (
+                    <div className="flex flex-wrap gap-2">
+                      {section.subsections.map((sub: any) => (
+                        <span
+                          key={sub.name}
+                          className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded"
+                        >
+                          {sub.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Help Section */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -269,18 +344,15 @@ export default function DashboardPage() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Estructura del Sistema
+                Flujo de Trabajo
               </h3>
               <p className="text-sm text-blue-700 mb-3">
-                El panel de administración está organizado por módulos funcionales:
+                El flujo típico para añadir contenido es:
               </p>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• <strong>Gestión de Organizadores</strong>: Eventos deportivos y sus competiciones/ediciones</li>
-                <li>• <strong>Servicios</strong>: Alojamientos, restaurantes, tiendas y puntos de información</li>
-                <li>• <strong>Blog</strong>: Contenido editorial, noticias y artículos</li>
-                <li>• <strong>Ofertas</strong>: Sistema de descuentos y promociones</li>
-                <li>• <strong>Usuarios</strong>: Gestión de cuentas y permisos</li>
-                <li>• <strong>Estadísticas</strong>: Métricas y analíticas del sistema</li>
+                <li>• <strong>Evento</strong>: Un evento deportivo (ej. "Ultra Trail del Mont Blanc")</li>
+                <li>• <strong>Competición</strong>: Una modalidad dentro del evento (ej. "UTMB 170K", "CCC 100K")</li>
+                <li>• <strong>Edición</strong>: Una edición anual de la competición (ej. "UTMB 170K 2024")</li>
               </ul>
             </div>
           </div>
