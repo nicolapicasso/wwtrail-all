@@ -18,14 +18,17 @@ import {
 } from 'lucide-react';
 import { userService } from '@/lib/api/user.service';
 
-interface Participant {
+interface ParticipantUser {
   id: string;
   username: string;
-  firstName: string | null;
-  lastName: string | null;
   fullName: string;
   avatar: string | null;
   country: string | null;
+}
+
+interface Participant {
+  id: string;
+  user: ParticipantUser;
   status: string;
   finishTime: string | null;
   position: number | null;
@@ -168,16 +171,16 @@ export function EditionParticipants({
           {displayedParticipants.map((participant) => (
             <Link
               key={participant.id}
-              href={`/${locale}/users/${participant.username}`}
+              href={`/${locale}/users/${participant.user.username}`}
               className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
             >
               <div className="flex items-center gap-3">
                 {/* Avatar */}
                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100">
-                  {participant.avatar ? (
+                  {participant.user.avatar ? (
                     <Image
-                      src={participant.avatar}
-                      alt={participant.fullName}
+                      src={participant.user.avatar}
+                      alt={participant.user.fullName}
                       fill
                       className="object-cover"
                     />
@@ -191,14 +194,14 @@ export function EditionParticipants({
                 {/* Info */}
                 <div>
                   <p className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                    {participant.fullName || participant.username}
+                    {participant.user.fullName || participant.user.username}
                   </p>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <span>@{participant.username}</span>
-                    {participant.country && (
+                    <span>@{participant.user.username}</span>
+                    {participant.user.country && (
                       <>
                         <span>•</span>
-                        <span>{participant.country}</span>
+                        <span>{participant.user.country}</span>
                       </>
                     )}
                   </div>
