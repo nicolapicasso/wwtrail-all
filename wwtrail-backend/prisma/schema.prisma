@@ -1171,6 +1171,9 @@ model Service {
   city     String                                @db.VarChar(100)
   location Unsupported("geometry(Point, 4326)")?
 
+  // Información de contacto
+  website String? @db.Text
+
   // Imágenes
   logoUrl    String?  @db.Text
   coverImage String?  @db.Text
