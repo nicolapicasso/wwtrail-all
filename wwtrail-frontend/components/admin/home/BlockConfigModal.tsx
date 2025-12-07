@@ -12,11 +12,13 @@ import type {
   ContentBlockConfig,
   TextBlockConfig,
   LinksBlockConfig,
+  MapBlockConfig,
   HomeBlockViewType,
   HomeTextSize,
   HomeTextVariant,
   HomeTextAlign,
   LinkItem,
+  MapMode,
 } from '@/types/home';
 
 interface BlockConfigModalProps {
@@ -54,6 +56,14 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   const [linksSubtitleSize, setLinksSubtitleSize] = useState<HomeTextSize>('MD');
   const [linksSubtitleAlign, setLinksSubtitleAlign] = useState<HomeTextAlign>('CENTER');
 
+  // Map block config
+  const [mapHeight, setMapHeight] = useState(400);
+  const [mapZoom, setMapZoom] = useState(6);
+  const [mapMode, setMapMode] = useState<MapMode>('terrain');
+  const [showEvents, setShowEvents] = useState(true);
+  const [showCompetitions, setShowCompetitions] = useState(true);
+  const [showServices, setShowServices] = useState(true);
+
   const [saving, setSaving] = useState(false);
 
   // Load existing config
@@ -81,6 +91,14 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         setLinksSubtitle(linksConfig.subtitle || '');
         setLinksSubtitleSize(linksConfig.subtitleSize || 'MD');
         setLinksSubtitleAlign(linksConfig.subtitleAlign || 'CENTER');
+      } else if (block.type === 'MAP') {
+        const mapConfig = config as MapBlockConfig;
+        setMapHeight(mapConfig.height || 400);
+        setMapZoom(mapConfig.zoom || 6);
+        setMapMode(mapConfig.mapMode || 'terrain');
+        setShowEvents(mapConfig.showEvents ?? true);
+        setShowCompetitions(mapConfig.showCompetitions ?? true);
+        setShowServices(mapConfig.showServices ?? true);
       }
     }
   }, [block]);
@@ -110,6 +128,15 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         subtitleSize: linksSubtitleSize,
         subtitleAlign: linksSubtitleAlign,
       } as LinksBlockConfig;
+    } else if (blockType === 'MAP') {
+      return {
+        height: mapHeight,
+        zoom: mapZoom,
+        mapMode: mapMode,
+        showEvents,
+        showCompetitions,
+        showServices,
+      } as MapBlockConfig;
     }
     return {};
   };
@@ -225,6 +252,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               <option value="POSTS">Artículos (Magazine)</option>
               <option value="TEXT">Texto</option>
               <option value="LINKS">Enlaces</option>
+              <option value="MAP">Mapa</option>
             </select>
           </div>
 
@@ -486,6 +514,97 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                 {items.length === 0 && (
                   <p className="text-sm text-gray-500 text-center py-4">
                     No hay enlaces. Agrega al menos uno.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {blockType === 'MAP' && (
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="font-semibold text-gray-900">Configuración del Mapa</h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Altura (píxeles)
+                  </label>
+                  <input
+                    type="number"
+                    value={mapHeight}
+                    onChange={(e) => setMapHeight(parseInt(e.target.value) || 400)}
+                    min={200}
+                    max={800}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nivel de Zoom (1-15)
+                  </label>
+                  <input
+                    type="number"
+                    value={mapZoom}
+                    onChange={(e) => setMapZoom(parseInt(e.target.value) || 6)}
+                    min={1}
+                    max={15}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de Mapa
+                </label>
+                <select
+                  value={mapMode}
+                  onChange={(e) => setMapMode(e.target.value as MapMode)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="terrain">Terreno (OpenTopoMap)</option>
+                  <option value="satellite">Satélite (ESRI)</option>
+                  <option value="street">Calles (OpenStreetMap)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Elementos a mostrar
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showEvents}
+                      onChange={(e) => setShowEvents(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Eventos</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showCompetitions}
+                      onChange={(e) => setShowCompetitions(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Competiciones</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showServices}
+                      onChange={(e) => setShowServices(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Servicios</span>
+                  </label>
+                </div>
+                {!showEvents && !showCompetitions && !showServices && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Selecciona al menos un tipo de elemento
                   </p>
                 )}
               </div>

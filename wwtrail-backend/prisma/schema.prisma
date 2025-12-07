@@ -1101,6 +1101,7 @@ enum HomeBlockType {
   POSTS
   TEXT
   LINKS
+  MAP
 }
 
 enum HomeBlockViewType {

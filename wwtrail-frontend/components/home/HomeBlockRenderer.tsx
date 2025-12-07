@@ -2,7 +2,8 @@
 
 'use client';
 
-import { HomeBlockType, type HomeBlock, type ContentBlockConfig, type TextBlockConfig, type LinksBlockConfig } from '@/types/home';
+import dynamic from 'next/dynamic';
+import { HomeBlockType, type HomeBlock, type ContentBlockConfig, type TextBlockConfig, type LinksBlockConfig, type MapBlockConfig } from '@/types/home';
 import { EventsBlock } from './EventsBlock';
 import { CompetitionsBlock } from './CompetitionsBlock';
 import { EditionsBlock } from './EditionsBlock';
@@ -10,6 +11,19 @@ import { ServicesBlock } from './ServicesBlock';
 import { PostsBlock } from './PostsBlock';
 import { TextBlock } from './TextBlock';
 import { LinksBlock } from './LinksBlock';
+
+// Dynamic import for MapBlock (no SSR due to Leaflet)
+const MapBlock = dynamic(() => import('./MapBlock').then(mod => ({ default: mod.MapBlock })), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-64 bg-gray-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p className="text-gray-500 text-sm">Cargando mapa...</p>
+      </div>
+    </div>
+  ),
+});
 
 interface HomeBlockRendererProps {
   block: HomeBlock;
@@ -47,6 +61,9 @@ export function HomeBlockRenderer({ block }: HomeBlockRendererProps) {
 
     case HomeBlockType.LINKS:
       return <LinksBlock config={block.config as LinksBlockConfig} />;
+
+    case HomeBlockType.MAP:
+      return <MapBlock config={block.config as MapBlockConfig} />;
 
     default:
       console.warn(`Unknown block type: ${block.type}`);

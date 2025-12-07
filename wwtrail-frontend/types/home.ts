@@ -8,7 +8,10 @@ export enum HomeBlockType {
   POSTS = 'POSTS',
   TEXT = 'TEXT',
   LINKS = 'LINKS',
+  MAP = 'MAP',
 }
+
+export type MapMode = 'street' | 'satellite' | 'terrain';
 
 export enum HomeBlockViewType {
   LIST = 'LIST',
@@ -66,7 +69,16 @@ export interface LinksBlockConfig {
   subtitleAlign?: HomeTextAlign;
 }
 
-export type BlockConfig = ContentBlockConfig | TextBlockConfig | LinksBlockConfig;
+export interface MapBlockConfig {
+  height: number; // Height in pixels
+  zoom: number; // Initial zoom level (1-17)
+  mapMode: MapMode; // terrain, satellite, street
+  showEvents: boolean;
+  showCompetitions: boolean;
+  showServices: boolean;
+}
+
+export type BlockConfig = ContentBlockConfig | TextBlockConfig | LinksBlockConfig | MapBlockConfig;
 
 // Modelo de bloque
 export interface HomeBlock {
