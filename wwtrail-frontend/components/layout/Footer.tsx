@@ -60,7 +60,7 @@ export default function Footer() {
   }
 
   return (
-    <div className="footer-wrapper sticky bottom-0 z-0 h-[360px]">
+    <div className="footer-wrapper relative h-[360px]">
       <footer className="absolute inset-0 overflow-hidden">
         {/* Landscape Background Layer */}
         <LandscapeBackground />
