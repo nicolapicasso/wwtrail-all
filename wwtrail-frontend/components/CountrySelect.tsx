@@ -9,6 +9,9 @@ interface CountrySelectProps {
   onChange: (code: string) => void;
   error?: string;
   disabled?: boolean;
+  placeholder?: string; // Texto cuando no hay selección
+  countryCounts?: Record<string, number>; // Conteo de items por país (código: cantidad)
+  showOnlyWithCounts?: boolean; // Si true, solo muestra países con conteo > 0
 }
 
 /**
@@ -18,7 +21,15 @@ interface CountrySelectProps {
  * - Buscador para encontrar rápido
  * - Banderas para mejor UX
  */
-export default function CountrySelect({ value, onChange, error, disabled }: CountrySelectProps) {
+export default function CountrySelect({
+  value,
+  onChange,
+  error,
+  disabled,
+  placeholder = 'Selecciona un país',
+  countryCounts,
+  showOnlyWithCounts = false,
+}: CountrySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCountries, setFilteredCountries] = useState(COUNTRIES);
@@ -28,14 +39,26 @@ export default function CountrySelect({ value, onChange, error, disabled }: Coun
   // Obtener país seleccionado
   const selectedCountry = COUNTRIES.find(c => c.code === value);
 
-  // Filtrar países según búsqueda
+  // Filtrar países según búsqueda y opcionalmente por conteo
   useEffect(() => {
-    if (searchQuery.trim()) {
-      setFilteredCountries(searchCountries(searchQuery));
-    } else {
-      setFilteredCountries(COUNTRIES);
+    let countries = searchQuery.trim() ? searchCountries(searchQuery) : COUNTRIES;
+
+    // Si showOnlyWithCounts está activo, filtrar solo países con conteo > 0
+    if (showOnlyWithCounts && countryCounts) {
+      countries = countries.filter(c => (countryCounts[c.code] || 0) > 0);
     }
-  }, [searchQuery]);
+
+    // Si hay countryCounts, ordenar por cantidad descendente
+    if (countryCounts) {
+      countries = [...countries].sort((a, b) => {
+        const countA = countryCounts[a.code] || 0;
+        const countB = countryCounts[b.code] || 0;
+        return countB - countA;
+      });
+    }
+
+    setFilteredCountries(countries);
+  }, [searchQuery, countryCounts, showOnlyWithCounts]);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -92,10 +115,14 @@ export default function CountrySelect({ value, onChange, error, disabled }: Coun
           <div className="flex items-center gap-2">
             <span className="text-2xl">{selectedCountry.flag}</span>
             <span className="font-medium text-gray-900">{selectedCountry.name}</span>
-            <span className="text-xs text-gray-500 ml-1">({selectedCountry.code})</span>
+            {countryCounts && countryCounts[selectedCountry.code] !== undefined && (
+              <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                {countryCounts[selectedCountry.code]}
+              </span>
+            )}
           </div>
         ) : (
-          <span className="text-gray-500">Selecciona un país</span>
+          <span className="text-gray-500">{placeholder}</span>
         )}
 
         <div className="flex items-center gap-1">
@@ -156,7 +183,14 @@ export default function CountrySelect({ value, onChange, error, disabled }: Coun
                 >
                   <span className="text-2xl">{country.flag}</span>
                   <div className="flex-1">
-                    <div className="font-medium">{country.name}</div>
+                    <div className="font-medium flex items-center gap-2">
+                      {country.name}
+                      {countryCounts && countryCounts[country.code] !== undefined && countryCounts[country.code] > 0 && (
+                        <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+                          {countryCounts[country.code]}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs text-gray-500">{country.code}</div>
                   </div>
                   {country.code === value && (

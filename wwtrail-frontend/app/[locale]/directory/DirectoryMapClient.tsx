@@ -122,6 +122,9 @@ export default function DirectoryMapClient() {
   const [competitions, setCompetitions] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
 
+  // Country counts for the country selector
+  const [countryCounts, setCountryCounts] = useState<Record<string, number>>({});
+
   // Filters
   const [filters, setFilters] = useState<DirectoryFilters>({
     itemType: 'all',
@@ -220,16 +223,24 @@ export default function DirectoryMapClient() {
       markersRef.current = [];
 
       const bounds = L.latLngBounds([]);
+      const newCountryCounts: Record<string, number> = {};
+
+      // Helper to add to country counts
+      const addToCount = (country: string) => {
+        if (country) {
+          newCountryCounts[country] = (newCountryCounts[country] || 0) + 1;
+        }
+      };
 
       // Load events if needed
       // When a special series is selected, only show competitions (not events or services)
       const showEvents = !filters.specialSeriesId && (filters.itemType === 'all' || filters.itemType === 'events');
       if (showEvents) {
         try {
+          // Load ALL events (no country filter) for counting
           const eventsData = await eventsService.getAll({
             status: 'PUBLISHED',
             limit: 1000,
-            country: filters.country || undefined,
             search: filters.search || undefined,
           });
 
@@ -237,10 +248,18 @@ export default function DirectoryMapClient() {
             (e: any) => e.latitude && e.longitude
           );
 
-          setEvents(eventsWithLocation);
+          // Count events per country (before country filter)
+          eventsWithLocation.forEach((event: any) => addToCount(event.country));
 
-          // Ajustar coordenadas de eventos solapados
-          const adjustedEvents = spreadOverlappingMarkers(eventsWithLocation, 0.003);
+          // Filter by country for display
+          const filteredEvents = filters.country
+            ? eventsWithLocation.filter((e: any) => e.country === filters.country)
+            : eventsWithLocation;
+
+          setEvents(filteredEvents);
+
+          // Ajustar coordenadas de eventos solapados (use filtered events for display)
+          const adjustedEvents = spreadOverlappingMarkers(filteredEvents, 0.003);
 
           // Add event markers with green icon
           adjustedEvents.forEach((event: any) => {
@@ -286,76 +305,80 @@ export default function DirectoryMapClient() {
             (c: any) => c.event?.latitude && c.event?.longitude
           );
 
-          // Apply filters
-          let filteredCompetitions = competitionsWithLocation;
-
-          if (filters.country) {
-            filteredCompetitions = filteredCompetitions.filter(
-              (c: any) => c.event?.country === filters.country
-            );
-          }
+          // Apply non-country filters first (for counting)
+          let filteredCompetitionsForCount = competitionsWithLocation;
 
           if (filters.competitionType) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.type === filters.competitionType
             );
           }
 
           if (filters.terrainTypeIds.length > 0) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => filters.terrainTypeIds.includes(c.terrainTypeId)
             );
           }
 
           if (filters.specialSeriesId) {
-            // Many-to-many: Check if competition belongs to the selected special series
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.specialSeries?.some((s: any) => s.id === filters.specialSeriesId)
             );
           }
 
           if (filters.itraPoints) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.itraPoints === parseInt(filters.itraPoints)
             );
           }
 
           if (filters.utmbIndex) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.utmbIndex === filters.utmbIndex
             );
           }
 
           // Distance range filter
           if (filters.minDistance) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.baseDistance >= parseFloat(filters.minDistance)
             );
           }
           if (filters.maxDistance) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.baseDistance <= parseFloat(filters.maxDistance)
             );
           }
 
           // Elevation range filter
           if (filters.minElevation) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.baseElevation >= parseInt(filters.minElevation)
             );
           }
           if (filters.maxElevation) {
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) => c.baseElevation <= parseInt(filters.maxElevation)
             );
           }
 
           if (filters.search) {
             const searchLower = filters.search.toLowerCase();
-            filteredCompetitions = filteredCompetitions.filter(
+            filteredCompetitionsForCount = filteredCompetitionsForCount.filter(
               (c: any) =>
                 c.name.toLowerCase().includes(searchLower) ||
                 c.event?.name.toLowerCase().includes(searchLower)
+            );
+          }
+
+          // Count competitions per country (before country filter)
+          filteredCompetitionsForCount.forEach((comp: any) => addToCount(comp.event?.country));
+
+          // Apply country filter for display
+          let filteredCompetitions = filteredCompetitionsForCount;
+          if (filters.country) {
+            filteredCompetitions = filteredCompetitions.filter(
+              (c: any) => c.event?.country === filters.country
             );
           }
 
@@ -414,10 +437,10 @@ export default function DirectoryMapClient() {
       const showServices = !filters.specialSeriesId && (filters.itemType === 'all' || filters.itemType === 'services');
       if (showServices) {
         try {
+          // Load ALL services (no country filter) for counting
           const servicesData = await servicesService.getAll({
             status: 'PUBLISHED',
             limit: 1000,
-            country: filters.country || undefined,
             search: filters.search || undefined,
           });
 
@@ -425,10 +448,18 @@ export default function DirectoryMapClient() {
             (s: any) => s.latitude && s.longitude
           );
 
-          setServices(servicesWithLocation);
+          // Count services per country (before country filter)
+          servicesWithLocation.forEach((service: any) => addToCount(service.country));
 
-          // Ajustar coordenadas de servicios solapados
-          const adjustedServices = spreadOverlappingMarkers(servicesWithLocation, 0.003);
+          // Filter by country for display
+          const filteredServices = filters.country
+            ? servicesWithLocation.filter((s: any) => s.country === filters.country)
+            : servicesWithLocation;
+
+          setServices(filteredServices);
+
+          // Ajustar coordenadas de servicios solapados (use filtered services for display)
+          const adjustedServices = spreadOverlappingMarkers(filteredServices, 0.003);
 
           // Add service markers with category-specific icons
           adjustedServices.forEach((service: any) => {
@@ -465,6 +496,9 @@ export default function DirectoryMapClient() {
           console.error('Error loading services:', err);
         }
       }
+
+      // Update country counts for the selector
+      setCountryCounts(newCountryCounts);
 
       // Fit bounds if there are markers
       if (markersRef.current.length > 0) {
@@ -683,6 +717,8 @@ export default function DirectoryMapClient() {
                   value={filters.country}
                   onChange={(value) => handleFilterChange('country', value)}
                   placeholder="Todos los países"
+                  countryCounts={countryCounts}
+                  showOnlyWithCounts={true}
                 />
               </div>
 
