@@ -534,8 +534,17 @@ class ZancadasService {
     totalPointsAwarded: number;
     usersWithPoints: number;
     transactionsByAction: { actionCode: string; actionName: string; count: number; points: number }[];
+    recentTransactions: {
+      id: string;
+      points: number;
+      createdAt: Date;
+      actionName: string;
+      actionCode: string;
+      userName: string;
+      userEmail: string;
+    }[];
   }> {
-    const [totalTransactions, totalPoints, usersWithPoints, actionStats] = await Promise.all([
+    const [totalTransactions, totalPoints, usersWithPoints, actionStats, recentTransactions] = await Promise.all([
       prisma.zancadasTransaction.count(),
       prisma.zancadasTransaction.aggregate({
         _sum: { points: true },
@@ -547,6 +556,14 @@ class ZancadasService {
         by: ['actionId'],
         _count: { id: true },
         _sum: { points: true },
+      }),
+      prisma.zancadasTransaction.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          action: { select: { actionName: true, actionCode: true } },
+          user: { select: { firstName: true, lastName: true, email: true, username: true } },
+        },
       }),
     ]);
 
@@ -572,6 +589,17 @@ class ZancadasService {
       totalPointsAwarded: totalPoints._sum.points || 0,
       usersWithPoints,
       transactionsByAction,
+      recentTransactions: recentTransactions.map((tx) => ({
+        id: tx.id,
+        points: tx.points,
+        createdAt: tx.createdAt,
+        actionName: tx.action.actionName,
+        actionCode: tx.action.actionCode,
+        userName: tx.user.firstName
+          ? `${tx.user.firstName} ${tx.user.lastName || ''}`.trim()
+          : tx.user.username,
+        userEmail: tx.user.email,
+      })),
     };
   }
 

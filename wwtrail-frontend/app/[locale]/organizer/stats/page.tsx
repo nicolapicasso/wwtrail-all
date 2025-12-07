@@ -27,8 +27,9 @@ import {
   Clock,
   Award,
   Layers,
+  Footprints,
 } from 'lucide-react';
-import { adminService, ComprehensiveStats } from '@/lib/api/admin.service';
+import { adminService, ComprehensiveStats, ZancadasStats } from '@/lib/api/admin.service';
 import { COUNTRIES } from '@/lib/utils/countries';
 
 // Role labels
@@ -136,6 +137,7 @@ function ProgressBar({ value, max, label, color = 'blue' }: { value: number; max
 
 export default function StatsPage() {
   const [stats, setStats] = useState<ComprehensiveStats | null>(null);
+  const [zancadasStats, setZancadasStats] = useState<ZancadasStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -143,8 +145,12 @@ export default function StatsPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await adminService.getComprehensiveStats();
+      const [data, zancadasData] = await Promise.all([
+        adminService.getComprehensiveStats(),
+        adminService.getZancadasStats(),
+      ]);
       setStats(data);
+      setZancadasStats(zancadasData);
     } catch (err: any) {
       console.error('Error fetching stats:', err);
       setError(err.response?.data?.message || 'Error al cargar las estadísticas');
@@ -581,6 +587,88 @@ export default function StatsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Zancadas Section */}
+      {zancadasStats && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Zancadas Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Footprints className="w-5 h-5 text-green-600" />
+                Zancadas - Resumen
+              </CardTitle>
+              <CardDescription>Estadísticas del programa de puntos</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <p className="text-3xl font-bold text-green-700">{zancadasStats.totalPointsAwarded.toLocaleString()}</p>
+                  <p className="text-xs text-gray-500">Puntos totales</p>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <p className="text-3xl font-bold text-blue-700">{zancadasStats.totalTransactions}</p>
+                  <p className="text-xs text-gray-500">Transacciones</p>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <p className="text-3xl font-bold text-purple-700">{zancadasStats.usersWithPoints}</p>
+                  <p className="text-xs text-gray-500">Usuarios con puntos</p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <p className="text-sm font-medium text-gray-700 mb-3">Puntos por acción</p>
+                <div className="space-y-3">
+                  {zancadasStats.transactionsByAction.map((action) => (
+                    <div key={action.actionCode} className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-700">{action.actionName}</span>
+                        <span className="text-xs text-gray-400 ml-2">({action.count} veces)</span>
+                      </div>
+                      <span className="font-bold text-green-600">{action.points.toLocaleString()} pts</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Zancadas Transactions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-blue-600" />
+                Últimas Zancadas
+              </CardTitle>
+              <CardDescription>10 transacciones más recientes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {zancadasStats.recentTransactions.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">No hay transacciones aún</p>
+                ) : (
+                  zancadasStats.recentTransactions.map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{tx.userName}</p>
+                        <p className="text-xs text-gray-500">
+                          {tx.actionName} • {new Date(tx.createdAt).toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <span className="ml-2 text-sm font-bold text-green-600">+{tx.points}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
