@@ -187,7 +187,7 @@ export default function EventMap({
       // Inicializar mapa
       const map = L.map(mapContainerRef.current).setView(
         [lat, lon],
-        12 // zoom level
+        11 // zoom level (reduced for terrain mode compatibility)
       );
 
       mapRef.current = map;
