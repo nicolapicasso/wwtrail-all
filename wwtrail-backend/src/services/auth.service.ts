@@ -8,6 +8,7 @@ import { AppError } from '../middlewares/error.middleware';
 import { RegisterInput, LoginInput } from '../schemas/auth.schema';
 import { UserRole } from '@prisma/client';
 import logger from '../utils/logger';
+import { zancadasService } from './zancadas.service';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
@@ -75,6 +76,16 @@ export class AuthService {
     // Generar tokens
     const { accessToken, refreshToken } = await this.generateTokens(user);
 
+    // Integración Zancadas: crear cliente en Omniwallet y otorgar puntos de registro
+    // Se ejecuta de forma asíncrona para no bloquear el registro
+    zancadasService.onUserRegistered(user.id, {
+      email: user.email,
+      name: user.firstName || user.username,
+      lastName: user.lastName || undefined,
+    }).catch((error) => {
+      logger.error(`Error in Zancadas onUserRegistered: ${error}`);
+    });
+
     return {
       user,
       accessToken,
@@ -117,6 +128,12 @@ export class AuthService {
     const { password, ...userWithoutPassword } = user;
 
     logger.info(`User logged in: ${user.email}`);
+
+    // Integración Zancadas: otorgar puntos de login (máximo 1 por día)
+    // Se ejecuta de forma asíncrona para no bloquear el login
+    zancadasService.onUserLoggedIn(user.id).catch((error) => {
+      logger.error(`Error in Zancadas onUserLoggedIn: ${error}`);
+    });
 
     return {
       user: userWithoutPassword,

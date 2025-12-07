@@ -157,24 +157,31 @@ model User {
   twitterUrl   String?  @db.Text
   youtubeUrl   String?  @db.Text
 
+  // Omniwallet / Zancadas
+  omniwalletCustomerId  String?   // Email/ID en Omniwallet
+  zancadasBalance       Int       @default(0)
+  omniwalletSyncedAt    DateTime?
+  omniwalletCardNumber  String?   @db.VarChar(100)
+
   // Relaciones
-  refreshTokens         RefreshToken[]
-  createdEvents         Event[]           @relation("EventCreator")
-  createdOrganizers     Organizer[]       @relation("OrganizerCreator")
-  createdSpecialSeries  SpecialSeries[]   @relation("SpecialSeriesCreator")
-  organizedCompetitions Competition[]     @relation("CompetitionOrganizer")
-  organizedServices     Service[]         @relation("ServiceOrganizer")
-  reviews               Review[]
-  favorites             Favorite[]
-  uploadedFiles         File[]            @relation("FileUploader")
-  notifications         Notification[]
-  participants          Participant[]
-  userEditions          UserEdition[]
-  userCompetitions      UserCompetition[]
-  blogPosts             Post[]
-  promotions            Promotion[]       @relation("PromotionCreator")
-  landings              Landing[]         @relation("LandingCreator")
-  ratings               EditionRating[]   @relation("UserRatings")
+  refreshTokens          RefreshToken[]
+  createdEvents          Event[]           @relation("EventCreator")
+  createdOrganizers      Organizer[]       @relation("OrganizerCreator")
+  createdSpecialSeries   SpecialSeries[]   @relation("SpecialSeriesCreator")
+  organizedCompetitions  Competition[]     @relation("CompetitionOrganizer")
+  organizedServices      Service[]         @relation("ServiceOrganizer")
+  reviews                Review[]
+  favorites              Favorite[]
+  uploadedFiles          File[]            @relation("FileUploader")
+  notifications          Notification[]
+  participants           Participant[]
+  userEditions           UserEdition[]
+  userCompetitions       UserCompetition[]
+  blogPosts              Post[]
+  promotions             Promotion[]       @relation("PromotionCreator")
+  landings               Landing[]         @relation("LandingCreator")
+  ratings                EditionRating[]   @relation("UserRatings")
+  zancadasTransactions   ZancadasTransaction[] @relation("UserZancadasTransactions")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1531,4 +1538,94 @@ model LandingTranslation {
   @@index([landingId])
   @@index([language])
   @@map("landing_translations")
+}
+
+// ===================================
+// ZANCADAS - OMNIWALLET INTEGRATION
+// Sistema de puntos de fidelización
+// ===================================
+
+// Configuración global de conexión con Omniwallet
+model ZancadasConfig {
+  id String @id @default(uuid())
+
+  // Conexión Omniwallet
+  omniwalletSubdomain     String? @db.VarChar(100)
+  omniwalletApiToken      String? @db.Text // Encriptado
+  omniwalletWebhookSecret String? @db.Text // Encriptado
+  isEnabled               Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("zancadas_config")
+}
+
+// Acciones configurables que otorgan Zancadas
+model ZancadasAction {
+  id          String  @id @default(uuid())
+  actionCode  String  @unique @db.VarChar(50) // 'REGISTER', 'LOGIN', 'RATING', 'PARTICIPATION'
+  actionName  String  @db.VarChar(100) // Nombre para mostrar
+  description String? @db.Text
+  points      Int     @default(0)
+  isEnabled   Boolean @default(true)
+  maxPerDay   Int? // Límite diario (null = sin límite)
+  maxPerUser  Int? // Límite total por usuario (null = sin límite)
+
+  // Para acciones de participación: estados que activan puntos
+  // JSON array de ParticipationStatus: ["COMPLETED", "REGISTERED", etc.]
+  triggerStatuses Json? @default("[]")
+
+  // Relaciones
+  transactions ZancadasTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([actionCode])
+  @@index([isEnabled])
+  @@map("zancadas_actions")
+}
+
+// Registro de transacciones de Zancadas
+model ZancadasTransaction {
+  id       String @id @default(uuid())
+  userId   String
+  actionId String
+  points   Int
+
+  // Referencia al objeto relacionado (edición, rating, etc.)
+  referenceType String? @db.VarChar(50) // 'EDITION', 'RATING', 'LOGIN', etc.
+  referenceId   String?
+
+  // Sincronización con Omniwallet
+  omniwalletSynced     Boolean @default(false)
+  omniwalletExternalId String? @unique @db.VarChar(255)
+  omniwalletError      String? @db.Text
+
+  // Relaciones
+  user   User          @relation("UserZancadasTransactions", fields: [userId], references: [id], onDelete: Cascade)
+  action ZancadasAction @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([actionId])
+  @@index([referenceType, referenceId])
+  @@index([createdAt])
+  @@index([omniwalletSynced])
+  @@map("zancadas_transactions")
+}
+
+// Registro de webhooks recibidos (para idempotencia)
+model ZancadasWebhook {
+  id      String @id @default(uuid())
+  hookId  String @unique @db.VarChar(255) // X-Omniwallet-Hook-Id
+  event   String @db.VarChar(100)
+  payload Json
+
+  processedAt DateTime @default(now())
+
+  @@index([hookId])
+  @@map("zancadas_webhooks")
 }

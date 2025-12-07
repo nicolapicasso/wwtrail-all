@@ -3,6 +3,8 @@
 import { Prisma, PodiumType, ParticipationStatus } from '@prisma/client';
 import prisma from '../config/database';
 import { UserEditionInput, SearchEditionsQuery } from '../schemas/userEdition.schema';
+import { zancadasService } from './zancadas.service';
+import logger from '../utils/logger';
 
 // ============================================
 // INTERFACES
@@ -67,6 +69,15 @@ class UserEditionService {
     if (!edition) {
       throw new Error('Edition not found');
     }
+
+    // Obtener estado anterior para comparar (si existe)
+    const existingParticipation = await prisma.userEdition.findUnique({
+      where: {
+        userId_editionId: { userId, editionId },
+      },
+      select: { status: true },
+    });
+    const previousStatus = existingParticipation?.status;
 
     // Preparar datos
     const updateData: Prisma.UserEditionUpdateInput = {
@@ -142,6 +153,15 @@ class UserEditionService {
         },
       },
     });
+
+    // Integración Zancadas: otorgar puntos si el estado cambió a uno que los otorga
+    // Solo si es un cambio de estado (no si el estado anterior era el mismo)
+    const newStatus = data.status as ParticipationStatus;
+    if (newStatus !== previousStatus) {
+      zancadasService.onParticipationMarked(userId, editionId, newStatus).catch((error) => {
+        logger.error(`Error in Zancadas onParticipationMarked: ${error}`);
+      });
+    }
 
     return participation;
   }
