@@ -3,13 +3,15 @@
 // ✅ Pin principal del evento
 // ✅ Pines secundarios de eventos cercanos
 // ✅ Popup con información
+// ✅ Selector de modo de mapa (terreno, satélite, calles)
 
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Event } from '@/types/api';
+import { Layers, Map as MapIcon, Satellite, MountainSnow } from 'lucide-react';
 
 // Fix para iconos de Leaflet en Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -18,6 +20,30 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
+
+// Map tile providers
+type MapMode = 'street' | 'satellite' | 'terrain';
+
+const MAP_TILES = {
+  street: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '© OpenStreetMap contributors',
+    name: 'Calles',
+    maxZoom: 19,
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '© Esri',
+    name: 'Satélite',
+    maxZoom: 19,
+  },
+  terrain: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '© OpenTopoMap contributors',
+    name: 'Terreno',
+    maxZoom: 17,
+  },
+};
 
 /**
  * Ajusta coordenadas de marcadores que se solapan, distribuyéndolos en círculo
@@ -107,6 +133,31 @@ export default function EventMap({
 }: EventMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+
+  const [mapMode, setMapMode] = useState<MapMode>('terrain');
+  const [showMapModeMenu, setShowMapModeMenu] = useState(false);
+
+  // Change map mode
+  const changeMapMode = useCallback((mode: MapMode) => {
+    if (!mapRef.current) return;
+
+    // Remove current tile layer
+    if (tileLayerRef.current) {
+      tileLayerRef.current.remove();
+    }
+
+    // Add new tile layer
+    const tileConfig = MAP_TILES[mode];
+    const newTileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      maxZoom: tileConfig.maxZoom,
+    }).addTo(mapRef.current);
+    tileLayerRef.current = newTileLayer;
+
+    setMapMode(mode);
+    setShowMapModeMenu(false);
+  }, []);
 
   useEffect(() => {
     if (!mapContainerRef.current || !event.latitude || !event.longitude) return;
@@ -141,11 +192,13 @@ export default function EventMap({
 
       mapRef.current = map;
 
-    // Agregar capa de tiles (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
+    // Agregar capa de tiles (Terrain por defecto para trail running)
+    const tileConfig = MAP_TILES.terrain;
+    const tileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      maxZoom: tileConfig.maxZoom,
     }).addTo(map);
+    tileLayerRef.current = tileLayer;
 
       // ============================================
       // ✅ ICONO PERSONALIZADO PARA EVENTO PRINCIPAL
@@ -406,11 +459,59 @@ export default function EventMap({
   }
 
   return (
-    <div 
-      ref={mapContainerRef} 
-      className="h-64 rounded-lg overflow-hidden border border-gray-200"
-      style={{ zIndex: 0 }}
-    />
+    <div className="relative h-64 rounded-lg overflow-hidden border border-gray-200">
+      {/* Map Mode Selector */}
+      <div className="absolute top-2 right-2 z-[1001]">
+        <button
+          onClick={() => setShowMapModeMenu(!showMapModeMenu)}
+          className="bg-white px-2 py-1.5 rounded shadow-md border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs"
+          title="Cambiar tipo de mapa"
+        >
+          <Layers className="w-3.5 h-3.5 text-gray-600" />
+          <span className="font-medium text-gray-700">{MAP_TILES[mapMode].name}</span>
+        </button>
+
+        {/* Map Mode Dropdown */}
+        {showMapModeMenu && (
+          <div className="absolute top-full right-0 mt-1 bg-white rounded shadow-lg border border-gray-200 overflow-hidden min-w-[100px]">
+            <button
+              onClick={() => changeMapMode('terrain')}
+              className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-1.5 hover:bg-gray-50 ${
+                mapMode === 'terrain' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+              }`}
+            >
+              <MountainSnow className="w-3.5 h-3.5" />
+              Terreno
+            </button>
+            <button
+              onClick={() => changeMapMode('satellite')}
+              className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-1.5 hover:bg-gray-50 ${
+                mapMode === 'satellite' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+              }`}
+            >
+              <Satellite className="w-3.5 h-3.5" />
+              Satélite
+            </button>
+            <button
+              onClick={() => changeMapMode('street')}
+              className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-1.5 hover:bg-gray-50 ${
+                mapMode === 'street' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+              }`}
+            >
+              <MapIcon className="w-3.5 h-3.5" />
+              Calles
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Map Container */}
+      <div
+        ref={mapContainerRef}
+        className="w-full h-full"
+        style={{ zIndex: 0 }}
+      />
+    </div>
   );
 }
 
