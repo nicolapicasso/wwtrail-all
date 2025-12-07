@@ -53,11 +53,8 @@ export default function Footer() {
     return null;
   }
 
-  // Don't render if all columns are empty
+  // Check if there's column content to display
   const hasContent = content.leftColumn || content.centerColumn || content.rightColumn;
-  if (!hasContent) {
-    return null;
-  }
 
   return (
     <div className="footer-wrapper relative h-[360px]">
@@ -68,36 +65,38 @@ export default function Footer() {
         {/* Semi-transparent overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-10" />
 
-        {/* Content Layer */}
-        <div className="absolute inset-x-0 bottom-0 z-20">
-          <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {/* Left Column (1/4) */}
-              {content.leftColumn && (
-                <div
-                  className="footer-column"
-                  dangerouslySetInnerHTML={{ __html: content.leftColumn }}
-                />
-              )}
+        {/* Content Layer - only render if there's content */}
+        {hasContent && (
+          <div className="absolute inset-x-0 bottom-0 z-20">
+            <div className="container mx-auto px-4 py-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                {/* Left Column (1/4) */}
+                {content.leftColumn && (
+                  <div
+                    className="footer-column"
+                    dangerouslySetInnerHTML={{ __html: content.leftColumn }}
+                  />
+                )}
 
-              {/* Center Column (2/4) */}
-              {content.centerColumn && (
-                <div
-                  className="footer-column md:col-span-2"
-                  dangerouslySetInnerHTML={{ __html: content.centerColumn }}
-                />
-              )}
+                {/* Center Column (2/4) */}
+                {content.centerColumn && (
+                  <div
+                    className="footer-column md:col-span-2"
+                    dangerouslySetInnerHTML={{ __html: content.centerColumn }}
+                  />
+                )}
 
-              {/* Right Column (1/4) */}
-              {content.rightColumn && (
-                <div
-                  className="footer-column"
-                  dangerouslySetInnerHTML={{ __html: content.rightColumn }}
-                />
-              )}
+                {/* Right Column (1/4) */}
+                {content.rightColumn && (
+                  <div
+                    className="footer-column"
+                    dangerouslySetInnerHTML={{ __html: content.rightColumn }}
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </footer>
 
       <style jsx>{`
