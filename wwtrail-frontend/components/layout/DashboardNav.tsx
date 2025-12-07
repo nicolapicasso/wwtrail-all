@@ -29,10 +29,8 @@ import {
   Star,
   UserCog,
   Upload,
-  Download,
-  PenSquare,
-  Database,
-  Languages,
+  Wallet,
+  Footprints,
 } from 'lucide-react';
 import { adminService, PendingContentCounts } from '@/lib/api/admin.service';
 
@@ -60,15 +58,16 @@ const navItems: NavItem[] = [
     dynamicBadge: true,
   },
   {
+    label: 'Configuración Home',
+    href: '/dashboard/home-config',
+    icon: Home,
+    adminOnly: true,
+  },
+  {
     label: 'Administración Web',
     icon: Globe,
     adminOnly: true,
     children: [
-      {
-        label: 'Configuración Home',
-        href: '/dashboard/home-config',
-        icon: Home,
-      },
       {
         label: 'Footer',
         href: '/organizer/footer',
@@ -106,13 +105,12 @@ const navItems: NavItem[] = [
         href: '/organizer/organizers',
         icon: Briefcase,
       },
+      {
+        label: 'Series Especiales',
+        href: '/organizer/special-series',
+        icon: Sparkles,
+      },
     ],
-  },
-  {
-    label: 'Series Especiales',
-    href: '/organizer/special-series',
-    icon: Sparkles,
-    adminOnly: true,
   },
   {
     label: 'Servicios',
@@ -123,13 +121,12 @@ const navItems: NavItem[] = [
         href: '/organizer/services',
         icon: Building2,
       },
+      {
+        label: 'Categorías',
+        href: '/organizer/services/categories',
+        icon: Tag,
+      },
     ],
-  },
-  {
-    label: 'Categorías de Servicios',
-    href: '/organizer/services/categories',
-    icon: Tag,
-    adminOnly: true,
   },
   {
     label: 'Blog y Artículos',
@@ -139,7 +136,6 @@ const navItems: NavItem[] = [
   {
     label: 'Promociones',
     icon: Ticket,
-    adminOnly: true,
     children: [
       {
         label: 'Gestionar promociones',
@@ -204,29 +200,25 @@ const navItems: NavItem[] = [
     adminOnly: true,
   },
   {
-    label: 'Datos',
-    icon: Database,
+    label: 'Importación',
+    href: '/organizer/import',
+    icon: Upload,
+    adminOnly: true,
+  },
+  {
+    label: 'Omniwallet',
+    icon: Wallet,
     adminOnly: true,
     children: [
       {
-        label: 'Importación',
-        href: '/organizer/import',
-        icon: Upload,
+        label: 'Configuración',
+        href: '/organizer/omniwallet',
+        icon: Settings,
       },
       {
-        label: 'Exportación',
-        href: '/organizer/export',
-        icon: Download,
-      },
-      {
-        label: 'Editor Masivo',
-        href: '/organizer/bulk-edit',
-        icon: PenSquare,
-      },
-      {
-        label: 'Traducciones',
-        href: '/organizer/translations',
-        icon: Languages,
+        label: 'Acciones y Puntos',
+        href: '/organizer/omniwallet/actions',
+        icon: Footprints,
       },
     ],
   },
@@ -235,7 +227,7 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO', 'Usuarios', 'Datos']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO', 'Usuarios', 'Omniwallet']);
   const [pendingCounts, setPendingCounts] = useState<PendingContentCounts | null>(null);
 
   // Fetch pending content counts for admins
