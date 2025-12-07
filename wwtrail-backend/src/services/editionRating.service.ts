@@ -4,6 +4,8 @@ import type {
   CreateEditionRatingInput,
   UpdateEditionRatingInput,
 } from '../schemas/editionRating.schema';
+import { zancadasService } from './zancadas.service';
+import logger from '../utils/logger';
 
 export class EditionRatingService {
   /**
@@ -62,6 +64,12 @@ export class EditionRatingService {
 
     // 4. Recalcular avgRating y totalRatings de la edición
     await this.recalculateEditionRating(editionId);
+
+    // 5. Integración Zancadas: otorgar puntos por valoración
+    // Se ejecuta de forma asíncrona para no bloquear la respuesta
+    zancadasService.onRatingCreated(userId, editionId).catch((error) => {
+      logger.error(`Error in Zancadas onRatingCreated: ${error}`);
+    });
 
     return rating;
   }

@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WWTrail - Footer Paisajes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+    
+    /* ========== DEMO CONTROLS ========== */
+    .demo-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      font-size: 0.8rem;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .demo-controls h3 {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      margin: 0.6rem 0 0.4rem;
+    }
+    .demo-controls h3:first-child { margin-top: 0; }
+    .demo-controls label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.25rem;
+      cursor: pointer;
+      color: #334155;
+      font-size: 0.75rem;
+    }
+    .demo-controls input[type="radio"] { accent-color: #059669; }
+    .demo-controls .divider { height: 1px; background: #e2e8f0; margin: 0.6rem 0; }
+    .info-box {
+      padding: 0.5rem;
+      background: #f1f5f9;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      color: #475569;
+      margin-top: 0.5rem;
+    }
+    .info-box .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.4rem; }
+    .info-box .dot.day { background: #fbbf24; }
+    .info-box .dot.night { background: #6366f1; }
+    .scene-name { color: #059669; font-weight: 600; }
+
+    /* ========== PAGE CONTENT ========== */
+    .page-content { position: relative; z-index: 10; background: white; }
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+      color: white;
+    }
+    .hero h1 { font-size: 3.5rem; font-weight: 700; letter-spacing: 4px; margin-bottom: 1rem; }
+    .hero p { font-size: 1.2rem; opacity: 0.8; }
+    .content-section { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+    .content-section h2 { font-size: 1.75rem; color: #1e293b; margin-bottom: 1rem; }
+    .content-section p { color: #64748b; line-height: 1.7; margin-bottom: 1rem; }
+
+    /* ========== FOOTER WRAPPER ========== */
+    .footer-wrapper { position: sticky; bottom: 0; z-index: 1; height: 360px; }
+    .wwtrail-footer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      transition: opacity 0.5s ease;
+    }
+    .wwtrail-footer.hidden { opacity: 0; pointer-events: none; }
+
+    /* ========== FOOTER CONTENT ========== */
+    .footer-content {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      text-align: center;
+      color: white;
+    }
+    .footer-logo { font-size: 1.4rem; font-weight: 600; letter-spacing: 3px; margin-bottom: 0.3rem; }
+    .footer-tagline { font-size: 0.7rem; opacity: 0.7; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px; }
+    .footer-links { display: flex; justify-content: center; gap: 1.75rem; font-size: 0.8rem; margin-bottom: 0.75rem; }
+    .footer-links a { color: rgba(255,255,255,0.8); text-decoration: none; transition: color 0.3s; }
+    .footer-links a:hover { color: white; }
+    .footer-copyright { font-size: 0.65rem; opacity: 0.5; }
+    
+    .footer-content.dark { color: #1e293b; }
+    .footer-content.dark .footer-links a { color: rgba(30,41,59,0.7); }
+    .footer-content.dark .footer-links a:hover { color: #1e293b; }
+
+    /* ========== SHARED ELEMENTS ========== */
+    .stars { position: absolute; top: 0; left: 0; right: 0; height: 180px; }
+    .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s ease-in-out infinite; }
+    @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+    
+    .cloud { position: absolute; background: rgba(255,255,255,0.9); border-radius: 50px; animation: cloudFloat 50s linear infinite; }
+    @keyframes cloudFloat { from { transform: translateX(-150px); } to { transform: translateX(calc(100vw + 150px)); } }
+    
+    .moon {
+      position: absolute;
+      top: 30px;
+      right: 14%;
+      width: 40px;
+      height: 40px;
+      background: #fef3c7;
+      border-radius: 50%;
+      box-shadow: 0 0 25px rgba(254,243,199,0.4);
+    }
+    .moon::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: -7px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+    
+    .sun { position: absolute; border-radius: 50%; }
+
+    /* ================================================================
+       1. MOUNTAINS
+    ================================================================ */
+    
+    /* MOUNTAINS - DAY */
+    .footer-mountains-day {
+      background: linear-gradient(to bottom, #7dd3fc 0%, #bae6fd 40%, #fef3c7 75%, #fde68a 100%);
+    }
+    .footer-mountains-day .sun {
+      top: 35px; right: 14%; width: 50px; height: 50px;
+      background: #fbbf24;
+      box-shadow: 0 0 50px #fbbf24;
+    }
+    .footer-mountains-day .cloud:nth-child(1) { top: 22px; width: 85px; height: 26px; animation-duration: 50s; }
+    .footer-mountains-day .cloud:nth-child(2) { top: 50px; width: 65px; height: 20px; animation-duration: 60s; animation-delay: -20s; }
+    .footer-mountains-day .cloud:nth-child(3) { top: 35px; width: 45px; height: 16px; animation-duration: 55s; animation-delay: -35s; }
+    
+    .m-layer { position: absolute; bottom: 0; left: 0; width: 100%; }
+    .footer-mountains-day .m-back {
+      height: 170px;
+      background: #6b7280;
+      clip-path: polygon(0% 100%, 0% 55%, 8% 42%, 16% 52%, 26% 28%, 36% 48%, 46% 22%, 56% 42%, 66% 18%, 76% 38%, 86% 12%, 100% 32%, 100% 100%);
+    }
+    .footer-mountains-day .m-snow {
+      height: 170px;
+      background: white;
+      clip-path: polygon(26% 28%, 28% 36%, 24% 36%, 46% 22%, 48% 32%, 44% 32%, 66% 18%, 68% 28%, 64% 28%, 86% 12%, 88% 24%, 84% 24%);
+      opacity: 0.9;
+    }
+    .footer-mountains-day .m-mid {
+      height: 135px;
+      background: #4b5563;
+      clip-path: polygon(0% 100%, 0% 58%, 12% 42%, 24% 55%, 36% 32%, 50% 48%, 62% 28%, 76% 44%, 88% 24%, 100% 38%, 100% 100%);
+    }
+    .footer-mountains-day .m-front {
+      height: 105px;
+      background: #374151;
+      clip-path: polygon(0% 100%, 0% 52%, 14% 38%, 30% 50%, 44% 32%, 54% 46%, 70% 28%, 84% 42%, 100% 30%, 100% 100%);
+    }
+    .footer-mountains-day .m-trees {
+      height: 65px;
+      background: #065f46;
+      clip-path: polygon(0% 100%, 0% 50%, 2% 28%, 4% 50%, 6% 22%, 8% 48%, 10% 32%, 12% 52%, 14% 26%, 16% 48%, 18% 18%, 20% 44%, 22% 32%, 24% 52%, 26% 24%, 28% 48%, 30% 28%, 32% 52%, 34% 32%, 36% 48%, 38% 18%, 40% 44%, 42% 28%, 44% 52%, 46% 22%, 48% 48%, 50% 32%, 52% 52%, 54% 26%, 56% 48%, 58% 18%, 60% 44%, 62% 32%, 64% 52%, 66% 24%, 68% 48%, 70% 28%, 72% 52%, 74% 32%, 76% 48%, 78% 18%, 80% 44%, 82% 28%, 84% 52%, 86% 22%, 88% 48%, 90% 32%, 92% 52%, 94% 26%, 96% 48%, 98% 22%, 100% 38%, 100% 100%);
+    }
+    
+    /* MOUNTAINS - NIGHT */
+    .footer-mountains-night {
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 60%, #334155 100%);
+    }
+    .footer-mountains-night .moon::before { background: #0f172a; }
+    .footer-mountains-night .m-back {
+      height: 170px;
+      background: #1e293b;
+      clip-path: polygon(0% 100%, 0% 55%, 8% 42%, 16% 52%, 26% 28%, 36% 48%, 46% 22%, 56% 42%, 66% 18%, 76% 38%, 86% 12%, 100% 32%, 100% 100%);
+    }
+    .footer-mountains-night .m-mid {
+      height: 135px;
+      background: #334155;
+      clip-path: polygon(0% 100%, 0% 58%, 12% 42%, 24% 55%, 36% 32%, 50% 48%, 62% 28%, 76% 44%, 88% 24%, 100% 38%, 100% 100%);
+    }
+    .footer-mountains-night .m-front {
+      height: 105px;
+      background: #475569;
+      clip-path: polygon(0% 100%, 0% 52%, 14% 38%, 30% 50%, 44% 32%, 54% 46%, 70% 28%, 84% 42%, 100% 30%, 100% 100%);
+    }
+
+    /* ================================================================
+       2. DESERT
+    ================================================================ */
+    
+    /* DESERT - DAY */
+    .footer-desert-day {
+      background: linear-gradient(to bottom, #fef3c7 0%, #fde68a 30%, #fbbf24 70%, #f59e0b 100%);
+    }
+    .footer-desert-day .sun {
+      top: 30px; right: 18%; width: 60px; height: 60px;
+      background: #fff7ed;
+      box-shadow: 0 0 80px #fbbf24, 0 0 120px #f59e0b;
+    }
+    
+    .d-layer { position: absolute; bottom: 0; left: 0; width: 100%; }
+    .footer-desert-day .d-dunes-back {
+      height: 160px;
+      background: linear-gradient(to bottom, #d97706 0%, #b45309 100%);
+      clip-path: polygon(0% 100%, 0% 70%, 15% 50%, 35% 65%, 55% 45%, 75% 60%, 95% 40%, 100% 55%, 100% 100%);
+    }
+    .footer-desert-day .d-dunes-mid {
+      height: 130px;
+      background: linear-gradient(to bottom, #f59e0b 0%, #d97706 100%);
+      clip-path: polygon(0% 100%, 0% 55%, 20% 40%, 40% 55%, 60% 35%, 80% 50%, 100% 38%, 100% 100%);
+    }
+    .footer-desert-day .d-dunes-front {
+      height: 100px;
+      background: linear-gradient(to bottom, #fbbf24 0%, #f59e0b 100%);
+      clip-path: polygon(0% 100%, 0% 50%, 25% 38%, 45% 52%, 65% 32%, 85% 48%, 100% 35%, 100% 100%);
+    }
+    .footer-desert-day .d-cactus {
+      position: absolute;
+      bottom: 70px;
+      width: 8px;
+      height: 45px;
+      background: #065f46;
+      border-radius: 4px;
+    }
+    .footer-desert-day .d-cactus::before,
+    .footer-desert-day .d-cactus::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      background: #065f46;
+      border-radius: 3px;
+    }
+    .footer-desert-day .d-cactus::before { left: -10px; top: 10px; height: 25px; }
+    .footer-desert-day .d-cactus::after { right: -10px; top: 15px; height: 20px; }
+    .footer-desert-day .d-cactus:nth-child(4) { left: 12%; }
+    .footer-desert-day .d-cactus:nth-child(5) { left: 78%; transform: scale(0.7); bottom: 60px; }
+    .footer-desert-day .d-cactus:nth-child(6) { left: 35%; transform: scale(0.5); bottom: 55px; }
+    
+    /* DESERT - NIGHT */
+    .footer-desert-night {
+      background: linear-gradient(to bottom, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    }
+    .footer-desert-night .moon { right: 18%; }
+    .footer-desert-night .moon::before { background: #1e1b4b; }
+    .footer-desert-night .d-dunes-back {
+      height: 160px;
+      background: linear-gradient(to bottom, #3730a3 0%, #312e81 100%);
+      clip-path: polygon(0% 100%, 0% 70%, 15% 50%, 35% 65%, 55% 45%, 75% 60%, 95% 40%, 100% 55%, 100% 100%);
+    }
+    .footer-desert-night .d-dunes-mid {
+      height: 130px;
+      background: linear-gradient(to bottom, #4338ca 0%, #3730a3 100%);
+      clip-path: polygon(0% 100%, 0% 55%, 20% 40%, 40% 55%, 60% 35%, 80% 50%, 100% 38%, 100% 100%);
+    }
+    .footer-desert-night .d-dunes-front {
+      height: 100px;
+      background: linear-gradient(to bottom, #4f46e5 0%, #4338ca 100%);
+      clip-path: polygon(0% 100%, 0% 50%, 25% 38%, 45% 52%, 65% 32%, 85% 48%, 100% 35%, 100% 100%);
+    }
+    .footer-desert-night .d-cactus {
+      position: absolute;
+      bottom: 70px;
+      width: 8px;
+      height: 45px;
+      background: #1e1b4b;
+      border-radius: 4px;
+    }
+    .footer-desert-night .d-cactus::before,
+    .footer-desert-night .d-cactus::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      background: #1e1b4b;
+      border-radius: 3px;
+    }
+    .footer-desert-night .d-cactus::before { left: -10px; top: 10px; height: 25px; }
+    .footer-desert-night .d-cactus::after { right: -10px; top: 15px; height: 20px; }
+    .footer-desert-night .d-cactus:nth-child(5) { left: 12%; }
+    .footer-desert-night .d-cactus:nth-child(6) { left: 78%; transform: scale(0.7); bottom: 60px; }
+    .footer-desert-night .d-cactus:nth-child(7) { left: 35%; transform: scale(0.5); bottom: 55px; }
+
+    /* ================================================================
+       3. COAST
+    ================================================================ */
+    
+    /* COAST - DAY */
+    .footer-coast-day {
+      background: linear-gradient(to bottom, #7dd3fc 0%, #38bdf8 40%, #0ea5e9 100%);
+    }
+    .footer-coast-day .sun {
+      top: 30px; right: 20%; width: 50px; height: 50px;
+      background: #fbbf24;
+      box-shadow: 0 0 50px #fbbf24;
+    }
+    .footer-coast-day .cloud:nth-child(1) { top: 20px; width: 80px; height: 24px; animation-duration: 55s; }
+    .footer-coast-day .cloud:nth-child(2) { top: 48px; width: 60px; height: 18px; animation-duration: 65s; animation-delay: -25s; }
+    
+    .c-layer { position: absolute; bottom: 0; left: 0; width: 100%; }
+    .footer-coast-day .c-sea {
+      height: 150px;
+      background: linear-gradient(to bottom, #0284c7 0%, #0369a1 100%);
+    }
+    .footer-coast-day .c-wave1,
+    .footer-coast-day .c-wave2,
+    .footer-coast-day .c-wave3 {
+      position: absolute;
+      width: 200%;
+      height: 20px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 100%;
+    }
+    .footer-coast-day .c-wave1 { bottom: 110px; animation: waveMove 8s ease-in-out infinite; }
+    .footer-coast-day .c-wave2 { bottom: 95px; animation: waveMove 6s ease-in-out infinite reverse; opacity: 0.7; }
+    .footer-coast-day .c-wave3 { bottom: 80px; animation: waveMove 10s ease-in-out infinite; opacity: 0.5; }
+    @keyframes waveMove { 0%, 100% { transform: translateX(-25%); } 50% { transform: translateX(0%); } }
+    
+    .footer-coast-day .c-beach {
+      height: 85px;
+      background: linear-gradient(to bottom, #fef3c7 0%, #fde68a 50%, #fcd34d 100%);
+      clip-path: polygon(0% 100%, 0% 30%, 10% 45%, 25% 25%, 40% 40%, 55% 20%, 70% 35%, 85% 15%, 100% 30%, 100% 100%);
+    }
+    .footer-coast-day .c-palm {
+      position: absolute;
+      bottom: 65px;
+    }
+    .footer-coast-day .c-palm-trunk {
+      width: 6px;
+      height: 50px;
+      background: linear-gradient(to right, #78350f, #92400e, #78350f);
+      border-radius: 3px;
+      transform: rotate(-5deg);
+    }
+    .footer-coast-day .c-palm-leaves {
+      position: absolute;
+      top: -15px;
+      left: -20px;
+      width: 50px;
+      height: 30px;
+    }
+    .footer-coast-day .c-palm-leaf {
+      position: absolute;
+      width: 25px;
+      height: 8px;
+      background: #15803d;
+      border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+      transform-origin: right center;
+    }
+    .footer-coast-day .c-palm-leaf:nth-child(1) { transform: rotate(-60deg); left: 10px; }
+    .footer-coast-day .c-palm-leaf:nth-child(2) { transform: rotate(-30deg); left: 15px; top: 5px; }
+    .footer-coast-day .c-palm-leaf:nth-child(3) { transform: rotate(0deg); left: 18px; top: 10px; }
+    .footer-coast-day .c-palm-leaf:nth-child(4) { transform: rotate(30deg); left: 15px; top: 15px; }
+    .footer-coast-day .c-palm-leaf:nth-child(5) { transform: rotate(60deg); left: 10px; top: 20px; }
+    .footer-coast-day .c-palm:nth-child(6) { left: 8%; }
+    .footer-coast-day .c-palm:nth-child(7) { left: 85%; transform: scale(0.8) scaleX(-1); }
+    
+    /* COAST - NIGHT */
+    .footer-coast-night {
+      background: linear-gradient(to bottom, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);
+    }
+    .footer-coast-night .moon { right: 20%; }
+    .footer-coast-night .moon::before { background: #0f172a; }
+    
+    .footer-coast-night .c-sea {
+      height: 150px;
+      background: linear-gradient(to bottom, #1e3a8a 0%, #1e40af 100%);
+    }
+    .footer-coast-night .c-wave1,
+    .footer-coast-night .c-wave2,
+    .footer-coast-night .c-wave3 {
+      position: absolute;
+      width: 200%;
+      height: 20px;
+      background: rgba(147,197,253,0.1);
+      border-radius: 100%;
+    }
+    .footer-coast-night .c-wave1 { bottom: 110px; animation: waveMove 8s ease-in-out infinite; }
+    .footer-coast-night .c-wave2 { bottom: 95px; animation: waveMove 6s ease-in-out infinite reverse; opacity: 0.6; }
+    .footer-coast-night .c-wave3 { bottom: 80px; animation: waveMove 10s ease-in-out infinite; opacity: 0.4; }
+    
+    .footer-coast-night .c-moon-reflection {
+      position: absolute;
+      bottom: 90px;
+      right: 18%;
+      width: 60px;
+      height: 80px;
+      background: linear-gradient(to bottom, rgba(254,243,199,0.3), transparent);
+      filter: blur(8px);
+      transform: scaleY(1.5);
+    }
+    
+    .footer-coast-night .c-beach {
+      height: 85px;
+      background: linear-gradient(to bottom, #475569 0%, #334155 100%);
+      clip-path: polygon(0% 100%, 0% 30%, 10% 45%, 25% 25%, 40% 40%, 55% 20%, 70% 35%, 85% 15%, 100% 30%, 100% 100%);
+    }
+    .footer-coast-night .c-palm {
+      position: absolute;
+      bottom: 65px;
+    }
+    .footer-coast-night .c-palm-trunk {
+      width: 6px;
+      height: 50px;
+      background: #1e293b;
+      border-radius: 3px;
+      transform: rotate(-5deg);
+    }
+    .footer-coast-night .c-palm-leaves {
+      position: absolute;
+      top: -15px;
+      left: -20px;
+      width: 50px;
+      height: 30px;
+    }
+    .footer-coast-night .c-palm-leaf {
+      position: absolute;
+      width: 25px;
+      height: 8px;
+      background: #0f172a;
+      border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+      transform-origin: right center;
+    }
+    .footer-coast-night .c-palm-leaf:nth-child(1) { transform: rotate(-60deg); left: 10px; }
+    .footer-coast-night .c-palm-leaf:nth-child(2) { transform: rotate(-30deg); left: 15px; top: 5px; }
+    .footer-coast-night .c-palm-leaf:nth-child(3) { transform: rotate(0deg); left: 18px; top: 10px; }
+    .footer-coast-night .c-palm-leaf:nth-child(4) { transform: rotate(30deg); left: 15px; top: 15px; }
+    .footer-coast-night .c-palm-leaf:nth-child(5) { transform: rotate(60deg); left: 10px; top: 20px; }
+    .footer-coast-night .c-palm:nth-child(6) { left: 8%; }
+    .footer-coast-night .c-palm:nth-child(7) { left: 85%; transform: scale(0.8) scaleX(-1); }
+
+    /* ================================================================
+       4. PLAINS / PRADERA
+    ================================================================ */
+    
+    /* PLAINS - DAY (Atardecer) */
+    .footer-plains-day {
+      background: linear-gradient(to bottom, #fef3c7 0%, #fdba74 30%, #fb923c 60%, #ea580c 100%);
+    }
+    .footer-plains-day .sun {
+      bottom: 120px; left: 50%; transform: translateX(-50%);
+      width: 70px; height: 70px;
+      background: #fbbf24;
+      box-shadow: 0 0 80px #fbbf24, 0 0 120px #f59e0b;
+    }
+    
+    .p-layer { position: absolute; bottom: 0; left: 0; width: 100%; }
+    .footer-plains-day .p-hills-back {
+      height: 140px;
+      background: #92400e;
+      clip-path: polygon(0% 100%, 0% 70%, 20% 55%, 40% 65%, 60% 50%, 80% 60%, 100% 45%, 100% 100%);
+    }
+    .footer-plains-day .p-hills-front {
+      height: 110px;
+      background: #78350f;
+      clip-path: polygon(0% 100%, 0% 60%, 15% 50%, 35% 58%, 55% 45%, 75% 55%, 100% 40%, 100% 100%);
+    }
+    .footer-plains-day .p-grass {
+      height: 80px;
+      background: linear-gradient(to bottom, #4d7c0f 0%, #365314 100%);
+    }
+    .footer-plains-day .p-grass-blades {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 8px,
+        #3f6212 8px,
+        #3f6212 10px
+      );
+      clip-path: polygon(0% 100%, 0% 60%, 1% 40%, 2% 60%, 3% 35%, 4% 58%, 5% 42%, 6% 62%, 7% 38%, 8% 55%, 9% 45%, 10% 60%, 11% 40%, 12% 58%, 13% 35%, 14% 62%, 15% 42%, 16% 55%, 17% 38%, 18% 60%, 19% 45%, 20% 58%, 21% 40%, 22% 62%, 23% 35%, 24% 55%, 25% 42%, 26% 60%, 27% 38%, 28% 58%, 29% 45%, 30% 62%, 31% 40%, 32% 55%, 33% 35%, 34% 60%, 35% 42%, 36% 58%, 37% 38%, 38% 62%, 39% 45%, 40% 55%, 41% 40%, 42% 60%, 43% 35%, 44% 58%, 45% 42%, 46% 62%, 47% 38%, 48% 55%, 49% 45%, 50% 60%, 51% 40%, 52% 58%, 53% 35%, 54% 62%, 55% 42%, 56% 55%, 57% 38%, 58% 60%, 59% 45%, 60% 58%, 61% 40%, 62% 62%, 63% 35%, 64% 55%, 65% 42%, 66% 60%, 67% 38%, 68% 58%, 69% 45%, 70% 62%, 71% 40%, 72% 55%, 73% 35%, 74% 60%, 75% 42%, 76% 58%, 77% 38%, 78% 62%, 79% 45%, 80% 55%, 81% 40%, 82% 60%, 83% 35%, 84% 58%, 85% 42%, 86% 62%, 87% 38%, 88% 55%, 89% 45%, 90% 60%, 91% 40%, 92% 58%, 93% 35%, 94% 62%, 95% 42%, 96% 55%, 97% 38%, 98% 60%, 99% 45%, 100% 55%, 100% 100%);
+      opacity: 0.5;
+    }
+    .footer-plains-day .p-windmill {
+      position: absolute;
+      bottom: 75px;
+      left: 25%;
+    }
+    .footer-plains-day .p-windmill-tower {
+      width: 8px;
+      height: 55px;
+      background: linear-gradient(to right, #1c1917, #292524, #1c1917);
+      clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+    }
+    .footer-plains-day .p-windmill-blades {
+      position: absolute;
+      top: -5px;
+      left: -17px;
+      width: 42px;
+      height: 42px;
+      animation: windmillSpin 8s linear infinite;
+    }
+    @keyframes windmillSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .footer-plains-day .p-blade {
+      position: absolute;
+      width: 4px;
+      height: 20px;
+      background: #1c1917;
+      left: 50%;
+      top: 0;
+      transform-origin: bottom center;
+      border-radius: 2px;
+    }
+    .footer-plains-day .p-blade:nth-child(1) { transform: translateX(-50%) rotate(0deg); }
+    .footer-plains-day .p-blade:nth-child(2) { transform: translateX(-50%) rotate(90deg); top: 50%; left: 100%; transform-origin: left center; }
+    .footer-plains-day .p-blade:nth-child(3) { transform: translateX(-50%) rotate(180deg); top: 100%; transform-origin: top center; }
+    .footer-plains-day .p-blade:nth-child(4) { transform: translateX(-50%) rotate(270deg); top: 50%; left: 0; transform-origin: right center; }
+    .footer-plains-day .p-windmill-center {
+      position: absolute;
+      top: -2px;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background: #44403c;
+      border-radius: 50%;
+    }
+    
+    /* PLAINS - NIGHT */
+    .footer-plains-night {
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 50%, #334155 100%);
+    }
+    .footer-plains-night .moon { left: 50%; transform: translateX(-50%); right: auto; top: 40px; }
+    .footer-plains-night .moon::before { background: #0f172a; }
+    
+    .footer-plains-night .p-hills-back {
+      height: 140px;
+      background: #1e293b;
+      clip-path: polygon(0% 100%, 0% 70%, 20% 55%, 40% 65%, 60% 50%, 80% 60%, 100% 45%, 100% 100%);
+    }
+    .footer-plains-night .p-hills-front {
+      height: 110px;
+      background: #334155;
+      clip-path: polygon(0% 100%, 0% 60%, 15% 50%, 35% 58%, 55% 45%, 75% 55%, 100% 40%, 100% 100%);
+    }
+    .footer-plains-night .p-grass {
+      height: 80px;
+      background: linear-gradient(to bottom, #1e3a5f 0%, #1e293b 100%);
+    }
+    .footer-plains-night .p-grass-blades {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: repeating-linear-gradient(90deg, transparent 0px, transparent 8px, #0f172a 8px, #0f172a 10px);
+      clip-path: polygon(0% 100%, 0% 60%, 1% 40%, 2% 60%, 3% 35%, 4% 58%, 5% 42%, 6% 62%, 7% 38%, 8% 55%, 9% 45%, 10% 60%, 11% 40%, 12% 58%, 13% 35%, 14% 62%, 15% 42%, 16% 55%, 17% 38%, 18% 60%, 19% 45%, 20% 58%, 21% 40%, 22% 62%, 23% 35%, 24% 55%, 25% 42%, 26% 60%, 27% 38%, 28% 58%, 29% 45%, 30% 62%, 31% 40%, 32% 55%, 33% 35%, 34% 60%, 35% 42%, 36% 58%, 37% 38%, 38% 62%, 39% 45%, 40% 55%, 41% 40%, 42% 60%, 43% 35%, 44% 58%, 45% 42%, 46% 62%, 47% 38%, 48% 55%, 49% 45%, 50% 60%, 51% 40%, 52% 58%, 53% 35%, 54% 62%, 55% 42%, 56% 55%, 57% 38%, 58% 60%, 59% 45%, 60% 58%, 61% 40%, 62% 62%, 63% 35%, 64% 55%, 65% 42%, 66% 60%, 67% 38%, 68% 58%, 69% 45%, 70% 62%, 71% 40%, 72% 55%, 73% 35%, 74% 60%, 75% 42%, 76% 58%, 77% 38%, 78% 62%, 79% 45%, 80% 55%, 81% 40%, 82% 60%, 83% 35%, 84% 58%, 85% 42%, 86% 62%, 87% 38%, 88% 55%, 89% 45%, 90% 60%, 91% 40%, 92% 58%, 93% 35%, 94% 62%, 95% 42%, 96% 55%, 97% 38%, 98% 60%, 99% 45%, 100% 55%, 100% 100%);
+      opacity: 0.4;
+    }
+    .footer-plains-night .p-windmill {
+      position: absolute;
+      bottom: 75px;
+      left: 25%;
+    }
+    .footer-plains-night .p-windmill-tower {
+      width: 8px;
+      height: 55px;
+      background: #0f172a;
+      clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+    }
+    .footer-plains-night .p-windmill-blades {
+      position: absolute;
+      top: -5px;
+      left: -17px;
+      width: 42px;
+      height: 42px;
+      animation: windmillSpin 8s linear infinite;
+    }
+    .footer-plains-night .p-blade {
+      position: absolute;
+      width: 4px;
+      height: 20px;
+      background: #0f172a;
+      left: 50%;
+      top: 0;
+      transform-origin: bottom center;
+      border-radius: 2px;
+    }
+    .footer-plains-night .p-blade:nth-child(1) { transform: translateX(-50%) rotate(0deg); }
+    .footer-plains-night .p-blade:nth-child(2) { transform: translateX(-50%) rotate(90deg); top: 50%; left: 100%; transform-origin: left center; }
+    .footer-plains-night .p-blade:nth-child(3) { transform: translateX(-50%) rotate(180deg); top: 100%; transform-origin: top center; }
+    .footer-plains-night .p-blade:nth-child(4) { transform: translateX(-50%) rotate(270deg); top: 50%; left: 0; transform-origin: right center; }
+    .footer-plains-night .p-windmill-center {
+      position: absolute;
+      top: -2px;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 50%;
+    }
+    
+    /* Fireflies for night plains */
+    .firefly {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #fef08a;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #fef08a;
+      animation: fireflyFloat 4s ease-in-out infinite;
+    }
+    @keyframes fireflyFloat {
+      0%, 100% { opacity: 0; transform: translate(0, 0); }
+      25% { opacity: 1; }
+      50% { opacity: 1; transform: translate(10px, -15px); }
+      75% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Demo Controls -->
+  <div class="demo-controls">
+    <h3>Hora</h3>
+    <label><input type="radio" name="mode" value="auto" checked> Auto (hora actual)</label>
+    <label><input type="radio" name="mode" value="day"> Forzar Día</label>
+    <label><input type="radio" name="mode" value="night"> Forzar Noche</label>
+    
+    <div class="divider"></div>
+    
+    <h3>Escenario</h3>
+    <label><input type="radio" name="scene" value="random" checked> Aleatorio</label>
+    <label><input type="radio" name="scene" value="mountains"> 🏔️ Montañas</label>
+    <label><input type="radio" name="scene" value="desert"> 🏜️ Desierto</label>
+    <label><input type="radio" name="scene" value="coast"> 🏖️ Costa</label>
+    <label><input type="radio" name="scene" value="plains"> 🌾 Llanuras</label>
+    
+    <div class="divider"></div>
+    
+    <div class="info-box">
+      <span class="dot" id="time-dot"></span>
+      <span id="time-label">Cargando...</span>
+    </div>
+    <div class="info-box" style="margin-top: 0.3rem;">
+      Escena: <span class="scene-name" id="scene-label">-</span>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+    <section class="hero">
+      <h1>WWTRAIL</h1>
+      <p>Descubre tu camino en cualquier terreno</p>
+    </section>
+    
+    <section class="content-section">
+      <h2>Explora nuevas rutas</h2>
+      <p>Desde picos nevados hasta dunas doradas, desde playas tropicales hasta praderas infinitas. WWTrail te lleva a todos los rincones del planeta.</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    </section>
+    
+    <section class="content-section">
+      <h2>Conecta con la comunidad</h2>
+      <p>Miles de trail runners compartiendo sus aventuras, rutas y experiencias. Únete a la comunidad más activa del trail running.</p>
+      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+    </section>
+    
+    <section class="content-section" style="min-height: 60vh;">
+      <h2>↓ Sigue haciendo scroll</h2>
+      <p>El footer se revelará debajo del contenido...</p>
+    </section>
+  </div>
+
+  <!-- Footer Wrapper -->
+  <div class="footer-wrapper">
+    
+    <!-- 1. MOUNTAINS DAY -->
+    <footer class="wwtrail-footer footer-mountains-day hidden" id="footer-mountains-day">
+      <div class="sun"></div>
+      <div class="cloud"></div>
+      <div class="cloud"></div>
+      <div class="cloud"></div>
+      <div class="m-layer m-back"></div>
+      <div class="m-layer m-snow"></div>
+      <div class="m-layer m-mid"></div>
+      <div class="m-layer m-front"></div>
+      <div class="m-layer m-trees"></div>
+      <div class="footer-content dark">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    
+    <!-- 1. MOUNTAINS NIGHT -->
+    <footer class="wwtrail-footer footer-mountains-night hidden" id="footer-mountains-night">
+      <div class="stars" id="stars-mountains"></div>
+      <div class="moon"></div>
+      <div class="m-layer m-back"></div>
+      <div class="m-layer m-mid"></div>
+      <div class="m-layer m-front"></div>
+      <div class="footer-content">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    
+    <!-- 2. DESERT DAY -->
+    <footer class="wwtrail-footer footer-desert-day hidden" id="footer-desert-day">
+      <div class="sun"></div>
+      <div class="d-layer d-dunes-back"></div>
+      <div class="d-layer d-dunes-mid"></div>
+      <div class="d-layer d-dunes-front"></div>
+      <div class="d-cactus"></div>
+      <div class="d-cactus"></div>
+      <div class="d-cactus"></div>
+      <div class="footer-content">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    
+    <!-- 2. DESERT NIGHT -->
+    <footer class="wwtrail-footer footer-desert-night hidden" id="footer-desert-night">
+      <div class="stars" id="stars-desert"></div>
+      <div class="moon"></div>
+      <div class="d-layer d-dunes-back"></div>
+      <div class="d-layer d-dunes-mid"></div>
+      <div class="d-layer d-dunes-front"></div>
+      <div class="d-cactus"></div>
+      <div class="d-cactus"></div>
+      <div class="d-cactus"></div>
+      <div class="footer-content">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    
+    <!-- 3. COAST DAY -->
+    <footer class="wwtrail-footer footer-coast-day hidden" id="footer-coast-day">
+      <div class="sun"></div>
+      <div class="cloud"></div>
+      <div class="cloud"></div>
+      <div class="c-layer c-sea">
+        <div class="c-wave1"></div>
+        <div class="c-wave2"></div>
+        <div class="c-wave3"></div>
+      </div>
+      <div class="c-layer c-beach"></div>
+      <div class="footer-content">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    
+    <!-- 3. COAST NIGHT -->
+    <footer class="wwtrail-footer footer-coast-night hidden" id="footer-coast-night">
+      <div class="stars" id="stars-coast"></div>
+      <div class="moon"></div>
+      <div class="c-layer c-sea">
+        <div class="c-wave1"></div>
+        <div class="c-wave2"></div>
+        <div class="c-wave3"></div>
+        <div class="c-moon-reflection"></div>
+      </div>
+      <div class="c-layer c-beach"></div>
+      <div class="footer-content">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    
+    <!-- 4. PLAINS DAY (Sunset) -->
+    <footer class="wwtrail-footer footer-plains-day hidden" id="footer-plains-day">
+      <div class="sun"></div>
+      <div class="p-layer p-hills-back"></div>
+      <div class="p-layer p-hills-front"></div>
+      <div class="p-layer p-grass">
+        <div class="p-grass-blades"></div>
+      </div>
+      <div class="footer-content">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    
+    <!-- 4. PLAINS NIGHT -->
+    <footer class="wwtrail-footer footer-plains-night hidden" id="footer-plains-night">
+      <div class="stars" id="stars-plains"></div>
+      <div class="moon"></div>
+      <div class="p-layer p-hills-back"></div>
+      <div class="p-layer p-hills-front"></div>
+      <div class="p-layer p-grass">
+        <div class="p-grass-blades"></div>
+      </div>
+      <div id="fireflies-container"></div>
+      <div class="footer-content">
+        <div class="footer-logo">WWTRAIL</div>
+        <div class="footer-tagline">Descubre tu camino</div>
+        <nav class="footer-links">
+          <a href="#">Rutas</a><a href="#">Carreras</a><a href="#">Comunidad</a><a href="#">Blog</a><a href="#">Contacto</a>
+        </nav>
+        <div class="footer-copyright">© 2024 WWTrail. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Generate stars for night scenes
+    function generateStars(containerId, count = 50) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        const size = Math.random() * 2 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        container.appendChild(star);
+      }
+    }
+    
+    // Generate fireflies for plains night
+    function generateFireflies() {
+      const container = document.getElementById('fireflies-container');
+      if (!container) return;
+      container.innerHTML = '';
+      for (let i = 0; i < 12; i++) {
+        const firefly = document.createElement('div');
+        firefly.className = 'firefly';
+        firefly.style.left = (10 + Math.random() * 80) + '%';
+        firefly.style.bottom = (80 + Math.random() * 60) + 'px';
+        firefly.style.animationDelay = Math.random() * 4 + 's';
+        firefly.style.animationDuration = (3 + Math.random() * 3) + 's';
+        container.appendChild(firefly);
+      }
+    }
+    
+    // Initialize stars
+    generateStars('stars-mountains', 55);
+    generateStars('stars-desert', 70);
+    generateStars('stars-coast', 45);
+    generateStars('stars-plains', 60);
+    generateFireflies();
+    
+    // Scene names for display
+    const sceneNames = {
+      mountains: '🏔️ Montañas',
+      desert: '🏜️ Desierto',
+      coast: '🏖️ Costa',
+      plains: '🌾 Llanuras'
+    };
+    
+    // Time detection
+    function isNightTime() {
+      const hour = new Date().getHours();
+      return hour < 7 || hour >= 20;
+    }
+    
+    // Footer management
+    const footers = {
+      'mountains-day': document.getElementById('footer-mountains-day'),
+      'mountains-night': document.getElementById('footer-mountains-night'),
+      'desert-day': document.getElementById('footer-desert-day'),
+      'desert-night': document.getElementById('footer-desert-night'),
+      'coast-day': document.getElementById('footer-coast-day'),
+      'coast-night': document.getElementById('footer-coast-night'),
+      'plains-day': document.getElementById('footer-plains-day'),
+      'plains-night': document.getElementById('footer-plains-night')
+    };
+    
+    function hideAllFooters() {
+      Object.values(footers).forEach(f => f.classList.add('hidden'));
+    }
+    
+    function showFooter(scene, isNight) {
+      hideAllFooters();
+      const id = `${scene}-${isNight ? 'night' : 'day'}`;
+      if (footers[id]) {
+        footers[id].classList.remove('hidden');
+      }
+      
+      // Update UI
+      document.getElementById('time-dot').className = 'dot ' + (isNight ? 'night' : 'day');
+      document.getElementById('time-label').textContent = isNight ? 'Modo Noche' : 'Modo Día';
+      document.getElementById('scene-label').textContent = sceneNames[scene];
+    }
+    
+    function getRandomScene() {
+      // Check sessionStorage for persistence
+      let scene = sessionStorage.getItem('wwtrail-scene');
+      if (!scene) {
+        const scenes = ['mountains', 'desert', 'coast', 'plains'];
+        scene = scenes[Math.floor(Math.random() * scenes.length)];
+        sessionStorage.setItem('wwtrail-scene', scene);
+      }
+      return scene;
+    }
+    
+    function updateFooter() {
+      const modeValue = document.querySelector('input[name="mode"]:checked').value;
+      const sceneValue = document.querySelector('input[name="scene"]:checked').value;
+      
+      // Determine night/day
+      let isNight;
+      if (modeValue === 'auto') {
+        isNight = isNightTime();
+      } else {
+        isNight = modeValue === 'night';
+      }
+      
+      // Determine scene
+      let scene;
+      if (sceneValue === 'random') {
+        scene = getRandomScene();
+      } else {
+        scene = sceneValue;
+        // If manually selected, update sessionStorage
+        sessionStorage.setItem('wwtrail-scene', scene);
+      }
+      
+      showFooter(scene, isNight);
+    }
+    
+    // Initialize
+    updateFooter();
+    
+    // Listen to radio changes
+    document.querySelectorAll('input[name="mode"], input[name="scene"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        // Reset random if changing scene manually
+        if (radio.name === 'scene' && radio.value !== 'random') {
+          sessionStorage.setItem('wwtrail-scene', radio.value);
+        } else if (radio.name === 'scene' && radio.value === 'random') {
+          sessionStorage.removeItem('wwtrail-scene');
+        }
+        updateFooter();
+      });
+    });
+  </script>
+</body>
+</html>

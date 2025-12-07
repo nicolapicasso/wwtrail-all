@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserStatsCards } from '@/components/UserStatsCards';
+import { ZancadasBalance, ZancadasHistory } from '@/components/zancadas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +32,7 @@ export default function ProfilePage() {
 
   const [participations, setParticipations] = useState<UserParticipation[]>([]);
   const [loadingParticipations, setLoadingParticipations] = useState(true);
+  const [zancadasRefresh, setZancadasRefresh] = useState(0);
 
   useEffect(() => {
     const fetchParticipations = async () => {
@@ -261,6 +263,12 @@ export default function ProfilePage() {
 
             {/* Statistics */}
             <UserStatsCards />
+
+            {/* Zancadas Balance */}
+            <ZancadasBalance onSyncComplete={() => setZancadasRefresh((prev) => prev + 1)} />
+
+            {/* Zancadas History */}
+            <ZancadasHistory refreshTrigger={zancadasRefresh} />
 
             {/* Recent Participations */}
             <Card>
