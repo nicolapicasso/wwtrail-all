@@ -135,7 +135,7 @@ export default function EventMap({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
 
-  const [mapMode, setMapMode] = useState<MapMode>('terrain');
+  const [mapMode, setMapMode] = useState<MapMode>('satellite');
   const [showMapModeMenu, setShowMapModeMenu] = useState(false);
 
   // Change map mode
@@ -192,8 +192,8 @@ export default function EventMap({
 
       mapRef.current = map;
 
-    // Agregar capa de tiles (Terrain por defecto para trail running)
-    const tileConfig = MAP_TILES.terrain;
+    // Agregar capa de tiles (Satellite por defecto)
+    const tileConfig = MAP_TILES.satellite;
     const tileLayer = L.tileLayer(tileConfig.url, {
       attribution: tileConfig.attribution,
       maxZoom: tileConfig.maxZoom,
