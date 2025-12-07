@@ -38,15 +38,18 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <>
       <Navbar />
-      {/* Main content - sits above footer, has negative margin to reveal footer */}
+      {/* Main content wrapper - sits above footer with negative margin for reveal */}
       <div
-        className="page-content relative z-10 bg-white min-h-screen"
+        className="page-content relative z-10"
         style={{ marginBottom: `-${FOOTER_HEIGHT}px` }}
       >
-        <main className="flex-1">
-          {children}
-        </main>
-        {/* Spacer to account for footer height */}
+        {/* Content with white background - ends before spacer */}
+        <div className="bg-white min-h-screen">
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
+        {/* Transparent spacer - allows fixed footer behind to be revealed */}
         <div style={{ height: `${FOOTER_HEIGHT}px` }} />
       </div>
       {/* Footer - fixed behind content */}

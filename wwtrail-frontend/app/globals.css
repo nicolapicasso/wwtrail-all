@@ -86,8 +86,13 @@
     @apply border-border;
   }
 
+  html, body {
+    /* Transparent background to allow footer reveal effect */
+    background: transparent;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-family: 'Montserrat', sans-serif;
   }
 
