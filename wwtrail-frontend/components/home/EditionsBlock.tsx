@@ -15,8 +15,11 @@ interface EditionsBlockProps {
   config: ContentBlockConfig;
 }
 
+const DEFAULT_TITLE = 'Últimas Ediciones';
+const DEFAULT_SUBTITLE = 'Inscríbete en las próximas carreras';
+
 export function EditionsBlock({ config }: EditionsBlockProps) {
-  const { limit, viewType, featuredOnly } = config;
+  const { limit, viewType, featuredOnly, title, subtitle } = config;
   const [editions, setEditions] = useState<EditionFull[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,9 +66,11 @@ export function EditionsBlock({ config }: EditionsBlockProps) {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Calendar className="w-8 h-8 text-black" />
-              Últimas Ediciones
+              {title || DEFAULT_TITLE}
             </h2>
-            <p className="text-gray-600 mt-2">Inscríbete en las próximas carreras</p>
+            {(subtitle || (!title && DEFAULT_SUBTITLE)) && (
+              <p className="text-gray-600 mt-2">{subtitle || DEFAULT_SUBTITLE}</p>
+            )}
           </div>
           <Link
             href="/editions"

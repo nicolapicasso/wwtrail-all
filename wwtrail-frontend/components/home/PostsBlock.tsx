@@ -15,8 +15,11 @@ interface PostsBlockProps {
   config: ContentBlockConfig;
 }
 
+const DEFAULT_TITLE = 'Magazine';
+const DEFAULT_SUBTITLE = 'Artículos, noticias y guías del mundo del trail';
+
 export function PostsBlock({ config }: PostsBlockProps) {
-  const { limit, viewType, featuredOnly } = config;
+  const { limit, viewType, featuredOnly, title, subtitle } = config;
   const [posts, setPosts] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,9 +66,11 @@ export function PostsBlock({ config }: PostsBlockProps) {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <BookOpen className="w-8 h-8 text-green-600" />
-              Magazine
+              {title || DEFAULT_TITLE}
             </h2>
-            <p className="text-gray-600 mt-2">Artículos, noticias y guías del mundo del trail</p>
+            {(subtitle || (!title && DEFAULT_SUBTITLE)) && (
+              <p className="text-gray-600 mt-2">{subtitle || DEFAULT_SUBTITLE}</p>
+            )}
           </div>
           <Link
             href="/magazine"

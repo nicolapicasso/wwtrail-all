@@ -19,6 +19,8 @@ export const ContentBlockConfigSchema = z.object({
   limit: z.number().int().min(1).max(50).default(6),
   viewType: HomeBlockViewTypeSchema.default('CARDS'),
   featuredOnly: z.boolean().default(false),
+  title: z.string().max(200).optional(),
+  subtitle: z.string().max(500).optional(),
 });
 
 // Config para bloques TEXT

@@ -41,6 +41,8 @@ export interface ContentBlockConfig {
   limit: number;
   viewType: HomeBlockViewType;
   featuredOnly?: boolean; // Only for EVENTS blocks
+  title?: string; // Custom title (optional)
+  subtitle?: string; // Custom subtitle (optional)
 }
 
 export interface TextBlockConfig {

@@ -36,10 +36,12 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   const [visible, setVisible] = useState(block?.visible ?? true);
   const [order, setOrder] = useState(block?.order ?? 0);
 
-  // Content block config (EVENTS, COMPETITIONS, EDITIONS)
+  // Content block config (EVENTS, COMPETITIONS, EDITIONS, SERVICES, POSTS)
   const [limit, setLimit] = useState(6);
   const [viewType, setViewType] = useState<HomeBlockViewType>('CARDS');
   const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [contentTitle, setContentTitle] = useState('');
+  const [contentSubtitle, setContentSubtitle] = useState('');
 
   // Text block config
   const [textContent, setTextContent] = useState('');
@@ -75,6 +77,8 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         setLimit(contentConfig.limit);
         setViewType(contentConfig.viewType);
         setFeaturedOnly(contentConfig.featuredOnly || false);
+        setContentTitle(contentConfig.title || '');
+        setContentSubtitle(contentConfig.subtitle || '');
       } else if (block.type === 'TEXT') {
         const textConfig = config as TextBlockConfig;
         setTextContent(textConfig.content);
@@ -107,6 +111,8 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         limit,
         viewType,
         featuredOnly,
+        title: contentTitle || undefined,
+        subtitle: contentSubtitle || undefined,
       };
       return config;
     } else if (blockType === 'TEXT') {
@@ -284,6 +290,32 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
           {(blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES' || blockType === 'POSTS') && (
             <div className="space-y-4 border-t pt-4">
               <h3 className="font-semibold text-gray-900">Configuración de Contenido</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Título personalizado
+                </label>
+                <input
+                  type="text"
+                  value={contentTitle}
+                  onChange={(e) => setContentTitle(e.target.value)}
+                  placeholder="Dejar vacío para usar título por defecto"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Subtítulo personalizado
+                </label>
+                <input
+                  type="text"
+                  value={contentSubtitle}
+                  onChange={(e) => setContentSubtitle(e.target.value)}
+                  placeholder="Dejar vacío para no mostrar subtítulo"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

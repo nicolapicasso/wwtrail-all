@@ -15,8 +15,11 @@ interface ServicesBlockProps {
   config: ContentBlockConfig;
 }
 
+const DEFAULT_TITLE = 'Servicios Destacados';
+const DEFAULT_SUBTITLE = 'Alojamientos, restaurantes y más para tu próxima aventura';
+
 export function ServicesBlock({ config }: ServicesBlockProps) {
-  const { limit, viewType, featuredOnly } = config;
+  const { limit, viewType, featuredOnly, title, subtitle } = config;
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,9 +70,11 @@ export function ServicesBlock({ config }: ServicesBlockProps) {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Building2 className="w-8 h-8 text-orange-600" />
-              Servicios Destacados
+              {title || DEFAULT_TITLE}
             </h2>
-            <p className="text-gray-600 mt-2">Alojamientos, restaurantes y más para tu próxima aventura</p>
+            {(subtitle || (!title && DEFAULT_SUBTITLE)) && (
+              <p className="text-gray-600 mt-2">{subtitle || DEFAULT_SUBTITLE}</p>
+            )}
           </div>
           <Link
             href="/services"

@@ -15,8 +15,11 @@ interface CompetitionsBlockProps {
   config: ContentBlockConfig;
 }
 
+const DEFAULT_TITLE = 'Últimas Competiciones';
+const DEFAULT_SUBTITLE = 'Las mejores carreras de trail y ultra trail';
+
 export function CompetitionsBlock({ config }: CompetitionsBlockProps) {
-  const { limit, viewType, featuredOnly } = config;
+  const { limit, viewType, featuredOnly, title, subtitle } = config;
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,9 +66,11 @@ export function CompetitionsBlock({ config }: CompetitionsBlockProps) {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Flag className="w-8 h-8 text-green-600" />
-              Últimas Competiciones
+              {title || DEFAULT_TITLE}
             </h2>
-            <p className="text-gray-600 mt-2">Las mejores carreras de trail y ultra trail</p>
+            {(subtitle || (!title && DEFAULT_SUBTITLE)) && (
+              <p className="text-gray-600 mt-2">{subtitle || DEFAULT_SUBTITLE}</p>
+            )}
           </div>
           <Link
             href="/competitions"

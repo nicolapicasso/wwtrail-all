@@ -15,8 +15,11 @@ interface EventsBlockProps {
   config: ContentBlockConfig;
 }
 
+const DEFAULT_TITLE = 'Últimos Eventos';
+const DEFAULT_SUBTITLE = 'Descubre los mejores eventos de trail running';
+
 export function EventsBlock({ config }: EventsBlockProps) {
-  const { limit, viewType, featuredOnly } = config;
+  const { limit, viewType, featuredOnly, title, subtitle } = config;
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,9 +70,11 @@ export function EventsBlock({ config }: EventsBlockProps) {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <MapPin className="w-8 h-8 text-blue-600" />
-              Últimos Eventos
+              {title || DEFAULT_TITLE}
             </h2>
-            <p className="text-gray-600 mt-2">Descubre los mejores eventos de trail running</p>
+            {(subtitle || (!title && DEFAULT_SUBTITLE)) && (
+              <p className="text-gray-600 mt-2">{subtitle || DEFAULT_SUBTITLE}</p>
+            )}
           </div>
           <Link
             href="/events"
