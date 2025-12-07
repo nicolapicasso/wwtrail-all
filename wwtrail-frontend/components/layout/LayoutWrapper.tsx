@@ -11,6 +11,9 @@ interface LayoutWrapperProps {
 // Routes that should NOT show Navbar and Footer (backoffice routes)
 const BACKOFFICE_ROUTES = ['/organizer', '/dashboard', '/admin'];
 
+// Footer height for reveal effect
+const FOOTER_HEIGHT = 360;
+
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
@@ -30,16 +33,23 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     return <>{children}</>;
   }
 
-  // Public pages: show Navbar and Footer
-  // The page-content div has bg-white and z-10 to slide over the sticky footer
+  // Public pages: show Navbar and Footer with reveal effect
+  // The content slides over the fixed footer when scrolling
   return (
     <>
       <Navbar />
-      <div className="page-content relative z-10 bg-white min-h-screen">
+      {/* Main content - sits above footer, has negative margin to reveal footer */}
+      <div
+        className="page-content relative z-10 bg-white min-h-screen"
+        style={{ marginBottom: `-${FOOTER_HEIGHT}px` }}
+      >
         <main className="flex-1">
           {children}
         </main>
+        {/* Spacer to account for footer height */}
+        <div style={{ height: `${FOOTER_HEIGHT}px` }} />
       </div>
+      {/* Footer - fixed behind content */}
       <Footer />
     </>
   );

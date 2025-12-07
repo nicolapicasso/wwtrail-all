@@ -57,7 +57,7 @@ export default function Footer() {
   const hasContent = content.leftColumn || content.centerColumn || content.rightColumn;
 
   return (
-    <div className="footer-wrapper relative h-[360px]">
+    <div className="footer-wrapper fixed bottom-0 left-0 right-0 h-[360px] z-0">
       <footer className="absolute inset-0 overflow-hidden">
         {/* Landscape Background Layer */}
         <LandscapeBackground />
