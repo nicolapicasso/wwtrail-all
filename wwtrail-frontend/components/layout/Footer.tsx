@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { footerService, FooterContent } from '@/lib/api/footer.service';
 import { LandscapeBackground } from '@/components/footer/landscapes';
 
+// Routes where footer should NOT be shown
+const FOOTER_EXCLUDED_ROUTES = ['/organizer', '/dashboard', '/directory'];
+
 export default function Footer() {
   const locale = useLocale();
+  const pathname = usePathname();
   const [content, setContent] = useState<FooterContent>({
     leftColumn: null,
     centerColumn: null,
@@ -14,7 +19,16 @@ export default function Footer() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Check if current route should hide the footer
+  const shouldHideFooter = FOOTER_EXCLUDED_ROUTES.some(route => pathname?.includes(route));
+
   useEffect(() => {
+    // Skip loading footer data if we're on excluded routes
+    if (shouldHideFooter) {
+      setLoading(false);
+      return;
+    }
+
     const loadFooter = async () => {
       try {
         const data = await footerService.getPublicFooter(locale.toUpperCase());
@@ -27,7 +41,12 @@ export default function Footer() {
     };
 
     loadFooter();
-  }, [locale]);
+  }, [locale, shouldHideFooter]);
+
+  // Don't render on excluded routes
+  if (shouldHideFooter) {
+    return null;
+  }
 
   // Don't render anything while loading
   if (loading) {
