@@ -4,10 +4,11 @@ import { z } from 'zod';
 // ENUMS
 // ===================================
 
-export const HomeBlockTypeSchema = z.enum(['EVENTS', 'COMPETITIONS', 'EDITIONS', 'SERVICES', 'POSTS', 'TEXT', 'LINKS']);
+export const HomeBlockTypeSchema = z.enum(['EVENTS', 'COMPETITIONS', 'EDITIONS', 'SERVICES', 'POSTS', 'TEXT', 'LINKS', 'MAP']);
 export const HomeBlockViewTypeSchema = z.enum(['LIST', 'CARDS']);
 export const HomeTextSizeSchema = z.enum(['SM', 'MD', 'LG', 'XL']);
 export const HomeTextVariantSchema = z.enum(['PARAGRAPH', 'HEADING']);
+export const MapModeSchema = z.enum(['street', 'satellite', 'terrain']);
 
 // ===================================
 // CONFIG SCHEMAS (por tipo de bloque)
@@ -38,6 +39,16 @@ export const LinksBlockConfigSchema = z.object({
   items: z.array(LinkItemSchema).min(1).max(12),
 });
 
+// Config para bloques MAP
+export const MapBlockConfigSchema = z.object({
+  height: z.number().int().min(200).max(800).default(400),
+  zoom: z.number().int().min(1).max(17).default(6),
+  mapMode: MapModeSchema.default('terrain'),
+  showEvents: z.boolean().default(true),
+  showCompetitions: z.boolean().default(true),
+  showServices: z.boolean().default(true),
+});
+
 // ===================================
 // HOME BLOCK SCHEMA
 // ===================================
@@ -51,6 +62,7 @@ export const createHomeBlockSchema = z.object({
       ContentBlockConfigSchema,
       TextBlockConfigSchema,
       LinksBlockConfigSchema,
+      MapBlockConfigSchema,
     ]).optional(),
   }),
 });
@@ -64,6 +76,7 @@ export const updateHomeBlockSchema = z.object({
       ContentBlockConfigSchema,
       TextBlockConfigSchema,
       LinksBlockConfigSchema,
+      MapBlockConfigSchema,
     ]).optional(),
   }),
 });
@@ -112,6 +125,7 @@ export const updateFullHomeConfigSchema = z.object({
           ContentBlockConfigSchema,
           TextBlockConfigSchema,
           LinksBlockConfigSchema,
+          MapBlockConfigSchema,
         ]).optional(),
       })
     ),
@@ -147,4 +161,5 @@ export type ReorderBlocksInput = z.infer<typeof reorderBlocksSchema>['body'];
 export type ContentBlockConfig = z.infer<typeof ContentBlockConfigSchema>;
 export type TextBlockConfig = z.infer<typeof TextBlockConfigSchema>;
 export type LinksBlockConfig = z.infer<typeof LinksBlockConfigSchema>;
+export type MapBlockConfig = z.infer<typeof MapBlockConfigSchema>;
 export type LinkItem = z.infer<typeof LinkItemSchema>;
