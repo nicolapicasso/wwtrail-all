@@ -331,7 +331,7 @@ function ParticipationCard({
 
   return (
     <Link
-      href={`/${locale}/events/${participation.edition.competition.event.slug}/${participation.edition.competition.slug}/${participation.edition.year}`}
+      href={`/${locale}/editions/${participation.edition.slug}`}
     >
       <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
         <div className="flex items-start justify-between">

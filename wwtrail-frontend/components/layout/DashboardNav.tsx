@@ -33,6 +33,8 @@ import {
   PenSquare,
   Database,
   Languages,
+  Wallet,
+  Footprints,
 } from 'lucide-react';
 import { adminService, PendingContentCounts } from '@/lib/api/admin.service';
 
@@ -230,12 +232,29 @@ const navItems: NavItem[] = [
       },
     ],
   },
+  {
+    label: 'Omniwallet',
+    icon: Wallet,
+    adminOnly: true,
+    children: [
+      {
+        label: 'Configuración',
+        href: '/organizer/omniwallet',
+        icon: Settings,
+      },
+      {
+        label: 'Acciones y Puntos',
+        href: '/organizer/omniwallet/actions',
+        icon: Footprints,
+      },
+    ],
+  },
 ];
 
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO', 'Usuarios', 'Datos']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO', 'Usuarios', 'Datos', 'Omniwallet']);
   const [pendingCounts, setPendingCounts] = useState<PendingContentCounts | null>(null);
 
   // Fetch pending content counts for admins

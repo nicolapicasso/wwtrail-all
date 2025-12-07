@@ -142,6 +142,28 @@ export interface PendingContentItem {
   };
 }
 
+// Zancadas stats interface
+export interface ZancadasStats {
+  totalTransactions: number;
+  totalPointsAwarded: number;
+  usersWithPoints: number;
+  transactionsByAction: Array<{
+    actionCode: string;
+    actionName: string;
+    count: number;
+    points: number;
+  }>;
+  recentTransactions: Array<{
+    id: string;
+    points: number;
+    createdAt: string;
+    actionName: string;
+    actionCode: string;
+    userName: string;
+    userEmail: string;
+  }>;
+}
+
 // Comprehensive stats interface
 export interface ComprehensiveStats {
   overview: {
@@ -228,6 +250,17 @@ class AdminService {
   async getComprehensiveStats(): Promise<ComprehensiveStats> {
     const { data } = await apiClientV1.get('/admin/stats/comprehensive');
     return data.data;
+  }
+
+  // Zancadas stats
+  async getZancadasStats(): Promise<ZancadasStats | null> {
+    try {
+      const { data } = await apiClientV2.get('/admin/zancadas/stats');
+      return data.data;
+    } catch {
+      // Return null if Zancadas is not configured
+      return null;
+    }
   }
 
   // ============================================

@@ -4,12 +4,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Loader2, AlertCircle, Info, Image as ImageIcon } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { Save, Loader2, AlertCircle, Info, Image as ImageIcon, Globe, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import editionsService from '@/lib/api/v2/editions.service';
 import type { Edition } from '@/types/edition';
 import type { Competition } from '@/types/competition';
 import { EditionStatus, RegistrationStatus } from '@/types/competition';
+import { Language } from '@/types/event';
+import { LANGUAGE_LABELS } from '@/types/post';
 import FileUpload from '@/components/FileUpload';
 
 interface EditionFormProps {
@@ -28,14 +31,19 @@ export default function EditionForm({
   onCancel,
 }: EditionFormProps) {
   const router = useRouter();
+  const locale = useLocale();
   const [loading, setLoading] = useState(false);
+  const [loadingAndEdit, setLoadingAndEdit] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEditMode = !!edition;
 
-  // Form state
+  // Form state - default language based on current locale
+  const defaultLanguage = locale === 'es' ? Language.ES : locale === 'en' ? Language.EN : Language.ES;
+
   const [formData, setFormData] = useState({
     year: edition?.year?.toString() || new Date().getFullYear().toString(),
+    language: (edition as any)?.language || defaultLanguage,
     startDate: (edition?.specificDate || edition?.startDate)?.split('T')[0] || '',
     endDate: edition?.endDate?.split('T')[0] || '',
     distance: edition?.distance?.toString() || '',
@@ -128,6 +136,7 @@ export default function EditionForm({
 
       const payload: any = {
         year,
+        language: formData.language,
         startDate: toISODateTime(formData.startDate, year),
         endDate: formData.endDate ? toISODateTime(formData.endDate, year) : undefined,
         distance: formData.distance ? parseFloat(formData.distance) : undefined,
@@ -209,6 +218,88 @@ export default function EditionForm({
     }
   };
 
+  // Handle save and redirect to edit mode (for meteo and rankings)
+  const handleSubmitAndEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // Validaciones
+    if (!formData.year) {
+      setError('El año es obligatorio');
+      return;
+    }
+
+    const year = parseInt(formData.year);
+    if (year < 1900 || year > 2100) {
+      setError('El año debe estar entre 1900 y 2100');
+      return;
+    }
+
+    if (!formData.startDate) {
+      setError('La fecha de inicio es obligatoria');
+      return;
+    }
+
+    setLoadingAndEdit(true);
+
+    try {
+      const toISODateTime = (dateString: string, editionYear: number) => {
+        if (!dateString) return undefined;
+        const [_, month, day] = dateString.split('-');
+        const fullDate = `${editionYear}-${month}-${day}`;
+        const date = new Date(fullDate);
+        return date.toISOString();
+      };
+
+      const prices: any = {};
+      if (formData.priceEarly) prices.early = parseFloat(formData.priceEarly);
+      if (formData.priceNormal) prices.normal = parseFloat(formData.priceNormal);
+      if (formData.priceLate) prices.late = parseFloat(formData.priceLate);
+
+      const payload: any = {
+        year,
+        language: formData.language,
+        startDate: toISODateTime(formData.startDate, year),
+        endDate: formData.endDate ? toISODateTime(formData.endDate, year) : undefined,
+        distance: formData.distance ? parseFloat(formData.distance) : undefined,
+        elevation: formData.elevation ? parseInt(formData.elevation) : undefined,
+        maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
+        currentParticipants: formData.currentParticipants ? parseInt(formData.currentParticipants) : 0,
+        city: formData.city || undefined,
+        registrationUrl: formData.registrationUrl || undefined,
+        registrationOpenDate: formData.registrationOpenDate ? toISODateTime(formData.registrationOpenDate, year) : undefined,
+        registrationCloseDate: formData.registrationCloseDate ? toISODateTime(formData.registrationCloseDate, year) : undefined,
+        resultsUrl: formData.resultsUrl || undefined,
+        status: formData.status,
+        registrationStatus: formData.registrationStatus,
+        prices: Object.keys(prices).length > 0 ? prices : undefined,
+        coverImage: formData.coverImage.trim() || undefined,
+        gallery: formData.gallery.length > 0 ? formData.gallery : undefined,
+        regulations: formData.regulations.trim() || undefined,
+        featured: formData.featured,
+      };
+
+      const result = await editionsService.create(competitionId, payload);
+      toast.success('Edición creada. Redirigiendo para definir ranking y meteo...');
+
+      // Redirect to edit mode
+      router.push(`/${locale}/organizer/editions/edit/${result.id}`);
+    } catch (err: any) {
+      console.error('Error saving edition:', err);
+      let errorMessage = err.response?.data?.message || 'Error al guardar la edición';
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        const validationErrors = err.response.data.errors
+          .map((e: any) => `${e.field}: ${e.message}`)
+          .join(', ');
+        errorMessage = `${errorMessage}: ${validationErrors}`;
+      }
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoadingAndEdit(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Header */}
@@ -274,6 +365,32 @@ export default function EditionForm({
               El año no puede modificarse una vez creada la edición
             </p>
           )}
+        </div>
+
+        {/* Language */}
+        <div>
+          <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
+            <span className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Idioma del Contenido *
+            </span>
+          </label>
+          <select
+            id="language"
+            value={formData.language}
+            onChange={(e) => setFormData({ ...formData, language: e.target.value as Language })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            required
+          >
+            {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+          </p>
         </div>
 
         {/* Dates */}
@@ -783,11 +900,34 @@ export default function EditionForm({
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* Submit Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t">
+        {/* Button: Save and define ranking/meteo (only in create mode) */}
+        {!isEditMode && (
+          <button
+            type="button"
+            onClick={handleSubmitAndEdit}
+            disabled={loading || loadingAndEdit}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {loadingAndEdit ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Trophy className="h-4 w-4" />
+                Guardar y definir ranking/meteo
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Button: Save */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || loadingAndEdit}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {loading ? (
