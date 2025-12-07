@@ -42,7 +42,6 @@ export const LinksBlockConfigSchema = z.object({
 // Config para bloques MAP
 export const MapBlockConfigSchema = z.object({
   height: z.number().int().min(200).max(800).default(400),
-  zoom: z.number().int().min(1).max(17).default(6),
   mapMode: MapModeSchema.default('terrain'),
   showEvents: z.boolean().default(true),
   showCompetitions: z.boolean().default(true),

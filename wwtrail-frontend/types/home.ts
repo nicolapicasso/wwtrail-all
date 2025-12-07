@@ -71,7 +71,6 @@ export interface LinksBlockConfig {
 
 export interface MapBlockConfig {
   height: number; // Height in pixels
-  zoom: number; // Initial zoom level (1-17)
   mapMode: MapMode; // terrain, satellite, street
   showEvents: boolean;
   showCompetitions: boolean;

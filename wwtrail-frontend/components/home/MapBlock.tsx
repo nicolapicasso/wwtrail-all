@@ -275,16 +275,16 @@ export function MapBlock({ config }: MapBlockProps) {
         }
       }
 
-      // Fit bounds if there are markers, otherwise use configured zoom
+      // Fit bounds if there are markers (auto-zoom like directory)
       if (markersRef.current.length > 0 && bounds.isValid()) {
-        mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: config.zoom });
+        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
       }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [config.showEvents, config.showCompetitions, config.showServices, config.zoom]);
+  }, [config.showEvents, config.showCompetitions, config.showServices]);
 
   // Initialize map
   useEffect(() => {
@@ -292,7 +292,8 @@ export function MapBlock({ config }: MapBlockProps) {
 
     const tileConfig = MAP_TILES[config.mapMode] || MAP_TILES.terrain;
 
-    const map = L.map(mapContainerRef.current).setView([40.4637, -3.7492], config.zoom);
+    // Initial view at Spain center, zoom will be adjusted by fitBounds after loading data
+    const map = L.map(mapContainerRef.current).setView([40.4637, -3.7492], 6);
     mapRef.current = map;
 
     L.tileLayer(tileConfig.url, {
@@ -309,7 +310,7 @@ export function MapBlock({ config }: MapBlockProps) {
         mapRef.current = null;
       }
     };
-  }, [config.mapMode, config.zoom, loadData]);
+  }, [config.mapMode, loadData]);
 
   return (
     <div className="w-full relative" style={{ height: `${config.height}px` }}>

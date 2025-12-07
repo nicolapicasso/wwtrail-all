@@ -58,7 +58,6 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
   // Map block config
   const [mapHeight, setMapHeight] = useState(400);
-  const [mapZoom, setMapZoom] = useState(6);
   const [mapMode, setMapMode] = useState<MapMode>('terrain');
   const [showEvents, setShowEvents] = useState(true);
   const [showCompetitions, setShowCompetitions] = useState(true);
@@ -94,7 +93,6 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
       } else if (block.type === 'MAP') {
         const mapConfig = config as MapBlockConfig;
         setMapHeight(mapConfig.height || 400);
-        setMapZoom(mapConfig.zoom || 6);
         setMapMode(mapConfig.mapMode || 'terrain');
         setShowEvents(mapConfig.showEvents ?? true);
         setShowCompetitions(mapConfig.showCompetitions ?? true);
@@ -131,7 +129,6 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
     } else if (blockType === 'MAP') {
       return {
         height: mapHeight,
-        zoom: mapZoom,
         mapMode: mapMode,
         showEvents,
         showCompetitions,
@@ -524,34 +521,19 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
             <div className="space-y-4 border-t pt-4">
               <h3 className="font-semibold text-gray-900">Configuración del Mapa</h3>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Altura (píxeles)
-                  </label>
-                  <input
-                    type="number"
-                    value={mapHeight}
-                    onChange={(e) => setMapHeight(parseInt(e.target.value) || 400)}
-                    min={200}
-                    max={800}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nivel de Zoom (1-15)
-                  </label>
-                  <input
-                    type="number"
-                    value={mapZoom}
-                    onChange={(e) => setMapZoom(parseInt(e.target.value) || 6)}
-                    min={1}
-                    max={15}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Altura (píxeles)
+                </label>
+                <input
+                  type="number"
+                  value={mapHeight}
+                  onChange={(e) => setMapHeight(parseInt(e.target.value) || 400)}
+                  min={200}
+                  max={800}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">El zoom se ajusta automáticamente para mostrar todos los elementos</p>
               </div>
 
               <div>
