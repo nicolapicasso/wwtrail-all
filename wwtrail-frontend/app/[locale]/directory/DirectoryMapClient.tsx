@@ -110,7 +110,7 @@ export default function DirectoryMapClient() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(true);
-  const [mapMode, setMapMode] = useState<MapMode>('street');
+  const [mapMode, setMapMode] = useState<MapMode>('terrain');
   const [showMapModeMenu, setShowMapModeMenu] = useState(false);
 
   // Catalog data
@@ -153,11 +153,11 @@ export default function DirectoryMapClient() {
     const map = L.map(mapContainerRef.current).setView([40.4637, -3.7492], 6); // Spain center
     mapRef.current = map;
 
-    // Add initial tile layer
-    const tileConfig = MAP_TILES.street;
+    // Add initial tile layer (terrain by default for trail running)
+    const tileConfig = MAP_TILES.terrain;
     const tileLayer = L.tileLayer(tileConfig.url, {
       attribution: tileConfig.attribution,
-      maxZoom: 19,
+      maxZoom: 17, // OpenTopoMap max zoom is 17
     }).addTo(map);
     tileLayerRef.current = tileLayer;
 
@@ -804,61 +804,66 @@ export default function DirectoryMapClient() {
 
       {/* Map */}
       <div className="flex-1 relative">
-        {/* Expand filters button - only shown when sidebar is hidden */}
-        {!showFilters && (
-          <button
-            onClick={() => setShowFilters(true)}
-            className="absolute top-4 left-4 z-20 bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
-            title="Mostrar filtros"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">Filtros</span>
-          </button>
-        )}
+        {/* Map Controls - Positioned above Leaflet (z-index 1000+) */}
+        <div className="absolute top-4 left-4 right-4 z-[1001] pointer-events-none flex justify-between items-start">
+          {/* Expand filters button - only shown when sidebar is hidden */}
+          <div className="pointer-events-auto">
+            {!showFilters && (
+              <button
+                onClick={() => setShowFilters(true)}
+                className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                title="Mostrar filtros"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">Filtros</span>
+              </button>
+            )}
+          </div>
 
-        {/* Map Mode Selector */}
-        <div className="absolute top-4 right-4 z-20">
-          <button
-            onClick={() => setShowMapModeMenu(!showMapModeMenu)}
-            className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
-            title="Cambiar tipo de mapa"
-          >
-            <Layers className="w-5 h-5 text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">{MAP_TILES[mapMode].name}</span>
-          </button>
+          {/* Map Mode Selector */}
+          <div className="pointer-events-auto relative">
+            <button
+              onClick={() => setShowMapModeMenu(!showMapModeMenu)}
+              className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
+              title="Cambiar tipo de mapa"
+            >
+              <Layers className="w-5 h-5 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">{MAP_TILES[mapMode].name}</span>
+            </button>
 
-          {/* Map Mode Dropdown */}
-          {showMapModeMenu && (
-            <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden min-w-[140px]">
-              <button
-                onClick={() => changeMapMode('street')}
-                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
-                  mapMode === 'street' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <MapIcon className="w-4 h-4" />
-                Calles
-              </button>
-              <button
-                onClick={() => changeMapMode('satellite')}
-                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
-                  mapMode === 'satellite' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <Satellite className="w-4 h-4" />
-                Satélite
-              </button>
-              <button
-                onClick={() => changeMapMode('terrain')}
-                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
-                  mapMode === 'terrain' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <MountainSnow className="w-4 h-4" />
-                Terreno
-              </button>
-            </div>
-          )}
+            {/* Map Mode Dropdown */}
+            {showMapModeMenu && (
+              <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden min-w-[140px]">
+                <button
+                  onClick={() => changeMapMode('street')}
+                  className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
+                    mapMode === 'street' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                  }`}
+                >
+                  <MapIcon className="w-4 h-4" />
+                  Calles
+                </button>
+                <button
+                  onClick={() => changeMapMode('satellite')}
+                  className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
+                    mapMode === 'satellite' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                  }`}
+                >
+                  <Satellite className="w-4 h-4" />
+                  Satélite
+                </button>
+                <button
+                  onClick={() => changeMapMode('terrain')}
+                  className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
+                    mapMode === 'terrain' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                  }`}
+                >
+                  <MountainSnow className="w-4 h-4" />
+                  Terreno
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Loading overlay */}
