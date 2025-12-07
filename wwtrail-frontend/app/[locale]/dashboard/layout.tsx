@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DashboardNav } from '@/components/layout/DashboardNav';
+import { CollapsibleUserInfo } from '@/components/layout/CollapsibleUserInfo';
 import { Trophy, LogOut, Menu, X } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -62,24 +63,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </nav>
 
           {/* User Info + Logout - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t border-gray-200 p-4">
-            <div className="mb-3 rounded-lg bg-gray-50 p-3">
-              <p className="text-sm font-medium text-gray-900">{user?.username}</p>
-              <p className="text-xs text-gray-500">{user?.email}</p>
-              {isAdmin && (
-                <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-                  Administrador
-                </span>
-              )}
-            </div>
-            <button
-              onClick={logout}
-              className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-            >
-              <LogOut className="h-4 w-4" />
-              Cerrar Sesión
-            </button>
-          </div>
+          <CollapsibleUserInfo
+            username={user?.username}
+            email={user?.email}
+            isAdmin={isAdmin}
+            onLogout={logout}
+          />
         </div>
       </aside>
 
@@ -122,19 +111,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </nav>
 
               {/* User Info + Logout */}
-              <div className="border-t border-gray-200 p-4">
-                <div className="mb-3 rounded-lg bg-gray-50 p-3">
-                  <p className="text-sm font-medium text-gray-900">{user?.username}</p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
-                </div>
-                <button
-                  onClick={logout}
-                  className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Cerrar Sesión
-                </button>
-              </div>
+              <CollapsibleUserInfo
+                username={user?.username}
+                email={user?.email}
+                isAdmin={isAdmin}
+                onLogout={logout}
+              />
             </div>
           </aside>
         </div>
