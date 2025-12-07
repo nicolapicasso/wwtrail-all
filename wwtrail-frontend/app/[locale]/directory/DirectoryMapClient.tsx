@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Search, MapPin, Mountain, Sparkles, Award, Filter, X, Building2, Flag } from 'lucide-react';
+import { Search, MapPin, Mountain, Sparkles, Award, X, Building2, ChevronLeft, ChevronRight, Layers, Map as MapIcon, Satellite, MountainSnow } from 'lucide-react';
 import eventsService from '@/lib/api/v2/events.service';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import servicesService from '@/lib/api/v2/services.service';
@@ -13,6 +13,26 @@ import { terrainTypesService } from '@/lib/api/catalogs.service';
 import CountrySelect from '@/components/CountrySelect';
 
 type ItemType = 'events' | 'competitions' | 'services' | 'all';
+type MapMode = 'street' | 'satellite' | 'terrain';
+
+// Map tile providers
+const MAP_TILES = {
+  street: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '© OpenStreetMap contributors',
+    name: 'Calles',
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '© Esri',
+    name: 'Satélite',
+  },
+  terrain: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '© OpenTopoMap contributors',
+    name: 'Terreno',
+  },
+};
 
 /**
  * Ajusta coordenadas de marcadores que se solapan, distribuyéndolos en círculo
@@ -86,9 +106,12 @@ export default function DirectoryMapClient() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(true);
+  const [mapMode, setMapMode] = useState<MapMode>('street');
+  const [showMapModeMenu, setShowMapModeMenu] = useState(false);
 
   // Catalog data
   const [terrainTypes, setTerrainTypes] = useState<any[]>([]);
@@ -130,10 +153,13 @@ export default function DirectoryMapClient() {
     const map = L.map(mapContainerRef.current).setView([40.4637, -3.7492], 6); // Spain center
     mapRef.current = map;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+    // Add initial tile layer
+    const tileConfig = MAP_TILES.street;
+    const tileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
       maxZoom: 19,
     }).addTo(map);
+    tileLayerRef.current = tileLayer;
 
     return () => {
       if (mapRef.current) {
@@ -141,6 +167,27 @@ export default function DirectoryMapClient() {
         mapRef.current = null;
       }
     };
+  }, []);
+
+  // Change map mode
+  const changeMapMode = useCallback((mode: MapMode) => {
+    if (!mapRef.current) return;
+
+    // Remove current tile layer
+    if (tileLayerRef.current) {
+      tileLayerRef.current.remove();
+    }
+
+    // Add new tile layer
+    const tileConfig = MAP_TILES[mode];
+    const newTileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      maxZoom: 19,
+    }).addTo(mapRef.current);
+    tileLayerRef.current = newTileLayer;
+
+    setMapMode(mode);
+    setShowMapModeMenu(false);
   }, []);
 
   // Load catalogs
@@ -546,38 +593,22 @@ export default function DirectoryMapClient() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <MapPin className="w-6 h-6 text-blue-600" />
-                Directorio con Mapa
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Explora eventos, competiciones y servicios en el mapa
-              </p>
-            </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Filter className="w-4 h-4" />
-              {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Filters Sidebar */}
+    <div className="flex h-screen overflow-hidden">
+      {/* Filters Sidebar - Collapsible */}
+      <div
+        className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
+          showFilters ? 'w-80' : 'w-0'
+        }`}
+      >
         {showFilters && (
-          <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
-            <div className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">Filtros</h2>
+          <div className="flex flex-col h-full min-w-[320px]">
+            {/* Sidebar Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                Filtros
+              </h2>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={clearFilters}
                   className="text-xs text-blue-600 hover:underline flex items-center gap-1"
@@ -585,7 +616,18 @@ export default function DirectoryMapClient() {
                   <X className="w-3 h-3" />
                   Limpiar
                 </button>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  title="Ocultar filtros"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
               </div>
+            </div>
+
+            {/* Scrollable Filter Content */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
               {/* Item Type */}
               <div>
@@ -758,19 +800,77 @@ export default function DirectoryMapClient() {
             </div>
           </div>
         )}
+      </div>
 
-        {/* Map */}
-        <div className="flex-1 relative">
-          {isLoading && (
-            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Cargando datos...</p>
-              </div>
+      {/* Map */}
+      <div className="flex-1 relative">
+        {/* Expand filters button - only shown when sidebar is hidden */}
+        {!showFilters && (
+          <button
+            onClick={() => setShowFilters(true)}
+            className="absolute top-4 left-4 z-20 bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            title="Mostrar filtros"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">Filtros</span>
+          </button>
+        )}
+
+        {/* Map Mode Selector */}
+        <div className="absolute top-4 right-4 z-20">
+          <button
+            onClick={() => setShowMapModeMenu(!showMapModeMenu)}
+            className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            title="Cambiar tipo de mapa"
+          >
+            <Layers className="w-5 h-5 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">{MAP_TILES[mapMode].name}</span>
+          </button>
+
+          {/* Map Mode Dropdown */}
+          {showMapModeMenu && (
+            <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden min-w-[140px]">
+              <button
+                onClick={() => changeMapMode('street')}
+                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
+                  mapMode === 'street' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                }`}
+              >
+                <MapIcon className="w-4 h-4" />
+                Calles
+              </button>
+              <button
+                onClick={() => changeMapMode('satellite')}
+                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
+                  mapMode === 'satellite' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                }`}
+              >
+                <Satellite className="w-4 h-4" />
+                Satélite
+              </button>
+              <button
+                onClick={() => changeMapMode('terrain')}
+                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
+                  mapMode === 'terrain' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                }`}
+              >
+                <MountainSnow className="w-4 h-4" />
+                Terreno
+              </button>
             </div>
           )}
-          <div ref={mapContainerRef} className="w-full h-full" />
         </div>
+
+        {/* Loading overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando datos...</p>
+            </div>
+          </div>
+        )}
+        <div ref={mapContainerRef} className="w-full h-full" />
       </div>
     </div>
   );
