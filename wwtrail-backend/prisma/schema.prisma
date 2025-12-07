@@ -411,12 +411,16 @@ model Edition {
   city     String?                               @db.VarChar(100)
   location Unsupported("geometry(Point, 4326)")?
 
+  // Idioma del contenido
+  language Language @default(ES)
+
   // Fechas y registro
   startDate             DateTime
   endDate               DateTime?
   registrationOpenDate  DateTime?
   registrationCloseDate DateTime?
   registrationUrl       String?   @db.Text
+  resultsUrl            String?   @db.Text // URL de resultados
 
   // Precios
   prices Json? // { "early": 45, "normal": 60, "late": 75 }
