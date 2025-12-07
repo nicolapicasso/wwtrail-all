@@ -182,6 +182,8 @@ model User {
   landings               Landing[]         @relation("LandingCreator")
   ratings                EditionRating[]   @relation("UserRatings")
   zancadasTransactions   ZancadasTransaction[] @relation("UserZancadasTransactions")
+  managedEvents          EventManager[]    @relation("EventManagerUser")
+  assignedManagers       EventManager[]    @relation("EventManagerAssigner")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -313,6 +315,7 @@ model Event {
   competitions Competition[]
   translations EventTranslation[]
   posts        Post[]           @relation("PostEvent")
+  managers     EventManager[]   @relation("EventManagers")
 
   viewCount Int     @default(0)
   featured  Boolean @default(false)
@@ -330,6 +333,32 @@ model Event {
   @@index([competitionTypeId])
   @@index([terrainTypeId])
   @@map("events")
+}
+
+// ===================================
+// EVENT MANAGERS (Gestores de Eventos)
+// Permite asignar usuarios organizadores a eventos
+// ===================================
+
+model EventManager {
+  id           String   @id @default(uuid())
+  eventId      String
+  userId       String
+  assignedById String
+
+  // Relaciones
+  event      Event @relation("EventManagers", fields: [eventId], references: [id], onDelete: Cascade)
+  user       User  @relation("EventManagerUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy User  @relation("EventManagerAssigner", fields: [assignedById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+  @@index([assignedById])
+  @@map("event_managers")
 }
 
 // Nivel 2: COMPETITION (Distancia/carrera específica dentro del evento)
