@@ -44,12 +44,12 @@ export default async function RootLayout({
           <AuthProvider>
             <InsiderProvider>
               <Navbar />
-              <div className="flex flex-col min-h-screen">
+              <div className="flex flex-col min-h-screen bg-white pb-[360px]">
                 <main className="flex-1">
                   {children}
                 </main>
-                <Footer />
               </div>
+              <Footer />
               <Toaster position="top-right" />
             </InsiderProvider>
           </AuthProvider>
