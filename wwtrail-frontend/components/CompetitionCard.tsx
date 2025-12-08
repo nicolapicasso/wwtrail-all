@@ -75,10 +75,10 @@ export function CompetitionCard({
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             )}
 
-            {/* Logo Overlay */}
+            {/* Logo Overlay - top left for simplified cards */}
             {logoImage && !logoError && (
-              <div className="absolute bottom-3 left-3 bg-white rounded-lg p-2 shadow-lg z-10">
-                <div className="relative w-12 h-12">
+              <div className="absolute top-3 left-3 bg-white rounded-lg p-1.5 shadow-lg z-10">
+                <div className="relative w-10 h-10">
                   <Image
                     src={logoImage}
                     alt={`${competition.name} logo`}
