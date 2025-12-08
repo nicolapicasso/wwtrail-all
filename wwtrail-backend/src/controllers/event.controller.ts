@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { EventService } from '../services/event.service';
 import prisma from '../config/database';
+import { cache } from '../config/redis';
 import logger from '../utils/logger';
 
 /**
@@ -537,6 +538,22 @@ export class EventController {
           },
         },
       });
+
+      // ✅ Invalidate all event list caches to ensure fresh featured data
+      // We use a pattern to clear all event list caches since they may contain featured filters
+      try {
+        await cache.del(`event:${id}`);
+        await cache.del(`event:slug:${event.slug}`);
+        // Clear all cached event lists (pattern-based clear isn't available, so we clear the main one)
+        await cache.del('events:list');
+        // Also try to clear featured-specific caches by deleting common patterns
+        const keys = await cache.keys('events:list:*featured*');
+        if (keys && keys.length > 0) {
+          await Promise.all(keys.map((key: string) => cache.del(key)));
+        }
+      } catch (cacheError) {
+        logger.warn('Failed to invalidate cache after featured toggle:', cacheError);
+      }
 
       logger.info(
         `Event featured status toggled: ${id} → ${event.featured} by user ${userId}`
