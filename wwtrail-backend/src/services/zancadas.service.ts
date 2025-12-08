@@ -758,7 +758,7 @@ class ZancadasService {
     const competitions = await prisma.competition.findMany({
       where: {
         baseDistance: { gt: 0 },
-        isActive: true,
+        status: 'PUBLISHED',
       },
       select: {
         id: true,
@@ -766,7 +766,7 @@ class ZancadasService {
         slug: true,
         baseDistance: true,
         baseElevation: true,
-        isFeatured: true,
+        featured: true,
         event: {
           select: {
             slug: true,
@@ -781,24 +781,26 @@ class ZancadasService {
 
     // Encontrar la competición más cercana
     let closest = competitions[0];
-    let minDiff = Math.abs(closest.baseDistance - userKm);
+    let minDiff = Math.abs((closest.baseDistance || 0) - userKm);
 
     for (const comp of competitions) {
-      const diff = Math.abs(comp.baseDistance - userKm);
+      const diff = Math.abs((comp.baseDistance || 0) - userKm);
       // Preferir featured si la diferencia es similar (dentro del 20%)
-      if (diff < minDiff || (diff <= minDiff * 1.2 && comp.isFeatured && !closest.isFeatured)) {
+      if (diff < minDiff || (diff <= minDiff * 1.2 && comp.featured && !closest.featured)) {
         closest = comp;
         minDiff = diff;
       }
     }
 
     // Si el usuario tiene menos que la competición más corta, usar esa como objetivo
-    if (userKm < competitions[0].baseDistance) {
+    if (userKm < (competitions[0].baseDistance || 0)) {
       closest = competitions[0];
     }
 
     // Calcular progreso (limitado a 100%)
-    const progress = Math.min(100, (userKm / closest.baseDistance) * 100);
+    const progress = closest.baseDistance
+      ? Math.min(100, (userKm / closest.baseDistance) * 100)
+      : 0;
 
     return {
       id: closest.id,
@@ -830,7 +832,7 @@ class ZancadasService {
     const competitions = await prisma.competition.findMany({
       where: {
         baseElevation: { gt: 0 },
-        isActive: true,
+        status: 'PUBLISHED',
       },
       select: {
         id: true,
@@ -838,7 +840,7 @@ class ZancadasService {
         slug: true,
         baseDistance: true,
         baseElevation: true,
-        isFeatured: true,
+        featured: true,
         event: {
           select: {
             slug: true,
@@ -859,7 +861,7 @@ class ZancadasService {
       if (!comp.baseElevation) continue;
       const diff = Math.abs(comp.baseElevation - userElevation);
       // Preferir featured si la diferencia es similar (dentro del 20%)
-      if (diff < minDiff || (diff <= minDiff * 1.2 && comp.isFeatured && !closest.isFeatured)) {
+      if (diff < minDiff || (diff <= minDiff * 1.2 && comp.featured && !closest.featured)) {
         closest = comp;
         minDiff = diff;
       }
