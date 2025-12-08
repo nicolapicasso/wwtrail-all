@@ -27,6 +27,9 @@ interface AddPointsData {
   type: string;
   externalId: string;
   content?: Record<string, unknown>;
+  // Datos opcionales del usuario para crear cliente si no existe
+  userName?: string;
+  userLastName?: string;
 }
 
 interface CustomerAttributes {
@@ -287,6 +290,7 @@ class OmniwalletService {
 
   /**
    * Suma puntos a un cliente
+   * Si el cliente no existe, lo crea automáticamente
    */
   async addPoints(data: AddPointsData): Promise<boolean> {
     try {
@@ -296,15 +300,50 @@ class OmniwalletService {
         return false;
       }
 
-      await client.post(`/customers/${encodeURIComponent(data.email)}/add-points`, {
-        points: data.points,
-        type: data.type,
-        external_id: data.externalId,
-        content: data.content || {},
-      });
+      // Intentar añadir puntos
+      try {
+        await client.post(`/customers/${encodeURIComponent(data.email)}/add-points`, {
+          points: data.points,
+          type: data.type,
+          external_id: data.externalId,
+          content: data.content || {},
+        });
 
-      logger.info(`Omniwallet points added: ${data.points} to ${data.email} (${data.type})`);
-      return true;
+        logger.info(`Omniwallet points added: ${data.points} to ${data.email} (${data.type})`);
+        return true;
+      } catch (error) {
+        const axiosError = error as AxiosError;
+
+        // Si el cliente no existe (404), crearlo y reintentar
+        if (axiosError.response?.status === 404) {
+          logger.info(`Customer not found in Omniwallet, creating: ${data.email}`);
+
+          // Crear el cliente con datos del usuario si están disponibles
+          const customer = await this.createCustomer({
+            email: data.email,
+            name: data.userName || data.email.split('@')[0],
+            lastName: data.userLastName,
+          });
+
+          if (!customer) {
+            logger.error(`Failed to create customer in Omniwallet: ${data.email}`);
+            return false;
+          }
+
+          // Reintentar añadir puntos
+          await client.post(`/customers/${encodeURIComponent(data.email)}/add-points`, {
+            points: data.points,
+            type: data.type,
+            external_id: data.externalId,
+            content: data.content || {},
+          });
+
+          logger.info(`Omniwallet points added after creating customer: ${data.points} to ${data.email} (${data.type})`);
+          return true;
+        }
+
+        throw error;
+      }
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string }>;
       logger.error(

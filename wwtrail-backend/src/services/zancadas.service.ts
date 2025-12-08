@@ -302,6 +302,8 @@ class ZancadasService {
           points: action.points,
           type: `WWTRAIL - ${action.actionName}`,
           externalId,
+          userName: user.firstName || undefined,
+          userLastName: user.lastName || undefined,
           content: {
             action_code: actionCode,
             reference_type: referenceType,
@@ -614,7 +616,7 @@ class ZancadasService {
     const failedTransactions = await prisma.zancadasTransaction.findMany({
       where: { omniwalletSynced: false },
       include: {
-        user: { select: { email: true } },
+        user: { select: { email: true, firstName: true, lastName: true } },
         action: { select: { actionName: true, actionCode: true } },
       },
       take: limit,
@@ -632,6 +634,8 @@ class ZancadasService {
           points: tx.points,
           type: `WWTRAIL - ${tx.action.actionName}`,
           externalId: tx.omniwalletExternalId,
+          userName: tx.user.firstName || undefined,
+          userLastName: tx.user.lastName || undefined,
           content: {
             action_code: tx.action.actionCode,
             reference_type: tx.referenceType,
