@@ -50,6 +50,8 @@ export interface CompetitionMarker {
   baseElevation: number | null;
   position: number; // % en la escala
   isCompleted: boolean;
+  multiplier: number; // 1 = normal, >1 = "×N"
+  displayName: string; // Nombre con multiplicador si aplica
   event: {
     slug: string;
     name: string;
@@ -58,8 +60,10 @@ export interface CompetitionMarker {
 
 export interface ScaleData {
   userValue: number;
-  maxScale: number;
-  userProgress: number; // % del usuario en la escala
+  scaleMax: number; // Límite superior de esta escala
+  scalePrev: number; // Límite inferior de esta escala
+  progress: number; // % del usuario en esta escala
+  isMaxLevel: boolean; // Si ha superado todas las escalas
   competitions: CompetitionMarker[];
 }
 

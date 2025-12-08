@@ -673,8 +673,12 @@ class ZancadasService {
   // 1 zancada = 0.3 metros de desnivel vertical
   static readonly METERS_PER_ZANCADA = 1.5;
   static readonly ELEVATION_METERS_PER_ZANCADA = 0.3;
-  static readonly SCALE_MULTIPLIER = 10; // Usuario siempre al ~10% de la escala
   static readonly COMPETITIONS_PER_SCALE = 5;
+
+  // Escalas fijas de distancia (en km)
+  static readonly DISTANCE_SCALES = [20, 50, 100, 200, 500, 1000, 5000, 10000, 100000];
+  // Escalas fijas de desnivel (en metros)
+  static readonly ELEVATION_SCALES = [500, 1000, 3000, 5000, 10000, 25000, 50000, 100000, 500000];
 
   /**
    * Convierte zancadas a kilómetros
@@ -691,31 +695,38 @@ class ZancadasService {
   }
 
   /**
+   * Encuentra la escala actual y siguiente basada en el valor del usuario
+   */
+  private findCurrentScale(value: number, scales: number[]): { current: number; next: number | null; progress: number } {
+    for (let i = 0; i < scales.length; i++) {
+      if (value < scales[i]) {
+        const prevScale = i > 0 ? scales[i - 1] : 0;
+        const currentScale = scales[i];
+        const progress = ((value - prevScale) / (currentScale - prevScale)) * 100;
+        return {
+          current: currentScale,
+          next: i < scales.length - 1 ? scales[i + 1] : null,
+          progress: Math.round(progress * 10) / 10,
+        };
+      }
+    }
+    // Usuario ha superado todas las escalas
+    return { current: scales[scales.length - 1], next: null, progress: 100 };
+  }
+
+  /**
    * Encuentra competiciones para mostrar en una escala de progreso
-   * La escala es valor_usuario × 10, con 5 competiciones distribuidas
+   * Usa escalas fijas predefinidas
    */
   async getEquivalentCompetitions(zancadas: number): Promise<{
     equivalentKm: number;
     equivalentElevation: number;
     distanceScale: {
       userValue: number;
-      maxScale: number;
-      userProgress: number;
-      competitions: Array<{
-        id: string;
-        name: string;
-        slug: string;
-        baseDistance: number;
-        baseElevation: number | null;
-        position: number; // % en la escala
-        isCompleted: boolean;
-        event: { slug: string; name: string };
-      }>;
-    };
-    elevationScale: {
-      userValue: number;
-      maxScale: number;
-      userProgress: number;
+      scaleMax: number;
+      scalePrev: number;
+      progress: number;
+      isMaxLevel: boolean;
       competitions: Array<{
         id: string;
         name: string;
@@ -724,6 +735,27 @@ class ZancadasService {
         baseElevation: number | null;
         position: number;
         isCompleted: boolean;
+        multiplier: number;
+        displayName: string;
+        event: { slug: string; name: string };
+      }>;
+    };
+    elevationScale: {
+      userValue: number;
+      scaleMax: number;
+      scalePrev: number;
+      progress: number;
+      isMaxLevel: boolean;
+      competitions: Array<{
+        id: string;
+        name: string;
+        slug: string;
+        baseDistance: number;
+        baseElevation: number | null;
+        position: number;
+        isCompleted: boolean;
+        multiplier: number;
+        displayName: string;
         event: { slug: string; name: string };
       }>;
     };
@@ -731,27 +763,45 @@ class ZancadasService {
     const equivalentKm = this.zancadasToKm(zancadas);
     const equivalentElevation = this.zancadasToElevation(zancadas);
 
-    // Calcular escalas (valor × 10, mínimo 10km / 1000m)
-    const distanceMaxScale = Math.max(10, equivalentKm * ZancadasService.SCALE_MULTIPLIER);
-    const elevationMaxScale = Math.max(1000, equivalentElevation * ZancadasService.SCALE_MULTIPLIER);
+    // Encontrar escala actual para distancia
+    const distanceScaleInfo = this.findCurrentScale(equivalentKm, ZancadasService.DISTANCE_SCALES);
+    const elevationScaleInfo = this.findCurrentScale(equivalentElevation, ZancadasService.ELEVATION_SCALES);
+
+    const distanceScalePrev = ZancadasService.DISTANCE_SCALES[
+      ZancadasService.DISTANCE_SCALES.indexOf(distanceScaleInfo.current) - 1
+    ] || 0;
+    const elevationScalePrev = ZancadasService.ELEVATION_SCALES[
+      ZancadasService.ELEVATION_SCALES.indexOf(elevationScaleInfo.current) - 1
+    ] || 0;
 
     // Buscar competiciones para cada escala
-    const distanceCompetitions = await this.findCompetitionsForDistanceScale(distanceMaxScale, equivalentKm);
-    const elevationCompetitions = await this.findCompetitionsForElevationScale(elevationMaxScale, equivalentElevation);
+    const isDistanceMaxLevel = distanceScaleInfo.progress >= 100 && distanceScaleInfo.next === null;
+    const isElevationMaxLevel = elevationScaleInfo.progress >= 100 && elevationScaleInfo.next === null;
+
+    const distanceCompetitions = isDistanceMaxLevel
+      ? []
+      : await this.findCompetitionsForDistanceScale(distanceScaleInfo.current, distanceScalePrev, equivalentKm);
+    const elevationCompetitions = isElevationMaxLevel
+      ? []
+      : await this.findCompetitionsForElevationScale(elevationScaleInfo.current, elevationScalePrev, equivalentElevation);
 
     return {
       equivalentKm: Math.round(equivalentKm * 100) / 100,
       equivalentElevation: Math.round(equivalentElevation),
       distanceScale: {
         userValue: Math.round(equivalentKm * 100) / 100,
-        maxScale: Math.round(distanceMaxScale * 10) / 10,
-        userProgress: Math.round((equivalentKm / distanceMaxScale) * 1000) / 10,
+        scaleMax: distanceScaleInfo.current,
+        scalePrev: distanceScalePrev,
+        progress: distanceScaleInfo.progress,
+        isMaxLevel: isDistanceMaxLevel,
         competitions: distanceCompetitions,
       },
       elevationScale: {
         userValue: Math.round(equivalentElevation),
-        maxScale: Math.round(elevationMaxScale),
-        userProgress: Math.round((equivalentElevation / elevationMaxScale) * 1000) / 10,
+        scaleMax: elevationScaleInfo.current,
+        scalePrev: elevationScalePrev,
+        progress: elevationScaleInfo.progress,
+        isMaxLevel: isElevationMaxLevel,
         competitions: elevationCompetitions,
       },
     };
@@ -759,9 +809,11 @@ class ZancadasService {
 
   /**
    * Busca competiciones distribuidas en la escala de distancia
+   * Incluye lógica de multiplicadores para distancias muy largas
    */
   private async findCompetitionsForDistanceScale(
-    maxScale: number,
+    scaleMax: number,
+    scalePrev: number,
     userKm: number
   ): Promise<Array<{
     id: string;
@@ -771,12 +823,14 @@ class ZancadasService {
     baseElevation: number | null;
     position: number;
     isCompleted: boolean;
+    multiplier: number;
+    displayName: string;
     event: { slug: string; name: string };
   }>> {
-    // Buscar competiciones con distancia dentro de la escala
+    // Buscar competiciones reales dentro de la escala
     const competitions = await prisma.competition.findMany({
       where: {
-        baseDistance: { gt: 0, lte: maxScale },
+        baseDistance: { gt: 0 },
         status: 'PUBLISHED',
       },
       select: {
@@ -793,35 +847,131 @@ class ZancadasService {
           },
         },
       },
-      orderBy: { baseDistance: 'asc' },
+      orderBy: { baseDistance: 'desc' },
+      take: 100, // Obtener las más largas para usar con multiplicadores
     });
 
     if (competitions.length === 0) return [];
 
-    // Seleccionar 5 competiciones bien distribuidas
-    const selected = this.selectDistributedCompetitions(
-      competitions,
-      ZancadasService.COMPETITIONS_PER_SCALE,
-      (c) => c.baseDistance || 0
+    const scaleRange = scaleMax - scalePrev;
+    const result: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      baseDistance: number;
+      baseElevation: number | null;
+      position: number;
+      isCompleted: boolean;
+      multiplier: number;
+      displayName: string;
+      event: { slug: string; name: string };
+    }> = [];
+
+    // Dividir la escala en 5 segmentos y buscar una competición para cada uno
+    for (let i = 0; i < ZancadasService.COMPETITIONS_PER_SCALE; i++) {
+      const targetDistance = scalePrev + (scaleRange * (i + 1)) / ZancadasService.COMPETITIONS_PER_SCALE;
+
+      // Buscar competición directa o con multiplicador
+      const match = this.findCompetitionWithMultiplier(competitions, targetDistance);
+
+      if (match) {
+        const effectiveDistance = match.baseDistance * match.multiplier;
+        const position = ((effectiveDistance - scalePrev) / scaleRange) * 100;
+
+        result.push({
+          id: match.id,
+          name: match.name,
+          slug: match.slug,
+          baseDistance: match.baseDistance,
+          baseElevation: match.baseElevation,
+          position: Math.min(100, Math.max(0, Math.round(position * 10) / 10)),
+          isCompleted: userKm >= effectiveDistance,
+          multiplier: match.multiplier,
+          displayName: match.multiplier > 1 ? `${match.name} ×${match.multiplier}` : match.name,
+          event: match.event,
+        });
+      }
+    }
+
+    // Eliminar duplicados y ordenar por posición
+    const uniqueResults = result.filter(
+      (item, index, self) =>
+        index === self.findIndex((t) => t.displayName === item.displayName)
     );
 
-    return selected.map((comp) => ({
-      id: comp.id,
-      name: comp.name,
-      slug: comp.slug,
-      baseDistance: comp.baseDistance || 0,
-      baseElevation: comp.baseElevation,
-      position: Math.round(((comp.baseDistance || 0) / maxScale) * 1000) / 10,
-      isCompleted: userKm >= (comp.baseDistance || 0),
-      event: comp.event,
-    }));
+    return uniqueResults.sort((a, b) => a.position - b.position).slice(0, ZancadasService.COMPETITIONS_PER_SCALE);
+  }
+
+  /**
+   * Busca una competición que coincida con la distancia objetivo, usando multiplicadores si es necesario
+   */
+  private findCompetitionWithMultiplier(
+    competitions: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      baseDistance: number | null;
+      baseElevation: number | null;
+      featured: boolean;
+      event: { slug: string; name: string };
+    }>,
+    targetDistance: number
+  ): {
+    id: string;
+    name: string;
+    slug: string;
+    baseDistance: number;
+    baseElevation: number | null;
+    multiplier: number;
+    event: { slug: string; name: string };
+  } | null {
+    // Primero buscar competición directa (±20%)
+    const directMatch = competitions.find(
+      (c) => c.baseDistance && Math.abs(c.baseDistance - targetDistance) / targetDistance < 0.2
+    );
+
+    if (directMatch && directMatch.baseDistance) {
+      return { ...directMatch, baseDistance: directMatch.baseDistance, multiplier: 1 };
+    }
+
+    // Si no hay match directo, buscar con multiplicador
+    // Usar las competiciones más largas
+    const longCompetitions = competitions
+      .filter((c) => c.baseDistance && c.baseDistance >= 50) // Solo competiciones de 50km+
+      .slice(0, 10); // Las 10 más largas
+
+    for (const comp of longCompetitions) {
+      if (!comp.baseDistance) continue;
+
+      // Calcular multiplicador necesario
+      const multiplier = Math.round(targetDistance / comp.baseDistance);
+
+      if (multiplier >= 2 && multiplier <= 10) {
+        const effectiveDistance = comp.baseDistance * multiplier;
+        if (Math.abs(effectiveDistance - targetDistance) / targetDistance < 0.25) {
+          return { ...comp, baseDistance: comp.baseDistance, multiplier };
+        }
+      }
+    }
+
+    // Fallback: usar la competición más cercana sin multiplicador
+    const closest = competitions
+      .filter((c) => c.baseDistance)
+      .sort((a, b) => Math.abs((a.baseDistance || 0) - targetDistance) - Math.abs((b.baseDistance || 0) - targetDistance))[0];
+
+    if (closest && closest.baseDistance) {
+      return { ...closest, baseDistance: closest.baseDistance, multiplier: 1 };
+    }
+
+    return null;
   }
 
   /**
    * Busca competiciones distribuidas en la escala de desnivel
    */
   private async findCompetitionsForElevationScale(
-    maxScale: number,
+    scaleMax: number,
+    scalePrev: number,
     userElevation: number
   ): Promise<Array<{
     id: string;
@@ -831,12 +981,13 @@ class ZancadasService {
     baseElevation: number | null;
     position: number;
     isCompleted: boolean;
+    multiplier: number;
+    displayName: string;
     event: { slug: string; name: string };
   }>> {
-    // Buscar competiciones con desnivel dentro de la escala
     const competitions = await prisma.competition.findMany({
       where: {
-        baseElevation: { gt: 0, lte: maxScale },
+        baseElevation: { gt: 0 },
         status: 'PUBLISHED',
       },
       select: {
@@ -853,77 +1004,115 @@ class ZancadasService {
           },
         },
       },
-      orderBy: { baseElevation: 'asc' },
+      orderBy: { baseElevation: 'desc' },
+      take: 100,
     });
 
     if (competitions.length === 0) return [];
 
-    // Seleccionar 5 competiciones bien distribuidas
-    const selected = this.selectDistributedCompetitions(
-      competitions,
-      ZancadasService.COMPETITIONS_PER_SCALE,
-      (c) => c.baseElevation || 0
+    const scaleRange = scaleMax - scalePrev;
+    const result: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      baseDistance: number;
+      baseElevation: number | null;
+      position: number;
+      isCompleted: boolean;
+      multiplier: number;
+      displayName: string;
+      event: { slug: string; name: string };
+    }> = [];
+
+    for (let i = 0; i < ZancadasService.COMPETITIONS_PER_SCALE; i++) {
+      const targetElevation = scalePrev + (scaleRange * (i + 1)) / ZancadasService.COMPETITIONS_PER_SCALE;
+
+      const match = this.findElevationCompetitionWithMultiplier(competitions, targetElevation);
+
+      if (match) {
+        const effectiveElevation = (match.baseElevation || 0) * match.multiplier;
+        const position = ((effectiveElevation - scalePrev) / scaleRange) * 100;
+
+        result.push({
+          id: match.id,
+          name: match.name,
+          slug: match.slug,
+          baseDistance: match.baseDistance || 0,
+          baseElevation: match.baseElevation,
+          position: Math.min(100, Math.max(0, Math.round(position * 10) / 10)),
+          isCompleted: userElevation >= effectiveElevation,
+          multiplier: match.multiplier,
+          displayName: match.multiplier > 1 ? `${match.name} ×${match.multiplier}` : match.name,
+          event: match.event,
+        });
+      }
+    }
+
+    const uniqueResults = result.filter(
+      (item, index, self) =>
+        index === self.findIndex((t) => t.displayName === item.displayName)
     );
 
-    return selected.map((comp) => ({
-      id: comp.id,
-      name: comp.name,
-      slug: comp.slug,
-      baseDistance: comp.baseDistance || 0,
-      baseElevation: comp.baseElevation,
-      position: Math.round(((comp.baseElevation || 0) / maxScale) * 1000) / 10,
-      isCompleted: userElevation >= (comp.baseElevation || 0),
-      event: comp.event,
-    }));
+    return uniqueResults.sort((a, b) => a.position - b.position).slice(0, ZancadasService.COMPETITIONS_PER_SCALE);
   }
 
   /**
-   * Selecciona N competiciones bien distribuidas de una lista ordenada
-   * Prioriza featured y busca buena distribución en el rango
+   * Busca competición de desnivel con multiplicador
    */
-  private selectDistributedCompetitions<T extends { featured: boolean }>(
-    competitions: T[],
-    count: number,
-    getValue: (c: T) => number
-  ): T[] {
-    if (competitions.length <= count) {
-      return competitions;
+  private findElevationCompetitionWithMultiplier(
+    competitions: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      baseDistance: number | null;
+      baseElevation: number | null;
+      featured: boolean;
+      event: { slug: string; name: string };
+    }>,
+    targetElevation: number
+  ): {
+    id: string;
+    name: string;
+    slug: string;
+    baseDistance: number | null;
+    baseElevation: number | null;
+    multiplier: number;
+    event: { slug: string; name: string };
+  } | null {
+    const directMatch = competitions.find(
+      (c) => c.baseElevation && Math.abs(c.baseElevation - targetElevation) / targetElevation < 0.2
+    );
+
+    if (directMatch) {
+      return { ...directMatch, multiplier: 1 };
     }
 
-    const selected: T[] = [];
-    const minValue = getValue(competitions[0]);
-    const maxValue = getValue(competitions[competitions.length - 1]);
-    const range = maxValue - minValue;
+    const longCompetitions = competitions
+      .filter((c) => c.baseElevation && c.baseElevation >= 2000)
+      .slice(0, 10);
 
-    // Dividir en segmentos y seleccionar el mejor de cada uno
-    for (let i = 0; i < count; i++) {
-      const segmentStart = minValue + (range * i) / count;
-      const segmentEnd = minValue + (range * (i + 1)) / count;
+    for (const comp of longCompetitions) {
+      if (!comp.baseElevation) continue;
 
-      // Encontrar competiciones en este segmento
-      const inSegment = competitions.filter((c) => {
-        const val = getValue(c);
-        return val >= segmentStart && val < segmentEnd && !selected.includes(c);
-      });
+      const multiplier = Math.round(targetElevation / comp.baseElevation);
 
-      if (inSegment.length > 0) {
-        // Preferir featured, sino el primero del segmento
-        const featured = inSegment.find((c) => c.featured);
-        selected.push(featured || inSegment[0]);
-      } else {
-        // Si no hay en el segmento, buscar el más cercano no seleccionado
-        const targetValue = (segmentStart + segmentEnd) / 2;
-        const closest = competitions
-          .filter((c) => !selected.includes(c))
-          .sort((a, b) => Math.abs(getValue(a) - targetValue) - Math.abs(getValue(b) - targetValue))[0];
-        if (closest) {
-          selected.push(closest);
+      if (multiplier >= 2 && multiplier <= 10) {
+        const effectiveElevation = comp.baseElevation * multiplier;
+        if (Math.abs(effectiveElevation - targetElevation) / targetElevation < 0.25) {
+          return { ...comp, multiplier };
         }
       }
     }
 
-    // Ordenar por valor
-    return selected.sort((a, b) => getValue(a) - getValue(b));
+    const closest = competitions
+      .filter((c) => c.baseElevation)
+      .sort((a, b) => Math.abs((a.baseElevation || 0) - targetElevation) - Math.abs((b.baseElevation || 0) - targetElevation))[0];
+
+    if (closest) {
+      return { ...closest, multiplier: 1 };
+    }
+
+    return null;
   }
 
   /**
@@ -1093,14 +1282,15 @@ class ZancadasService {
     };
   } | null> {
     const result = await this.getEquivalentCompetitions(zancadas);
-    return result.byDistance
+    const firstComp = result.distanceScale.competitions[0];
+    return firstComp
       ? {
-          id: result.byDistance.id,
-          name: result.byDistance.name,
-          slug: result.byDistance.slug,
-          baseDistance: result.byDistance.baseDistance,
-          baseElevation: result.byDistance.baseElevation,
-          event: result.byDistance.event,
+          id: firstComp.id,
+          name: firstComp.name,
+          slug: firstComp.slug,
+          baseDistance: firstComp.baseDistance,
+          baseElevation: firstComp.baseElevation,
+          event: firstComp.event,
         }
       : null;
   }
