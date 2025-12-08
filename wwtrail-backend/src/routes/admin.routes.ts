@@ -531,6 +531,58 @@ router.delete(
 );
 
 // ============================================
+// RUTAS ADMIN - IMPORTACIÓN FORMATO NATIVO
+// (Importa archivos generados por el exportador)
+// ============================================
+
+/**
+ * @route   POST /api/v2/admin/import/native/validate
+ * @desc    Validate native export file and detect conflicts
+ * @access  Admin
+ * @body    { entity?: string, data: any[] }
+ * @query   ?entityType=events|competitions|editions|organizers|specialSeries|services|posts
+ */
+router.post(
+  '/admin/import/native/validate',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.validateNativeImport(req, res, next)
+);
+
+/**
+ * @route   POST /api/v2/admin/import/native
+ * @desc    Import from native export format
+ * @access  Admin
+ * @body    { entity?: string, data: any[], conflictResolution?: 'skip'|'update'|'create_new', dryRun?: boolean }
+ * @query   ?entityType=events|competitions|editions|organizers|specialSeries|services|posts
+ *
+ * Conflict resolution options:
+ * - skip: Skip items with conflicts (default)
+ * - update: Update existing records with import data
+ * - create_new: Create new records with generated IDs/slugs
+ *
+ * Use dryRun=true to preview what would happen without making changes
+ */
+router.post(
+  '/admin/import/native',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.importNative(req, res, next)
+);
+
+/**
+ * @route   POST /api/v2/admin/import/native/editions
+ * @desc    Import editions from native export format (convenience endpoint)
+ * @access  Admin
+ */
+router.post(
+  '/admin/import/native/editions',
+  authenticate,
+  requireAdmin,
+  (req: Request, res: Response, next: NextFunction) => importController.importNativeEditions(req, res, next)
+);
+
+// ============================================
 // RUTAS ADMIN - EXPORTACION DE DATOS
 // ============================================
 

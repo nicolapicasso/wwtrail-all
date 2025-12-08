@@ -1,6 +1,8 @@
 // src/services/import.service.ts
 import { prisma } from '../config/database';
 import { EventStatus, Language } from '@prisma/client';
+import logger from '../utils/logger';
+import { slugify } from '../utils/slugify';
 import type {
   ImportOrganizer,
   ImportSeries,
@@ -9,6 +11,73 @@ import type {
   ImportResult,
   FullImportResult,
 } from '../schemas/import.schema';
+
+// ============================================
+// TYPES FOR NATIVE EXPORT FORMAT IMPORT
+// ============================================
+
+export type EntityType = 'events' | 'competitions' | 'editions' | 'organizers' | 'specialSeries' | 'services' | 'posts';
+export type ConflictResolution = 'skip' | 'update' | 'create_new';
+
+export interface NativeImportFile {
+  exportedAt?: string;
+  entity?: EntityType;
+  version?: string;
+  count?: number;
+  data: any[];
+}
+
+export interface ConflictItem {
+  index: number;
+  id: string;
+  slug?: string;
+  name?: string;
+  conflictType: 'id_exists' | 'slug_exists' | 'both_exist';
+  existingRecord: {
+    id: string;
+    slug?: string;
+    name?: string;
+  };
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  entityType: EntityType;
+  totalItems: number;
+  validItems: number;
+  conflicts: ConflictItem[];
+  errors: string[];
+  warnings: string[];
+  preview: {
+    toCreate: number;
+    toSkip: number;
+    potentialUpdates: number;
+  };
+}
+
+export interface NativeImportOptions {
+  conflictResolution: ConflictResolution;
+  dryRun?: boolean;
+  userId: string;
+}
+
+export interface NativeImportResult {
+  success: boolean;
+  entityType: EntityType;
+  summary: {
+    processed: number;
+    created: number;
+    updated: number;
+    skipped: number;
+    errors: number;
+  };
+  details: {
+    created: { id: string; name?: string; slug?: string }[];
+    updated: { id: string; name?: string; slug?: string }[];
+    skipped: { id: string; name?: string; slug?: string; reason: string }[];
+    errors: { index: number; data: any; error: string }[];
+  };
+}
 
 // Mapping from import terrain names to our slug format
 const TERRAIN_MAPPING: Record<string, string> = {
@@ -502,6 +571,823 @@ export class ImportService {
       series: series.deleted,
       organizers: organizers.deleted,
     };
+  }
+
+  // ============================================
+  // NATIVE EXPORT FORMAT IMPORT METHODS
+  // ============================================
+
+  /**
+   * Validate import file and detect conflicts (native format)
+   */
+  async validateNativeImport(file: NativeImportFile, entityType?: EntityType): Promise<ValidationResult> {
+    const detectedType = entityType || file.entity;
+
+    if (!detectedType) {
+      return {
+        isValid: false,
+        entityType: 'events',
+        totalItems: 0,
+        validItems: 0,
+        conflicts: [],
+        errors: ['No entity type specified. Please provide entityType or ensure file has entity field.'],
+        warnings: [],
+        preview: { toCreate: 0, toSkip: 0, potentialUpdates: 0 },
+      };
+    }
+
+    if (!file.data || !Array.isArray(file.data)) {
+      return {
+        isValid: false,
+        entityType: detectedType,
+        totalItems: 0,
+        validItems: 0,
+        conflicts: [],
+        errors: ['Invalid file format: data array is missing or invalid.'],
+        warnings: [],
+        preview: { toCreate: 0, toSkip: 0, potentialUpdates: 0 },
+      };
+    }
+
+    const conflicts: ConflictItem[] = [];
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    let validItems = 0;
+
+    // Check each item for conflicts
+    for (let i = 0; i < file.data.length; i++) {
+      const item = file.data[i];
+
+      try {
+        const conflict = await this.checkNativeConflict(detectedType, item);
+        if (conflict) {
+          conflicts.push({ ...conflict, index: i });
+        } else {
+          validItems++;
+        }
+      } catch (err: any) {
+        errors.push(`Item ${i}: ${err.message}`);
+      }
+
+      // Check for missing required fields
+      const missingFields = this.checkRequiredFieldsNative(detectedType, item);
+      if (missingFields.length > 0) {
+        warnings.push(`Item ${i} (${item.name || item.id}): Missing fields: ${missingFields.join(', ')}`);
+      }
+
+      // Check for missing parent references
+      const parentWarning = await this.checkParentExists(detectedType, item);
+      if (parentWarning) {
+        warnings.push(`Item ${i} (${item.name || item.id}): ${parentWarning}`);
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      entityType: detectedType,
+      totalItems: file.data.length,
+      validItems,
+      conflicts,
+      errors,
+      warnings,
+      preview: {
+        toCreate: validItems,
+        toSkip: conflicts.length,
+        potentialUpdates: conflicts.length,
+      },
+    };
+  }
+
+  /**
+   * Import data from native export format
+   */
+  async importNativeData(
+    file: NativeImportFile,
+    entityType: EntityType,
+    options: NativeImportOptions
+  ): Promise<NativeImportResult> {
+    const result: NativeImportResult = {
+      success: true,
+      entityType,
+      summary: {
+        processed: 0,
+        created: 0,
+        updated: 0,
+        skipped: 0,
+        errors: 0,
+      },
+      details: {
+        created: [],
+        updated: [],
+        skipped: [],
+        errors: [],
+      },
+    };
+
+    if (!file.data || !Array.isArray(file.data)) {
+      result.success = false;
+      result.details.errors.push({ index: -1, data: null, error: 'Invalid file format' });
+      return result;
+    }
+
+    for (let i = 0; i < file.data.length; i++) {
+      const item = file.data[i];
+      result.summary.processed++;
+
+      try {
+        const conflict = await this.checkNativeConflict(entityType, item);
+
+        if (conflict) {
+          switch (options.conflictResolution) {
+            case 'skip':
+              result.summary.skipped++;
+              result.details.skipped.push({
+                id: item.id,
+                name: item.name,
+                slug: item.slug,
+                reason: `Conflict: ${conflict.conflictType}`,
+              });
+              break;
+
+            case 'update':
+              if (!options.dryRun) {
+                const updated = await this.updateNativeEntity(entityType, item, conflict.existingRecord.id, options.userId);
+                result.summary.updated++;
+                result.details.updated.push({
+                  id: updated.id,
+                  name: updated.name,
+                  slug: updated.slug,
+                });
+              } else {
+                result.summary.updated++;
+                result.details.updated.push({
+                  id: conflict.existingRecord.id,
+                  name: item.name,
+                  slug: item.slug,
+                });
+              }
+              break;
+
+            case 'create_new':
+              if (!options.dryRun) {
+                const created = await this.createNativeEntityWithNewId(entityType, item, options.userId);
+                result.summary.created++;
+                result.details.created.push({
+                  id: created.id,
+                  name: created.name,
+                  slug: created.slug,
+                });
+              } else {
+                result.summary.created++;
+                result.details.created.push({
+                  id: '[NEW_ID]',
+                  name: item.name,
+                  slug: `${item.slug}-imported`,
+                });
+              }
+              break;
+          }
+        } else {
+          // No conflict - create new
+          if (!options.dryRun) {
+            const created = await this.createNativeEntity(entityType, item, options.userId);
+            result.summary.created++;
+            result.details.created.push({
+              id: created.id,
+              name: created.name,
+              slug: created.slug,
+            });
+          } else {
+            result.summary.created++;
+            result.details.created.push({
+              id: item.id || '[NEW_ID]',
+              name: item.name,
+              slug: item.slug,
+            });
+          }
+        }
+      } catch (err: any) {
+        result.summary.errors++;
+        result.details.errors.push({
+          index: i,
+          data: { id: item.id, name: item.name, slug: item.slug },
+          error: err.message,
+        });
+        logger.error(`Import error for item ${i}:`, err);
+      }
+    }
+
+    result.success = result.summary.errors === 0;
+    return result;
+  }
+
+  // ============================================
+  // NATIVE CONFLICT DETECTION
+  // ============================================
+
+  private async checkNativeConflict(entityType: EntityType, item: any): Promise<ConflictItem | null> {
+    const model = this.getNativeModel(entityType);
+
+    let existingById = null;
+    let existingBySlug = null;
+
+    // Check by ID
+    if (item.id) {
+      try {
+        existingById = await (model as any).findUnique({
+          where: { id: item.id },
+          select: { id: true, slug: true, name: true, title: true, year: true },
+        });
+      } catch {
+        // ID format might be invalid
+      }
+    }
+
+    // Check by slug
+    if (item.slug) {
+      try {
+        existingBySlug = await (model as any).findFirst({
+          where: { slug: item.slug },
+          select: { id: true, slug: true, name: true, title: true, year: true },
+        });
+      } catch {
+        // Slug might not exist in this model
+      }
+    }
+
+    if (existingById && existingBySlug && existingById.id === existingBySlug.id) {
+      return {
+        index: 0,
+        id: item.id,
+        slug: item.slug,
+        name: item.name || item.title,
+        conflictType: 'both_exist',
+        existingRecord: {
+          id: existingById.id,
+          slug: existingById.slug,
+          name: existingById.name || existingById.title || `Year ${existingById.year}`,
+        },
+      };
+    } else if (existingById) {
+      return {
+        index: 0,
+        id: item.id,
+        slug: item.slug,
+        name: item.name || item.title,
+        conflictType: 'id_exists',
+        existingRecord: {
+          id: existingById.id,
+          slug: existingById.slug,
+          name: existingById.name || existingById.title || `Year ${existingById.year}`,
+        },
+      };
+    } else if (existingBySlug) {
+      return {
+        index: 0,
+        id: item.id,
+        slug: item.slug,
+        name: item.name || item.title,
+        conflictType: 'slug_exists',
+        existingRecord: {
+          id: existingBySlug.id,
+          slug: existingBySlug.slug,
+          name: existingBySlug.name || existingBySlug.title || `Year ${existingBySlug.year}`,
+        },
+      };
+    }
+
+    return null;
+  }
+
+  // ============================================
+  // NATIVE ENTITY CREATION
+  // ============================================
+
+  private async createNativeEntity(entityType: EntityType, item: any, userId: string): Promise<any> {
+    switch (entityType) {
+      case 'events':
+        return this.createNativeEvent(item, userId);
+      case 'competitions':
+        return this.createNativeCompetition(item, userId);
+      case 'editions':
+        return this.createNativeEdition(item, userId);
+      case 'organizers':
+        return this.createNativeOrganizer(item, userId);
+      case 'specialSeries':
+        return this.createNativeSpecialSeries(item, userId);
+      case 'services':
+        return this.createNativeService(item, userId);
+      case 'posts':
+        return this.createNativePost(item, userId);
+      default:
+        throw new Error(`Unknown entity type: ${entityType}`);
+    }
+  }
+
+  private async createNativeEntityWithNewId(entityType: EntityType, item: any, userId: string): Promise<any> {
+    const newItem = { ...item };
+    delete newItem.id;
+
+    if (newItem.slug) {
+      newItem.slug = await this.generateUniqueSlug(entityType, newItem.slug);
+    }
+
+    return this.createNativeEntity(entityType, newItem, userId);
+  }
+
+  private async generateUniqueSlug(entityType: EntityType, baseSlug: string): Promise<string> {
+    const model = this.getNativeModel(entityType);
+    let slug = `${baseSlug}-imported`;
+    let counter = 1;
+
+    while (true) {
+      try {
+        const existing = await (model as any).findFirst({
+          where: { slug },
+          select: { id: true },
+        });
+
+        if (!existing) {
+          return slug;
+        }
+
+        slug = `${baseSlug}-imported-${counter}`;
+        counter++;
+      } catch {
+        return slug;
+      }
+    }
+  }
+
+  private async createNativeEvent(item: any, userId: string): Promise<any> {
+    const data: any = {
+      name: item.name,
+      slug: item.slug || slugify(item.name),
+      description: item.description,
+      city: item.city || '',
+      country: item.country || 'ES',
+      website: item.website,
+      email: item.email,
+      phone: item.phone,
+      logoUrl: item.logoUrl,
+      coverImage: item.coverImage,
+      gallery: item.gallery || [],
+      typicalMonth: item.typicalMonth,
+      firstEditionYear: item.firstEditionYear || new Date().getFullYear(),
+      featured: item.featured || false,
+      status: item.status || 'PUBLISHED',
+      userId: userId,
+      language: item.language || 'ES',
+      instagramUrl: item.instagramUrl,
+      facebookUrl: item.facebookUrl,
+      twitterUrl: item.twitterUrl,
+      youtubeUrl: item.youtubeUrl,
+    };
+
+    // Handle organizer relation
+    if (item.organizerId || item.organizer?.id) {
+      const orgId = item.organizerId || item.organizer?.id;
+      const orgExists = await prisma.organizer.findUnique({ where: { id: orgId } });
+      if (orgExists) {
+        data.organizerId = orgId;
+      }
+    }
+
+    const event = await prisma.event.create({
+      data,
+      select: { id: true, name: true, slug: true },
+    });
+
+    // Set location if coordinates provided
+    if (item.latitude && item.longitude) {
+      await prisma.$executeRaw`
+        UPDATE events
+        SET location = ST_SetSRID(ST_MakePoint(${item.longitude}, ${item.latitude}), 4326)
+        WHERE id = ${event.id}
+      `;
+    }
+
+    logger.info(`Imported event: ${event.name} (${event.id})`);
+    return event;
+  }
+
+  private async createNativeCompetition(item: any, userId: string): Promise<any> {
+    // Find event by ID or slug
+    let eventId = item.eventId;
+    if (!eventId && item.event) {
+      const event = await prisma.event.findFirst({
+        where: {
+          OR: [
+            { id: item.event.id },
+            { slug: item.event.slug },
+          ].filter(x => x.id || x.slug),
+        },
+        select: { id: true },
+      });
+      eventId = event?.id;
+    }
+
+    if (!eventId) {
+      throw new Error(`Event not found for competition "${item.name}". Import the event first.`);
+    }
+
+    const data: any = {
+      eventId,
+      name: item.name,
+      slug: item.slug || slugify(item.name),
+      description: item.description,
+      type: item.type || 'TRAIL',
+      baseDistance: item.baseDistance,
+      baseElevation: item.baseElevation,
+      baseMaxParticipants: item.baseMaxParticipants,
+      itraPoints: item.itraPoints,
+      utmbIndex: item.utmbIndex,
+      logoUrl: item.logoUrl,
+      coverImage: item.coverImage,
+      gallery: item.gallery || [],
+      featured: item.featured || false,
+      status: item.status || 'PUBLISHED',
+      organizerId: userId,
+      language: item.language || 'ES',
+    };
+
+    // Handle terrain type
+    if (item.terrainTypeId || item.terrainType?.id) {
+      const terrainId = item.terrainTypeId || item.terrainType?.id;
+      const terrainExists = await prisma.terrainType.findUnique({ where: { id: terrainId } });
+      if (terrainExists) {
+        data.terrainTypeId = terrainId;
+      }
+    }
+
+    const competition = await prisma.competition.create({
+      data,
+      select: { id: true, name: true, slug: true },
+    });
+
+    // Handle special series (many-to-many)
+    if (item.specialSeries && Array.isArray(item.specialSeries)) {
+      for (const series of item.specialSeries) {
+        const seriesExists = await prisma.specialSeries.findFirst({
+          where: { OR: [{ id: series.id }, { slug: series.slug }].filter(x => x.id || x.slug) },
+        });
+        if (seriesExists) {
+          await prisma.competition.update({
+            where: { id: competition.id },
+            data: {
+              specialSeries: {
+                connect: { id: seriesExists.id },
+              },
+            },
+          });
+        }
+      }
+    }
+
+    logger.info(`Imported competition: ${competition.name} (${competition.id})`);
+    return competition;
+  }
+
+  private async createNativeEdition(item: any, _userId: string): Promise<any> {
+    // Find competition by ID or slug
+    let competitionId = item.competitionId;
+    if (!competitionId && item.competition) {
+      const competition = await prisma.competition.findFirst({
+        where: {
+          OR: [
+            { id: item.competition.id },
+            { slug: item.competition.slug },
+          ].filter(x => x.id || x.slug),
+        },
+        select: { id: true },
+      });
+      competitionId = competition?.id;
+    }
+
+    if (!competitionId) {
+      throw new Error(`Competition not found for edition "${item.name || item.year}". Import the competition first.`);
+    }
+
+    const data: any = {
+      competitionId,
+      year: item.year,
+      slug: item.slug || `${item.year}`,
+      name: item.name,
+      description: item.description,
+      startDate: item.startDate ? new Date(item.startDate) : null,
+      endDate: item.endDate ? new Date(item.endDate) : null,
+      distance: item.distance,
+      elevation: item.elevation,
+      maxParticipants: item.maxParticipants,
+      currentParticipants: item.currentParticipants || 0,
+      registrationUrl: item.registrationUrl,
+      registrationStatus: item.registrationStatus || 'NOT_OPEN',
+      price: item.price,
+      currency: item.currency || 'EUR',
+      itra: item.itra,
+      utmb: item.utmb,
+      logoUrl: item.logoUrl,
+      coverImage: item.coverImage,
+      gallery: item.gallery || [],
+      status: item.status || 'PUBLISHED',
+    };
+
+    const edition = await prisma.edition.create({
+      data,
+      select: { id: true, year: true, slug: true, name: true },
+    });
+
+    // Set location if coordinates provided
+    if (item.latitude && item.longitude) {
+      await prisma.$executeRaw`
+        UPDATE editions
+        SET location = ST_SetSRID(ST_MakePoint(${item.longitude}, ${item.latitude}), 4326)
+        WHERE id = ${edition.id}
+      `;
+    }
+
+    logger.info(`Imported edition: ${edition.name || edition.year} (${edition.id})`);
+    return { ...edition, name: edition.name || `${edition.year}` };
+  }
+
+  private async createNativeOrganizer(item: any, userId: string): Promise<any> {
+    const data: any = {
+      name: item.name,
+      slug: item.slug || slugify(item.name),
+      description: item.description,
+      email: item.email,
+      phone: item.phone,
+      website: item.website,
+      logoUrl: item.logoUrl,
+      coverImage: item.coverImage,
+      city: item.city,
+      country: item.country || 'ES',
+      verified: item.verified || false,
+      featured: item.featured || false,
+      createdById: userId,
+      instagramUrl: item.instagramUrl,
+      facebookUrl: item.facebookUrl,
+      twitterUrl: item.twitterUrl,
+      youtubeUrl: item.youtubeUrl,
+    };
+
+    const organizer = await prisma.organizer.create({
+      data,
+      select: { id: true, name: true, slug: true },
+    });
+
+    logger.info(`Imported organizer: ${organizer.name} (${organizer.id})`);
+    return organizer;
+  }
+
+  private async createNativeSpecialSeries(item: any, userId: string): Promise<any> {
+    const data: any = {
+      name: item.name,
+      slug: item.slug || slugify(item.name),
+      description: item.description,
+      logoUrl: item.logoUrl,
+      website: item.website,
+      country: item.country || 'ES',
+      language: item.language || 'ES',
+      createdById: userId,
+    };
+
+    const series = await prisma.specialSeries.create({
+      data,
+      select: { id: true, name: true, slug: true },
+    });
+
+    logger.info(`Imported special series: ${series.name} (${series.id})`);
+    return series;
+  }
+
+  private async createNativeService(item: any, userId: string): Promise<any> {
+    const data: any = {
+      name: item.name,
+      slug: item.slug || slugify(item.name),
+      description: item.description,
+      shortDescription: item.shortDescription,
+      email: item.email,
+      phone: item.phone,
+      website: item.website,
+      logoUrl: item.logoUrl,
+      coverImage: item.coverImage,
+      gallery: item.gallery || [],
+      city: item.city,
+      country: item.country || 'ES',
+      address: item.address,
+      featured: item.featured || false,
+      verified: item.verified || false,
+      status: item.status || 'PUBLISHED',
+      organizerId: userId,
+    };
+
+    // Handle category
+    if (item.categoryId || item.category?.id) {
+      const catId = item.categoryId || item.category?.id;
+      const catExists = await prisma.serviceCategory.findUnique({ where: { id: catId } });
+      if (catExists) {
+        data.categoryId = catId;
+      }
+    }
+
+    const service = await prisma.service.create({
+      data,
+      select: { id: true, name: true, slug: true },
+    });
+
+    // Set location if coordinates provided
+    if (item.latitude && item.longitude) {
+      await prisma.$executeRaw`
+        UPDATE services
+        SET location = ST_SetSRID(ST_MakePoint(${item.longitude}, ${item.latitude}), 4326)
+        WHERE id = ${service.id}
+      `;
+    }
+
+    logger.info(`Imported service: ${service.name} (${service.id})`);
+    return service;
+  }
+
+  private async createNativePost(item: any, userId: string): Promise<any> {
+    const data: any = {
+      title: item.title,
+      slug: item.slug || slugify(item.title),
+      content: item.content,
+      excerpt: item.excerpt,
+      coverImage: item.coverImage,
+      status: item.status || 'PUBLISHED',
+      featured: item.featured || false,
+      publishedAt: item.publishedAt ? new Date(item.publishedAt) : new Date(),
+      authorId: userId,
+    };
+
+    // Handle event relation
+    if (item.eventId || item.event?.id) {
+      const evtId = item.eventId || item.event?.id;
+      const evtExists = await prisma.event.findUnique({ where: { id: evtId } });
+      if (evtExists) {
+        data.eventId = evtId;
+      }
+    }
+
+    // Handle competition relation
+    if (item.competitionId || item.competition?.id) {
+      const compId = item.competitionId || item.competition?.id;
+      const compExists = await prisma.competition.findUnique({ where: { id: compId } });
+      if (compExists) {
+        data.competitionId = compId;
+      }
+    }
+
+    const post = await prisma.post.create({
+      data,
+      select: { id: true, title: true, slug: true },
+    });
+
+    logger.info(`Imported post: ${post.title} (${post.id})`);
+    return { ...post, name: post.title };
+  }
+
+  // ============================================
+  // NATIVE ENTITY UPDATE
+  // ============================================
+
+  private async updateNativeEntity(entityType: EntityType, item: any, existingId: string, _userId: string): Promise<any> {
+    const model = this.getNativeModel(entityType);
+
+    // Remove fields that shouldn't be updated
+    const updateData = { ...item };
+    delete updateData.id;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+    delete updateData.user;
+    delete updateData.organizer;
+    delete updateData.event;
+    delete updateData.competition;
+    delete updateData.competitions;
+    delete updateData.editions;
+    delete updateData.specialSeries;
+    delete updateData.terrainType;
+    delete updateData.category;
+    delete updateData.author;
+    delete updateData.tags;
+    delete updateData.images;
+    delete updateData._count;
+    delete updateData.latitude;
+    delete updateData.longitude;
+    delete updateData.location;
+    delete updateData.translations;
+    delete updateData.createdBy;
+
+    // Handle date fields
+    if (updateData.startDate) updateData.startDate = new Date(updateData.startDate);
+    if (updateData.endDate) updateData.endDate = new Date(updateData.endDate);
+    if (updateData.publishedAt) updateData.publishedAt = new Date(updateData.publishedAt);
+
+    const updated = await (model as any).update({
+      where: { id: existingId },
+      data: updateData,
+      select: { id: true, slug: true, name: true, title: true, year: true },
+    });
+
+    // Update location if coordinates provided
+    if (item.latitude && item.longitude) {
+      const table = entityType === 'events' ? 'events' : entityType === 'editions' ? 'editions' : entityType === 'services' ? 'services' : null;
+      if (table) {
+        await prisma.$executeRawUnsafe(`
+          UPDATE ${table}
+          SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
+          WHERE id = $3
+        `, item.longitude, item.latitude, existingId);
+      }
+    }
+
+    logger.info(`Updated ${entityType}: ${existingId}`);
+    return { ...updated, name: updated.name || updated.title || `Year ${updated.year}` };
+  }
+
+  // ============================================
+  // NATIVE HELPERS
+  // ============================================
+
+  private getNativeModel(entityType: EntityType): any {
+    switch (entityType) {
+      case 'events':
+        return prisma.event;
+      case 'competitions':
+        return prisma.competition;
+      case 'editions':
+        return prisma.edition;
+      case 'organizers':
+        return prisma.organizer;
+      case 'specialSeries':
+        return prisma.specialSeries;
+      case 'services':
+        return prisma.service;
+      case 'posts':
+        return prisma.post;
+      default:
+        throw new Error(`Unknown entity type: ${entityType}`);
+    }
+  }
+
+  private checkRequiredFieldsNative(entityType: EntityType, item: any): string[] {
+    const missing: string[] = [];
+
+    switch (entityType) {
+      case 'events':
+        if (!item.name) missing.push('name');
+        if (!item.city && !item.country) missing.push('city or country');
+        break;
+      case 'competitions':
+        if (!item.name) missing.push('name');
+        if (!item.eventId && !item.event) missing.push('event (eventId or event object)');
+        break;
+      case 'editions':
+        if (!item.year) missing.push('year');
+        if (!item.competitionId && !item.competition) missing.push('competition (competitionId or competition object)');
+        break;
+      case 'organizers':
+        if (!item.name) missing.push('name');
+        break;
+      case 'specialSeries':
+        if (!item.name) missing.push('name');
+        break;
+      case 'services':
+        if (!item.name) missing.push('name');
+        break;
+      case 'posts':
+        if (!item.title) missing.push('title');
+        if (!item.content) missing.push('content');
+        break;
+    }
+
+    return missing;
+  }
+
+  private async checkParentExists(entityType: EntityType, item: any): Promise<string | null> {
+    switch (entityType) {
+      case 'competitions':
+        const eventId = item.eventId || item.event?.id;
+        if (eventId) {
+          const event = await prisma.event.findUnique({ where: { id: eventId } });
+          if (!event) {
+            return `Parent event (${eventId}) not found. Import it first.`;
+          }
+        }
+        break;
+      case 'editions':
+        const compId = item.competitionId || item.competition?.id;
+        if (compId) {
+          const comp = await prisma.competition.findUnique({ where: { id: compId } });
+          if (!comp) {
+            return `Parent competition (${compId}) not found. Import it first.`;
+          }
+        }
+        break;
+    }
+    return null;
   }
 }
 
