@@ -217,12 +217,18 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       const organizerId = filters.organizerId;
       const skip = (page - 1) * limit;
 
+      // Verificar si es admin (case-insensitive)
+      const isAdmin = userRole?.toUpperCase() === 'ADMIN';
+
+      // Log para debug
+      console.log(`[getMyEvents] userId: ${userId}, userRole: "${userRole}", isAdmin: ${isAdmin}`);
+
       // Base where clause
       const where: any = {};
       const andConditions: any[] = [];
 
-      // Si es ORGANIZER, ve sus eventos creados + eventos donde es manager asignado
-      if (userRole !== 'ADMIN') {
+      // Si NO es ADMIN, filtrar solo sus eventos + eventos donde es manager
+      if (!isAdmin) {
         // Obtener IDs de eventos donde el usuario es manager
         const managedEvents = await prisma.eventManager.findMany({
           where: { userId },
@@ -237,6 +243,10 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
             { id: { in: managedEventIds } },
           ],
         });
+
+        console.log(`[getMyEvents] Non-admin filter applied. Managed events: ${managedEventIds.length}`);
+      } else {
+        console.log(`[getMyEvents] ADMIN detected - showing ALL events`);
       }
 
       // Filtro de status si se proporciona
@@ -274,7 +284,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       }
 
       // Filtro por organizador (solo para admin)
-      if (organizerId && userRole === 'ADMIN') {
+      if (organizerId && isAdmin) {
         where.organizerId = organizerId;
       }
 
@@ -314,7 +324,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
       // Añadir información de ownership para usuarios no-admin
       let eventsWithOwnership = enrichedEvents;
-      if (userRole !== 'ADMIN') {
+      if (!isAdmin) {
         eventsWithOwnership = enrichedEvents.map((event: any) => ({
           ...event,
           isOwner: event.userId === userId,
