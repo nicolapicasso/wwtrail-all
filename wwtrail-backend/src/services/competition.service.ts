@@ -146,6 +146,18 @@ export class CompetitionService {
   }
 
   /**
+   * Fisher-Yates shuffle algorithm for random ordering
+   */
+  private static shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  /**
    * Listar todas las competiciones
    */
   static async findAll(options: any = {}) {
@@ -293,21 +305,28 @@ export class CompetitionService {
     // ✅ NUEVO: Apply translations AFTER extracting coordinates
     const translatedCompetitions = applyTranslationsToList(competitions, requestedLanguage);
 
-    // Ordenar según el campo
-    if (sortBy === 'startDate' || sortBy === 'typicalMonth') {
-      // Ordenar por mes del evento
-      translatedCompetitions.sort((a, b) => {
-        const monthA = a.event.typicalMonth || 99;
-        const monthB = b.event.typicalMonth || 99;
-        return monthA - monthB;
-      });
-    } else if (sortBy === 'name') {
-      // Ordenar por nombre
-      translatedCompetitions.sort((a, b) => a.name.localeCompare(b.name));
+    // Ordenar según el campo (only if not featured query - featured gets shuffled)
+    if (!isFeatured) {
+      if (sortBy === 'startDate' || sortBy === 'typicalMonth') {
+        // Ordenar por mes del evento
+        translatedCompetitions.sort((a, b) => {
+          const monthA = a.event.typicalMonth || 99;
+          const monthB = b.event.typicalMonth || 99;
+          return monthA - monthB;
+        });
+      } else if (sortBy === 'name') {
+        // Ordenar por nombre
+        translatedCompetitions.sort((a, b) => a.name.localeCompare(b.name));
+      }
     }
 
+    // ✅ Shuffle results for featured queries to show variety
+    const finalCompetitions = isFeatured
+      ? this.shuffleArray(translatedCompetitions)
+      : translatedCompetitions;
+
     // Añadir isActive calculado basado en ediciones futuras
-    return this.addComputedIsActiveToList(translatedCompetitions);
+    return this.addComputedIsActiveToList(finalCompetitions);
   }
 
   /**
@@ -684,6 +703,9 @@ export class CompetitionService {
         logoUrl: data.logoUrl,
         coverImage: data.coverImage,
         gallery: data.gallery,
+        // Status fields
+        featured: data.featured,
+        status: data.status,
       },
       include: {
         event: {
@@ -769,6 +791,49 @@ export class CompetitionService {
 
     logger.warn(`Competition deleted: ${id}`);
     return { message: 'Competition deleted successfully' };
+  }
+
+  /**
+   * Toggle featured status de una competición
+   */
+  static async toggleFeatured(id: string, userId: string) {
+    // Get current competition directly from DB (not cached)
+    const current = await prisma.competition.findUnique({
+      where: { id },
+      select: { id: true, featured: true },
+    });
+
+    if (!current) {
+      throw new Error('Competition not found');
+    }
+
+    // Verify user is admin
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN') {
+      throw new Error('Unauthorized: Only admins can toggle featured status');
+    }
+
+    // Toggle featured status
+    const competition = await prisma.competition.update({
+      where: { id },
+      data: { featured: !current.featured },
+      include: {
+        event: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    logger.info(`Competition featured toggled: ${id} → ${competition.featured}`);
+    return competition;
   }
 
   /**

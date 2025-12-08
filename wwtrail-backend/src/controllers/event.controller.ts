@@ -509,8 +509,12 @@ export class EventController {
       const { id } = req.params;
       const userId = req.user!.id;
 
-      // Get current event
-      const currentEvent = await EventService.findById(id);
+      // Get current event directly from DB (not cached) to ensure fresh data
+      const currentEvent = await prisma.event.findUnique({
+        where: { id },
+        select: { id: true, featured: true },
+      });
+
       if (!currentEvent) {
         return res.status(404).json({
           status: 'error',
@@ -518,10 +522,7 @@ export class EventController {
         });
       }
 
-      // Toggle featured status directly with prisma to avoid permission checks
-      const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
-
+      // Toggle featured status using the singleton prisma instance
       const event = await prisma.event.update({
         where: { id },
         data: { featured: !currentEvent.featured },

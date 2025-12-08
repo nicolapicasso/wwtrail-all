@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { CompetitionController } from '../controllers/competition.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { authorize } from '../middlewares/authorize.middleware';
 import { competitionEditionsRouter } from './edition.routes';
 import { validate } from '../middlewares/validate.middleware';
 import {
@@ -91,6 +92,15 @@ router.patch(
   authenticate,
   validate(competitionIdSchema),
   CompetitionController.toggleActive
+);
+
+// PATCH /api/v2/competitions/:id/featured - Toggle featured status (solo ADMIN)
+router.patch(
+  '/:id/featured',
+  authenticate,
+  authorize('ADMIN'),
+  validate(competitionIdSchema),
+  CompetitionController.toggleFeatured
 );
 
 // DELETE /api/v2/competitions/:id - Eliminar

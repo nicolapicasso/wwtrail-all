@@ -523,6 +523,18 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
   }
 
   /**
+   * Fisher-Yates shuffle algorithm for random ordering
+   */
+  private static shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  /**
    * Listar eventos con filtros y paginación
    */
   static async findAll(filters: EventFilters = {}) {
@@ -541,8 +553,11 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
 
     const skip = (page - 1) * limit;
 
-    // Generar cache key
-    const cacheKey = `events:list:${JSON.stringify(filters)}`;
+    // Check if this is a featured query - use time-based cache for random rotation
+    const isFeaturedQuery = featured === 'true' || featured === true;
+    // For featured items, cache for 5 minutes to allow rotation
+    const cacheTimeComponent = isFeaturedQuery ? Math.floor(Date.now() / (5 * 60 * 1000)) : '';
+    const cacheKey = `events:list:${JSON.stringify(filters)}:${cacheTimeComponent}`;
 
     // Intentar obtener del caché
     const cached = await cache.get(cacheKey);
@@ -625,8 +640,13 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     // ✅ NUEVO: Apply translations based on requested language
     const translatedEvents = applyTranslationsToList(enrichedEvents, language);
 
+    // ✅ Shuffle results for featured queries to show variety
+    const finalEvents = isFeaturedQuery
+      ? this.shuffleArray(translatedEvents)
+      : translatedEvents;
+
     const result = {
-      data: translatedEvents,
+      data: finalEvents,
       pagination: {
         page,
         limit,
@@ -635,8 +655,9 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       },
     };
 
-    // Guardar en caché
-    await cache.set(cacheKey, JSON.stringify(result), CACHE_TTL);
+    // Guardar en caché (shorter TTL for featured queries)
+    const cacheTTL = isFeaturedQuery ? 300 : CACHE_TTL; // 5 min for featured, default for others
+    await cache.set(cacheKey, JSON.stringify(result), cacheTTL);
 
     return result;
   }

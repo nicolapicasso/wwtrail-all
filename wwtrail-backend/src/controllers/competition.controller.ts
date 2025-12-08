@@ -251,4 +251,30 @@ export class CompetitionController {
       next(error);
     }
   }
+
+  /**
+   * PATCH /api/v2/competitions/:id/featured
+   * Toggle featured status de una competición
+   * @auth Required (solo ADMIN)
+   */
+  static async toggleFeatured(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+
+      const competition = await CompetitionService.toggleFeatured(id, userId);
+
+      logger.info(
+        `Competition featured status toggled: ${id} → ${competition.featured} by user ${userId}`
+      );
+
+      res.json({
+        status: 'success',
+        message: `Competition ${competition.featured ? 'marked as featured' : 'unmarked as featured'}`,
+        data: competition,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
