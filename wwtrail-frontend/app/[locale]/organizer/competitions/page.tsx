@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Loader2, Mountain, TrendingUp, Users, Edit, Trash2, Eye, Calendar, Star } from 'lucide-react';
+import { Plus, Loader2, Mountain, TrendingUp, Users, Edit, Trash2, Eye, Calendar, Star, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import EventSelect from '@/components/EventSelect';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import eventsService from '@/lib/api/v2/events.service';
 import type { Competition } from '@/types/competition';
@@ -19,6 +20,7 @@ export default function OrganizerCompetitionsPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
 
   // Filters
@@ -46,10 +48,13 @@ export default function OrganizerCompetitionsPage() {
    */
   const fetchEvents = useCallback(async () => {
     try {
-      const response = await eventsService.getMyEvents({ limit: 100 });
+      setIsLoadingEvents(true);
+      const response = await eventsService.getMyEvents({ limit: 500 });
       setEvents(response.data);
     } catch (error: any) {
       console.error('Error fetching events:', error);
+    } finally {
+      setIsLoadingEvents(false);
     }
   }, []);
 
@@ -164,24 +169,25 @@ export default function OrganizerCompetitionsPage() {
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Event Filter */}
+            {/* Event Filter with search */}
             <div>
-              <label htmlFor="event-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Filtrar por Evento
               </label>
-              <select
-                id="event-filter"
+              <EventSelect
                 value={selectedEventId}
-                onChange={(e) => setSelectedEventId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="">Todos los eventos</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedEventId}
+                events={events.map(e => ({
+                  id: e.id,
+                  name: e.name,
+                  city: e.city,
+                  country: e.country,
+                }))}
+                placeholder="Selecciona un evento"
+                showAllOption={true}
+                allOptionLabel="Todos los eventos"
+                isLoading={isLoadingEvents}
+              />
             </div>
 
             {/* Featured Filter */}
@@ -194,7 +200,7 @@ export default function OrganizerCompetitionsPage() {
                 id="featured-filter"
                 value={featuredFilter}
                 onChange={(e) => setFeaturedFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
                 <option value="all">Todas las competiciones</option>
                 <option value="true">Solo destacadas</option>
@@ -205,16 +211,27 @@ export default function OrganizerCompetitionsPage() {
             {/* Search */}
             <div>
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar
+                Buscar competición
               </label>
-              <input
-                type="text"
-                id="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar por nombre..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  id="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar por nombre..."
+                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
