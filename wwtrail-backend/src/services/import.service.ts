@@ -785,8 +785,26 @@ export class ImportService {
   // NATIVE CONFLICT DETECTION
   // ============================================
 
+  private getSelectFieldsForEntity(entityType: EntityType): Record<string, boolean> {
+    switch (entityType) {
+      case 'events':
+      case 'competitions':
+      case 'organizers':
+      case 'specialSeries':
+      case 'services':
+        return { id: true, slug: true, name: true };
+      case 'posts':
+        return { id: true, slug: true, title: true };
+      case 'editions':
+        return { id: true, slug: true, year: true, competitionId: true };
+      default:
+        return { id: true };
+    }
+  }
+
   private async checkNativeConflict(entityType: EntityType, item: any): Promise<ConflictItem | null> {
     const model = this.getNativeModel(entityType);
+    const selectFields = this.getSelectFieldsForEntity(entityType);
 
     let existingById = null;
     let existingBySlug = null;
@@ -796,7 +814,7 @@ export class ImportService {
       try {
         existingById = await (model as any).findUnique({
           where: { id: item.id },
-          select: { id: true, slug: true, name: true, title: true, year: true },
+          select: selectFields,
         });
       } catch {
         // ID format might be invalid
@@ -808,7 +826,7 @@ export class ImportService {
       try {
         existingBySlug = await (model as any).findFirst({
           where: { slug: item.slug },
-          select: { id: true, slug: true, name: true, title: true, year: true },
+          select: selectFields,
         });
       } catch {
         // Slug might not exist in this model
@@ -971,6 +989,26 @@ export class ImportService {
     return event;
   }
 
+  // Convert utmbIndex string to enum value
+  private convertUtmbIndex(value: string | null | undefined): string | null {
+    if (!value) return null;
+
+    // Map common string formats to enum values
+    const normalizedValue = value.toUpperCase().replace(/[^0-9KM]/g, '');
+    const mappings: Record<string, string> = {
+      '20K': 'INDEX_20K',
+      '50K': 'INDEX_50K',
+      '100K': 'INDEX_100K',
+      '100M': 'INDEX_100M',
+      'INDEX_20K': 'INDEX_20K',
+      'INDEX_50K': 'INDEX_50K',
+      'INDEX_100K': 'INDEX_100K',
+      'INDEX_100M': 'INDEX_100M',
+    };
+
+    return mappings[normalizedValue] || mappings[value] || null;
+  }
+
   private async createNativeCompetition(item: any, userId: string): Promise<any> {
     // Find event by ID or slug
     let eventId = item.eventId;
@@ -991,23 +1029,37 @@ export class ImportService {
       throw new Error(`Event not found for competition "${item.name}". Import the event first.`);
     }
 
+    // Get organizer ID - prefer item.organizerId, fallback to userId
+    let organizerId = item.organizerId;
+    if (!organizerId) {
+      // Check if there's an organizer in the event
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+        select: { organizerId: true },
+      });
+      organizerId = event?.organizerId || userId;
+    }
+
+    // Convert utmbIndex to proper enum value
+    const utmbIndex = this.convertUtmbIndex(item.utmbIndex);
+
     const data: any = {
       eventId,
       name: item.name,
       slug: item.slug || slugify(item.name),
       description: item.description,
-      type: item.type || 'TRAIL',
+      type: item.type || item.competitionType?.toUpperCase() || 'TRAIL',
       baseDistance: item.baseDistance,
       baseElevation: item.baseElevation,
       baseMaxParticipants: item.baseMaxParticipants,
       itraPoints: item.itraPoints,
-      utmbIndex: item.utmbIndex,
-      logoUrl: item.logoUrl,
+      utmbIndex,
+      logoUrl: item.logoUrl || item.logo,
       coverImage: item.coverImage,
       gallery: item.gallery || [],
       featured: item.featured || false,
       status: item.status || 'PUBLISHED',
-      organizerId: userId,
+      organizerId,
       language: item.language || 'ES',
     };
 
@@ -1028,9 +1080,32 @@ export class ImportService {
     // Handle special series (many-to-many)
     if (item.specialSeries && Array.isArray(item.specialSeries)) {
       for (const series of item.specialSeries) {
-        const seriesExists = await prisma.specialSeries.findFirst({
-          where: { OR: [{ id: series.id }, { slug: series.slug }].filter(x => x.id || x.slug) },
-        });
+        let seriesExists = null;
+
+        if (typeof series === 'string') {
+          // Series is a string (name) - search by name or slug
+          seriesExists = await prisma.specialSeries.findFirst({
+            where: {
+              OR: [
+                { name: { contains: series, mode: 'insensitive' } },
+                { slug: series.toLowerCase().replace(/\s+/g, '-') },
+              ],
+            },
+          });
+        } else if (series && typeof series === 'object') {
+          // Series is an object with id/slug/name
+          const conditions = [];
+          if (series.id) conditions.push({ id: series.id });
+          if (series.slug) conditions.push({ slug: series.slug });
+          if (series.name) conditions.push({ name: series.name });
+
+          if (conditions.length > 0) {
+            seriesExists = await prisma.specialSeries.findFirst({
+              where: { OR: conditions },
+            });
+          }
+        }
+
         if (seriesExists) {
           await prisma.competition.update({
             where: { id: competition.id },
