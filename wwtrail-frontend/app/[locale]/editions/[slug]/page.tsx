@@ -12,6 +12,7 @@ import EventMap from '@/components/EventMap';
 import { RelatedArticles } from '@/components/RelatedArticles';
 import { EditionParticipants } from '@/components/EditionParticipants';
 import { AddParticipationButton } from '@/components/AddParticipationButton';
+import { AdminEditButtonFloating } from '@/components/AdminEditButton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Event } from '@/types/api';
@@ -157,11 +158,14 @@ export default async function EditionDetailPage({
             {/* Status Badge & Participation Button */}
             <div className="ml-4 flex flex-col gap-2 items-end">
               <StatusBadge status={edition.status} />
-              <AddParticipationButton
-                editionId={edition.id}
-                editionName={competition.name}
-                editionYear={edition.year}
-              />
+              {/* Only show participation button if edition is not upcoming */}
+              {edition.status !== 'UPCOMING' && (
+                <AddParticipationButton
+                  editionId={edition.id}
+                  editionName={competition.name}
+                  editionYear={edition.year}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -183,11 +187,14 @@ export default async function EditionDetailPage({
                 label="Desnivel"
                 value={`${editionWithDetails.resolvedElevation} m D+`}
               />
-              <StatCard
-                icon={<Users className="h-5 w-5" />}
-                label="Participantes"
-                value={`${edition.currentParticipants}/${editionWithDetails.resolvedMaxParticipants}`}
-              />
+              {/* Only show max participants if value exists */}
+              {editionWithDetails.resolvedMaxParticipants && (
+                <StatCard
+                  icon={<Users className="h-5 w-5" />}
+                  label="Máx. Participantes"
+                  value={`${editionWithDetails.resolvedMaxParticipants}`}
+                />
+              )}
               {edition.avgRating && (
                 <StatCard
                   icon={<span className="text-xl">⭐</span>}
@@ -480,6 +487,12 @@ export default async function EditionDetailPage({
         {/* Related Articles */}
         <RelatedArticles editionId={editionWithDetails.id} title={`Artículos sobre ${competition.name} ${editionWithDetails.year}`} className="mt-8" />
       </div>
+
+      {/* Admin Edit Button (floating) */}
+      <AdminEditButtonFloating
+        editUrl={`/organizer/editions/edit/${edition.id}`}
+        label="Editar Edición"
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 import Head from 'next/head';
 import { AdminEditButtonFloating } from '@/components/AdminEditButton';
+import { FavoriteButton } from '@/components/FavoriteButton';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -162,11 +163,18 @@ export default function CompetitionDetailPage() {
                   </div>
                 )}
               </div>
-              {!competition.isActive && (
-                <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
-                  Inactiva
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {!competition.isActive && (
+                  <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+                    Inactiva
+                  </span>
+                )}
+                <FavoriteButton
+                  competitionId={competition.id}
+                  size="lg"
+                  className="bg-white/20 hover:bg-white/30"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -546,13 +554,6 @@ export default function CompetitionDetailPage() {
               </div>
             )}
 
-            {/* Note about inheritance */}
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <p className="text-xs text-blue-800">
-                <strong>Note:</strong> Individual editions may override these base values.
-                Check the edition details for specific information.
-              </p>
-            </div>
           </div>
         </div>
 

@@ -461,17 +461,6 @@ export default async function EventDetailPage({
               </div>
             </div>
 
-            {/* Call to Action */}
-            <div className="bg-gradient-to-br from-green-600 to-blue-600 rounded-lg shadow-lg p-6 text-white">
-              <h3 className="font-bold text-lg mb-2">¿Interesado?</h3>
-              <p className="text-sm mb-4 text-white/90">
-                Guarda este evento en tus favoritos
-              </p>
-              <button className="w-full bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Guardar Evento
-              </button>
-            </div>
-
             {/* Eventos Similares */}
             {nearbyEvents && nearbyEvents.length > 0 && (
               <div className="bg-white rounded-lg shadow p-6">

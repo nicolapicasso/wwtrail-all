@@ -20,10 +20,13 @@ import {
   Medal,
   ArrowRight,
   Globe,
+  Heart,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
+import Link from 'next/link';
 import { userService, UserParticipation } from '@/lib/api/user.service';
+import { favoritesService, FavoriteCompetition } from '@/lib/api/favorites.service';
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -32,6 +35,8 @@ export default function ProfilePage() {
 
   const [participations, setParticipations] = useState<UserParticipation[]>([]);
   const [loadingParticipations, setLoadingParticipations] = useState(true);
+  const [favorites, setFavorites] = useState<FavoriteCompetition[]>([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [zancadasRefresh, setZancadasRefresh] = useState(0);
 
   useEffect(() => {
@@ -46,8 +51,20 @@ export default function ProfilePage() {
       }
     };
 
+    const fetchFavorites = async () => {
+      try {
+        const data = await favoritesService.getFavorites();
+        setFavorites(data);
+      } catch (err) {
+        console.error('Error fetching favorites:', err);
+      } finally {
+        setLoadingFavorites(false);
+      }
+    };
+
     if (user) {
       fetchParticipations();
+      fetchFavorites();
     }
   }, [user]);
 
@@ -263,6 +280,72 @@ export default function ProfilePage() {
 
             {/* Statistics */}
             <UserStatsCards />
+
+            {/* Favorite Competitions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-red-500" />
+                  Competiciones Favoritas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingFavorites ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+                  </div>
+                ) : favorites.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Heart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-muted-foreground mb-3">
+                      No tienes competiciones favoritas
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/${locale}/events`)}
+                    >
+                      Explorar competiciones
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {favorites.slice(0, 5).map((fav) => (
+                      <Link
+                        key={fav.id}
+                        href={`/events/${fav.competition.event.slug}/${fav.competition.slug}`}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-red-100">
+                            <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {fav.competition.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {fav.competition.event.name} • {fav.competition.event.country}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          {fav.competition.baseDistance && (
+                            <span>{fav.competition.baseDistance} km</span>
+                          )}
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </Link>
+                    ))}
+                    {favorites.length > 5 && (
+                      <p className="text-center text-sm text-muted-foreground pt-2">
+                        Y {favorites.length - 5} más...
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Zancadas Balance */}
             <ZancadasBalance onSyncComplete={() => setZancadasRefresh((prev) => prev + 1)} />

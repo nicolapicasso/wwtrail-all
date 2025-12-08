@@ -42,6 +42,7 @@ import seoRoutes from './routes/seo.routes';
 import footerRoutes from './routes/footer.routes';
 import landingRoutes from './routes/landing.routes';
 import zancadasRoutes from './routes/zancadas.routes';
+import favoritesRoutes from './routes/favorites.routes';
 
 dotenv.config();
 
@@ -166,6 +167,7 @@ app.use('/api/v2/footer', footerRoutes);
 app.use('/api/v2/landings', landingRoutes);
 app.use('/api/v2/users', userRoutes);
 app.use('/api/v2/zancadas', zancadasRoutes); // Omniwallet / Zancadas integration
+app.use('/api/v2/favorites', favoritesRoutes); // User favorites for competitions
 app.use('/api/v2', catalogRoutes);
 app.use('/api/v2', adminRoutes); // Admin routes for V2
 
