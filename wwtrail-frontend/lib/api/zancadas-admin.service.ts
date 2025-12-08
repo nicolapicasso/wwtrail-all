@@ -127,7 +127,7 @@ export const zancadasAdminService = {
    * POST /api/v2/zancadas/admin/retry-syncs
    */
   async retrySyncs(limit?: number): Promise<{ processed: number; synced: number }> {
-    const response = await apiClientV2.post('/zancadas/admin/retry-syncs', null, {
+    const response = await apiClientV2.post('/zancadas/admin/retry-syncs', {}, {
       params: { limit },
     });
     return response.data.data;
