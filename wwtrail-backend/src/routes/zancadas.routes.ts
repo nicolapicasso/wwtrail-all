@@ -18,8 +18,11 @@ router.get('/transactions', authenticate, ZancadasController.getMyTransactions);
 // Sincronizar mi balance con Omniwallet
 router.post('/sync', authenticate, ZancadasController.syncMyBalance);
 
-// Obtener competición equivalente basada en zancadas
+// Obtener competición equivalente basada en zancadas (legacy - single competition)
 router.get('/equivalent-competition', authenticate, ZancadasController.getEquivalentCompetition);
+
+// Obtener competiciones equivalentes (distancia + desnivel)
+router.get('/equivalent-competitions', authenticate, ZancadasController.getEquivalentCompetitions);
 
 // =============================================
 // RUTAS DE ADMIN (requieren autenticación + rol ADMIN)

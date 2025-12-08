@@ -94,7 +94,7 @@ export class ZancadasController {
 
   /**
    * GET /api/v2/zancadas/equivalent-competition
-   * Obtiene una competición equivalente basada en las zancadas
+   * Obtiene una competición equivalente basada en las zancadas (legacy)
    */
   static async getEquivalentCompetition(req: Request, res: Response, next: NextFunction) {
     try {
@@ -119,6 +119,32 @@ export class ZancadasController {
       res.status(200).json({
         status: 'success',
         data: competition,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v2/zancadas/equivalent-competitions
+   * Obtiene competiciones equivalentes por distancia y desnivel
+   */
+  static async getEquivalentCompetitions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const zancadas = parseInt(req.query.zancadas as string) || 0;
+
+      if (zancadas <= 0) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid zancadas value',
+        });
+      }
+
+      const result = await zancadasService.getEquivalentCompetitions(zancadas);
+
+      res.status(200).json({
+        status: 'success',
+        data: result,
       });
     } catch (error) {
       next(error);

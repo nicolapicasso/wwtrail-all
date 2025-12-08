@@ -42,6 +42,26 @@ export interface TransactionsResponse {
   meta: TransactionsMeta;
 }
 
+export interface CompetitionReference {
+  id: string;
+  name: string;
+  slug: string;
+  baseDistance: number;
+  baseElevation: number | null;
+  progress: number;
+  event: {
+    slug: string;
+    name: string;
+  };
+}
+
+export interface EquivalentCompetitionsResponse {
+  equivalentKm: number;
+  equivalentElevation: number;
+  byDistance: CompetitionReference | null;
+  byElevation: CompetitionReference | null;
+}
+
 // =============================================
 // USER SERVICE (para usuarios autenticados)
 // =============================================
@@ -115,7 +135,7 @@ export const zancadasService = {
   },
 
   /**
-   * Obtener una competición equivalente basada en las zancadas
+   * Obtener una competición equivalente basada en las zancadas (legacy)
    * GET /api/v2/zancadas/equivalent-competition
    */
   async getEquivalentCompetition(zancadas: number): Promise<{
@@ -131,6 +151,21 @@ export const zancadasService = {
   } | null> {
     try {
       const response = await apiClientV2.get('/zancadas/equivalent-competition', {
+        params: { zancadas }
+      });
+      return response.data.data;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Obtener competiciones equivalentes por distancia y desnivel
+   * GET /api/v2/zancadas/equivalent-competitions
+   */
+  async getEquivalentCompetitions(zancadas: number): Promise<EquivalentCompetitionsResponse | null> {
+    try {
+      const response = await apiClientV2.get('/zancadas/equivalent-competitions', {
         params: { zancadas }
       });
       return response.data.data;

@@ -668,39 +668,96 @@ class ZancadasService {
   // EQUIVALENT COMPETITION
   // =============================================
 
+  // Constantes de conversión
+  // 1 zancada = 1.5 metros horizontales
+  // 1 zancada = 0.3 metros de desnivel vertical
+  static readonly METERS_PER_ZANCADA = 1.5;
+  static readonly ELEVATION_METERS_PER_ZANCADA = 0.3;
+
   /**
-   * Encuentra una competición equivalente basada en las zancadas del usuario
-   * Conversión: 650 zancadas = 1 km
+   * Convierte zancadas a kilómetros
    */
-  async getEquivalentCompetition(zancadas: number): Promise<{
+  zancadasToKm(zancadas: number): number {
+    return (zancadas * ZancadasService.METERS_PER_ZANCADA) / 1000;
+  }
+
+  /**
+   * Convierte zancadas a metros de desnivel
+   */
+  zancadasToElevation(zancadas: number): number {
+    return zancadas * ZancadasService.ELEVATION_METERS_PER_ZANCADA;
+  }
+
+  /**
+   * Encuentra competiciones equivalentes basadas en las zancadas del usuario
+   * Devuelve una competición de referencia por distancia y otra por desnivel
+   */
+  async getEquivalentCompetitions(zancadas: number): Promise<{
+    equivalentKm: number;
+    equivalentElevation: number;
+    byDistance: {
+      id: string;
+      name: string;
+      slug: string;
+      baseDistance: number;
+      baseElevation: number | null;
+      progress: number;
+      event: {
+        slug: string;
+        name: string;
+      };
+    } | null;
+    byElevation: {
+      id: string;
+      name: string;
+      slug: string;
+      baseDistance: number;
+      baseElevation: number | null;
+      progress: number;
+      event: {
+        slug: string;
+        name: string;
+      };
+    } | null;
+  }> {
+    const equivalentKm = this.zancadasToKm(zancadas);
+    const equivalentElevation = this.zancadasToElevation(zancadas);
+
+    // Buscar la competición más cercana por distancia
+    // Si el usuario tiene menos km que cualquier competición, buscar la más corta
+    const byDistance = await this.findClosestCompetitionByDistance(equivalentKm);
+
+    // Buscar la competición más cercana por desnivel
+    const byElevation = await this.findClosestCompetitionByElevation(equivalentElevation);
+
+    return {
+      equivalentKm: Math.round(equivalentKm * 100) / 100,
+      equivalentElevation: Math.round(equivalentElevation),
+      byDistance,
+      byElevation,
+    };
+  }
+
+  /**
+   * Busca la competición más cercana por distancia
+   * Si el usuario tiene menos km, busca la más corta como objetivo
+   */
+  private async findClosestCompetitionByDistance(userKm: number): Promise<{
     id: string;
     name: string;
     slug: string;
     baseDistance: number;
     baseElevation: number | null;
+    progress: number;
     event: {
       slug: string;
       name: string;
     };
   } | null> {
-    const ZANCADAS_PER_KM = 650;
-    const equivalentKm = zancadas / ZANCADAS_PER_KM;
-
-    // Buscar competiciones con distancia similar (±30% o mínimo 5km de margen)
-    const marginPercent = 0.3;
-    const minMargin = 5;
-    const margin = Math.max(equivalentKm * marginPercent, minMargin);
-
-    const minDistance = Math.max(1, equivalentKm - margin);
-    const maxDistance = equivalentKm + margin;
-
-    // Buscar competiciones, priorizando las featured
+    // Buscar competiciones con distancia válida
     const competitions = await prisma.competition.findMany({
       where: {
-        baseDistance: {
-          gte: minDistance,
-          lte: maxDistance,
-        },
+        baseDistance: { gt: 0 },
         isActive: true,
       },
       select: {
@@ -717,47 +774,145 @@ class ZancadasService {
           },
         },
       },
-      orderBy: [
-        { isFeatured: 'desc' },
-        { baseDistance: 'asc' },
-      ],
-      take: 10,
+      orderBy: { baseDistance: 'asc' },
     });
 
-    if (competitions.length === 0) {
-      // Si no hay competiciones en el rango, buscar la más cercana
-      const closestCompetition = await prisma.competition.findFirst({
-        where: {
-          baseDistance: { gt: 0 },
-          isActive: true,
-        },
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          baseDistance: true,
-          baseElevation: true,
-          event: {
-            select: {
-              slug: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          baseDistance: equivalentKm < 10 ? 'asc' : 'desc',
-        },
-      });
+    if (competitions.length === 0) return null;
 
-      return closestCompetition;
+    // Encontrar la competición más cercana
+    let closest = competitions[0];
+    let minDiff = Math.abs(closest.baseDistance - userKm);
+
+    for (const comp of competitions) {
+      const diff = Math.abs(comp.baseDistance - userKm);
+      // Preferir featured si la diferencia es similar (dentro del 20%)
+      if (diff < minDiff || (diff <= minDiff * 1.2 && comp.isFeatured && !closest.isFeatured)) {
+        closest = comp;
+        minDiff = diff;
+      }
     }
 
-    // Seleccionar una aleatoria de las encontradas, priorizando featured
-    const featuredCompetitions = competitions.filter(c => c.isFeatured);
-    const pool = featuredCompetitions.length > 0 ? featuredCompetitions : competitions;
-    const randomIndex = Math.floor(Math.random() * pool.length);
+    // Si el usuario tiene menos que la competición más corta, usar esa como objetivo
+    if (userKm < competitions[0].baseDistance) {
+      closest = competitions[0];
+    }
 
-    return pool[randomIndex];
+    // Calcular progreso (limitado a 100%)
+    const progress = Math.min(100, (userKm / closest.baseDistance) * 100);
+
+    return {
+      id: closest.id,
+      name: closest.name,
+      slug: closest.slug,
+      baseDistance: closest.baseDistance,
+      baseElevation: closest.baseElevation,
+      progress: Math.round(progress * 10) / 10,
+      event: closest.event,
+    };
+  }
+
+  /**
+   * Busca la competición más cercana por desnivel
+   */
+  private async findClosestCompetitionByElevation(userElevation: number): Promise<{
+    id: string;
+    name: string;
+    slug: string;
+    baseDistance: number;
+    baseElevation: number | null;
+    progress: number;
+    event: {
+      slug: string;
+      name: string;
+    };
+  } | null> {
+    // Buscar competiciones con desnivel válido
+    const competitions = await prisma.competition.findMany({
+      where: {
+        baseElevation: { gt: 0 },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        baseDistance: true,
+        baseElevation: true,
+        isFeatured: true,
+        event: {
+          select: {
+            slug: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { baseElevation: 'asc' },
+    });
+
+    if (competitions.length === 0) return null;
+
+    // Encontrar la competición más cercana por desnivel
+    let closest = competitions[0];
+    let minDiff = Math.abs((closest.baseElevation || 0) - userElevation);
+
+    for (const comp of competitions) {
+      if (!comp.baseElevation) continue;
+      const diff = Math.abs(comp.baseElevation - userElevation);
+      // Preferir featured si la diferencia es similar (dentro del 20%)
+      if (diff < minDiff || (diff <= minDiff * 1.2 && comp.isFeatured && !closest.isFeatured)) {
+        closest = comp;
+        minDiff = diff;
+      }
+    }
+
+    // Si el usuario tiene menos que la competición con menos desnivel, usar esa como objetivo
+    const lowestElevation = competitions[0];
+    if (lowestElevation.baseElevation && userElevation < lowestElevation.baseElevation) {
+      closest = lowestElevation;
+    }
+
+    // Calcular progreso (limitado a 100%)
+    const progress = closest.baseElevation
+      ? Math.min(100, (userElevation / closest.baseElevation) * 100)
+      : 0;
+
+    return {
+      id: closest.id,
+      name: closest.name,
+      slug: closest.slug,
+      baseDistance: closest.baseDistance,
+      baseElevation: closest.baseElevation,
+      progress: Math.round(progress * 10) / 10,
+      event: closest.event,
+    };
+  }
+
+  /**
+   * @deprecated Use getEquivalentCompetitions instead
+   * Mantener por compatibilidad - usa la nueva lógica internamente
+   */
+  async getEquivalentCompetition(zancadas: number): Promise<{
+    id: string;
+    name: string;
+    slug: string;
+    baseDistance: number;
+    baseElevation: number | null;
+    event: {
+      slug: string;
+      name: string;
+    };
+  } | null> {
+    const result = await this.getEquivalentCompetitions(zancadas);
+    return result.byDistance
+      ? {
+          id: result.byDistance.id,
+          name: result.byDistance.name,
+          slug: result.byDistance.slug,
+          baseDistance: result.byDistance.baseDistance,
+          baseElevation: result.byDistance.baseElevation,
+          event: result.byDistance.event,
+        }
+      : null;
   }
 }
 
