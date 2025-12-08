@@ -187,8 +187,8 @@ export default async function EditionDetailPage({
                 label="Desnivel"
                 value={`${editionWithDetails.resolvedElevation} m D+`}
               />
-              {/* Only show max participants if value exists */}
-              {editionWithDetails.resolvedMaxParticipants && (
+              {/* Only show max participants if value is positive */}
+              {editionWithDetails.resolvedMaxParticipants > 0 && (
                 <StatCard
                   icon={<Users className="h-5 w-5" />}
                   label="Máx. Participantes"
