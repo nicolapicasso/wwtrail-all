@@ -383,10 +383,11 @@ function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType
     const a = document.createElement('a');
     a.href = url;
     a.download = `ejemplo_${entityType}.json`;
-    document.body.appendChild(a);
+    a.style.display = 'none';
+    // Click without appending to DOM to avoid React hydration issues
     a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    // Clean up blob URL after a short delay
+    setTimeout(() => window.URL.revokeObjectURL(url), 100);
   };
 
   return (
