@@ -894,6 +894,45 @@ class AdminService {
   }
 
   // ============================================
+  // NATIVE IMPORT SYSTEM (Import using export format)
+  // ============================================
+
+  /**
+   * Validate native import file and detect conflicts
+   */
+  async validateNativeImport(
+    entityType: NativeImportEntityType,
+    file: NativeImportFile
+  ): Promise<NativeValidationResult> {
+    const { data } = await apiClientV2.post('/admin/import/native/validate', {
+      ...file,
+      entity: entityType,
+    }, {
+      params: { entityType },
+    });
+    return data.data;
+  }
+
+  /**
+   * Import from native export format
+   */
+  async importNative(
+    entityType: NativeImportEntityType,
+    file: NativeImportFile,
+    options: NativeImportOptions = {}
+  ): Promise<NativeImportResult> {
+    const { data } = await apiClientV2.post('/admin/import/native', {
+      ...file,
+      entity: entityType,
+      conflictResolution: options.conflictResolution || 'skip',
+      dryRun: options.dryRun || false,
+    }, {
+      params: { entityType },
+    });
+    return data.data;
+  }
+
+  // ============================================
   // EXPORT SYSTEM
   // ============================================
 
@@ -1097,6 +1136,80 @@ export interface EntityMetadata {
   name: BulkEditEntityType;
   label: string;
   fields: FieldMetadata[];
+}
+
+// ============================================
+// NATIVE IMPORT TYPES
+// ============================================
+
+export type NativeImportEntityType =
+  | 'events'
+  | 'competitions'
+  | 'editions'
+  | 'organizers'
+  | 'specialSeries'
+  | 'services'
+  | 'posts';
+
+export type ConflictResolution = 'skip' | 'update' | 'create_new';
+
+export interface NativeImportFile {
+  exportedAt?: string;
+  entity?: string;
+  version?: string;
+  count?: number;
+  data: any[];
+}
+
+export interface NativeImportOptions {
+  conflictResolution?: ConflictResolution;
+  dryRun?: boolean;
+}
+
+export interface ConflictItem {
+  index: number;
+  item: any;
+  conflictType: 'id_exists' | 'slug_exists' | 'both_exist';
+  existingId?: string;
+  existingSlug?: string;
+}
+
+export interface NativeValidationResult {
+  isValid: boolean;
+  entityType: NativeImportEntityType;
+  totalItems: number;
+  validItems: number;
+  conflicts: ConflictItem[];
+  errors: string[];
+  warnings: string[];
+  preview: {
+    toCreate: number;
+    toSkip: number;
+    potentialUpdates: number;
+  };
+}
+
+export interface NativeImportResultItem {
+  index: number;
+  action: 'created' | 'updated' | 'skipped' | 'error';
+  id?: string;
+  slug?: string;
+  message?: string;
+}
+
+export interface NativeImportResult {
+  success: boolean;
+  entityType: NativeImportEntityType;
+  dryRun: boolean;
+  summary: {
+    total: number;
+    created: number;
+    updated: number;
+    skipped: number;
+    errors: number;
+  };
+  results: NativeImportResultItem[];
+  errors: string[];
 }
 
 export const adminService = new AdminService();
