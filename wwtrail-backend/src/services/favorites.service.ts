@@ -1,6 +1,6 @@
 // src/services/favorites.service.ts
 
-import prisma from '../lib/prisma';
+import prisma from '../config/database';
 
 export class FavoritesService {
   /**
