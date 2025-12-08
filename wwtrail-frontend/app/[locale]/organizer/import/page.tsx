@@ -5,6 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -34,6 +39,7 @@ import {
   Briefcase,
   FileText,
   Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 import {
   adminService,
@@ -254,8 +260,11 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
       } else if (Array.isArray(data)) {
         // Direct array
         setFile({ data });
+      } else if (data.id && (data.name || data.title || data.slug)) {
+        // Single object - wrap in array
+        setFile({ data: [data] });
       } else {
-        alert('Formato de archivo no reconocido');
+        alert('Formato de archivo no reconocido. Debe ser un array, un objeto con propiedad "data", o un objeto con "id" y "name/title/slug".');
         return;
       }
 
@@ -1169,102 +1178,117 @@ export default function ImportPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Delete Section - Always visible */}
-      <Card className="border-red-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-600">
-            <Trash2 className="w-5 h-5" />
-            Eliminar Datos
-          </CardTitle>
-          <CardDescription>
-            Elimina datos importados para poder reimportar con correcciones
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <Button
-              variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50"
-              onClick={() => handleDelete('editions')}
-              disabled={deleting !== null}
-            >
-              {deleting === 'editions' ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Calendar className="w-4 h-4 mr-2" />
-              )}
-              Ediciones
+      {/* Danger Zone - Collapsible Delete Section */}
+      <div className="mt-12 pt-8 border-t-2 border-dashed border-gray-200">
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full flex items-center justify-between p-4 hover:bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                <span className="font-medium">Zona de Peligro - Eliminar Datos</span>
+              </div>
+              <ChevronDown className="w-5 h-5 text-red-400" />
             </Button>
-            <Button
-              variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50"
-              onClick={() => handleDelete('competitions')}
-              disabled={deleting !== null}
-            >
-              {deleting === 'competitions' ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Trophy className="w-4 h-4 mr-2" />
-              )}
-              Competiciones
-            </Button>
-            <Button
-              variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50"
-              onClick={() => handleDelete('events')}
-              disabled={deleting !== null}
-            >
-              {deleting === 'events' ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <MapPin className="w-4 h-4 mr-2" />
-              )}
-              Eventos
-            </Button>
-            <Button
-              variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50"
-              onClick={() => handleDelete('series')}
-              disabled={deleting !== null}
-            >
-              {deleting === 'series' ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Award className="w-4 h-4 mr-2" />
-              )}
-              Series
-            </Button>
-            <Button
-              variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50"
-              onClick={() => handleDelete('organizers')}
-              disabled={deleting !== null}
-            >
-              {deleting === 'organizers' ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Building2 className="w-4 h-4 mr-2" />
-              )}
-              Organizadores
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete('all')}
-              disabled={deleting !== null}
-            >
-              {deleting === 'all' ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4 mr-2" />
-              )}
-              Eliminar Todo
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500 mt-3">
-            Nota: Eliminar eventos tambien elimina sus competiciones. Eliminar competiciones tambien elimina sus ediciones.
-          </p>
-        </CardContent>
-      </Card>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <Card className="border-red-200 mt-4 bg-red-50/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-600">
+                  <AlertTriangle className="w-5 h-5" />
+                  Eliminar Datos Importados
+                </CardTitle>
+                <CardDescription>
+                  Elimina datos importados para poder reimportar con correcciones. Esta accion no se puede deshacer.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <Button
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete('editions')}
+                    disabled={deleting !== null}
+                  >
+                    {deleting === 'editions' ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Calendar className="w-4 h-4 mr-2" />
+                    )}
+                    Ediciones
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete('competitions')}
+                    disabled={deleting !== null}
+                  >
+                    {deleting === 'competitions' ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trophy className="w-4 h-4 mr-2" />
+                    )}
+                    Competiciones
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete('events')}
+                    disabled={deleting !== null}
+                  >
+                    {deleting === 'events' ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <MapPin className="w-4 h-4 mr-2" />
+                    )}
+                    Eventos
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete('series')}
+                    disabled={deleting !== null}
+                  >
+                    {deleting === 'series' ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Award className="w-4 h-4 mr-2" />
+                    )}
+                    Series
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete('organizers')}
+                    disabled={deleting !== null}
+                  >
+                    {deleting === 'organizers' ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Building2 className="w-4 h-4 mr-2" />
+                    )}
+                    Organizadores
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDelete('all')}
+                    disabled={deleting !== null}
+                  >
+                    {deleting === 'all' ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4 mr-2" />
+                    )}
+                    Eliminar Todo
+                  </Button>
+                </div>
+                <p className="text-xs text-red-600 mt-3">
+                  Nota: Eliminar eventos tambien elimina sus competiciones. Eliminar competiciones tambien elimina sus ediciones.
+                </p>
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
     </div>
   );
 }
