@@ -92,6 +92,39 @@ export class ZancadasController {
     }
   }
 
+  /**
+   * GET /api/v2/zancadas/equivalent-competition
+   * Obtiene una competición equivalente basada en las zancadas
+   */
+  static async getEquivalentCompetition(req: Request, res: Response, next: NextFunction) {
+    try {
+      const zancadas = parseInt(req.query.zancadas as string) || 0;
+
+      if (zancadas <= 0) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid zancadas value',
+        });
+      }
+
+      const competition = await zancadasService.getEquivalentCompetition(zancadas);
+
+      if (!competition) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'No equivalent competition found',
+        });
+      }
+
+      res.status(200).json({
+        status: 'success',
+        data: competition,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // =============================================
   // ADMIN ENDPOINTS - CONFIG
   // =============================================

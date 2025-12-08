@@ -659,6 +659,102 @@ class ZancadasService {
     logger.info(`Retry failed syncs: ${synced}/${failedTransactions.length} synced`);
     return { processed: failedTransactions.length, synced };
   }
+
+  // =============================================
+  // EQUIVALENT COMPETITION
+  // =============================================
+
+  /**
+   * Encuentra una competición equivalente basada en las zancadas del usuario
+   * Conversión: 650 zancadas = 1 km
+   */
+  async getEquivalentCompetition(zancadas: number): Promise<{
+    id: string;
+    name: string;
+    slug: string;
+    baseDistance: number;
+    baseElevation: number | null;
+    event: {
+      slug: string;
+      name: string;
+    };
+  } | null> {
+    const ZANCADAS_PER_KM = 650;
+    const equivalentKm = zancadas / ZANCADAS_PER_KM;
+
+    // Buscar competiciones con distancia similar (±30% o mínimo 5km de margen)
+    const marginPercent = 0.3;
+    const minMargin = 5;
+    const margin = Math.max(equivalentKm * marginPercent, minMargin);
+
+    const minDistance = Math.max(1, equivalentKm - margin);
+    const maxDistance = equivalentKm + margin;
+
+    // Buscar competiciones, priorizando las featured
+    const competitions = await prisma.competition.findMany({
+      where: {
+        baseDistance: {
+          gte: minDistance,
+          lte: maxDistance,
+        },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        baseDistance: true,
+        baseElevation: true,
+        isFeatured: true,
+        event: {
+          select: {
+            slug: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: [
+        { isFeatured: 'desc' },
+        { baseDistance: 'asc' },
+      ],
+      take: 10,
+    });
+
+    if (competitions.length === 0) {
+      // Si no hay competiciones en el rango, buscar la más cercana
+      const closestCompetition = await prisma.competition.findFirst({
+        where: {
+          baseDistance: { gt: 0 },
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          baseDistance: true,
+          baseElevation: true,
+          event: {
+            select: {
+              slug: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          baseDistance: equivalentKm < 10 ? 'asc' : 'desc',
+        },
+      });
+
+      return closestCompetition;
+    }
+
+    // Seleccionar una aleatoria de las encontradas, priorizando featured
+    const featuredCompetitions = competitions.filter(c => c.isFeatured);
+    const pool = featuredCompetitions.length > 0 ? featuredCompetitions : competitions;
+    const randomIndex = Math.floor(Math.random() * pool.length);
+
+    return pool[randomIndex];
+  }
 }
 
 // Exportar instancia singleton

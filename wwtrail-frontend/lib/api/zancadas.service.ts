@@ -113,6 +113,31 @@ export const zancadasService = {
       syncedAt: new Date().toISOString(),
     };
   },
+
+  /**
+   * Obtener una competición equivalente basada en las zancadas
+   * GET /api/v2/zancadas/equivalent-competition
+   */
+  async getEquivalentCompetition(zancadas: number): Promise<{
+    id: string;
+    name: string;
+    slug: string;
+    baseDistance: number;
+    baseElevation: number;
+    event: {
+      slug: string;
+      name: string;
+    };
+  } | null> {
+    try {
+      const response = await apiClientV2.get('/zancadas/equivalent-competition', {
+        params: { zancadas }
+      });
+      return response.data.data;
+    } catch {
+      return null;
+    }
+  },
 };
 
 export default zancadasService;
