@@ -475,13 +475,13 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                     </div>
                     <div>
                       <span className="text-yellow-600">Conflictos:</span>{' '}
-                      <span className="font-medium">{validationResult.conflicts.length}</span>
+                      <span className="font-medium">{validationResult.conflicts?.length ?? 0}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Conflicts Detail */}
-                {validationResult.conflicts.length > 0 && (
+                {validationResult.conflicts && validationResult.conflicts.length > 0 && (
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium mb-3 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-yellow-500" />
@@ -509,7 +509,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 )}
 
                 {/* Errors */}
-                {validationResult.errors.length > 0 && (
+                {validationResult.errors && validationResult.errors.length > 0 && (
                   <div className="border border-red-200 rounded-lg p-4 bg-red-50">
                     <h4 className="font-medium mb-2 text-red-800 flex items-center gap-2">
                       <XCircle className="w-4 h-4" />
@@ -524,7 +524,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 )}
 
                 {/* Warnings */}
-                {validationResult.warnings.length > 0 && (
+                {validationResult.warnings && validationResult.warnings.length > 0 && (
                   <div className="border border-orange-200 rounded-lg p-4 bg-orange-50">
                     <h4 className="font-medium mb-2 text-orange-800 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4" />
@@ -607,7 +607,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
             <div className="pt-4 border-t">
               <Button
                 onClick={handleImport}
-                disabled={importing || validationResult.errors.length > 0}
+                disabled={importing || (validationResult.errors?.length ?? 0) > 0}
                 size="lg"
                 className={dryRun ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'}
               >
@@ -655,29 +655,29 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
             {/* Summary */}
             <div className="grid grid-cols-5 gap-4 mb-4">
               <div className="text-center p-3 bg-gray-100 rounded-lg">
-                <p className="text-2xl font-bold">{importResult.summary.total}</p>
+                <p className="text-2xl font-bold">{importResult.summary?.total ?? 0}</p>
                 <p className="text-xs text-gray-500">Total</p>
               </div>
               <div className="text-center p-3 bg-green-100 rounded-lg">
-                <p className="text-2xl font-bold text-green-700">{importResult.summary.created}</p>
+                <p className="text-2xl font-bold text-green-700">{importResult.summary?.created ?? 0}</p>
                 <p className="text-xs text-green-600">Creados</p>
               </div>
               <div className="text-center p-3 bg-blue-100 rounded-lg">
-                <p className="text-2xl font-bold text-blue-700">{importResult.summary.updated}</p>
+                <p className="text-2xl font-bold text-blue-700">{importResult.summary?.updated ?? 0}</p>
                 <p className="text-xs text-blue-600">Actualizados</p>
               </div>
               <div className="text-center p-3 bg-yellow-100 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-700">{importResult.summary.skipped}</p>
+                <p className="text-2xl font-bold text-yellow-700">{importResult.summary?.skipped ?? 0}</p>
                 <p className="text-xs text-yellow-600">Omitidos</p>
               </div>
               <div className="text-center p-3 bg-red-100 rounded-lg">
-                <p className="text-2xl font-bold text-red-700">{importResult.summary.errors}</p>
+                <p className="text-2xl font-bold text-red-700">{importResult.summary?.errors ?? 0}</p>
                 <p className="text-xs text-red-600">Errores</p>
               </div>
             </div>
 
             {/* Detailed Results */}
-            {importResult.results.length > 0 && (
+            {importResult.results && importResult.results.length > 0 && (
               <div className="max-h-64 overflow-y-auto border rounded-lg">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 sticky top-0">
