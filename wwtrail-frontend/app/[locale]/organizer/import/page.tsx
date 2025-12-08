@@ -220,6 +220,228 @@ const ENTITY_OPTIONS: { value: NativeImportEntityType; label: string; icon: Reac
   { value: 'posts', label: 'Posts', icon: FileText },
 ];
 
+// Example JSON structures for each entity type
+const EXAMPLE_JSON: Record<NativeImportEntityType, object> = {
+  events: {
+    id: "cuid_example_event_123",
+    slug: "ultra-trail-barcelona",
+    name: "Ultra Trail Barcelona",
+    description: "Descripcion del evento...",
+    shortDescription: "Descripcion corta",
+    country: "ES",
+    region: "Catalunya",
+    city: "Barcelona",
+    latitude: 41.3851,
+    longitude: 2.1734,
+    website: "https://example.com",
+    email: "info@example.com",
+    phone: "+34 600 000 000",
+    featured: false,
+    status: "PUBLISHED",
+    organizer: {
+      id: "organizer_id",
+      name: "Nombre Organizador",
+      slug: "nombre-organizador"
+    },
+    competitions: [
+      { id: "comp_id", name: "Competicion", slug: "competicion" }
+    ]
+  },
+  competitions: {
+    id: "cuid_example_comp_123",
+    slug: "ultra-trail-100k",
+    name: "Ultra Trail 100K",
+    description: "Descripcion de la competicion...",
+    shortDescription: "Descripcion corta",
+    distance: 100,
+    elevation: 5000,
+    itra: 5,
+    utmbIndex: "INDEX_100K",  // Valores: INDEX_20K, INDEX_50K, INDEX_100K, INDEX_100M
+    featured: false,
+    status: "PUBLISHED",
+    event: {
+      id: "event_id",
+      name: "Nombre Evento",
+      slug: "nombre-evento"
+    },
+    specialSeries: [
+      { id: "series_id", name: "UTMB World Series Events", slug: "utmb-world-series-events" }
+    ],
+    terrainType: {
+      id: "terrain_id",
+      name: "Montana",
+      slug: "montana"
+    },
+    editions: [
+      { id: "edition_id", year: 2024, slug: "2024" }
+    ]
+  },
+  editions: {
+    id: "cuid_example_edition_123",
+    slug: "2024",
+    year: 2024,
+    date: "2024-06-15T08:00:00.000Z",
+    registrationStart: "2024-01-15T00:00:00.000Z",
+    registrationEnd: "2024-05-31T23:59:59.000Z",
+    price: 150,
+    currency: "EUR",
+    maxParticipants: 500,
+    latitude: 41.3851,
+    longitude: 2.1734,
+    status: "PUBLISHED",
+    competition: {
+      id: "competition_id",
+      name: "Ultra Trail 100K",
+      slug: "ultra-trail-100k",
+      event: {
+        id: "event_id",
+        name: "Ultra Trail Barcelona",
+        slug: "ultra-trail-barcelona"
+      }
+    }
+  },
+  organizers: {
+    id: "cuid_example_org_123",
+    slug: "trail-running-events",
+    name: "Trail Running Events",
+    description: "Organizador de eventos de trail...",
+    website: "https://trailrunningevents.com",
+    email: "info@trailrunningevents.com",
+    phone: "+34 600 000 000",
+    logo: "https://example.com/logo.png",
+    country: "ES",
+    region: "Catalunya",
+    city: "Barcelona",
+    events: [
+      { id: "event_id", name: "Evento 1", slug: "evento-1" }
+    ]
+  },
+  specialSeries: {
+    id: "cuid_example_series_123",
+    slug: "utmb-world-series",
+    name: "UTMB World Series",
+    description: "Circuito mundial de ultra trail...",
+    logo: "https://example.com/utmb-logo.png",
+    website: "https://utmb.world",
+    competitions: [
+      { id: "comp_id", name: "Competicion", slug: "competicion" }
+    ]
+  },
+  services: {
+    id: "cuid_example_service_123",
+    slug: "fisioterapia-deportiva",
+    name: "Fisioterapia Deportiva BCN",
+    description: "Servicios de fisioterapia para corredores...",
+    website: "https://fisio-bcn.com",
+    email: "info@fisio-bcn.com",
+    phone: "+34 600 000 000",
+    latitude: 41.3851,
+    longitude: 2.1734,
+    address: "Calle Ejemplo 123",
+    city: "Barcelona",
+    country: "ES",
+    category: {
+      id: "category_id",
+      name: "Fisioterapia",
+      slug: "fisioterapia"
+    }
+  },
+  posts: {
+    id: "cuid_example_post_123",
+    slug: "guia-entrenamiento-ultra",
+    title: "Guia de Entrenamiento para Ultra Trail",
+    content: "Contenido del articulo...",
+    excerpt: "Extracto breve del articulo",
+    featuredImage: "https://example.com/image.jpg",
+    status: "PUBLISHED",
+    publishedAt: "2024-01-15T10:00:00.000Z",
+    author: {
+      id: "user_id",
+      email: "autor@example.com",
+      username: "autor"
+    },
+    tags: [
+      { id: "tag_id", name: "Entrenamiento", slug: "entrenamiento" }
+    ],
+    event: {
+      id: "event_id",
+      name: "Evento Relacionado",
+      slug: "evento-relacionado"
+    }
+  }
+};
+
+// Component to show example JSON and allow download
+function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType }) {
+  const [showExample, setShowExample] = useState(false);
+  const example = EXAMPLE_JSON[entityType];
+  const exampleArray = [example]; // Export format is an array
+
+  const downloadExample = () => {
+    const blob = new Blob([JSON.stringify(exampleArray, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ejemplo_${entityType}.json`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  return (
+    <div className="border rounded-lg p-4 bg-gray-50">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="font-medium text-sm flex items-center gap-2">
+          <FileJson className="w-4 h-4 text-blue-600" />
+          Formato JSON Esperado
+        </h4>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExample(!showExample)}
+          >
+            <Eye className="w-3 h-3 mr-1" />
+            {showExample ? 'Ocultar' : 'Ver Ejemplo'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={downloadExample}
+          >
+            <Download className="w-3 h-3 mr-1" />
+            Descargar
+          </Button>
+        </div>
+      </div>
+
+      {showExample && (
+        <div className="mt-3">
+          <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-xs max-h-80 overflow-y-auto">
+            {JSON.stringify(exampleArray, null, 2)}
+          </pre>
+          <div className="mt-2 text-xs text-gray-600 space-y-1">
+            <p><strong>Nota:</strong> El archivo debe ser un array de objetos con esta estructura.</p>
+            {entityType === 'competitions' && (
+              <>
+                <p><strong>utmbIndex:</strong> Valores validos: INDEX_20K, INDEX_50K, INDEX_100K, INDEX_100M (o 20K, 50K, 100K, 100M)</p>
+                <p><strong>specialSeries:</strong> Array de objetos con id, name y slug (no strings)</p>
+              </>
+            )}
+            {entityType === 'events' && (
+              <p><strong>organizer:</strong> Objeto con id, name y slug para vincular al organizador existente</p>
+            )}
+            {entityType === 'editions' && (
+              <p><strong>competition:</strong> Debe incluir el objeto competition con id y slug para vincular correctamente</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NativeImportTab({ onImportComplete }: { onImportComplete: () => void }) {
   const [entityType, setEntityType] = useState<NativeImportEntityType>('events');
   const [file, setFile] = useState<NativeImportFile | null>(null);
@@ -355,6 +577,11 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
               })}
             </SelectContent>
           </Select>
+
+          {/* Example JSON Section - show for selected entity */}
+          <div className="mt-4">
+            <ExampleJsonSection entityType={entityType} />
+          </div>
         </CardContent>
       </Card>
 
