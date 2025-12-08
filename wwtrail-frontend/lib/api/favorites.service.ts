@@ -1,6 +1,6 @@
 // lib/api/favorites.service.ts
 
-import api from './api';
+import { apiClientV2 } from './client';
 
 export interface FavoriteCompetition {
   id: string;
@@ -35,7 +35,7 @@ export const favoritesService = {
    * Get all user's favorite competitions
    */
   async getFavorites(): Promise<FavoriteCompetition[]> {
-    const response = await api.get('/favorites');
+    const response = await apiClientV2.get('/favorites');
     return response.data.data;
   },
 
@@ -43,7 +43,7 @@ export const favoritesService = {
    * Check if a competition is favorited by the current user
    */
   async isFavorite(competitionId: string): Promise<boolean> {
-    const response = await api.get(`/favorites/check/${competitionId}`);
+    const response = await apiClientV2.get(`/favorites/check/${competitionId}`);
     return response.data.data.isFavorite;
   },
 
@@ -51,7 +51,7 @@ export const favoritesService = {
    * Add a competition to favorites
    */
   async addFavorite(competitionId: string): Promise<FavoriteCompetition> {
-    const response = await api.post(`/favorites/${competitionId}`);
+    const response = await apiClientV2.post(`/favorites/${competitionId}`);
     return response.data.data;
   },
 
@@ -59,7 +59,7 @@ export const favoritesService = {
    * Remove a competition from favorites
    */
   async removeFavorite(competitionId: string): Promise<void> {
-    await api.delete(`/favorites/${competitionId}`);
+    await apiClientV2.delete(`/favorites/${competitionId}`);
   },
 
   /**

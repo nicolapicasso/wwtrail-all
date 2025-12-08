@@ -313,7 +313,7 @@ export default function ProfilePage() {
                     {favorites.slice(0, 5).map((fav) => (
                       <Link
                         key={fav.id}
-                        href={`/events/${fav.competition.event.slug}/${fav.competition.slug}`}
+                        href={`/${locale}/events/${fav.competition.event.slug}/${fav.competition.slug}`}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex items-center gap-3">

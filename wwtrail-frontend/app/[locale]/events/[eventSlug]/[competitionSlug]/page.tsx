@@ -163,7 +163,7 @@ export default function CompetitionDetailPage() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {!competition.isActive && (
                   <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
                     Inactiva
@@ -172,6 +172,7 @@ export default function CompetitionDetailPage() {
                 <FavoriteButton
                   competitionId={competition.id}
                   size="lg"
+                  showLabel={true}
                   className="bg-white/20 hover:bg-white/30"
                 />
               </div>
