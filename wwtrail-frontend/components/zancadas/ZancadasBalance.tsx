@@ -8,16 +8,15 @@ import {
   zancadasService,
   ZancadasBalance as BalanceType,
   EquivalentCompetitionsResponse,
-  CompetitionReference
+  ScaleData,
+  CompetitionMarker
 } from '@/lib/api/zancadas.service';
-import { Footprints, RefreshCw, ChevronRight } from 'lucide-react';
+import { Footprints, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 
 // Constantes de conversión (deben coincidir con el backend)
-// 1 zancada = 1.5 metros horizontales
-// 1 zancada = 0.3 metros de desnivel vertical
 const METERS_PER_ZANCADA = 1.5;
 const ELEVATION_METERS_PER_ZANCADA = 0.3;
 
@@ -26,229 +25,221 @@ interface ZancadasBalanceProps {
 }
 
 // =============================================
-// SVG PROGRESS COMPONENTS
+// SVG SCALE COMPONENTS
 // =============================================
 
 /**
- * Barra de progreso para distancia con icono de ruta
+ * Escala de progreso de distancia con marcadores de competiciones
  */
-function DistanceProgressBar({
-  progress,
-  userKm,
-  targetKm
+function DistanceScaleBar({
+  scale,
+  locale
 }: {
-  progress: number;
-  userKm: number;
-  targetKm: number;
+  scale: ScaleData;
+  locale: string;
 }) {
-  const clampedProgress = Math.min(100, Math.max(0, progress));
+  const [hoveredComp, setHoveredComp] = useState<CompetitionMarker | null>(null);
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between text-xs text-muted-foreground mb-1">
-        <span>{userKm.toFixed(2)} km</span>
-        <span>{targetKm} km</span>
+    <div className="space-y-2">
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>0 km</span>
+        <span className="font-medium text-blue-600">{scale.userValue} km</span>
+        <span>{scale.maxScale} km</span>
       </div>
-      <div className="relative h-6 bg-blue-100 rounded-full overflow-hidden">
-        {/* Track/Road pattern */}
-        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-          <defs>
-            <pattern id="roadPattern" patternUnits="userSpaceOnUse" width="20" height="6" patternTransform="rotate(0)">
-              <line x1="0" y1="3" x2="8" y2="3" stroke="#93c5fd" strokeWidth="1" strokeDasharray="4 4"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#roadPattern)" />
-        </svg>
 
-        {/* Progress fill */}
+      {/* Progress bar con marcadores */}
+      <div className="relative h-8 bg-blue-50 rounded-full overflow-visible border border-blue-200">
+        {/* Barra de progreso del usuario */}
         <div
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out rounded-full"
-          style={{ width: `${clampedProgress}%` }}
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-500"
+          style={{ width: `${Math.min(100, scale.userProgress)}%` }}
+        />
+
+        {/* Marcadores de competiciones */}
+        {scale.competitions.map((comp, idx) => (
+          <div
+            key={comp.id}
+            className="absolute top-0 h-full flex items-center"
+            style={{ left: `${comp.position}%`, transform: 'translateX(-50%)' }}
+          >
+            {/* Línea vertical */}
+            <div className={`w-0.5 h-full ${comp.isCompleted ? 'bg-green-500' : 'bg-blue-300'}`} />
+
+            {/* Marcador */}
+            <div
+              className={`absolute -top-3 cursor-pointer transition-transform hover:scale-125 ${
+                comp.isCompleted ? 'text-green-500' : 'text-blue-400'
+              }`}
+              onMouseEnter={() => setHoveredComp(comp)}
+              onMouseLeave={() => setHoveredComp(null)}
+            >
+              {comp.isCompleted ? (
+                <span className="text-sm">✓</span>
+              ) : (
+                <span className="text-xs font-bold">{idx + 1}</span>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* Marcador del usuario */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
+          style={{ left: `${Math.min(100, scale.userProgress)}%`, transform: `translateX(-50%) translateY(-50%)` }}
         >
-          {/* Runner icon at the end of progress */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white rounded-full p-1 shadow-sm border border-blue-200">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
-              <circle cx="12" cy="5" r="3"/>
-              <path d="M6 20l3-7 3 4 3-4 3 7"/>
-            </svg>
+          <div className="w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+            <span className="text-[8px] text-white">🏃</span>
           </div>
         </div>
+      </div>
 
-        {/* Percentage text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-semibold text-blue-900 drop-shadow-sm">
-            {clampedProgress.toFixed(1)}%
-          </span>
+      {/* Tooltip de competición hover */}
+      {hoveredComp && (
+        <div className="text-xs bg-white border rounded-lg p-2 shadow-lg">
+          <p className="font-medium">{hoveredComp.name}</p>
+          <p className="text-muted-foreground">{hoveredComp.baseDistance} km • {hoveredComp.event.name}</p>
         </div>
+      )}
+
+      {/* Lista de competiciones */}
+      <div className="space-y-1 mt-3">
+        {scale.competitions.map((comp, idx) => (
+          <Link
+            key={comp.id}
+            href={`/${locale}/events/${comp.event.slug}/${comp.slug}`}
+            className={`flex items-center gap-2 text-xs p-1.5 rounded hover:bg-gray-50 transition-colors ${
+              comp.isCompleted ? 'text-green-700 bg-green-50' : 'text-gray-700'
+            }`}
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              comp.isCompleted ? 'bg-green-500 text-white' : 'bg-blue-100 text-blue-600'
+            }`}>
+              {comp.isCompleted ? '✓' : idx + 1}
+            </span>
+            <span className="flex-1 truncate">{comp.name}</span>
+            <span className="text-muted-foreground">{comp.baseDistance} km</span>
+          </Link>
+        ))}
       </div>
     </div>
   );
 }
 
 /**
- * Barra de progreso para desnivel con perfil de montaña
+ * Escala de progreso de desnivel con perfil de montaña
  */
-function ElevationProgressBar({
-  progress,
-  userElevation,
-  targetElevation
+function ElevationScaleBar({
+  scale,
+  locale
 }: {
-  progress: number;
-  userElevation: number;
-  targetElevation: number;
+  scale: ScaleData;
+  locale: string;
 }) {
-  const clampedProgress = Math.min(100, Math.max(0, progress));
+  const [hoveredComp, setHoveredComp] = useState<CompetitionMarker | null>(null);
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between text-xs text-muted-foreground mb-1">
-        <span>{userElevation.toLocaleString()} m D+</span>
-        <span>{targetElevation.toLocaleString()} m D+</span>
+    <div className="space-y-2">
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>0 m</span>
+        <span className="font-medium text-green-600">{scale.userValue.toLocaleString()} m D+</span>
+        <span>{scale.maxScale.toLocaleString()} m</span>
       </div>
-      <div className="relative h-10 bg-gradient-to-b from-green-50 to-green-100 rounded-lg overflow-hidden">
-        {/* Mountain profile SVG */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-          {/* Background mountains (grey, behind) */}
+
+      {/* Perfil de montaña SVG */}
+      <div className="relative h-16 bg-gradient-to-b from-green-50 to-green-100 rounded-lg overflow-visible border border-green-200">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 64" preserveAspectRatio="none">
+          {/* Perfil de montaña base (gris) */}
           <path
-            d="M0 40 L15 25 L25 32 L40 15 L55 28 L70 10 L85 22 L100 18 L100 40 Z"
+            d="M0 64 L5 55 L15 60 L25 45 L35 55 L45 35 L55 50 L65 25 L75 40 L85 20 L95 35 L100 30 L100 64 Z"
             fill="#d1d5db"
-            opacity="0.5"
+            opacity="0.4"
           />
 
-          {/* Main mountain profile (green, with clip for progress) */}
+          {/* Clip path para el progreso */}
           <defs>
-            <clipPath id="progressClip">
-              <rect x="0" y="0" width={clampedProgress} height="40" />
+            <clipPath id="elevationProgressClip">
+              <rect x="0" y="0" width={scale.userProgress} height="64" />
             </clipPath>
           </defs>
 
-          {/* Filled mountain (progress) */}
+          {/* Perfil relleno (progreso) */}
           <path
-            d="M0 40 L10 30 L20 35 L35 18 L50 30 L65 12 L80 25 L95 20 L100 25 L100 40 Z"
-            fill="url(#mountainGradient)"
-            clipPath="url(#progressClip)"
+            d="M0 64 L5 55 L15 60 L25 45 L35 55 L45 35 L55 50 L65 25 L75 40 L85 20 L95 35 L100 30 L100 64 Z"
+            fill="url(#elevationGradient)"
+            clipPath="url(#elevationProgressClip)"
           />
 
-          {/* Gradient definition */}
           <defs>
-            <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="elevationGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#16a34a" />
-              <stop offset="50%" stopColor="#22c55e" />
               <stop offset="100%" stopColor="#4ade80" />
             </linearGradient>
           </defs>
 
-          {/* Mountain outline */}
-          <path
-            d="M0 40 L10 30 L20 35 L35 18 L50 30 L65 12 L80 25 L95 20 L100 25 L100 40"
-            fill="none"
-            stroke="#166534"
-            strokeWidth="0.5"
-            opacity="0.6"
-          />
+          {/* Marcadores de competiciones */}
+          {scale.competitions.map((comp, idx) => (
+            <g key={comp.id}>
+              {/* Línea vertical */}
+              <line
+                x1={comp.position}
+                y1="0"
+                x2={comp.position}
+                y2="64"
+                stroke={comp.isCompleted ? '#22c55e' : '#86efac'}
+                strokeWidth="0.5"
+                strokeDasharray="2 2"
+              />
+              {/* Bandera */}
+              <g transform={`translate(${comp.position}, 5)`}>
+                <polygon
+                  points="0,0 6,3 0,6"
+                  fill={comp.isCompleted ? '#22c55e' : '#60a5fa'}
+                  className="cursor-pointer"
+                  onMouseEnter={() => setHoveredComp(comp)}
+                  onMouseLeave={() => setHoveredComp(null)}
+                />
+                <line x1="0" y1="0" x2="0" y2="10" stroke={comp.isCompleted ? '#22c55e' : '#60a5fa'} strokeWidth="1" />
+              </g>
+            </g>
+          ))}
 
-          {/* Snow caps on peaks */}
-          <circle cx="35" cy="18" r="2" fill="white" opacity="0.8" />
-          <circle cx="65" cy="12" r="2.5" fill="white" opacity="0.8" />
-          <circle cx="95" cy="20" r="1.5" fill="white" opacity="0.8" />
-
-          {/* Progress indicator line */}
-          <line
-            x1={clampedProgress}
-            y1="0"
-            x2={clampedProgress}
-            y2="40"
-            stroke="#166534"
-            strokeWidth="1"
-            strokeDasharray="2 2"
-            opacity="0.7"
-          />
+          {/* Marcador del usuario (escalador) */}
+          <g transform={`translate(${Math.min(98, scale.userProgress)}, 50)`}>
+            <circle r="4" fill="#16a34a" stroke="white" strokeWidth="1" />
+            <text x="0" y="1" textAnchor="middle" fontSize="4" fill="white">⛰</text>
+          </g>
         </svg>
-
-        {/* Climber icon at progress point */}
-        <div
-          className="absolute top-1 transition-all duration-500 ease-out"
-          style={{ left: `calc(${clampedProgress}% - 8px)` }}
-        >
-          <div className="bg-white rounded-full p-0.5 shadow-sm border border-green-300">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-green-600">
-              <path d="M12 2L2 22h20L12 2z"/>
-            </svg>
-          </div>
-        </div>
-
-        {/* Percentage text */}
-        <div className="absolute bottom-1 right-2">
-          <span className="text-xs font-semibold text-green-900 bg-white/70 px-1 rounded">
-            {clampedProgress.toFixed(1)}%
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Card de competición de referencia
- */
-function CompetitionReferenceCard({
-  competition,
-  type,
-  userValue,
-  locale
-}: {
-  competition: CompetitionReference;
-  type: 'distance' | 'elevation';
-  userValue: number;
-  locale: string;
-}) {
-  const isDistance = type === 'distance';
-  const targetValue = isDistance ? competition.baseDistance : (competition.baseElevation || 0);
-  const isComplete = competition.progress >= 100;
-
-  return (
-    <div className={`rounded-lg border ${isComplete ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200' : 'bg-white border-gray-200'} p-3`}>
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className={`text-sm font-medium ${isComplete ? 'text-amber-700' : 'text-muted-foreground'}`}>
-          {isComplete
-            ? (isDistance ? '¡Distancia completada!' : '¡Desnivel completado!')
-            : (isDistance ? 'Objetivo de distancia' : 'Objetivo de desnivel')
-          }
-        </span>
-        {isComplete && <span className="text-lg">🏆</span>}
       </div>
 
-      {/* Progress bar */}
-      {isDistance ? (
-        <DistanceProgressBar
-          progress={competition.progress}
-          userKm={userValue}
-          targetKm={competition.baseDistance}
-        />
-      ) : (
-        <ElevationProgressBar
-          progress={competition.progress}
-          userElevation={userValue}
-          targetElevation={competition.baseElevation || 0}
-        />
+      {/* Tooltip de competición hover */}
+      {hoveredComp && (
+        <div className="text-xs bg-white border rounded-lg p-2 shadow-lg">
+          <p className="font-medium">{hoveredComp.name}</p>
+          <p className="text-muted-foreground">{hoveredComp.baseElevation?.toLocaleString()} m D+ • {hoveredComp.event.name}</p>
+        </div>
       )}
 
-      {/* Competition link */}
-      <Link
-        href={`/${locale}/events/${competition.event.slug}/${competition.slug}`}
-        className="flex items-center justify-between mt-3 p-2 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors group"
-      >
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm text-gray-900 truncate group-hover:text-blue-600">
-            {competition.name}
-          </p>
-          <p className="text-xs text-muted-foreground truncate">
-            {competition.event.name} • {competition.baseDistance} km • {(competition.baseElevation || 0).toLocaleString()} m D+
-          </p>
-        </div>
-        <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-500 flex-shrink-0 ml-2" />
-      </Link>
+      {/* Lista de competiciones */}
+      <div className="space-y-1 mt-3">
+        {scale.competitions.map((comp, idx) => (
+          <Link
+            key={comp.id}
+            href={`/${locale}/events/${comp.event.slug}/${comp.slug}`}
+            className={`flex items-center gap-2 text-xs p-1.5 rounded hover:bg-gray-50 transition-colors ${
+              comp.isCompleted ? 'text-green-700 bg-green-50' : 'text-gray-700'
+            }`}
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              comp.isCompleted ? 'bg-green-500 text-white' : 'bg-green-100 text-green-600'
+            }`}>
+              {comp.isCompleted ? '✓' : idx + 1}
+            </span>
+            <span className="flex-1 truncate">{comp.name}</span>
+            <span className="text-muted-foreground">{comp.baseElevation?.toLocaleString()} m</span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
@@ -264,7 +255,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
   const [equivalentData, setEquivalentData] = useState<EquivalentCompetitionsResponse | null>(null);
   const locale = useLocale();
 
-  // Calcular equivalencias localmente (para mostrar antes de cargar del servidor)
+  // Calcular equivalencias localmente
   const localEquivalentKm = balance ? (balance.balance * METERS_PER_ZANCADA) / 1000 : 0;
   const localEquivalentElevation = balance ? balance.balance * ELEVATION_METERS_PER_ZANCADA : 0;
 
@@ -274,7 +265,6 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
       const data = await zancadasService.getBalance();
       setBalance(data);
 
-      // Cargar competiciones equivalentes si hay balance
       if (data && data.balance > 0) {
         try {
           const competitions = await zancadasService.getEquivalentCompetitions(data.balance);
@@ -309,7 +299,6 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
       toast.success('Balance sincronizado correctamente');
       onSyncComplete?.();
 
-      // Recargar competiciones con el nuevo balance
       if (result.balance > 0) {
         const competitions = await zancadasService.getEquivalentCompetitions(result.balance);
         setEquivalentData(competitions);
@@ -336,12 +325,10 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
     );
   }
 
-  // If no balance data (Zancadas not configured or user not linked)
   if (!balance) {
     return null;
   }
 
-  // Usar datos del servidor si están disponibles, sino calcular localmente
   const displayKm = equivalentData?.equivalentKm ?? localEquivalentKm;
   const displayElevation = equivalentData?.equivalentElevation ?? localEquivalentElevation;
 
@@ -386,27 +373,27 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
           </div>
         </div>
 
-        {/* Competiciones de referencia */}
+        {/* Escalas de progreso */}
         {equivalentData && (
-          <div className="space-y-3 pt-2 border-t">
-            {/* Por distancia */}
-            {equivalentData.byDistance && (
-              <CompetitionReferenceCard
-                competition={equivalentData.byDistance}
-                type="distance"
-                userValue={displayKm}
-                locale={locale}
-              />
+          <div className="space-y-6 pt-2 border-t">
+            {/* Escala de distancia */}
+            {equivalentData.distanceScale.competitions.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center gap-1">
+                  📍 Progreso en distancia
+                </h4>
+                <DistanceScaleBar scale={equivalentData.distanceScale} locale={locale} />
+              </div>
             )}
 
-            {/* Por desnivel */}
-            {equivalentData.byElevation && (
-              <CompetitionReferenceCard
-                competition={equivalentData.byElevation}
-                type="elevation"
-                userValue={displayElevation}
-                locale={locale}
-              />
+            {/* Escala de desnivel */}
+            {equivalentData.elevationScale.competitions.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-green-700 mb-2 flex items-center gap-1">
+                  ⛰️ Progreso en desnivel
+                </h4>
+                <ElevationScaleBar scale={equivalentData.elevationScale} locale={locale} />
+              </div>
             )}
           </div>
         )}

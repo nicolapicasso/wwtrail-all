@@ -42,24 +42,32 @@ export interface TransactionsResponse {
   meta: TransactionsMeta;
 }
 
-export interface CompetitionReference {
+export interface CompetitionMarker {
   id: string;
   name: string;
   slug: string;
   baseDistance: number;
   baseElevation: number | null;
-  progress: number;
+  position: number; // % en la escala
+  isCompleted: boolean;
   event: {
     slug: string;
     name: string;
   };
 }
 
+export interface ScaleData {
+  userValue: number;
+  maxScale: number;
+  userProgress: number; // % del usuario en la escala
+  competitions: CompetitionMarker[];
+}
+
 export interface EquivalentCompetitionsResponse {
   equivalentKm: number;
   equivalentElevation: number;
-  byDistance: CompetitionReference | null;
-  byElevation: CompetitionReference | null;
+  distanceScale: ScaleData;
+  elevationScale: ScaleData;
 }
 
 // =============================================
