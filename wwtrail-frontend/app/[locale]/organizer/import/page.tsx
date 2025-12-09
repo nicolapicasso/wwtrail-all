@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import SearchableEntitySelect from '@/components/SearchableEntitySelect';
 import {
   Upload,
   Database,
@@ -845,21 +846,14 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 Selecciona el evento al que asociar las competiciones.
                 Si no seleccionas ninguno, el JSON debe incluir el eventId.
               </p>
-              <Select value={parentId || '_none'} onValueChange={(v) => setParentId(v === '_none' ? '' : v)}>
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder={loadingParents ? 'Cargando...' : 'Seleccionar Evento'} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">
-                    <span className="text-gray-500">Sin seleccionar (usar referencia del JSON)</span>
-                  </SelectItem>
-                  {parentEntities.map(entity => (
-                    <SelectItem key={entity.id} value={entity.id}>
-                      {entity.name} <span className="text-gray-400 text-xs">({entity.slug})</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableEntitySelect
+                value={parentId}
+                onChange={setParentId}
+                options={parentEntities}
+                placeholder="Seleccionar Evento"
+                emptyOptionLabel="Sin seleccionar (usar referencia del JSON)"
+                loading={loadingParents}
+              />
               {parentId && (
                 <p className="mt-2 text-xs text-green-700">
                   Todas las competiciones se asociaran a este evento.
@@ -878,21 +872,14 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 <p className="text-xs text-blue-700 mb-3">
                   Primero selecciona el evento para filtrar las competiciones disponibles.
                 </p>
-                <Select value={selectedEventId || '_none'} onValueChange={(v) => setSelectedEventId(v === '_none' ? '' : v)}>
-                  <SelectTrigger className="w-full bg-white">
-                    <SelectValue placeholder={loadingEvents ? 'Cargando eventos...' : 'Seleccionar Evento'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">
-                      <span className="text-gray-500">Sin seleccionar</span>
-                    </SelectItem>
-                    {eventsList.map(event => (
-                      <SelectItem key={event.id} value={event.id}>
-                        {event.name} <span className="text-gray-400 text-xs">({event.slug})</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableEntitySelect
+                  value={selectedEventId}
+                  onChange={setSelectedEventId}
+                  options={eventsList}
+                  placeholder="Seleccionar Evento"
+                  emptyOptionLabel="Sin seleccionar"
+                  loading={loadingEvents}
+                />
               </div>
 
               {selectedEventId && (
@@ -904,21 +891,14 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                     Selecciona la competicion a la que asociar las ediciones.
                     Si no seleccionas ninguna, el JSON debe incluir el competitionId.
                   </p>
-                  <Select value={parentId || '_none'} onValueChange={(v) => setParentId(v === '_none' ? '' : v)}>
-                    <SelectTrigger className="w-full bg-white">
-                      <SelectValue placeholder={loadingParents ? 'Cargando competiciones...' : 'Seleccionar Competicion'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_none">
-                        <span className="text-gray-500">Sin seleccionar (usar referencia del JSON)</span>
-                      </SelectItem>
-                      {parentEntities.map(entity => (
-                        <SelectItem key={entity.id} value={entity.id}>
-                          {entity.name} <span className="text-gray-400 text-xs">({entity.slug})</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableEntitySelect
+                    value={parentId}
+                    onChange={setParentId}
+                    options={parentEntities}
+                    placeholder="Seleccionar Competicion"
+                    emptyOptionLabel="Sin seleccionar (usar referencia del JSON)"
+                    loading={loadingParents}
+                  />
                   {parentId && (
                     <p className="mt-2 text-xs text-green-700">
                       Todas las ediciones se asociaran a esta competicion.
