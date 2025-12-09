@@ -811,12 +811,12 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 Selecciona el {parentLabel.toLowerCase()} al que asociar las {entityType === 'competitions' ? 'competiciones' : 'ediciones'}.
                 Si no seleccionas ninguno, el JSON debe incluir la referencia al {parentLabel.toLowerCase()}.
               </p>
-              <Select value={parentId} onValueChange={setParentId}>
+              <Select value={parentId || '_none'} onValueChange={(v) => setParentId(v === '_none' ? '' : v)}>
                 <SelectTrigger className="w-full bg-white">
                   <SelectValue placeholder={loadingParents ? 'Cargando...' : `Seleccionar ${parentLabel}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">
+                  <SelectItem value="_none">
                     <span className="text-gray-500">Sin seleccionar (usar referencia del JSON)</span>
                   </SelectItem>
                   {parentEntities.map(entity => (
