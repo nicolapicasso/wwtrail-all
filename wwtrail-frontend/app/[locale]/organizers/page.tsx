@@ -45,7 +45,7 @@ export default function OrganizersPublicPage() {
       const response = await organizersService.getAll(filters);
 
       setOrganizers(response.data);
-      setTotalPages(response.pagination.pages);
+      setTotalPages(response.pagination.totalPages);
       setTotal(response.pagination.total);
     } catch (error: any) {
       console.error('Error fetching organizers:', error);
