@@ -57,6 +57,7 @@ export const COUNTRIES: Country[] = [
   // Asia y Oceanía
   { code: 'JP', name: 'Japón', flag: '🇯🇵' },
   { code: 'CN', name: 'China', flag: '🇨🇳' },
+  { code: 'KR', name: 'Corea del Sur', flag: '🇰🇷' },
   { code: 'AU', name: 'Australia', flag: '🇦🇺' },
   { code: 'NZ', name: 'Nueva Zelanda', flag: '🇳🇿' },
   { code: 'ID', name: 'Indonesia', flag: '🇮🇩' },
