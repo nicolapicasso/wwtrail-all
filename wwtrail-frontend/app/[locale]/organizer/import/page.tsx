@@ -45,6 +45,8 @@ import {
   ConflictResolution,
   ConflictItem,
 } from '@/lib/api/admin.service';
+import { terrainTypesService, specialSeriesService } from '@/lib/api/catalogs.service';
+import type { TerrainType, SpecialSeries } from '@/types/catalog';
 
 interface ImportStats {
   organizers: number;
@@ -203,6 +205,180 @@ function ResultCard({ title, result }: { title: string; result: ImportResult }) 
         </div>
       )}
     </div>
+  );
+}
+
+// ============================================
+// MASTER DATA REFERENCE COMPONENT
+// ============================================
+
+function MasterDataReference() {
+  const [terrainTypes, setTerrainTypes] = useState<TerrainType[]>([]);
+  const [specialSeries, setSpecialSeries] = useState<SpecialSeries[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showTerrainTypes, setShowTerrainTypes] = useState(false);
+  const [showSpecialSeries, setShowSpecialSeries] = useState(false);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [tt, ss] = await Promise.all([
+        terrainTypesService.getAll(),
+        specialSeriesService.getAll(),
+      ]);
+      setTerrainTypes(tt);
+      setSpecialSeries(ss);
+    } catch (error) {
+      console.error('Error loading master data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const downloadJson = (data: any[], filename: string) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    a.click();
+    setTimeout(() => window.URL.revokeObjectURL(url), 100);
+  };
+
+  // Format data for import (only id, name, slug)
+  const formatForImport = (items: any[]) =>
+    items.map(({ id, name, slug }) => ({ id, name, slug }));
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Database className="w-5 h-5" />
+          Datos Maestros de Referencia
+        </CardTitle>
+        <CardDescription>
+          Consulta los valores validos para terrainType y specialSeries que debes usar en tus archivos de importacion
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          </div>
+        ) : (
+          <>
+            {/* Terrain Types */}
+            <div className="border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setShowTerrainTypes(!showTerrainTypes)}
+                className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Mountain className="w-4 h-4 text-orange-600" />
+                  <span className="font-medium">Tipos de Terreno</span>
+                  <span className="text-sm text-gray-500">({terrainTypes.length})</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showTerrainTypes ? 'rotate-180' : ''}`} />
+              </button>
+              {showTerrainTypes && (
+                <div className="p-3 border-t">
+                  <div className="flex justify-end mb-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadJson(formatForImport(terrainTypes), 'terrain_types.json')}
+                    >
+                      <Download className="w-3 h-3 mr-1" />
+                      Descargar JSON
+                    </Button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-1 text-left">ID</th>
+                          <th className="px-2 py-1 text-left">Nombre</th>
+                          <th className="px-2 py-1 text-left">Slug</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {terrainTypes.map((tt) => (
+                          <tr key={tt.id} className="border-t">
+                            <td className="px-2 py-1 font-mono text-xs">{tt.id.slice(0, 8)}...</td>
+                            <td className="px-2 py-1">{tt.name}</td>
+                            <td className="px-2 py-1 font-mono text-xs text-gray-600">{tt.slug}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-800">
+                    <strong>Uso en JSON:</strong> <code className="bg-blue-100 px-1 rounded">{`"terrainType": { "id": "...", "name": "Alta montaña", "slug": "alta-montana" }`}</code>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Special Series */}
+            <div className="border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setShowSpecialSeries(!showSpecialSeries)}
+                className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  <span className="font-medium">Series Especiales</span>
+                  <span className="text-sm text-gray-500">({specialSeries.length})</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showSpecialSeries ? 'rotate-180' : ''}`} />
+              </button>
+              {showSpecialSeries && (
+                <div className="p-3 border-t">
+                  <div className="flex justify-end mb-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadJson(formatForImport(specialSeries), 'special_series.json')}
+                    >
+                      <Download className="w-3 h-3 mr-1" />
+                      Descargar JSON
+                    </Button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-1 text-left">ID</th>
+                          <th className="px-2 py-1 text-left">Nombre</th>
+                          <th className="px-2 py-1 text-left">Slug</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {specialSeries.map((ss) => (
+                          <tr key={ss.id} className="border-t">
+                            <td className="px-2 py-1 font-mono text-xs">{ss.id.slice(0, 8)}...</td>
+                            <td className="px-2 py-1">{ss.name}</td>
+                            <td className="px-2 py-1 font-mono text-xs text-gray-600">{ss.slug}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-2 p-2 bg-purple-50 rounded text-xs text-purple-800">
+                    <strong>Uso en JSON:</strong> <code className="bg-purple-100 px-1 rounded">{`"specialSeries": [{ "id": "...", "name": "UTMB World Series", "slug": "utmb-world-series" }]`}</code>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -548,6 +724,9 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
 
   return (
     <div className="space-y-6">
+      {/* Master Data Reference */}
+      <MasterDataReference />
+
       {/* Entity Type Selection */}
       <Card>
         <CardHeader>
