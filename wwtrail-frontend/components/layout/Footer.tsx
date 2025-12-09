@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation';
 import { footerService, FooterContent } from '@/lib/api/footer.service';
 import { LandscapeBackground } from '@/components/footer/landscapes';
 
-// Routes where footer should NOT be shown
-const FOOTER_EXCLUDED_ROUTES = ['/organizer', '/dashboard', '/directory'];
+// Routes where footer should NOT be shown (matched by path segment, not substring)
+const FOOTER_EXCLUDED_ROUTES = ['organizer', 'dashboard', 'directory'];
 
 export default function Footer() {
   const locale = useLocale();
@@ -19,8 +19,9 @@ export default function Footer() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Check if current route should hide the footer
-  const shouldHideFooter = FOOTER_EXCLUDED_ROUTES.some(route => pathname?.includes(route));
+  // Check if current route should hide the footer (using segment matching, not substring)
+  const segments = pathname?.split('/').filter(Boolean) || [];
+  const shouldHideFooter = FOOTER_EXCLUDED_ROUTES.some(route => segments.includes(route));
 
   useEffect(() => {
     // Skip loading footer data if we're on excluded routes
