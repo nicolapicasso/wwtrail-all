@@ -1096,15 +1096,23 @@ export class ImportService {
       throw new Error(`Event not found for competition "${item.name}". Import the event first or select a parent event.`);
     }
 
-    // Get organizer ID - prefer item.organizerId, fallback to userId
+    // Get organizer ID - prefer item.organizerId if it's a valid User ID, fallback to userId
+    // Note: Competition.organizerId references User table, NOT Organizer table
+    // Event.organizerId references Organizer table (different!), so we can't use it here
     let organizerId = item.organizerId;
-    if (!organizerId) {
-      // Check if there's an organizer in the event
-      const event = await prisma.event.findUnique({
-        where: { id: eventId },
-        select: { organizerId: true },
+    if (organizerId) {
+      // Verify the organizerId exists in User table
+      const userExists = await prisma.user.findUnique({
+        where: { id: organizerId },
+        select: { id: true },
       });
-      organizerId = event?.organizerId || userId;
+      if (!userExists) {
+        // Invalid organizerId, use the importing user instead
+        organizerId = userId;
+      }
+    } else {
+      // No organizerId provided, use the importing user
+      organizerId = userId;
     }
 
     // Convert utmbIndex to proper enum value

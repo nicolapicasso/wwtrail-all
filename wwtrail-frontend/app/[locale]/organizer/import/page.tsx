@@ -635,7 +635,34 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
   const [parentEntities, setParentEntities] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   const [loadingParents, setLoadingParents] = useState(false);
 
-  // Load parent entities when entity type changes
+  // Cascade selectors for editions: Event -> Competition
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [eventsList, setEventsList] = useState<Array<{ id: string; name: string; slug: string }>>([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+
+  // Load events list for editions cascade
+  useEffect(() => {
+    const loadEventsList = async () => {
+      if (entityType === 'editions') {
+        setLoadingEvents(true);
+        try {
+          const events = await adminService.getEventsForSelector();
+          setEventsList(events);
+        } catch (error) {
+          console.error('Error loading events for cascade:', error);
+          setEventsList([]);
+        } finally {
+          setLoadingEvents(false);
+        }
+      } else {
+        setEventsList([]);
+        setSelectedEventId('');
+      }
+    };
+    loadEventsList();
+  }, [entityType]);
+
+  // Load parent entities when entity type or selected event changes
   useEffect(() => {
     const loadParentEntities = async () => {
       if (entityType === 'competitions') {
@@ -650,23 +677,30 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
           setLoadingParents(false);
         }
       } else if (entityType === 'editions') {
-        setLoadingParents(true);
-        try {
-          const competitions = await adminService.getCompetitionsForSelector();
-          setParentEntities(competitions);
-        } catch (error) {
-          console.error('Error loading competitions:', error);
+        // For editions, only load competitions when an event is selected
+        if (selectedEventId) {
+          setLoadingParents(true);
+          try {
+            const competitions = await adminService.getCompetitionsForSelector(selectedEventId);
+            setParentEntities(competitions);
+          } catch (error) {
+            console.error('Error loading competitions:', error);
+            setParentEntities([]);
+          } finally {
+            setLoadingParents(false);
+          }
+        } else {
           setParentEntities([]);
-        } finally {
-          setLoadingParents(false);
         }
+        // Reset parent selection when event changes
+        setParentId('');
       } else {
         setParentEntities([]);
         setParentId('');
       }
     };
     loadParentEntities();
-  }, [entityType]);
+  }, [entityType, selectedEventId]);
 
   // Check if parent selector should be shown
   const needsParentSelector = entityType === 'competitions' || entityType === 'editions';
@@ -801,19 +835,19 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
             </SelectContent>
           </Select>
 
-          {/* Parent Entity Selector - shown for competitions and editions */}
-          {needsParentSelector && (
+          {/* Parent Entity Selector - shown for competitions */}
+          {entityType === 'competitions' && (
             <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <label className="block text-sm font-medium text-blue-900 mb-2">
-                {parentLabel} Padre (opcional)
+                Evento Padre (opcional)
               </label>
               <p className="text-xs text-blue-700 mb-3">
-                Selecciona el {parentLabel.toLowerCase()} al que asociar las {entityType === 'competitions' ? 'competiciones' : 'ediciones'}.
-                Si no seleccionas ninguno, el JSON debe incluir la referencia al {parentLabel.toLowerCase()}.
+                Selecciona el evento al que asociar las competiciones.
+                Si no seleccionas ninguno, el JSON debe incluir el eventId.
               </p>
               <Select value={parentId || '_none'} onValueChange={(v) => setParentId(v === '_none' ? '' : v)}>
                 <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder={loadingParents ? 'Cargando...' : `Seleccionar ${parentLabel}`} />
+                  <SelectValue placeholder={loadingParents ? 'Cargando...' : 'Seleccionar Evento'} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="_none">
@@ -828,7 +862,74 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
               </Select>
               {parentId && (
                 <p className="mt-2 text-xs text-green-700">
-                  Todas las {entityType === 'competitions' ? 'competiciones' : 'ediciones'} se asociaran a este {parentLabel.toLowerCase()}.
+                  Todas las competiciones se asociaran a este evento.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Cascade Selectors for Editions - Event -> Competition */}
+          {entityType === 'editions' && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-blue-900 mb-2">
+                  1. Seleccionar Evento (opcional)
+                </label>
+                <p className="text-xs text-blue-700 mb-3">
+                  Primero selecciona el evento para filtrar las competiciones disponibles.
+                </p>
+                <Select value={selectedEventId || '_none'} onValueChange={(v) => setSelectedEventId(v === '_none' ? '' : v)}>
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue placeholder={loadingEvents ? 'Cargando eventos...' : 'Seleccionar Evento'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">
+                      <span className="text-gray-500">Sin seleccionar</span>
+                    </SelectItem>
+                    {eventsList.map(event => (
+                      <SelectItem key={event.id} value={event.id}>
+                        {event.name} <span className="text-gray-400 text-xs">({event.slug})</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedEventId && (
+                <div>
+                  <label className="block text-sm font-medium text-blue-900 mb-2">
+                    2. Seleccionar Competicion (opcional)
+                  </label>
+                  <p className="text-xs text-blue-700 mb-3">
+                    Selecciona la competicion a la que asociar las ediciones.
+                    Si no seleccionas ninguna, el JSON debe incluir el competitionId.
+                  </p>
+                  <Select value={parentId || '_none'} onValueChange={(v) => setParentId(v === '_none' ? '' : v)}>
+                    <SelectTrigger className="w-full bg-white">
+                      <SelectValue placeholder={loadingParents ? 'Cargando competiciones...' : 'Seleccionar Competicion'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">
+                        <span className="text-gray-500">Sin seleccionar (usar referencia del JSON)</span>
+                      </SelectItem>
+                      {parentEntities.map(entity => (
+                        <SelectItem key={entity.id} value={entity.id}>
+                          {entity.name} <span className="text-gray-400 text-xs">({entity.slug})</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {parentId && (
+                    <p className="mt-2 text-xs text-green-700">
+                      Todas las ediciones se asociaran a esta competicion.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!selectedEventId && (
+                <p className="text-xs text-amber-700">
+                  Si no seleccionas evento, el JSON debe incluir el competitionId para cada edicion.
                 </p>
               )}
             </div>

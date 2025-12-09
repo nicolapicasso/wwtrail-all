@@ -937,19 +937,31 @@ class AdminService {
       params: { includeRelations: false },
       responseType: 'json',
     });
-    // The export endpoint returns {data: {exportedAt, entity, data: [...]}}
-    return data.data?.data?.map((e: any) => ({ id: e.id, name: e.name, slug: e.slug })) || [];
+    // The export endpoint returns { exportedAt, entity, count, data: [...] }
+    return data.data?.map((e: any) => ({ id: e.id, name: e.name, slug: e.slug })) || [];
   }
 
   /**
-   * Get list of competitions for selector (id, name, slug)
+   * Get list of competitions for selector (id, name, slug), optionally filtered by eventId
    */
-  async getCompetitionsForSelector(): Promise<Array<{ id: string; name: string; slug: string }>> {
+  async getCompetitionsForSelector(eventId?: string): Promise<Array<{ id: string; name: string; slug: string; eventId: string }>> {
     const { data } = await apiClientV2.get('/admin/export/competitions', {
       params: { includeRelations: false },
       responseType: 'json',
     });
-    return data.data?.data?.map((c: any) => ({ id: c.id, name: c.name, slug: c.slug })) || [];
+    let competitions = data.data?.map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      eventId: c.eventId
+    })) || [];
+
+    // Filter by eventId if provided
+    if (eventId) {
+      competitions = competitions.filter((c: any) => c.eventId === eventId);
+    }
+
+    return competitions;
   }
 
   // ============================================
