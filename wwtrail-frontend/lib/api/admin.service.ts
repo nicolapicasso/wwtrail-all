@@ -495,14 +495,6 @@ class AdminService {
   }
 
   /**
-   * Get user by ID for admin editing
-   */
-  async getUserById(userId: string): Promise<User> {
-    const { data } = await apiClientV1.get(`/admin/users/${userId}`);
-    return data.data;
-  }
-
-  /**
    * Update user by ID (admin editing another user)
    */
   async updateUserById(userId: string, userData: {
@@ -926,10 +918,38 @@ class AdminService {
       entity: entityType,
       conflictResolution: options.conflictResolution || 'skip',
       dryRun: options.dryRun || false,
+      parentId: options.parentId,
     }, {
       params: { entityType },
     });
     return data.data;
+  }
+
+  // ============================================
+  // ENTITY LISTS FOR SELECTORS
+  // ============================================
+
+  /**
+   * Get list of events for selector (id, name, slug)
+   */
+  async getEventsForSelector(): Promise<Array<{ id: string; name: string; slug: string }>> {
+    const { data } = await apiClientV2.get('/admin/export/events', {
+      params: { includeRelations: false },
+      responseType: 'json',
+    });
+    // The export endpoint returns {data: {exportedAt, entity, data: [...]}}
+    return data.data?.data?.map((e: any) => ({ id: e.id, name: e.name, slug: e.slug })) || [];
+  }
+
+  /**
+   * Get list of competitions for selector (id, name, slug)
+   */
+  async getCompetitionsForSelector(): Promise<Array<{ id: string; name: string; slug: string }>> {
+    const { data } = await apiClientV2.get('/admin/export/competitions', {
+      params: { includeRelations: false },
+      responseType: 'json',
+    });
+    return data.data?.data?.map((c: any) => ({ id: c.id, name: c.name, slug: c.slug })) || [];
   }
 
   // ============================================
@@ -1164,6 +1184,7 @@ export interface NativeImportFile {
 export interface NativeImportOptions {
   conflictResolution?: ConflictResolution;
   dryRun?: boolean;
+  parentId?: string; // Event ID for competitions, Competition ID for editions
 }
 
 export interface ConflictItem {

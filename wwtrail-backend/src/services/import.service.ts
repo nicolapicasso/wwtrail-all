@@ -59,18 +59,29 @@ export interface NativeImportOptions {
   conflictResolution: ConflictResolution;
   dryRun?: boolean;
   userId: string;
+  parentId?: string; // Event ID for competitions, Competition ID for editions
+}
+
+export interface NativeImportResultItem {
+  index: number;
+  action: 'created' | 'updated' | 'skipped' | 'error';
+  id?: string;
+  slug?: string;
+  message?: string;
 }
 
 export interface NativeImportResult {
   success: boolean;
   entityType: EntityType;
+  dryRun: boolean;
   summary: {
-    processed: number;
+    total: number;
     created: number;
     updated: number;
     skipped: number;
     errors: number;
   };
+  results: NativeImportResultItem[];
   details: {
     created: { id: string; name?: string; slug?: string }[];
     updated: { id: string; name?: string; slug?: string }[];
@@ -669,13 +680,15 @@ export class ImportService {
     const result: NativeImportResult = {
       success: true,
       entityType,
+      dryRun: options.dryRun || false,
       summary: {
-        processed: 0,
+        total: 0,
         created: 0,
         updated: 0,
         skipped: 0,
         errors: 0,
       },
+      results: [],
       details: {
         created: [],
         updated: [],
@@ -687,12 +700,13 @@ export class ImportService {
     if (!file.data || !Array.isArray(file.data)) {
       result.success = false;
       result.details.errors.push({ index: -1, data: null, error: 'Invalid file format' });
+      result.results.push({ index: -1, action: 'error', message: 'Invalid file format' });
       return result;
     }
 
     for (let i = 0; i < file.data.length; i++) {
       const item = file.data[i];
-      result.summary.processed++;
+      result.summary.total++;
 
       try {
         const conflict = await this.checkNativeConflict(entityType, item);
@@ -707,6 +721,13 @@ export class ImportService {
                 slug: item.slug,
                 reason: `Conflict: ${conflict.conflictType}`,
               });
+              result.results.push({
+                index: i,
+                action: 'skipped',
+                id: item.id,
+                slug: item.slug,
+                message: `Conflict: ${conflict.conflictType}`,
+              });
               break;
 
             case 'update':
@@ -718,12 +739,25 @@ export class ImportService {
                   name: updated.name,
                   slug: updated.slug,
                 });
+                result.results.push({
+                  index: i,
+                  action: 'updated',
+                  id: updated.id,
+                  slug: updated.slug,
+                });
               } else {
                 result.summary.updated++;
                 result.details.updated.push({
                   id: conflict.existingRecord.id,
                   name: item.name,
                   slug: item.slug,
+                });
+                result.results.push({
+                  index: i,
+                  action: 'updated',
+                  id: conflict.existingRecord.id,
+                  slug: item.slug,
+                  message: '[DRY RUN]',
                 });
               }
               break;
@@ -737,6 +771,12 @@ export class ImportService {
                   name: created.name,
                   slug: created.slug,
                 });
+                result.results.push({
+                  index: i,
+                  action: 'created',
+                  id: created.id,
+                  slug: created.slug,
+                });
               } else {
                 result.summary.created++;
                 result.details.created.push({
@@ -744,17 +784,30 @@ export class ImportService {
                   name: item.name,
                   slug: `${item.slug}-imported`,
                 });
+                result.results.push({
+                  index: i,
+                  action: 'created',
+                  id: '[NEW_ID]',
+                  slug: `${item.slug}-imported`,
+                  message: '[DRY RUN]',
+                });
               }
               break;
           }
         } else {
           // No conflict - create new
           if (!options.dryRun) {
-            const created = await this.createNativeEntity(entityType, item, options.userId);
+            const created = await this.createNativeEntity(entityType, item, options.userId, options.parentId);
             result.summary.created++;
             result.details.created.push({
               id: created.id,
               name: created.name,
+              slug: created.slug,
+            });
+            result.results.push({
+              index: i,
+              action: 'created',
+              id: created.id,
               slug: created.slug,
             });
           } else {
@@ -764,6 +817,13 @@ export class ImportService {
               name: item.name,
               slug: item.slug,
             });
+            result.results.push({
+              index: i,
+              action: 'created',
+              id: item.id || '[NEW_ID]',
+              slug: item.slug,
+              message: '[DRY RUN]',
+            });
           }
         }
       } catch (err: any) {
@@ -772,6 +832,13 @@ export class ImportService {
           index: i,
           data: { id: item.id, name: item.name, slug: item.slug },
           error: err.message,
+        });
+        result.results.push({
+          index: i,
+          action: 'error',
+          id: item.id,
+          slug: item.slug,
+          message: err.message,
         });
         logger.error(`Import error for item ${i}:`, err);
       }
@@ -881,14 +948,14 @@ export class ImportService {
   // NATIVE ENTITY CREATION
   // ============================================
 
-  private async createNativeEntity(entityType: EntityType, item: any, userId: string): Promise<any> {
+  private async createNativeEntity(entityType: EntityType, item: any, userId: string, parentId?: string): Promise<any> {
     switch (entityType) {
       case 'events':
         return this.createNativeEvent(item, userId);
       case 'competitions':
-        return this.createNativeCompetition(item, userId);
+        return this.createNativeCompetition(item, userId, parentId);
       case 'editions':
-        return this.createNativeEdition(item, userId);
+        return this.createNativeEdition(item, userId, parentId);
       case 'organizers':
         return this.createNativeOrganizer(item, userId);
       case 'specialSeries':
@@ -1009,9 +1076,9 @@ export class ImportService {
     return mappings[normalizedValue] || mappings[value] || null;
   }
 
-  private async createNativeCompetition(item: any, userId: string): Promise<any> {
-    // Find event by ID or slug
-    let eventId = item.eventId;
+  private async createNativeCompetition(item: any, userId: string, parentId?: string): Promise<any> {
+    // Find event by ID or slug, or use parentId from import options
+    let eventId = item.eventId || parentId;
     if (!eventId && item.event) {
       const event = await prisma.event.findFirst({
         where: {
@@ -1026,7 +1093,7 @@ export class ImportService {
     }
 
     if (!eventId) {
-      throw new Error(`Event not found for competition "${item.name}". Import the event first.`);
+      throw new Error(`Event not found for competition "${item.name}". Import the event first or select a parent event.`);
     }
 
     // Get organizer ID - prefer item.organizerId, fallback to userId
@@ -1123,9 +1190,9 @@ export class ImportService {
     return competition;
   }
 
-  private async createNativeEdition(item: any, _userId: string): Promise<any> {
-    // Find competition by ID or slug
-    let competitionId = item.competitionId;
+  private async createNativeEdition(item: any, _userId: string, parentId?: string): Promise<any> {
+    // Find competition by ID or slug, or use parentId from import options
+    let competitionId = item.competitionId || parentId;
     if (!competitionId && item.competition) {
       const competition = await prisma.competition.findFirst({
         where: {
@@ -1140,7 +1207,7 @@ export class ImportService {
     }
 
     if (!competitionId) {
-      throw new Error(`Competition not found for edition "${item.name || item.year}". Import the competition first.`);
+      throw new Error(`Competition not found for edition "${item.name || item.year}". Import the competition first or select a parent competition.`);
     }
 
     const data: any = {

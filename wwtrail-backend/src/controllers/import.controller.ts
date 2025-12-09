@@ -410,11 +410,13 @@ class ImportController {
       const options = nativeImportOptionsSchema.parse(optionsInput);
 
       const userId = req.user!.id;
+      const parentId = req.body.parentId;
 
       const result = await importService.importNativeData(file, entityType, {
         conflictResolution: options.conflictResolution as ConflictResolution,
         dryRun: options.dryRun,
         userId,
+        parentId,
       });
 
       const statusMessage = options.dryRun

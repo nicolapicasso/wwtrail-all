@@ -630,6 +630,48 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
   const [conflictResolution, setConflictResolution] = useState<ConflictResolution>('skip');
   const [dryRun, setDryRun] = useState(true);
 
+  // Parent entity selector
+  const [parentId, setParentId] = useState<string>('');
+  const [parentEntities, setParentEntities] = useState<Array<{ id: string; name: string; slug: string }>>([]);
+  const [loadingParents, setLoadingParents] = useState(false);
+
+  // Load parent entities when entity type changes
+  useEffect(() => {
+    const loadParentEntities = async () => {
+      if (entityType === 'competitions') {
+        setLoadingParents(true);
+        try {
+          const events = await adminService.getEventsForSelector();
+          setParentEntities(events);
+        } catch (error) {
+          console.error('Error loading events:', error);
+          setParentEntities([]);
+        } finally {
+          setLoadingParents(false);
+        }
+      } else if (entityType === 'editions') {
+        setLoadingParents(true);
+        try {
+          const competitions = await adminService.getCompetitionsForSelector();
+          setParentEntities(competitions);
+        } catch (error) {
+          console.error('Error loading competitions:', error);
+          setParentEntities([]);
+        } finally {
+          setLoadingParents(false);
+        }
+      } else {
+        setParentEntities([]);
+        setParentId('');
+      }
+    };
+    loadParentEntities();
+  }, [entityType]);
+
+  // Check if parent selector should be shown
+  const needsParentSelector = entityType === 'competitions' || entityType === 'editions';
+  const parentLabel = entityType === 'competitions' ? 'Evento' : 'Competicion';
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
@@ -698,6 +740,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
       const result = await adminService.importNative(entityType, file, {
         conflictResolution,
         dryRun,
+        parentId: parentId || undefined,
       });
       setImportResult(result);
 
@@ -757,6 +800,39 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
               })}
             </SelectContent>
           </Select>
+
+          {/* Parent Entity Selector - shown for competitions and editions */}
+          {needsParentSelector && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <label className="block text-sm font-medium text-blue-900 mb-2">
+                {parentLabel} Padre (opcional)
+              </label>
+              <p className="text-xs text-blue-700 mb-3">
+                Selecciona el {parentLabel.toLowerCase()} al que asociar las {entityType === 'competitions' ? 'competiciones' : 'ediciones'}.
+                Si no seleccionas ninguno, el JSON debe incluir la referencia al {parentLabel.toLowerCase()}.
+              </p>
+              <Select value={parentId} onValueChange={setParentId}>
+                <SelectTrigger className="w-full bg-white">
+                  <SelectValue placeholder={loadingParents ? 'Cargando...' : `Seleccionar ${parentLabel}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">
+                    <span className="text-gray-500">Sin seleccionar (usar referencia del JSON)</span>
+                  </SelectItem>
+                  {parentEntities.map(entity => (
+                    <SelectItem key={entity.id} value={entity.id}>
+                      {entity.name} <span className="text-gray-400 text-xs">({entity.slug})</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {parentId && (
+                <p className="mt-2 text-xs text-green-700">
+                  Todas las {entityType === 'competitions' ? 'competiciones' : 'ediciones'} se asociaran a este {parentLabel.toLowerCase()}.
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Example JSON Section - show for selected entity */}
           <div className="mt-4">
