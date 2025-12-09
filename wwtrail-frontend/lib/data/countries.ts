@@ -59,6 +59,7 @@ export const COUNTRIES: Country[] = [
   { code: 'CN', name: 'China', flag: '🇨🇳' },
   { code: 'AU', name: 'Australia', flag: '🇦🇺' },
   { code: 'NZ', name: 'Nueva Zelanda', flag: '🇳🇿' },
+  { code: 'ID', name: 'Indonesia', flag: '🇮🇩' },
   { code: 'TH', name: 'Tailandia', flag: '🇹🇭' },
   { code: 'SG', name: 'Singapur', flag: '🇸🇬' },
   { code: 'HK', name: 'Hong Kong', flag: '🇭🇰' },
