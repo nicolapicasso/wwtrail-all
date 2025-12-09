@@ -108,38 +108,40 @@ export default function InsidersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-16">
+      {/* Hero Section - 150px height */}
+      <div className="relative bg-gradient-to-r from-yellow-500 to-orange-500 text-white h-[150px] flex items-center">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center text-center">
+          <div className="flex items-center justify-center gap-6">
             {/* Badge */}
-            <div className="mb-6">
+            <div className="shrink-0">
               {data?.config?.badgeUrl ? (
                 <Image
                   src={data.config.badgeUrl}
                   alt="WWTrail Insider"
-                  width={120}
-                  height={120}
+                  width={80}
+                  height={80}
                   className="object-contain"
                 />
               ) : (
-                <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">
-                  <Star className="w-12 h-12 text-white fill-white" />
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                  <Star className="w-8 h-8 text-white fill-white" />
                 </div>
               )}
             </div>
 
-            <h1 className="text-4xl font-bold mb-4">WWTrail Insiders</h1>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold mb-2">WWTrail Insiders</h1>
 
-            {/* Stats */}
-            <div className="flex items-center gap-6 text-white/90">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                <span>{data?.stats?.total || 0} Insiders</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                <span>{Object.keys(data?.stats?.byCountry || {}).length} Países</span>
+              {/* Stats */}
+              <div className="flex items-center justify-center gap-6 text-white/90 text-sm">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  <span>{data?.stats?.total || 0} Insiders</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  <span>{Object.keys(data?.stats?.byCountry || {}).length} Países</span>
+                </div>
               </div>
             </div>
           </div>
@@ -204,7 +206,7 @@ export default function InsidersPage() {
                       </div>
 
                       {/* Name */}
-                      <h3 className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
+                      <h3 className="font-semibold text-gray-900 group-hover:text-[#B66916] transition-colors">
                         {insider.fullName}
                       </h3>
 

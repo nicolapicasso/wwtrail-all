@@ -190,7 +190,7 @@ export default function CompetitionDetailPage() {
             {competition.description && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
-                  <Info className="h-6 w-6 text-blue-600" />
+                  <Info className="h-6 w-6 text-[#B66916]" />
                   Acerca de
                 </h2>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
@@ -230,7 +230,7 @@ export default function CompetitionDetailPage() {
             {/* All Editions List */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
-                <Calendar className="h-6 w-6 text-blue-600" />
+                <Calendar className="h-6 w-6 text-[#B66916]" />
                 All Editions ({editions.length})
               </h2>
               <p className="text-sm text-gray-600 mb-4">
@@ -249,12 +249,12 @@ export default function CompetitionDetailPage() {
                     <Link
                       key={edition.id}
                       href={`/editions/${edition.slug}`}
-                      className="block p-4 border rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-colors"
+                      className="block p-4 border rounded-lg hover:border-[#B66916] hover:bg-orange-50 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl font-bold text-blue-600">
+                            <span className="text-2xl font-bold text-[#B66916]">
                               {edition.year}
                             </span>
                             {edition.specificDate && (
@@ -292,7 +292,7 @@ export default function CompetitionDetailPage() {
                           {edition.status && (
                             <span className={`text-xs px-2 py-1 rounded-full ${
                               edition.status === 'FINISHED' ? 'bg-gray-100 text-gray-700' :
-                              edition.status === 'UPCOMING' ? 'bg-blue-100 text-blue-700' :
+                              edition.status === 'UPCOMING' ? 'bg-orange-100 text-orange-700' :
                               edition.status === 'ONGOING' ? 'bg-green-100 text-green-700' :
                               'bg-gray-100 text-gray-700'
                             }`}>
@@ -302,7 +302,7 @@ export default function CompetitionDetailPage() {
                                edition.status}
                             </span>
                           )}
-                          <span className="text-blue-600 font-semibold">→</span>
+                          <span className="text-[#B66916] font-semibold">→</span>
                         </div>
                       </div>
                     </Link>
@@ -376,7 +376,7 @@ export default function CompetitionDetailPage() {
                     href={`https://www.google.com/maps?q=${competition.event.latitude},${competition.event.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline flex items-center gap-2"
+                    className="text-sm text-[#B66916] hover:underline flex items-center gap-2"
                   >
                     <MapPin className="h-4 w-4" />
                     Ver en Google Maps
@@ -391,8 +391,8 @@ export default function CompetitionDetailPage() {
               <div className="space-y-4">
                 {/* Type */}
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                    <Mountain className="h-5 w-5 text-blue-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
+                    <Mountain className="h-5 w-5 text-[#B66916]" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Type</p>
@@ -476,7 +476,7 @@ export default function CompetitionDetailPage() {
                           <div className="flex-1">
                             <Link
                               href={`/special-series/${series.slug}`}
-                              className="font-semibold hover:text-purple-600 transition-colors"
+                              className="font-semibold hover:text-[#B66916] transition-colors"
                             >
                               {series.name}
                             </Link>
@@ -496,8 +496,8 @@ export default function CompetitionDetailPage() {
                   {/* ITRA Points */}
                   {competition.itraPoints !== undefined && competition.itraPoints !== null && (
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                        <Award className="h-5 w-5 text-blue-600" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
+                        <Award className="h-5 w-5 text-[#B66916]" />
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Puntos ITRA</p>

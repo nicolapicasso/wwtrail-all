@@ -52,8 +52,8 @@ export default function EventsPage() {
                 onClick={() => setViewMode('grid')}
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-[#16A34A] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
                 }`}
                 aria-pressed={viewMode === 'grid'}
               >
@@ -63,8 +63,8 @@ export default function EventsPage() {
                 onClick={() => setViewMode('list')}
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-[#16A34A] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
                 }`}
                 aria-pressed={viewMode === 'list'}
               >

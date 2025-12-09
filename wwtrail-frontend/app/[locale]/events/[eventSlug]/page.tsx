@@ -337,11 +337,11 @@ export default async function EventDetailPage({
                     } as any))}
                 />
                 <div className="mt-4">
-                  <a 
+                  <a
                     href={`https://www.google.com/maps?q=${event.latitude},${event.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline flex items-center gap-2"
+                    className="text-sm text-[#B66916] hover:underline flex items-center gap-2"
                   >
                     <MapPin className="h-4 w-4" />
                     Ver en Google Maps
@@ -386,7 +386,7 @@ export default async function EventDetailPage({
                     href={event.website}
                     icon={<Globe className="h-5 w-5" />}
                     label="Sitio Web"
-                    color="text-blue-600"
+                    color="text-[#B66916]"
                   />
                 )}
                 
@@ -472,7 +472,7 @@ export default async function EventDetailPage({
                     <Link
                       key={nearbyEvent.id}
                       href={`/events/${nearbyEvent.slug}`}
-                      className="block text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                      className="block text-sm text-[#B66916] hover:text-[#8B4F12] hover:underline"
                     >
                       → {nearbyEvent.name}
                     </Link>
@@ -526,14 +526,14 @@ function StatItem({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function ContactLink({ 
-  href, 
-  icon, 
-  label, 
-  color = "text-green-600" 
-}: { 
-  href: string; 
-  icon: React.ReactNode; 
+function ContactLink({
+  href,
+  icon,
+  label,
+  color = "text-[#B66916]"
+}: {
+  href: string;
+  icon: React.ReactNode;
   label: string;
   color?: string;
 }) {
@@ -542,7 +542,7 @@ function ContactLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 text-gray-700 hover:text-green-600 transition-colors group"
+      className="flex items-center gap-3 text-gray-700 hover:text-[#B66916] transition-colors group"
     >
       <div className={`${color} group-hover:scale-110 transition-transform`}>
         {icon}

@@ -143,7 +143,7 @@ export function UserList({
                   placeholder="Buscar usuarios..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
                 />
               </div>
             </div>
@@ -153,7 +153,7 @@ export function UserList({
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
               >
                 <option value="">Todos los pa{'\u00ed'}ses</option>
                 {COUNTRIES.map((c) => (
@@ -171,7 +171,7 @@ export function UserList({
                 placeholder="Edad min"
                 value={minAge || ''}
                 onChange={(e) => setMinAge(e.target.value ? Number(e.target.value) : undefined)}
-                className="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
                 min="0"
                 max="100"
               />
@@ -181,7 +181,7 @@ export function UserList({
                 placeholder="Edad max"
                 value={maxAge || ''}
                 onChange={(e) => setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
-                className="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
                 min="0"
                 max="100"
               />
@@ -193,8 +193,8 @@ export function UserList({
                 onClick={() => setViewMode('grid')}
                 className={`px-3 py-2 rounded-lg transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-[#16A34A] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
                 }`}
               >
                 Grid
@@ -203,8 +203,8 @@ export function UserList({
                 onClick={() => setViewMode('list')}
                 className={`px-3 py-2 rounded-lg transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-[#16A34A] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
                 }`}
               >
                 Lista
@@ -217,7 +217,7 @@ export function UserList({
       {/* Loading */}
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B66916]"></div>
         </div>
       )}
 
@@ -227,7 +227,7 @@ export function UserList({
           <p className="text-red-600">{error}</p>
           <button
             onClick={fetchUsers}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-[#16A34A] text-white rounded-lg hover:bg-[#B66916]"
           >
             Reintentar
           </button>
@@ -264,9 +264,9 @@ export function UserList({
               <button
                 onClick={handlePreviousPage}
                 disabled={!pagination.hasPrev}
-                className={`p-2 rounded-lg ${
+                className={`p-2 rounded-lg transition-colors ${
                   pagination.hasPrev
-                    ? 'hover:bg-gray-100 text-gray-700'
+                    ? 'hover:bg-[#B66916] hover:text-white text-gray-700'
                     : 'text-gray-300 cursor-not-allowed'
                 }`}
               >
@@ -278,12 +278,12 @@ export function UserList({
                   key={idx}
                   onClick={() => typeof pageNum === 'number' && setPage(pageNum)}
                   disabled={pageNum === '...'}
-                  className={`px-3 py-1 rounded-lg ${
+                  className={`px-3 py-1 rounded-lg transition-colors ${
                     pageNum === page
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-[#16A34A] text-white'
                       : pageNum === '...'
                       ? 'text-gray-400 cursor-default'
-                      : 'hover:bg-gray-100 text-gray-700'
+                      : 'hover:bg-[#B66916] hover:text-white text-gray-700'
                   }`}
                 >
                   {pageNum}
@@ -293,9 +293,9 @@ export function UserList({
               <button
                 onClick={handleNextPage}
                 disabled={!pagination.hasNext}
-                className={`p-2 rounded-lg ${
+                className={`p-2 rounded-lg transition-colors ${
                   pagination.hasNext
-                    ? 'hover:bg-gray-100 text-gray-700'
+                    ? 'hover:bg-[#B66916] hover:text-white text-gray-700'
                     : 'text-gray-300 cursor-not-allowed'
                 }`}
               >

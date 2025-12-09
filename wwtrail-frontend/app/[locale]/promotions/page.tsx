@@ -103,7 +103,7 @@ export default function PromotionsPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar promociones..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                 />
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function PromotionsPage() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
               >
                 <option value="ALL">Todas</option>
                 <option value="COUPON">Cupones</option>
@@ -122,7 +122,7 @@ export default function PromotionsPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
               >
                 <option value="">Todas las categorías</option>
                 {filteredCategories.map(category => (
@@ -161,8 +161,8 @@ export default function PromotionsPage() {
                     onClick={() => setPage(pageNum)}
                     className={`px-4 py-2 rounded-lg font-medium ${
                       page === pageNum
-                        ? 'bg-green-600 text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        ? 'bg-[#16A34A] text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-[#B66916] hover:text-white hover:border-[#B66916]'
                     }`}
                   >
                     {pageNum}

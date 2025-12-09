@@ -216,7 +216,7 @@ export default function EventFilters({
             placeholder="Buscar eventos por nombre o ubicación..."
             value={searchValue}  // ✅ Valor controlado
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
           />
           {searchValue && (
             <button
@@ -237,7 +237,7 @@ export default function EventFilters({
           <Filter className="h-5 w-5" />
           Filtros
           {hasActiveFilters && (
-            <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="bg-[#B66916] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
               {[searchValue, selectedCountry, selectedCity, selectedMonth, selectedHighlighted !== 'all'].filter(Boolean).length}
             </span>
           )}
@@ -274,7 +274,7 @@ export default function EventFilters({
                 value={selectedCity}
                 onChange={(e) => handleCityChange(e.target.value)}
                 disabled={availableCities.length === 0}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="">
                   {availableCities.length === 0 ? 'Cargando ciudades...' : 'Todas las ciudades'}
@@ -298,7 +298,7 @@ export default function EventFilters({
                 value={selectedStatus}
                 onChange={(e) => handleStatusChange(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="ALL">Todos los estados</option>
                 <option value="PUBLISHED">Publicados</option>
@@ -319,7 +319,7 @@ export default function EventFilters({
                 value={selectedMonth}
                 onChange={(e) => handleMonthChange(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {months.map((month) => (
                   <option key={month.value} value={month.value}>
@@ -341,7 +341,7 @@ export default function EventFilters({
                 value={selectedOrganizer}
                 onChange={(e) => handleOrganizerChange(e.target.value)}
                 disabled={isLoading || availableOrganizers.length === 0}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="">
                   {availableOrganizers.length === 0 ? 'Cargando...' : 'Todos los organizadores'}
@@ -365,7 +365,7 @@ export default function EventFilters({
                 value={selectedHighlighted}
                 onChange={(e) => handleHighlightedChange(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="all">Todos los eventos</option>
                 <option value="true">Solo destacados</option>
@@ -392,7 +392,7 @@ export default function EventFilters({
       {/* Loading Indicator */}
       {isLoading && (
         <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#B66916] border-t-transparent"></div>
           Cargando eventos...
         </div>
       )}

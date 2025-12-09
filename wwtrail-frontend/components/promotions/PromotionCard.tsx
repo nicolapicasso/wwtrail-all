@@ -64,7 +64,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
       {/* Content */}
       <div className="p-4">
         <Link href={`/promotions/${promotion.slug}`}>
-          <h3 className="text-lg font-bold text-gray-900 hover:text-green-600 mb-2 line-clamp-2">
+          <h3 className="text-lg font-bold text-gray-900 hover:text-[#B66916] mb-2 line-clamp-2">
             {promotion.title}
           </h3>
         </Link>
@@ -138,7 +138,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
         {!showActions && (
           <Link
             href={`/promotions/${promotion.slug}`}
-            className="block w-full mt-3 px-4 py-2 text-center text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
+            className="block w-full mt-3 px-4 py-2 text-center text-sm font-medium text-white bg-[#16A34A] rounded-lg hover:bg-[#B66916]"
           >
             {isCoupon ? 'Obtener Cupón' : 'Ver Contenido'}
           </Link>

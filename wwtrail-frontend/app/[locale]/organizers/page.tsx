@@ -245,7 +245,7 @@ export default function OrganizersPublicPage() {
                 <button
                   onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                   disabled={page === 1}
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white hover:bg-[#B66916] hover:text-white hover:border-[#B66916] disabled:pointer-events-none disabled:opacity-50 transition-colors"
                   aria-label="Página anterior"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -268,8 +268,8 @@ export default function OrganizersPublicPage() {
                       onClick={() => handlePageClick(pageNum as number)}
                       className={`flex h-9 w-9 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
                         isActive
-                          ? 'border-blue-600 bg-blue-600 text-white'
-                          : 'border-gray-300 bg-white hover:bg-gray-50'
+                          ? 'border-[#16A34A] bg-[#16A34A] text-white'
+                          : 'border-gray-300 bg-white hover:bg-[#B66916] hover:text-white hover:border-[#B66916]'
                       }`}
                       aria-label={`Ir a página ${pageNum}`}
                       aria-current={isActive ? 'page' : undefined}
@@ -283,7 +283,7 @@ export default function OrganizersPublicPage() {
                 <button
                   onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                   disabled={page === totalPages}
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 bg-white hover:bg-[#B66916] hover:text-white hover:border-[#B66916] disabled:pointer-events-none disabled:opacity-50 transition-colors"
                   aria-label="Página siguiente"
                 >
                   <ChevronRight className="h-4 w-4" />

@@ -120,7 +120,7 @@ export default function PromotionDetailPage() {
             {/* Type Badge */}
             <div className="flex items-center gap-3 mb-4">
               <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                isCoupon ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
+                isCoupon ? 'bg-blue-500 text-white' : 'bg-[#B66916] text-white'
               }`}>
                 {isCoupon ? '🎟️ Cupón' : '🔒 Contenido Exclusivo'}
               </span>
@@ -300,7 +300,7 @@ export default function PromotionDetailPage() {
           <div className="bg-white rounded-lg shadow-lg p-8">
             {requiresLogin ? (
               <div className="text-center py-8">
-                <Lock className="h-16 w-16 text-purple-600 mx-auto mb-4" />
+                <Lock className="h-16 w-16 text-[#B66916] mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Contenido Exclusivo</h2>
                 <p className="text-gray-600 mb-6">
                   Debes iniciar sesión para ver este contenido exclusivo
@@ -323,7 +323,7 @@ export default function PromotionDetailPage() {
             ) : (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Lock className="h-6 w-6 text-purple-600" />
+                  <Lock className="h-6 w-6 text-[#B66916]" />
                   Contenido Exclusivo
                 </h2>
                 <div

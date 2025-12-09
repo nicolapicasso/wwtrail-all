@@ -7,7 +7,8 @@ import { useLocale } from 'next-intl';
 import { servicesService, serviceCategoriesService } from '@/lib/api/v2';
 import { Service, ServiceCategory, ServiceFilters } from '@/types/v2';
 import ServiceCard from '@/components/ServiceCard';
-import { Search, Filter, MapPin, Tag, Loader2 } from 'lucide-react';
+import { Search, Filter, MapPin, Tag, Loader2, Globe } from 'lucide-react';
+import CountrySelect from '@/components/CountrySelect';
 
 export default function ServicesPage() {
   const locale = useLocale();
@@ -80,7 +81,7 @@ export default function ServicesPage() {
         {/* Filters */}
         <div className="bg-white rounded-lg border p-6 mb-8">
           <form onSubmit={handleSearch} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {/* Search */}
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -93,9 +94,22 @@ export default function ServicesPage() {
                     value={filters.search}
                     onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                     placeholder="Buscar servicios..."
-                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md"
+                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                   />
                 </div>
+              </div>
+
+              {/* Country */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  <Globe className="inline h-4 w-4 mr-1" />
+                  País
+                </label>
+                <CountrySelect
+                  value={filters.country || ''}
+                  onChange={(country) => setFilters({ ...filters, country, page: 1 })}
+                  placeholder="Todos los países"
+                />
               </div>
 
               {/* Category */}
@@ -107,7 +121,7 @@ export default function ServicesPage() {
                 <select
                   value={filters.categoryId}
                   onChange={(e) => setFilters({ ...filters, categoryId: e.target.value, page: 1 })}
-                  className="w-full px-3 py-2 border border-input rounded-md"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                 >
                   <option value="">Todas las categorías</option>
                   {categories.map((cat) => (
@@ -126,7 +140,7 @@ export default function ServicesPage() {
                 <select
                   value={filters.sortBy}
                   onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as any, page: 1 })}
-                  className="w-full px-3 py-2 border border-input rounded-md"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                 >
                   <option value="createdAt">Más recientes</option>
                   <option value="name">Nombre</option>
@@ -141,7 +155,7 @@ export default function ServicesPage() {
                     type="checkbox"
                     checked={filters.featured || false}
                     onChange={(e) => setFilters({ ...filters, featured: e.target.checked || undefined, page: 1 })}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-[#B66916] border-gray-300 rounded focus:ring-[#B66916] accent-[#B66916]"
                   />
                   <span className="text-sm font-medium">
                     Solo destacados
@@ -152,7 +166,7 @@ export default function ServicesPage() {
 
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="bg-[#16A34A] text-white px-6 py-2 rounded-md hover:bg-[#B66916] transition-colors"
             >
               Buscar
             </button>
@@ -162,7 +176,7 @@ export default function ServicesPage() {
         {/* Results */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#B66916]" />
           </div>
         ) : services.length > 0 ? (
           <>

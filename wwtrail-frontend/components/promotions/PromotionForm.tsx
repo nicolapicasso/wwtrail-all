@@ -201,7 +201,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
             disabled={!!promotion}
             className={`p-4 border-2 rounded-lg text-center transition-colors ${
               type === 'EXCLUSIVE_CONTENT'
-                ? 'border-purple-500 bg-purple-50'
+                ? 'border-[#B66916] bg-orange-50'
                 : 'border-gray-300 hover:border-gray-400'
             } ${promotion ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
