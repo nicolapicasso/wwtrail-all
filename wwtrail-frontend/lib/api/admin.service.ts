@@ -1201,10 +1201,15 @@ export interface NativeImportOptions {
 
 export interface ConflictItem {
   index: number;
-  item: any;
+  id: string;
+  slug?: string;
+  name?: string;
   conflictType: 'id_exists' | 'slug_exists' | 'both_exist';
-  existingId?: string;
-  existingSlug?: string;
+  existingRecord: {
+    id: string;
+    slug?: string;
+    name?: string;
+  };
 }
 
 export interface NativeValidationResult {

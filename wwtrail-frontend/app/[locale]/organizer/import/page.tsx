@@ -1075,7 +1075,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                       {validationResult.conflicts.slice(0, 10).map((conflict, i) => (
                         <div key={i} className="text-sm p-2 bg-yellow-50 rounded">
                           <span className="font-medium">
-                            {conflict.item.name || conflict.item.title || conflict.item.slug || `Item ${conflict.index + 1}`}
+                            {conflict.name || conflict.slug || `Item ${conflict.index + 1}`}
                           </span>
                           <span className="text-gray-500 ml-2">
                             ({conflict.conflictType === 'id_exists' ? 'ID existe' :
