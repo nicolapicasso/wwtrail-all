@@ -97,12 +97,27 @@ export default function Navbar() {
 
             {/* Desktop Navigation - Public Menu */}
             <div className="hidden md:flex md:ml-10 md:space-x-8">
-              <Link
-                href="/events"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
-              >
-                {t('events')}
-              </Link>
+              {/* Eventos con dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
+                    {t('events')}
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/events" className="cursor-pointer">
+                      {t('events')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/organizers" className="cursor-pointer">
+                      {t('organizers')}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Competiciones con dropdown */}
               <DropdownMenu>
@@ -248,13 +263,25 @@ export default function Navbar() {
         <div className="md:hidden bg-black">
           {/* Public Menu Items */}
           <div className="pt-2 pb-3 space-y-1">
+            {/* Eventos section */}
+            <div className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300">
+              {t('events')}
+            </div>
             <Link
               href="/events"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {t('events')}
+              → {t('events')}
             </Link>
+            <Link
+              href="/organizers"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              → {t('organizers')}
+            </Link>
+            {/* Competiciones section */}
             <Link
               href="/competitions"
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
