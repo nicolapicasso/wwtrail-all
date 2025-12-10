@@ -20,7 +20,7 @@ export default function OrganizerCard({ organizer, className = '' }: OrganizerCa
   return (
     <div className={`rounded-lg border bg-white p-6 shadow-sm ${className}`}>
       <h3 className="mb-4 font-semibold flex items-center gap-2">
-        <Building2 className="h-5 w-5 text-blue-600" />
+        <Building2 className="h-5 w-5 text-[#B66916]" />
         Organizador
       </h3>
 
@@ -30,7 +30,7 @@ export default function OrganizerCard({ organizer, className = '' }: OrganizerCa
       >
         {organizer.logoUrl && (
           <div className="flex justify-center mb-3">
-            <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 group-hover:ring-2 group-hover:ring-blue-500 transition-all">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 group-hover:ring-2 group-hover:ring-[#B66916] transition-all">
               <Image
                 src={normalizeImageUrl(organizer.logoUrl)}
                 alt={`${organizer.name} logo`}
@@ -41,11 +41,11 @@ export default function OrganizerCard({ organizer, className = '' }: OrganizerCa
           </div>
         )}
 
-        <p className="text-center font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+        <p className="text-center font-medium text-gray-900 group-hover:text-[#B66916] transition-colors">
           {organizer.name}
         </p>
 
-        <p className="text-center text-xs text-gray-500 mt-1 group-hover:text-blue-500 transition-colors">
+        <p className="text-center text-xs text-gray-500 mt-1 group-hover:text-[#B66916] transition-colors">
           Ver perfil del organizador →
         </p>
       </Link>
