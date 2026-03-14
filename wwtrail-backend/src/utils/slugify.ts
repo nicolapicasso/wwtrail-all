@@ -21,14 +21,28 @@ export function slugify(text: string): string {
  */
 export async function generateUniqueSlug(
   name: string,
-  type: 'event' | 'competition' | 'edition' = 'event'
+  type: 'event' | 'competition' | 'edition' | 'service' | 'service-category' | 'special-series' = 'event',
+  currentSlug?: string
 ): Promise<string> {
   let slug = slugify(name);
+
+  // If the generated slug matches the current slug, no need to change
+  if (currentSlug && slug === currentSlug) {
+    return slug;
+  }
+
   let counter = 1;
   let isUnique = false;
 
   while (!isUnique) {
     const testSlug = counter === 1 ? slug : `${slug}-${counter}`;
+
+    // If testSlug matches currentSlug, it's available (it's ours)
+    if (currentSlug && testSlug === currentSlug) {
+      slug = testSlug;
+      isUnique = true;
+      break;
+    }
 
     // Verificar si existe en la tabla correspondiente
     let exists;
@@ -48,6 +62,24 @@ export async function generateUniqueSlug(
 
       case 'edition':
         exists = await prisma.edition.findUnique({
+          where: { slug: testSlug },
+        });
+        break;
+
+      case 'service':
+        exists = await prisma.service.findUnique({
+          where: { slug: testSlug },
+        });
+        break;
+
+      case 'service-category':
+        exists = await prisma.serviceCategory.findUnique({
+          where: { slug: testSlug },
+        });
+        break;
+
+      case 'special-series':
+        exists = await prisma.specialSeries.findUnique({
           where: { slug: testSlug },
         });
         break;

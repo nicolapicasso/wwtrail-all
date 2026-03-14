@@ -54,7 +54,7 @@ export class SpecialSeriesService {
       const status = userRole === 'ADMIN' ? 'PUBLISHED' : 'DRAFT';
 
       // Generar slug único
-      const slug = await generateUniqueSlug(data.name, prisma.specialSeries);
+      const slug = await generateUniqueSlug(data.name, 'special-series');
 
       const specialSeries = await prisma.specialSeries.create({
         data: {
