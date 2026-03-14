@@ -66,7 +66,7 @@ export class WeatherService {
 
       // Procesar datos horarios y calcular promedios
       const hourly = data.hourly;
-      const hours = hourly.time.length;
+      const _hours = hourly.time.length;
 
       // Calcular promedios
       const avgTemp = this.calculateAverage(hourly.temperature_2m);
@@ -309,7 +309,7 @@ export class WeatherService {
 
     return {
       edition: updatedEdition,
-      weather: updatedEdition.weather as EditionWeather,
+      weather: updatedEdition.weather as unknown as EditionWeather,
     };
   }
 

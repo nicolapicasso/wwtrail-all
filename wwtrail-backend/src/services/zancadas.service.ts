@@ -1119,7 +1119,7 @@ class ZancadasService {
    * Busca la competición más cercana por distancia
    * Si el usuario tiene menos km, busca la más corta como objetivo
    */
-  private async findClosestCompetitionByDistance(userKm: number): Promise<{
+  private async _findClosestCompetitionByDistance(userKm: number): Promise<{
     id: string;
     name: string;
     slug: string;
@@ -1183,7 +1183,7 @@ class ZancadasService {
       id: closest.id,
       name: closest.name,
       slug: closest.slug,
-      baseDistance: closest.baseDistance,
+      baseDistance: closest.baseDistance ?? 0,
       baseElevation: closest.baseElevation,
       progress: Math.round(progress * 10) / 10,
       event: closest.event,
@@ -1193,7 +1193,7 @@ class ZancadasService {
   /**
    * Busca la competición más cercana por desnivel
    */
-  private async findClosestCompetitionByElevation(userElevation: number): Promise<{
+  private async _findClosestCompetitionByElevation(userElevation: number): Promise<{
     id: string;
     name: string;
     slug: string;
@@ -1259,7 +1259,7 @@ class ZancadasService {
       id: closest.id,
       name: closest.name,
       slug: closest.slug,
-      baseDistance: closest.baseDistance,
+      baseDistance: closest.baseDistance ?? 0,
       baseElevation: closest.baseElevation,
       progress: Math.round(progress * 10) / 10,
       event: closest.event,

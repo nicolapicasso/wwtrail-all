@@ -1,5 +1,5 @@
 import { PrismaClient, ParticipationStatus } from '@prisma/client';
-import { NotFoundError, BadRequestError, ForbiddenError } from '../utils/errors';
+import { NotFoundError, ForbiddenError } from '../utils/errors';
 
 const prisma = new PrismaClient();
 

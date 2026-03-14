@@ -597,8 +597,8 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           promotionId: promotion.id,
           language: targetLang,
           title: translated.title,
-          description: translated.description || null,
-          exclusiveContent: translated.exclusiveContent || null,
+          description: translated.description ?? undefined,
+          exclusiveContent: translated.exclusiveContent ?? undefined,
         };
 
         const savedTranslation = await prisma.promotionTranslation.upsert({
