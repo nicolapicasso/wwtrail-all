@@ -58,7 +58,7 @@ export class ServiceService {
   /**
    * Disparar traducciones automáticas en background (no bloqueante)
    */
-  private static triggerAutoTranslation(serviceId: string, status: EventStatus) {
+  private static triggerAutoTranslation(serviceId: string, status: EventStatus): void {
     if (!isAutoTranslateEnabled() || !shouldTranslateByStatus(status)) {
       return;
     }
@@ -84,7 +84,13 @@ export class ServiceService {
           });
       });
     } else {
-      return TranslationService.autoTranslateService(serviceId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
+      TranslationService.autoTranslateService(serviceId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING)
+        .then((translations) => {
+          logger.info(`Auto-translation completed for service ${serviceId}: ${translations.length} translations created`);
+        })
+        .catch((error) => {
+          logger.error(`Auto-translation failed for service ${serviceId}:`, error.message);
+        });
     }
   }
 
@@ -276,8 +282,8 @@ export class ServiceService {
       }
 
       // Parse featured as boolean (query params come as strings)
-      if (filters.featured !== undefined && filters.featured !== null && filters.featured !== '') {
-        where.featured = filters.featured === true || filters.featured === 'true';
+      if (filters.featured !== undefined && filters.featured !== null) {
+        where.featured = filters.featured === true || String(filters.featured) === 'true';
       }
 
       if (filters.status) {
