@@ -84,7 +84,13 @@ export class ServiceService {
           });
       });
     } else {
-      return TranslationService.autoTranslateService(serviceId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING);
+      TranslationService.autoTranslateService(serviceId, targetLanguages, TranslationConfig.OVERWRITE_EXISTING)
+        .then((translations) => {
+          logger.info(`Auto-translation completed for service ${serviceId}: ${translations.length} translations created`);
+        })
+        .catch((error) => {
+          logger.error(`Auto-translation failed for service ${serviceId}:`, error.message);
+        });
     }
   }
 
