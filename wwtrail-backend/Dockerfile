@@ -28,6 +28,9 @@ RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
+# Install Prisma CLI (needed for migrations in entrypoint)
+RUN npm install prisma --save-optional
+
 # Rebuild native modules for production (bcrypt, sharp)
 RUN npm rebuild bcrypt sharp
 
