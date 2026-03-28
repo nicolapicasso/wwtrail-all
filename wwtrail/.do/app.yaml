@@ -1,0 +1,64 @@
+# DigitalOcean App Platform Configuration
+name: wwtrail
+
+services:
+  - name: wwtrail-web
+    github:
+      repo: nicolapicasso/wwtrail-all
+      branch: main
+      deploy_on_push: true
+    source_dir: /wwtrail
+    dockerfile_path: wwtrail/Dockerfile
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: professional-xs
+    routes:
+      - path: /
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: JWT_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: JWT_REFRESH_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: JWT_EXPIRES_IN
+        scope: RUN_TIME
+        value: "7d"
+      - key: JWT_REFRESH_EXPIRES_IN
+        scope: RUN_TIME
+        value: "30d"
+      - key: NEXT_PUBLIC_APP_URL
+        scope: RUN_AND_BUILD_TIME
+        value: "https://wwtrail.com"
+      - key: NEXT_PUBLIC_APP_NAME
+        scope: BUILD_TIME
+        value: "WWTRAIL"
+      - key: NODE_ENV
+        scope: RUN_AND_BUILD_TIME
+        value: "production"
+      - key: OPENAI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: SMTP_HOST
+        scope: RUN_TIME
+      - key: SMTP_PORT
+        scope: RUN_TIME
+        value: "587"
+      - key: SMTP_USER
+        scope: RUN_TIME
+      - key: SMTP_PASS
+        scope: RUN_TIME
+        type: SECRET
+      - key: EMAIL_FROM
+        scope: RUN_TIME
+        value: "noreply@wwtrail.com"
+
+databases:
+  - name: wwtrail-db
+    engine: PG
+    version: "16"
+    size: db-s-1vcpu-1gb
+    num_nodes: 1
