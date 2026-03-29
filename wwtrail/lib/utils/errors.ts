@@ -52,3 +52,6 @@ export class InternalServerError extends AppError {
     super(message, 500);
   }
 }
+
+// Alias for backwards compatibility with services that import as ApiError
+export { AppError as ApiError };
