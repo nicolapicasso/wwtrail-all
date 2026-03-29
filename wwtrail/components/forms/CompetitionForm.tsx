@@ -4,12 +4,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Loader2, AlertCircle, Image as ImageIcon, Tag, Globe } from 'lucide-react';
+import { Save, Loader2, AlertCircle, Image as ImageIcon, Tag, Globe, Sparkles, ExternalLink, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { terrainTypesService } from '@/lib/api/catalogs.service';
+import aiAutofillService from '@/lib/api/v2/aiAutofill.service';
+import type { CompetitionAutoFillResult, SuggestedImage } from '@/lib/api/v2/aiAutofill.service';
 import type { Competition, UTMBIndex } from '@/types/competition';
 import type { TerrainType, SpecialSeriesListItem } from '@/types/v2';
 import { CompetitionType, Language } from '@/types/event';
@@ -35,6 +37,60 @@ export default function CompetitionForm({
   const [error, setError] = useState<string | null>(null);
 
   const isEditMode = !!competition;
+
+  // AI auto-fill state
+  const [aiUrl, setAiUrl] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiDone, setAiDone] = useState(false);
+  const [suggestedImages, setSuggestedImages] = useState<SuggestedImage[]>([]);
+  const [showImageSuggestions, setShowImageSuggestions] = useState(false);
+
+  const handleAiAutofill = async () => {
+    if (!aiUrl.trim()) {
+      setError('Introduce la URL de la competición para usar el auto-relleno con IA');
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      setError(null);
+
+      const result = await aiAutofillService.autofillCompetition(aiUrl.trim());
+
+      // Auto-rellenar campos vacíos
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || result.name || prev.name,
+        description: prev.description || result.description || prev.description,
+        type: (result.type as CompetitionType) || prev.type,
+        baseDistance: prev.baseDistance || (result.baseDistance?.toString() || prev.baseDistance),
+        baseElevation: prev.baseElevation || (result.baseElevation?.toString() || prev.baseElevation),
+        baseMaxParticipants: prev.baseMaxParticipants || (result.baseMaxParticipants?.toString() || prev.baseMaxParticipants),
+        itraPoints: prev.itraPoints || (result.itraPoints?.toString() || prev.itraPoints),
+        utmbIndex: prev.utmbIndex || result.utmbIndex || prev.utmbIndex,
+      }));
+
+      // Auto-generar slug si vacío
+      if (!formData.slug && result.name) {
+        setFormData(prev => ({ ...prev, slug: generateSlug(result.name!) }));
+      }
+
+      // Imágenes sugeridas
+      if (result.suggestedImages && result.suggestedImages.length > 0) {
+        setSuggestedImages(result.suggestedImages);
+        setShowImageSuggestions(true);
+      }
+
+      setAiDone(true);
+      toast.success(`Auto-relleno completado. Se encontraron ${Object.keys(result).filter(k => result[k as keyof CompetitionAutoFillResult]).length} campos.`);
+    } catch (err: any) {
+      console.error('AI autofill error:', err);
+      setError(err.response?.data?.error || err.message || 'Error al analizar la URL con IA');
+      toast.error('Error al analizar la URL');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   // Catalog data
   const [terrainTypes, setTerrainTypes] = useState<TerrainType[]>([]);
@@ -207,6 +263,119 @@ export default function CompetitionForm({
           </button>
         )}
       </div>
+
+      {/* Card: Auto-relleno con IA */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="h-5 w-5 text-purple-600" />
+          <h3 className="text-lg font-semibold text-purple-900">Auto-relleno con IA</h3>
+        </div>
+        <p className="text-sm text-purple-700 mb-4">
+          Introduce la URL específica de esta competición y la IA rellenará los campos posibles.
+        </p>
+
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={aiUrl}
+            onChange={(e) => setAiUrl(e.target.value)}
+            placeholder="https://www.ejemplo-evento.com/competicion-50k"
+            className="flex-1 rounded-lg border border-purple-300 px-4 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+          />
+          <button
+            type="button"
+            onClick={handleAiAutofill}
+            disabled={aiLoading || !aiUrl.trim()}
+            className="flex items-center gap-2 px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            {aiLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Analizando...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Analizar con IA
+              </>
+            )}
+          </button>
+        </div>
+
+        {aiLoading && (
+          <div className="mt-3 p-3 bg-purple-100 border border-purple-200 rounded-lg">
+            <p className="text-sm text-purple-800 flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              La IA está analizando la web de la competición...
+            </p>
+          </div>
+        )}
+
+        {aiDone && !aiLoading && (
+          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-800 font-medium">
+              Auto-relleno completado. Revisa los campos y ajusta lo que necesites.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Imágenes sugeridas por la IA */}
+      {showImageSuggestions && suggestedImages.length > 0 && (
+        <div className="rounded-lg bg-amber-50 p-6 shadow-sm border border-amber-200">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-amber-600" />
+              <h3 className="text-lg font-semibold text-amber-900">Imágenes sugeridas</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowImageSuggestions(false)}
+              className="text-amber-600 hover:text-amber-800"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <p className="text-sm text-amber-700 mb-4">
+            Imágenes encontradas en la web. Haz clic en "Ver" para abrirla y decidir si descargarla.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {suggestedImages.map((img, idx) => (
+              <div key={idx} className="relative group">
+                <div className="aspect-video bg-white rounded-lg border border-amber-200 overflow-hidden">
+                  <img
+                    src={img.url}
+                    alt={img.alt || `Imagen ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-xs text-amber-700 capitalize px-1.5 py-0.5 bg-amber-100 rounded">
+                    {img.type}
+                  </span>
+                  <a
+                    href={img.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-amber-600 hover:text-amber-800 flex items-center gap-1"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    Ver
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 p-2 bg-amber-100 border border-amber-200 rounded text-xs text-amber-800">
+            Para usar una imagen, ábrela con "Ver", descárgala, y luego súbela en la sección de medios del formulario.
+          </div>
+        </div>
+      )}
 
       {/* Error Alert */}
       {error && (

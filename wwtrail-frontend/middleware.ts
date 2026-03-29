@@ -34,6 +34,10 @@ export function middleware(request: NextRequest) {
     '/promotions',
     '/organizers',
     '/special-series',
+    '/users',
+    '/directory',
+    '/page',
+    '/editions',
   ];
 
   // Función para verificar si una ruta es pública (considerando locale prefix)

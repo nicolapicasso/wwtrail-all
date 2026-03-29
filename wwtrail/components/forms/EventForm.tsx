@@ -8,9 +8,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import eventsService from '@/lib/api/v2/events.service';
 import { organizersService } from '@/lib/api/v2';
-import { ArrowLeft, MapPin, Calendar, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2, Building2, Sparkles, ExternalLink, Download } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import FileUpload from '@/components/FileUpload';
+import aiAutofillService from '@/lib/api/v2/aiAutofill.service';
+import type { EventAutoFillResult, SuggestedImage } from '@/lib/api/v2/aiAutofill.service';
 
 interface EventFormProps {
   mode: 'create' | 'edit';
@@ -49,6 +51,67 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
     twitterUrl: initialData?.twitterUrl || '',
     youtubeUrl: initialData?.youtubeUrl || '',
   });
+
+  // AI auto-fill state
+  const [aiUrl, setAiUrl] = useState(initialData?.websiteUrl || initialData?.website || '');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<EventAutoFillResult | null>(null);
+  const [suggestedImages, setSuggestedImages] = useState<SuggestedImage[]>([]);
+  const [showImageSuggestions, setShowImageSuggestions] = useState(false);
+
+  // AI auto-fill handler
+  const handleAiAutofill = async () => {
+    if (!aiUrl.trim()) {
+      setError('Introduce la URL del evento para usar el auto-relleno con IA');
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      setError(null);
+
+      const result = await aiAutofillService.autofillEvent(aiUrl.trim());
+      setAiResult(result);
+
+      // Auto-rellenar campos vacíos con los datos de la IA
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || result.name || prev.name,
+        description: prev.description || result.description || prev.description,
+        city: prev.city || result.city || prev.city,
+        country: prev.country || result.country || prev.country,
+        website: prev.website || result.website || aiUrl.trim(),
+        typicalMonth: prev.typicalMonth || (result.typicalMonth?.toString() || prev.typicalMonth),
+        firstEditionYear: prev.firstEditionYear || (result.firstEditionYear?.toString() || prev.firstEditionYear),
+        instagramUrl: prev.instagramUrl || result.instagramUrl || prev.instagramUrl,
+        facebookUrl: prev.facebookUrl || result.facebookUrl || prev.facebookUrl,
+        twitterUrl: prev.twitterUrl || result.twitterUrl || prev.twitterUrl,
+        youtubeUrl: prev.youtubeUrl || result.youtubeUrl || prev.youtubeUrl,
+      }));
+
+      // Si hay slug vacío, generarlo del nombre
+      if (!formData.slug && result.name) {
+        const newSlug = generateSlug(result.name);
+        setFormData(prev => ({ ...prev, slug: newSlug }));
+        if (newSlug.length >= 3) {
+          validateSlug(newSlug);
+        }
+      }
+
+      // Guardar imágenes sugeridas
+      if (result.suggestedImages && result.suggestedImages.length > 0) {
+        setSuggestedImages(result.suggestedImages);
+        setShowImageSuggestions(true);
+      }
+
+      alert(`Auto-relleno completado. Se encontraron ${Object.keys(result).filter(k => result[k as keyof EventAutoFillResult]).length} campos${result.competitions?.length ? ` y ${result.competitions.length} competiciones` : ''}.`);
+    } catch (err: any) {
+      console.error('AI autofill error:', err);
+      setError(err.response?.data?.error || err.message || 'Error al analizar la URL con IA');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   // Slug validation state
   const [slugValidation, setSlugValidation] = useState<{
@@ -337,6 +400,159 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Card: Auto-relleno con IA */}
+        <div className="rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 p-6 shadow-sm border border-purple-200">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-5 w-5 text-purple-600" />
+            <h2 className="text-lg font-semibold text-purple-900">Auto-relleno con IA</h2>
+          </div>
+          <p className="text-sm text-purple-700 mb-4">
+            Introduce la URL de la web del evento y la IA rellenará automáticamente los campos posibles.
+          </p>
+
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={aiUrl}
+              onChange={(e) => setAiUrl(e.target.value)}
+              placeholder="https://www.ejemplo-evento.com"
+              className="flex-1 rounded-lg border border-purple-300 px-4 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+            />
+            <button
+              type="button"
+              onClick={handleAiAutofill}
+              disabled={aiLoading || !aiUrl.trim()}
+              className="flex items-center gap-2 px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            >
+              {aiLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analizando...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Analizar con IA
+                </>
+              )}
+            </button>
+          </div>
+
+          {aiLoading && (
+            <div className="mt-3 p-3 bg-purple-100 border border-purple-200 rounded-lg">
+              <p className="text-sm text-purple-800 flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                La IA está analizando la web del evento. Esto puede tardar unos segundos...
+              </p>
+            </div>
+          )}
+
+          {aiResult && !aiLoading && (
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800 font-medium">
+                Auto-relleno completado. Revisa los campos y ajusta lo que necesites.
+              </p>
+              {aiResult.competitions && aiResult.competitions.length > 0 && (
+                <p className="text-sm text-green-700 mt-1">
+                  Se detectaron {aiResult.competitions.length} competiciones. Podrás crearlas después de guardar el evento.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Imágenes sugeridas por la IA */}
+        {showImageSuggestions && suggestedImages.length > 0 && (
+          <div className="rounded-lg bg-amber-50 p-6 shadow-sm border border-amber-200">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-amber-600" />
+                <h2 className="text-lg font-semibold text-amber-900">Imágenes sugeridas por la IA</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowImageSuggestions(false)}
+                className="text-amber-600 hover:text-amber-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-amber-700 mb-4">
+              La IA ha encontrado estas imágenes en la web del evento. Haz clic en una para abrirla y decidir si descargarla.
+            </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {suggestedImages.map((img, idx) => (
+                <div key={idx} className="relative group">
+                  <div className="aspect-video bg-white rounded-lg border border-amber-200 overflow-hidden">
+                    <img
+                      src={img.url}
+                      alt={img.alt || `Imagen ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="text-xs text-amber-700 capitalize px-1.5 py-0.5 bg-amber-100 rounded">
+                      {img.type}
+                    </span>
+                    <a
+                      href={img.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-amber-600 hover:text-amber-800 flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Ver
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 p-2 bg-amber-100 border border-amber-200 rounded text-xs text-amber-800">
+              Para usar una imagen, ábrela con "Ver", descárgala, y luego súbela en la sección "Imágenes" del formulario.
+            </div>
+          </div>
+        )}
+
+        {/* Competiciones detectadas por la IA */}
+        {aiResult?.competitions && aiResult.competitions.length > 0 && (
+          <div className="rounded-lg bg-blue-50 p-6 shadow-sm border border-blue-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-blue-900">Competiciones detectadas</h2>
+            </div>
+            <p className="text-sm text-blue-700 mb-4">
+              La IA ha detectado estas competiciones en la web del evento. Podrás crearlas después de guardar el evento.
+            </p>
+
+            <div className="space-y-3">
+              {aiResult.competitions.map((comp, idx) => (
+                <div key={idx} className="bg-white rounded-lg border border-blue-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900">{comp.name}</h3>
+                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                      {comp.type}
+                    </span>
+                  </div>
+                  <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                    {comp.baseDistance && <span>{comp.baseDistance} km</span>}
+                    {comp.baseElevation && <span>{comp.baseElevation} m D+</span>}
+                    {comp.baseMaxParticipants && <span>Max: {comp.baseMaxParticipants}</span>}
+                    {comp.itraPoints !== undefined && <span>ITRA: {comp.itraPoints}</span>}
+                  </div>
+                  {comp.description && (
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">{comp.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Card: Información Básica */}
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Información Básica</h2>
