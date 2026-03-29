@@ -242,13 +242,13 @@ export interface ComprehensiveStats {
 class AdminService {
   // Dashboard stats
   async getStats(): Promise<AdminStats> {
-    const { data } = await apiClientV1.get('/admin/stats');
+    const { data } = await apiClientV2.get('/admin');
     return data.data;
   }
 
   // Comprehensive stats
   async getComprehensiveStats(): Promise<ComprehensiveStats> {
-    const { data } = await apiClientV1.get('/admin/stats/comprehensive');
+    const { data } = await apiClientV2.get('/admin', { params: { action: 'comprehensive' } });
     return data.data;
   }
 
