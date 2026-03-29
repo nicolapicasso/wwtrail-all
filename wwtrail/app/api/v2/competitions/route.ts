@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       params[key] = value;
     }
     const user = await getAuthUser(request);
-    const result = await CompetitionService.getAll(params, user?.id);
+    const result = await CompetitionService.findAll(params);
     return apiSuccess(result);
   } catch (error) {
     return apiError(error);

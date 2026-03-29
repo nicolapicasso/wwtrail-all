@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       params[key] = value;
     }
 
-    const result = await EventService.getAll(params);
+    const result = await EventService.findAll(params);
     return apiSuccess(result);
   } catch (error) {
     return apiError(error);

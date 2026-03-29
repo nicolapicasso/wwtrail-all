@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     for (const [key, value] of searchParams.entries()) {
       params[key] = value;
     }
-    const result = await EditionService.getAll(params);
+    const result = await EditionService.findAllWithInheritance(params);
     return apiSuccess(result);
   } catch (error) {
     return apiError(error);
