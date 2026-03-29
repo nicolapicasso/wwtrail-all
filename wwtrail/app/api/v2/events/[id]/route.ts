@@ -23,7 +23,7 @@ export async function PUT(
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const event = await EventService.update(params.id, data, user.id, user.role);
+    const event = await EventService.update(params.id, data, user.id);
     return apiSuccess(event);
   } catch (error) {
     return apiError(error);
@@ -37,7 +37,7 @@ export async function DELETE(
 ) {
   try {
     const user = await requireRole(request, 'ADMIN');
-    await EventService.delete(params.id);
+    await EventService.delete(params.id, user.id);
     return apiSuccess({ message: 'Event deleted' });
   } catch (error) {
     return apiError(error);

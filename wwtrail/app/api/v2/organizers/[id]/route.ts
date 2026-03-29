@@ -15,7 +15,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const organizer = await OrganizerService.update(params.id, data, user.id, user.role);
+    const organizer = await OrganizerService.update(params.id, data, user.id);
     return apiSuccess(organizer);
   } catch (error) {
     return apiError(error);
@@ -24,8 +24,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await requireRole(request, 'ADMIN');
-    await OrganizerService.delete(params.id);
+    const user = await requireRole(request, 'ADMIN');
+    await OrganizerService.delete(params.id, user.id);
     return apiSuccess({ message: 'Organizer deleted' });
   } catch (error) {
     return apiError(error);

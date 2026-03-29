@@ -20,8 +20,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await requireRole(request, 'ADMIN');
-    await SpecialSeriesService.delete(params.id);
+    const user = await requireRole(request, 'ADMIN');
+    await SpecialSeriesService.delete(params.id, user.id);
     return apiSuccess({ message: 'Special series deleted' });
   } catch (error) { return apiError(error); }
 }
