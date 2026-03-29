@@ -1,6 +1,5 @@
 // lib/api/admin.service.ts
 
-import { apiClientV1 } from './client';
 import apiClientV2 from './client-v2';
 
 export interface AdminStats {
@@ -417,7 +416,7 @@ class AdminService {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ users: User[]; pagination: UsersPagination }> {
-    const { data } = await apiClientV1.get('/admin/users', { params });
+    const { data } = await apiClientV2.get('/admin/users', { params });
     return {
       users: data.data,
       pagination: data.pagination,
@@ -425,27 +424,27 @@ class AdminService {
   }
 
   async getUserById(userId: string): Promise<User> {
-    const { data } = await apiClientV1.get(`/admin/users/${userId}`);
+    const { data } = await apiClientV2.get(`/admin/users/${userId}`);
     return data.data;
   }
 
   async getUserStats(userId: string) {
-    const { data } = await apiClientV1.get(`/admin/users/${userId}/stats`);
+    const { data } = await apiClientV2.get(`/admin/users/${userId}/stats`);
     return data.data;
   }
 
   async updateUserRole(userId: string, role: string): Promise<User> {
-    const { data } = await apiClientV1.patch(`/admin/users/${userId}/role`, { role });
+    const { data } = await apiClientV2.patch(`/admin/users/${userId}/role`, { role });
     return data.data;
   }
 
   async toggleUserStatus(userId: string): Promise<User> {
-    const { data } = await apiClientV1.patch(`/admin/users/${userId}/toggle-status`);
+    const { data } = await apiClientV2.patch(`/admin/users/${userId}/toggle-status`);
     return data.data;
   }
 
   async deleteUser(userId: string) {
-    const { data } = await apiClientV1.delete(`/admin/users/${userId}`);
+    const { data } = await apiClientV2.delete(`/admin/users/${userId}`);
     return data;
   }
 
@@ -460,7 +459,7 @@ class AdminService {
     country?: string;
     gender?: string;
   }): Promise<User> {
-    const { data } = await apiClientV1.patch(`/admin/users/${userId}`, userData);
+    const { data } = await apiClientV2.patch(`/admin/users/${userId}`, userData);
     return data.data;
   }
 
@@ -476,7 +475,7 @@ class AdminService {
     country?: string;
     gender?: string;
   }): Promise<{ user: User; generatedPassword: string }> {
-    const { data } = await apiClientV1.post('/admin/users', userData);
+    const { data } = await apiClientV2.post('/admin/users', userData);
     return {
       user: data.data,
       generatedPassword: data.generatedPassword,
@@ -487,7 +486,7 @@ class AdminService {
    * Regenerate password for a user (admin only)
    */
   async regeneratePassword(userId: string): Promise<{ user: User; generatedPassword: string }> {
-    const { data } = await apiClientV1.post(`/admin/users/${userId}/regenerate-password`);
+    const { data } = await apiClientV2.post(`/admin/users/${userId}/regenerate-password`);
     return {
       user: data.data,
       generatedPassword: data.generatedPassword,
@@ -514,7 +513,7 @@ class AdminService {
     twitterUrl?: string;
     youtubeUrl?: string;
   }): Promise<User> {
-    const { data } = await apiClientV1.put(`/admin/users/${userId}`, userData);
+    const { data } = await apiClientV2.put(`/admin/users/${userId}`, userData);
     return data.data;
   }
 
@@ -522,7 +521,7 @@ class AdminService {
    * Toggle insider status for a user
    */
   async toggleInsiderStatus(userId: string): Promise<User> {
-    const { data } = await apiClientV1.patch(`/admin/users/${userId}/toggle-insider`);
+    const { data } = await apiClientV2.patch(`/admin/users/${userId}/toggle-insider`);
     return data.data;
   }
 
@@ -530,7 +529,7 @@ class AdminService {
    * Toggle public status for a user
    */
   async togglePublicStatus(userId: string): Promise<User> {
-    const { data } = await apiClientV1.patch(`/admin/users/${userId}/toggle-public`);
+    const { data } = await apiClientV2.patch(`/admin/users/${userId}/toggle-public`);
     return data.data;
   }
 
@@ -549,7 +548,7 @@ class AdminService {
       byGender: Record<string, number>;
     };
   }> {
-    const { data } = await apiClientV1.get('/admin/insiders');
+    const { data } = await apiClientV2.get('/admin/insiders');
     return {
       insiders: data.data,
       stats: data.stats,
@@ -569,7 +568,7 @@ class AdminService {
     introTextFR?: string;
     introTextDE?: string;
   }> {
-    const { data } = await apiClientV1.get('/admin/insiders/config');
+    const { data } = await apiClientV2.get('/admin/insiders/config');
     return data.data;
   }
 
@@ -585,7 +584,7 @@ class AdminService {
     introTextFR?: string;
     introTextDE?: string;
   }): Promise<any> {
-    const { data } = await apiClientV1.put('/admin/insiders/config', configData);
+    const { data } = await apiClientV2.put('/admin/insiders/config', configData);
     return data.data;
   }
 
@@ -603,7 +602,7 @@ class AdminService {
     sortBy?: 'createdAt' | 'name' | 'startDate';
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ data: PendingCompetition[]; pagination: CompetitionsPagination }> {
-    const { data } = await apiClientV1.get('/admin/competitions/pending', { params });
+    const { data } = await apiClientV2.get('/admin/competitions/pending', { params });
     return {
       data: data.data,
       pagination: data.pagination,
@@ -616,7 +615,7 @@ class AdminService {
    */
   async approveEvent(competitionId: string, adminNotes?: string) {
     const body = adminNotes ? { adminNotes } : {};
-    const { data } = await apiClientV1.post(
+    const { data } = await apiClientV2.post(
       `/admin/competitions/${competitionId}/approve`,
       body
     );
@@ -693,7 +692,7 @@ class AdminService {
    */
   async rejectEvent(competitionId: string, reason?: string) {
     const body = reason ? { reason } : {};
-    const { data } = await apiClientV1.post(
+    const { data } = await apiClientV2.post(
       `/admin/competitions/${competitionId}/reject`,
       body
     );
@@ -704,7 +703,7 @@ class AdminService {
    * Obtener estadísticas de competiciones
    */
   async getCompetitionStats() {
-    const { data } = await apiClientV1.get('/admin/competitions/stats');
+    const { data } = await apiClientV2.get('/admin/competitions/stats');
     return data.data;
   }
 
@@ -715,7 +714,7 @@ class AdminService {
     type?: string;
   }) {
     try {
-      const { data } = await apiClientV1.get('/admin/logs', { params });
+      const { data } = await apiClientV2.get('/admin/logs', { params });
       return data;
     } catch (error) {
       // Endpoint no implementado aún, devolver estructura vacía
@@ -745,7 +744,7 @@ class AdminService {
     competitions: number;
     terrainTypes: number;
   }> {
-    const { data } = await apiClientV1.get('/admin/import/stats');
+    const { data } = await apiClientV2.get('/admin/import');
     return data.data;
   }
 
@@ -757,7 +756,7 @@ class AdminService {
     skipped: number;
     errors: Array<{ identifier: string; error: string }>;
   }> {
-    const { data } = await apiClientV1.post('/admin/import/terrain-types');
+    const { data } = await apiClientV2.post('/admin/import', { type: 'terrain-types' });
     return data.data;
   }
 
@@ -769,7 +768,7 @@ class AdminService {
     skipped: number;
     errors: Array<{ identifier: string; error: string }>;
   }> {
-    const { data } = await apiClientV1.post('/admin/import/organizers', organizers);
+    const { data } = await apiClientV2.post('/admin/import', { type: 'organizers', data: organizers });
     return data.data;
   }
 
@@ -781,7 +780,7 @@ class AdminService {
     skipped: number;
     errors: Array<{ identifier: string; error: string }>;
   }> {
-    const { data } = await apiClientV1.post('/admin/import/series', series);
+    const { data } = await apiClientV2.post('/admin/import', { type: 'series', data: series });
     return data.data;
   }
 
@@ -793,7 +792,7 @@ class AdminService {
     skipped: number;
     errors: Array<{ identifier: string; error: string }>;
   }> {
-    const { data } = await apiClientV1.post('/admin/import/events', events);
+    const { data } = await apiClientV2.post('/admin/import', { type: 'events', data: events });
     return data.data;
   }
 
@@ -805,7 +804,7 @@ class AdminService {
     skipped: number;
     errors: Array<{ identifier: string; error: string }>;
   }> {
-    const { data } = await apiClientV1.post('/admin/import/competitions', competitions);
+    const { data } = await apiClientV2.post('/admin/import', { type: 'competitions', data: competitions });
     return data.data;
   }
 
@@ -824,7 +823,7 @@ class AdminService {
     competitions?: { created: number; skipped: number; errors: any[] };
     terrainTypes?: { created: number; skipped: number; errors: any[] };
   }> {
-    const { data } = await apiClientV1.post('/admin/import/full', importData);
+    const { data } = await apiClientV2.post('/admin/import', { type: 'full', data: importData });
     return data.data;
   }
 
@@ -836,7 +835,7 @@ class AdminService {
    * Delete all competitions
    */
   async deleteAllCompetitions(): Promise<{ deleted: number }> {
-    const { data } = await apiClientV1.delete('/admin/import/competitions');
+    const { data } = await apiClientV2.request({ method: 'DELETE', url: '/admin/import', data: { type: 'competitions' } });
     return data.data;
   }
 
@@ -844,7 +843,7 @@ class AdminService {
    * Delete all events (and competitions)
    */
   async deleteAllEvents(): Promise<{ deleted: number }> {
-    const { data } = await apiClientV1.delete('/admin/import/events');
+    const { data } = await apiClientV2.request({ method: 'DELETE', url: '/admin/import', data: { type: 'events' } });
     return data.data;
   }
 
@@ -852,7 +851,7 @@ class AdminService {
    * Delete all series
    */
   async deleteAllSeries(): Promise<{ deleted: number }> {
-    const { data } = await apiClientV1.delete('/admin/import/series');
+    const { data } = await apiClientV2.request({ method: 'DELETE', url: '/admin/import', data: { type: 'series' } });
     return data.data;
   }
 
@@ -860,7 +859,7 @@ class AdminService {
    * Delete all organizers
    */
   async deleteAllOrganizers(): Promise<{ deleted: number }> {
-    const { data } = await apiClientV1.delete('/admin/import/organizers');
+    const { data } = await apiClientV2.request({ method: 'DELETE', url: '/admin/import', data: { type: 'organizers' } });
     return data.data;
   }
 
@@ -868,7 +867,7 @@ class AdminService {
    * Delete all editions
    */
   async deleteAllEditions(): Promise<{ deleted: number }> {
-    const { data } = await apiClientV1.delete('/admin/import/editions');
+    const { data } = await apiClientV2.request({ method: 'DELETE', url: '/admin/import', data: { type: 'editions' } });
     return data.data;
   }
 
@@ -881,7 +880,7 @@ class AdminService {
     series: number;
     organizers: number;
   }> {
-    const { data } = await apiClientV1.delete('/admin/import/all');
+    const { data } = await apiClientV2.request({ method: 'DELETE', url: '/admin/import', data: { type: 'all' } });
     return data.data;
   }
 
