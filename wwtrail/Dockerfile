@@ -51,9 +51,10 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl curl
 
-# Create non-root user
+# Create non-root user with writable home directory
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+    adduser --system --uid 1001 --home /home/nextjs nextjs && \
+    mkdir -p /home/nextjs && chown -R nextjs:nodejs /home/nextjs
 
 # Copy standalone output (includes server.js and minimal node_modules)
 COPY --from=builder /app/.next/standalone ./
