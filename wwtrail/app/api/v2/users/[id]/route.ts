@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { UserService } from '@/lib/services/user.service';
-import { requireAuth, requireRole, apiSuccess, apiError } from '@/lib/auth';
+import { requireAuth, requireRole, apiSuccess, apiError, ApiError } from '@/lib/auth';
 
 const userService = new UserService();
 
@@ -8,7 +8,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   try {
     const user = await userService.getOwnProfile(params.id);
     return apiSuccess(user);
-  } catch (error) { return apiError(error); }
+  } catch (error: any) {
+    if (error?.message?.includes('not found')) {
+      return apiError(new ApiError('User not found', 404));
+    }
+    return apiError(error);
+  }
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
