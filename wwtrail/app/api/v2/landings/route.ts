@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ADMIN');
     const data = await request.json();
-    const landing = await LandingService.create(data, user.id);
+    const landing = await LandingService.createLanding(data, user.id);
     return apiSuccess(landing, 201);
   } catch (error) { return apiError(error); }
 }

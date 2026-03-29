@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const event = await EventService.getById(params.id);
+    const event = await EventService.findById(params.id);
     return apiSuccess(event);
   } catch (error) {
     return apiError(error);

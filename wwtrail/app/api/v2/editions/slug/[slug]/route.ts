@@ -12,11 +12,11 @@ export async function GET(
     const withInheritance = searchParams.get('withInheritance') === 'true';
 
     if (withInheritance) {
-      const edition = await EditionService.getBySlugWithInheritance(params.slug, lang);
+      const edition = await EditionService.getWithInheritanceBySlug(params.slug);
       return apiSuccess(edition);
     }
 
-    const edition = await EditionService.getBySlug(params.slug, lang);
+    const edition = await EditionService.findBySlug(params.slug);
     return apiSuccess(edition);
   } catch (error) {
     return apiError(error);
