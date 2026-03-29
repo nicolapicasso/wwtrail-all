@@ -1,0 +1,147 @@
+# DigitalOcean App Platform - WWTRAIL
+# Auto-deploy: push to main → deploy automatically
+#
+# Setup:
+#   1. doctl apps create --spec wwtrail/.do/app.yaml
+#   2. Set secrets via DO dashboard: DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, OPENAI_API_KEY
+#   3. Or: doctl apps update <app-id> --spec wwtrail/.do/app.yaml
+#
+# The DATABASE_URL for the managed DB is auto-injected by DO when using
+# the ${db.DATABASE_URL} syntax below.
+
+name: wwtrail
+
+services:
+  - name: wwtrail-web
+    github:
+      repo: nicolapicasso/wwtrail-all
+      branch: main
+      deploy_on_push: true
+    source_dir: /wwtrail
+    dockerfile_path: Dockerfile
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: professional-xs
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 30
+      period_seconds: 15
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    routes:
+      - path: /
+    build_command: ""
+    run_command: ""
+    envs:
+      # Database - auto-injected from managed DB
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: ${db.DATABASE_URL}
+
+      # Auth secrets (set manually in DO dashboard)
+      - key: JWT_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: JWT_REFRESH_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: JWT_EXPIRES_IN
+        scope: RUN_TIME
+        value: "7d"
+      - key: JWT_REFRESH_EXPIRES_IN
+        scope: RUN_TIME
+        value: "30d"
+
+      # Public URLs (build + runtime)
+      - key: NEXT_PUBLIC_APP_URL
+        scope: RUN_AND_BUILD_TIME
+        value: "${APP_URL}"
+      - key: NEXT_PUBLIC_APP_NAME
+        scope: BUILD_TIME
+        value: "WWTRAIL"
+
+      # Node environment
+      - key: NODE_ENV
+        scope: RUN_AND_BUILD_TIME
+        value: "production"
+
+      # AI Translation (set manually in DO dashboard)
+      - key: OPENAI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+
+      # Auto-translate config
+      - key: AUTO_TRANSLATE_ENABLED
+        scope: RUN_TIME
+        value: "true"
+      - key: AUTO_TRANSLATE_LANGUAGES
+        scope: RUN_TIME
+        value: "EN,IT,CA,FR,DE"
+      - key: DEFAULT_LANGUAGE
+        scope: RUN_TIME
+        value: "ES"
+
+      # Email (set manually in DO dashboard)
+      - key: SMTP_HOST
+        scope: RUN_TIME
+        type: SECRET
+      - key: SMTP_PORT
+        scope: RUN_TIME
+        value: "587"
+      - key: SMTP_USER
+        scope: RUN_TIME
+        type: SECRET
+      - key: SMTP_PASS
+        scope: RUN_TIME
+        type: SECRET
+      - key: EMAIL_FROM
+        scope: RUN_TIME
+        value: "noreply@wwtrail.com"
+
+      # External APIs (set manually in DO dashboard)
+      - key: MAPBOX_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+      - key: OPENWEATHER_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+
+      # Omniwallet / Zancadas (set manually in DO dashboard)
+      - key: OMNIWALLET_SUBDOMAIN
+        scope: RUN_TIME
+        type: SECRET
+      - key: OMNIWALLET_API_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+      - key: OMNIWALLET_WEBHOOK_SECRET
+        scope: RUN_TIME
+        type: SECRET
+
+      # DigitalOcean Spaces for file storage (set manually)
+      - key: STORAGE_TYPE
+        scope: RUN_TIME
+        value: "spaces"
+      - key: DO_SPACES_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: DO_SPACES_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: DO_SPACES_ENDPOINT
+        scope: RUN_TIME
+        value: "https://ams3.digitaloceanspaces.com"
+      - key: DO_SPACES_BUCKET
+        scope: RUN_TIME
+        value: "wwtrail-uploads"
+      - key: DO_SPACES_CDN
+        scope: RUN_TIME
+        value: "https://wwtrail-uploads.ams3.cdn.digitaloceanspaces.com"
+
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    size: db-s-1vcpu-1gb
+    num_nodes: 1
+    production: true

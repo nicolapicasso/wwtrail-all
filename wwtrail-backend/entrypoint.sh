@@ -2,7 +2,7 @@
 set -e
 
 echo "==> Waiting for PostgreSQL to be ready..."
-until echo "SELECT 1" | npx prisma db execute --stdin > /dev/null 2>&1; do
+until echo "SELECT 1" | npx prisma db execute --stdin --url "$DATABASE_URL" > /dev/null 2>&1; do
   echo "    PostgreSQL is not ready yet. Retrying in 2s..."
   sleep 2
 done
