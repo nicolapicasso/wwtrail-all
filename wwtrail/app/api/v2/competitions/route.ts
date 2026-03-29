@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const competition = await CompetitionService.create(data, user.id, user.role);
+    const competition = await CompetitionService.create(data.eventId, data, user.id);
     return apiSuccess(competition, 201);
   } catch (error) {
     return apiError(error);

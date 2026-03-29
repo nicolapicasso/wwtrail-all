@@ -162,19 +162,20 @@ export class CompetitionService {
    */
   static async findAll(options: any = {}) {
     const {
-      limit = 50,
       sortBy = 'name',
       isFeatured,
       search,
       type,
       country,
-      minDistance,
-      maxDistance,
-      minElevation,
-      maxElevation,
       specialSeriesId,
-      language,  // ✅ NUEVO: Language parameter
+      language,
     } = options;
+
+    const limit = Number(options.limit) || 50;
+    const minDistance = options.minDistance !== undefined ? Number(options.minDistance) : undefined;
+    const maxDistance = options.maxDistance !== undefined ? Number(options.maxDistance) : undefined;
+    const minElevation = options.minElevation !== undefined ? Number(options.minElevation) : undefined;
+    const maxElevation = options.maxElevation !== undefined ? Number(options.maxElevation) : undefined;
 
     const requestedLanguage = parseLanguage(language);
 

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const series = await SpecialSeriesService.create(data, user.id, user.role);
+    const series = await SpecialSeriesService.create({ ...data, createdById: user.id }, user.role);
     return apiSuccess(series, 201);
   } catch (error) { return apiError(error); }
 }

@@ -33,18 +33,18 @@ export const competitionsService = {
    * Get all competitions with optional filters
    * GET /competitions
    */
-  async getAll(filters?: { limit?: number; offset?: number; isFeatured?: boolean; language?: string }): Promise<{ competitions: Competition[] }> {
+  async getAll(filters?: { limit?: number; offset?: number; isFeatured?: boolean; language?: string; [key: string]: any }): Promise<any> {
     const params = new URLSearchParams();
-    if (filters?.limit) params.append('limit', filters.limit.toString());
-    if (filters?.offset) params.append('offset', filters.offset.toString());
-    if (filters?.isFeatured !== undefined) params.append('isFeatured', filters.isFeatured.toString());
-    if (filters?.language) params.append('language', filters.language);
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== '' && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
 
-    const response = await apiClientV2.get<{
-      status: string;
-      data: { competitions: Competition[] };
-    }>(`/competitions${params.toString() ? `?${params.toString()}` : ''}`);
-    return response.data.data;
+    const response = await apiClientV2.get(`/competitions${params.toString() ? `?${params.toString()}` : ''}`);
+    return response.data;
   },
 
   /**

@@ -29,7 +29,9 @@ export class LandingService {
    */
   static async getAllLandings(options: GetLandingsOptions = {}) {
     try {
-      const { page = 1, limit = 20, search, language } = options;
+      const { search, language } = options;
+      const page = Number(options.page) || 1;
+      const limit = Number(options.limit) || 20;
       const skip = (page - 1) * limit;
 
       const where: any = {};

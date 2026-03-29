@@ -81,34 +81,39 @@ export const eventsService = {
       params.append('language', filters.language);
     }
 
-    const { data } = await apiClientV1.get('/events', { params });
-    
-    // ✅ ADAPTACIÓN: Backend devuelve { data: [...] }, adaptamos a { data: { events: [...] } }
+    const { data } = await apiClientV2.get('/events', { params });
+
+    // Backend returns { success: true, data: { data: [...events], pagination: {...} } }
+    // Unwrap to V1 format: { data: { events: [...] }, pagination: {...} }
+    const innerData = data.data; // { data: [...events], pagination: {...} }
+    const events = Array.isArray(innerData) ? innerData
+      : Array.isArray(innerData?.data) ? innerData.data
+      : (innerData?.events || []);
+    const pagination = innerData?.pagination || data.pagination;
+
     return {
-      data: {
-        events: Array.isArray(data.data) ? data.data : []
-      },
-      pagination: data.pagination || {
+      data: { events },
+      pagination: pagination || {
         page: 1,
         limit: 12,
-        total: 0,
-        pages: 0
+        total: events.length,
+        pages: 1
       }
     };
   },
 
   async getById(id: string): Promise<Event> {
-    const { data } = await apiClientV1.get<EventResponseV1>(`/events/${id}`);
+    const { data } = await apiClientV2.get<EventResponseV1>(`/events/${id}`);
     return data.data;
   },
 
   async getBySlug(slug: string): Promise<Event> {
-    const { data } = await apiClientV1.get<EventResponseV1>(`/events/slug/${slug}`);
+    const { data } = await apiClientV2.get<EventResponseV1>(`/events/slug/${slug}`);
     return data.data;
   },
 
   async getNearby(lat: number, lon: number, radius: number = 50): Promise<Event[]> {
-    const { data } = await apiClientV1.get<{ data: Event[] }>(
+    const { data } = await apiClientV2.get<{ data: Event[] }>(
       '/events/nearby',
       {
         params: { lat, lon, radius }
@@ -118,7 +123,7 @@ export const eventsService = {
   },
 
   async search(query: string): Promise<Event[]> {
-    const { data } = await apiClientV1.get<{ data: { events: Event[] } }>(
+    const { data } = await apiClientV2.get<{ data: { events: Event[] } }>(
       '/events/search',
       {
         params: { q: query }
@@ -128,12 +133,12 @@ export const eventsService = {
   },
 
   async getFeatured(): Promise<Event[]> {
-    const { data } = await apiClientV1.get<{ data: { events: Event[] } }>('/events/featured');
+    const { data } = await apiClientV2.get<{ data: { events: Event[] } }>('/events/featured');
     return data.data.events;
   },
 
   async getUpcoming(): Promise<Event[]> {
-    const { data } = await apiClientV1.get<{ data: { events: Event[] } }>('/events/upcoming');
+    const { data } = await apiClientV2.get<{ data: { events: Event[] } }>('/events/upcoming');
     return data.data.events;
   },
 

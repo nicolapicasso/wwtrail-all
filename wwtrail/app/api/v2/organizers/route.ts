@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const organizer = await OrganizerService.create(data, user.id, user.role);
+    const organizer = await OrganizerService.create({ ...data, createdById: user.id }, user.role);
     return apiSuccess(organizer, 201);
   } catch (error) {
     return apiError(error);

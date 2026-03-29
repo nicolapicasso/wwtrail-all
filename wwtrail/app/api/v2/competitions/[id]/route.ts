@@ -23,7 +23,7 @@ export async function PUT(
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const competition = await CompetitionService.update(params.id, data, user.id, user.role);
+    const competition = await CompetitionService.update(params.id, data, user.id);
     return apiSuccess(competition);
   } catch (error) {
     return apiError(error);
@@ -37,7 +37,7 @@ export async function PATCH(
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const competition = await CompetitionService.update(params.id, data, user.id, user.role);
+    const competition = await CompetitionService.update(params.id, data, user.id);
     return apiSuccess(competition);
   } catch (error) {
     return apiError(error);
@@ -49,8 +49,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireRole(request, 'ADMIN');
-    await CompetitionService.delete(params.id);
+    const user = await requireRole(request, 'ADMIN');
+    await CompetitionService.delete(params.id, user.id);
     return apiSuccess({ message: 'Competition deleted' });
   } catch (error) {
     return apiError(error);

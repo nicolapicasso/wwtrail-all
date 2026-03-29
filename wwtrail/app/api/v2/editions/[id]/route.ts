@@ -21,7 +21,7 @@ export async function PUT(
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const edition = await EditionService.update(params.id, data, user.id, user.role);
+    const edition = await EditionService.update(params.id, data, user.id);
     return apiSuccess(edition);
   } catch (error) {
     return apiError(error);
@@ -33,8 +33,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireRole(request, 'ADMIN');
-    await EditionService.delete(params.id);
+    const user = await requireRole(request, 'ADMIN');
+    await EditionService.delete(params.id, user.id);
     return apiSuccess({ message: 'Edition deleted' });
   } catch (error) {
     return apiError(error);
