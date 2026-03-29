@@ -2,7 +2,22 @@
 // Service para gestión de archivos en frontend
 // ✅ CORREGIDO: Agregado parámetro fieldname
 
-import { apiClientV1 } from './client';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+
+// Files API is at /api/files/ (not under /api/auth/ or /api/v2/)
+const BASE_URL = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+const apiClientFiles = axios.create({
+  baseURL: `${BASE_URL}/api`,
+  headers: { 'Content-Type': 'application/json' },
+});
+apiClientFiles.interceptors.request.use((config: any) => {
+  const token = Cookies.get('accessToken');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export interface FileUploadResponse {
   id: string;
@@ -23,7 +38,7 @@ export async function uploadFile(file: File, fieldname: string = 'file'): Promis
     const formData = new FormData();
     formData.append(fieldname, file);  // ✅ Ahora fieldname está definido
 
-    const response = await apiClientV1.post<{
+    const response = await apiClientFiles.post<{
       status: string;
       data: FileUploadResponse;
     }>('/files/upload', formData, {
@@ -58,7 +73,7 @@ export async function uploadMultipleFiles(files: File[], fieldname: string = 'ga
       formData.append(fieldname, file);  // ✅ Ahora fieldname está definido
     });
 
-    const response = await apiClientV1.post<{
+    const response = await apiClientFiles.post<{
       status: string;
       data: FileUploadResponse[];
     }>('/files/upload-multiple', formData, {
@@ -85,7 +100,7 @@ export async function uploadMultipleFiles(files: File[], fieldname: string = 'ga
  */
 export async function deleteFile(fileId: string): Promise<void> {
   try {
-    await apiClientV1.delete(`/files/${fileId}`);  // ✅ Corregido: template string
+    await apiClientFiles.delete(`/files/${fileId}`);  // ✅ Corregido: template string
   } catch (error: any) {
     console.error('Error deleting file:', error);
     throw new Error(
@@ -99,7 +114,7 @@ export async function deleteFile(fileId: string): Promise<void> {
  */
 export async function getUserFiles(page: number = 1, limit: number = 20) {
   try {
-    const response = await apiClientV1.get<{
+    const response = await apiClientFiles.get<{
       status: string;
       data: FileUploadResponse[];
       pagination: {
@@ -126,7 +141,7 @@ export async function getUserFiles(page: number = 1, limit: number = 20) {
  */
 export async function getFileInfo(fileId: string) {
   try {
-    const response = await apiClientV1.get<{
+    const response = await apiClientFiles.get<{
       status: string;
       data: FileUploadResponse;
     }>(`/files/${fileId}`);  // ✅ Corregido: template string
