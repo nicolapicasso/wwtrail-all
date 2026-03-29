@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { EventService } from '@/lib/services/event.service';
-import { requireRole, apiSuccess, apiError } from '@/lib/auth';
+import { requireRole, apiSuccess, apiError, ApiError } from '@/lib/auth';
 
 // GET /api/v2/events/:id
 export async function GET(
@@ -10,7 +10,10 @@ export async function GET(
   try {
     const event = await EventService.findById(params.id);
     return apiSuccess(event);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message?.includes('not found')) {
+      return apiError(new ApiError('Event not found', 404));
+    }
     return apiError(error);
   }
 }

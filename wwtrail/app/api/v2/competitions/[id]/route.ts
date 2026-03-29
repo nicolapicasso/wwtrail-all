@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { CompetitionService } from '@/lib/services/competition.service';
-import { requireRole, apiSuccess, apiError } from '@/lib/auth';
+import { requireRole, apiSuccess, apiError, ApiError } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -11,7 +11,10 @@ export async function GET(
     const lang = searchParams.get('lang') || undefined;
     const competition = await CompetitionService.findById(params.id);
     return apiSuccess(competition);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message?.includes('not found')) {
+      return apiError(new ApiError('Competition not found', 404));
+    }
     return apiError(error);
   }
 }

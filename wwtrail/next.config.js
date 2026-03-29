@@ -9,40 +9,15 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: process.env.NODE_ENV !== 'production',
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'wwtrail.com',
-        pathname: '/uploads/**',
+        hostname: '**',
       },
-      // DigitalOcean Spaces CDN
-      {
-        protocol: 'https',
-        hostname: '*.digitaloceanspaces.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.cdn.digitaloceanspaces.com',
-      },
-      // External image sources for special series logos
-      {
-        protocol: 'https',
-        hostname: 'www.goldentrailseries.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'utmb.world',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.skyrunner.com',
-      },
-      // Local development
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '3000',
-        pathname: '/uploads/**',
       },
     ],
   },
