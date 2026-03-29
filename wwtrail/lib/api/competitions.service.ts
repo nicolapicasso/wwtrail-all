@@ -13,15 +13,16 @@ export const competitionsService = {
       params: filters,
     });
 
-    // ✅ Adaptar respuesta del backend al formato esperado
     const backendData = response.data;
+    // API returns { success: true, data: [...competitions] }
+    const competitions = Array.isArray(backendData.data) ? backendData.data : [];
 
     return {
-      data: backendData.data?.competitions || [],
+      data: competitions,
       pagination: {
         page: 1,
         limit: filters?.limit || 50,
-        total: backendData.count || 0,
+        total: competitions.length,
         totalPages: 1,
       }
     };
