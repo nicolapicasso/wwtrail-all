@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const params: any = {};
     for (const [key, value] of searchParams.entries()) params[key] = value;
-    const result = await LandingService.getAll(params);
+    const result = await LandingService.getAllLandings(params);
     return apiSuccess(result);
   } catch (error) { return apiError(error); }
 }
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ADMIN');
     const data = await request.json();
-    const landing = await LandingService.create(data, user.id);
+    const landing = await LandingService.createLanding(data, user.id);
     return apiSuccess(landing, 201);
   } catch (error) { return apiError(error); }
 }

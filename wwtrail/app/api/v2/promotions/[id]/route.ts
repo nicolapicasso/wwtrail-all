@@ -4,7 +4,7 @@ import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const promotion = await PromotionService.getById(params.id);
+    const promotion = await PromotionService.getByIdOrSlug(params.id);
     return apiSuccess(promotion);
   } catch (error) { return apiError(error); }
 }

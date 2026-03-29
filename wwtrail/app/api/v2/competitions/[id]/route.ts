@@ -9,7 +9,7 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url);
     const lang = searchParams.get('lang') || undefined;
-    const competition = await CompetitionService.getById(params.id, lang);
+    const competition = await CompetitionService.findById(params.id);
     return apiSuccess(competition);
   } catch (error) {
     return apiError(error);

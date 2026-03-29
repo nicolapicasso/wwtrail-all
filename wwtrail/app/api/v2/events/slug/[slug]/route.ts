@@ -9,7 +9,7 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url);
     const lang = searchParams.get('lang') || undefined;
-    const event = await EventService.getBySlug(params.slug, lang);
+    const event = await EventService.findBySlug(params.slug);
     return apiSuccess(event);
   } catch (error) {
     return apiError(error);

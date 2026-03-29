@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const edition = await EditionService.getById(params.id);
+    const edition = await EditionService.findById(params.id);
     return apiSuccess(edition);
   } catch (error) {
     return apiError(error);
