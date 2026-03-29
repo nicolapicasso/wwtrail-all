@@ -2,7 +2,7 @@
 
 import { Prisma, Gender } from '@prisma/client';
 import prisma from '@/lib/db';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { UpdateUserInput, ChangePasswordInput, GetPublicUsersQuery } from '@/lib/schemas/user.schema';
 
 // ============================================

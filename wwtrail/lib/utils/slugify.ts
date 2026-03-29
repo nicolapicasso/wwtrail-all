@@ -1,5 +1,5 @@
 // src/utils/slugify.ts
-import prisma from '../config/database';
+import prisma from '@/lib/db';
 
 /**
  * Convierte un string a formato slug
