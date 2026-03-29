@@ -94,7 +94,7 @@ interface UserParticipation {
 // USER SERVICE
 // ============================================
 
-class UserService {
+export class UserService {
   /**
    * Obtener perfil propio (autenticado)
    */

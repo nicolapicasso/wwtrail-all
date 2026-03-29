@@ -24,7 +24,7 @@ interface UpdateFooterInput {
   rightColumnDE?: string | null;
 }
 
-class FooterService {
+export class FooterService {
   /**
    * Get footer configuration (creates default if doesn't exist)
    */

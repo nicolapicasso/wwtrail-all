@@ -12,7 +12,7 @@ interface GetLandingsOptions {
   language?: Language;
 }
 
-class LandingService {
+export class LandingService {
   /**
    * Generate unique slug from title
    */

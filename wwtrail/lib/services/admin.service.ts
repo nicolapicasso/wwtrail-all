@@ -60,7 +60,7 @@ interface UserStats {
 // ADMIN SERVICE
 // ============================================
 
-class AdminService {
+export class AdminService {
   /**
    * Obtener estadísticas generales del dashboard
    */
