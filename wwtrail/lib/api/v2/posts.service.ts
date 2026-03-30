@@ -29,10 +29,11 @@ class PostsService {
     if (filters?.sortBy) params.append('sortBy', filters.sortBy);
     if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-    const response = await apiClientV2.get<PaginatedResponse<PostListItem>>(
+    const response = await apiClientV2.get(
       `/posts?${params.toString()}`
     );
-    return response.data;
+    // Unwrap apiSuccess wrapper: response.data = { success, data: { data: [...], pagination } }
+    return response.data.data || response.data;
   }
 
   /**
