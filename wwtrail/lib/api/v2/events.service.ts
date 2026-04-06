@@ -160,6 +160,15 @@ class EventsService {
     const response = await apiClientV2.patch<EventResponse>(`/events/${id}/status`, { status });
     return response.data;
   }
+  /**
+   * Get nearby events by coordinates
+   */
+  async getNearby(lat: number, lon: number, radius: number = 50): Promise<Event[]> {
+    const response = await apiClientV2.get<{ status: string; data: Event[] }>(
+      `/events/nearby?lat=${lat}&lon=${lon}&radius=${radius}`
+    );
+    return Array.isArray(response.data.data) ? response.data.data : [];
+  }
 }
 
 export default new EventsService();
