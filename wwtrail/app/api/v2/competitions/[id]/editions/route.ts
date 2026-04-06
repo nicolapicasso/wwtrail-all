@@ -11,6 +11,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     if (searchParams.get('sortOrder')) options.sortOrder = searchParams.get('sortOrder');
 
     const editions = await EditionService.findByCompetition(id, options);
-    return apiSuccess({ editions });
+    return apiSuccess(editions);
   } catch (error) { return apiError(error); }
 }
