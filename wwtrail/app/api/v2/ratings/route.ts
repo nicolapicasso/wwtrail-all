@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const data = await request.json();
-    const rating = await EditionRatingService.createOrUpdate(data, user.id);
+    const { editionId, ...ratingData } = data;
+    const rating = await EditionRatingService.create(user.id, editionId, ratingData);
     return apiSuccess(rating, 201);
   } catch (error) { return apiError(error); }
 }

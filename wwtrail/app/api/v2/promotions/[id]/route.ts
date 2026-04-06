@@ -13,7 +13,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const promotion = await PromotionService.update(params.id, data, user.id, user.role);
+    const { id } = await params;
+    const promotion = await PromotionService.update(id, data);
     return apiSuccess(promotion);
   } catch (error) { return apiError(error); }
 }

@@ -15,7 +15,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const service = await ServiceService.update(params.id, data, user.id, user.role);
+    const { id } = await params;
+    const service = await ServiceService.update(id, data);
     return apiSuccess(service);
   } catch (error) {
     return apiError(error);
