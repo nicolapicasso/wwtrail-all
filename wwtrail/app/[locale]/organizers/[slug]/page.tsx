@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { organizersService } from '@/lib/api/v2';
 import { Organizer } from '@/types/v2';

@@ -6,7 +6,6 @@ import {
   UpdateOrganizerInput,
   OrganizerFilters,
   PaginatedResponse,
-  ApiResponse,
 } from '@/types/v2';
 
 class OrganizersService {
@@ -24,68 +23,73 @@ class OrganizersService {
     if (filters?.sortBy) params.append('sortBy', filters.sortBy);
     if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-    const response = await apiClientV2.get<PaginatedResponse<OrganizerListItem>>(
+    const response = await apiClientV2.get(
       `/organizers?${params.toString()}`
     );
-    return response.data;
+
+    // apiSuccess wraps as { success, data: { data, pagination } }
+    const inner = response.data?.data || response.data;
+    return {
+      status: 'success',
+      data: inner.data || [],
+      pagination: inner.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 },
+    };
   }
 
   /**
    * Get organizer by ID
    */
   async getById(id: string): Promise<Organizer> {
-    const response = await apiClientV2.get<ApiResponse<Organizer>>(`/organizers/${id}`);
-    return response.data.data!;
+    const response = await apiClientV2.get(`/organizers/${id}`);
+    return response.data?.data || response.data;
   }
 
   /**
    * Get organizer by slug
    */
   async getBySlug(slug: string): Promise<Organizer> {
-    const response = await apiClientV2.get<ApiResponse<Organizer>>(`/organizers/slug/${slug}`);
-    return response.data.data!;
+    const response = await apiClientV2.get(`/organizers/slug/${slug}`);
+    return response.data?.data || response.data;
   }
 
   /**
    * Check if slug is available
    */
   async checkSlug(slug: string): Promise<{ available: boolean; slug: string }> {
-    const response = await apiClientV2.get<ApiResponse<{ available: boolean; slug: string }>>(
-      `/organizers/check-slug/${slug}`
-    );
-    return response.data.data!;
+    const response = await apiClientV2.get(`/organizers/check-slug/${slug}`);
+    return response.data?.data || response.data;
   }
 
   /**
    * Create a new organizer (authenticated - ORGANIZER/ADMIN)
    */
   async create(data: CreateOrganizerInput): Promise<Organizer> {
-    const response = await apiClientV2.post<ApiResponse<Organizer>>('/organizers', data);
-    return response.data.data!;
+    const response = await apiClientV2.post('/organizers', data);
+    return response.data?.data || response.data;
   }
 
   /**
    * Update an organizer (authenticated - creator or ADMIN)
    */
   async update(id: string, data: UpdateOrganizerInput): Promise<Organizer> {
-    const response = await apiClientV2.patch<ApiResponse<Organizer>>(`/organizers/${id}`, data);
-    return response.data.data!;
+    const response = await apiClientV2.patch(`/organizers/${id}`, data);
+    return response.data?.data || response.data;
   }
 
   /**
    * Approve an organizer (admin only)
    */
   async approve(id: string): Promise<Organizer> {
-    const response = await apiClientV2.post<ApiResponse<Organizer>>(`/organizers/${id}/approve`);
-    return response.data.data!;
+    const response = await apiClientV2.post(`/organizers/${id}/approve`);
+    return response.data?.data || response.data;
   }
 
   /**
    * Reject an organizer (admin only)
    */
   async reject(id: string): Promise<Organizer> {
-    const response = await apiClientV2.post<ApiResponse<Organizer>>(`/organizers/${id}/reject`);
-    return response.data.data!;
+    const response = await apiClientV2.post(`/organizers/${id}/reject`);
+    return response.data?.data || response.data;
   }
 
   /**

@@ -4,16 +4,13 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { Loader2, Building2, Search, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { organizersService } from '@/lib/api/v2';
 import { OrganizerListItem } from '@/types/v2';
 import CountrySelect from '@/components/CountrySelect';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 export default function OrganizersPublicPage() {
-  const router = useRouter();
-
   // State
   const [organizers, setOrganizers] = useState<OrganizerListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,9 +41,9 @@ export default function OrganizersPublicPage() {
 
       const response = await organizersService.getAll(filters);
 
-      setOrganizers(response.data);
-      setTotalPages(response.pagination.totalPages);
-      setTotal(response.pagination.total);
+      setOrganizers(response.data || []);
+      setTotalPages(response.pagination?.totalPages || response.pagination?.pages || 1);
+      setTotal(response.pagination?.total || 0);
     } catch (error: any) {
       console.error('Error fetching organizers:', error);
     } finally {
