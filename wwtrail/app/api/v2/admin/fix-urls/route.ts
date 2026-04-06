@@ -104,10 +104,53 @@ export async function POST(request: NextRequest) {
 
     const totalFixed = Object.values(results).reduce((sum, n) => sum + n, 0);
 
+    // Handle String[] gallery fields across models
+    const galleryModels = ['event', 'competition', 'edition', 'service', 'promotion', 'organizer'];
+    for (const model of galleryModels) {
+      try {
+        const prismaModel = (prisma as any)[model];
+        if (!prismaModel) continue;
+
+        const records = await prismaModel.findMany({
+          select: { id: true, gallery: true },
+        });
+
+        for (const record of records) {
+          if (!Array.isArray(record.gallery) || record.gallery.length === 0) continue;
+          const urls = record.gallery as string[];
+          const hasMatch = urls.some((url: string) =>
+            typeof url === 'string' && oldPatterns.some(p => url.includes(p))
+          );
+          if (hasMatch) {
+            const key = `${model}.gallery`;
+            results[key] = (results[key] || 0) + 1;
+            if (!dryRun) {
+              const fixed = urls.map((url: string) => {
+                if (typeof url !== 'string') return url;
+                let result = url;
+                for (const p of oldPatterns) {
+                  result = result.split(p).join(appUrl);
+                }
+                return result;
+              });
+              await prismaModel.update({
+                where: { id: record.id },
+                data: { gallery: fixed },
+              });
+            }
+          }
+        }
+      } catch (e: any) {
+        // Skip models without gallery field
+      }
+    }
+
+    const totalFixedFinal = Object.values(results).reduce((sum, n) => sum + n, 0);
+
     return apiSuccess({
       dryRun,
       targetUrl: appUrl,
-      totalRecordsFixed: totalFixed,
+      totalRecordsFixed: totalFixedFinal,
       details: results,
     });
   } catch (error) {
