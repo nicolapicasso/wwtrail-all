@@ -27,8 +27,8 @@ class EventsService {
     if (filters?.organizerId) params.append('organizerId', filters.organizerId);
     if (typeof filters?.isFeatured === 'boolean') params.append('featured', filters.isFeatured.toString());
 
-    const response = await apiClientV2.get<EventsResponse>(`/events?${params.toString()}`);
-    return response.data;
+    const response = await apiClientV2.get(`/events?${params.toString()}`);
+    return response.data.data || response.data;
   }
 
   /**
@@ -47,8 +47,8 @@ class EventsService {
     if (filters?.organizerId) params.append('organizerId', filters.organizerId);
     if (typeof filters?.isFeatured === 'boolean') params.append('featured', filters.isFeatured.toString());
 
-    const response = await apiClientV2.get<EventsResponse>(`/events/my-events?${params.toString()}`);
-    return response.data;
+    const response = await apiClientV2.get(`/events/my-events?${params.toString()}`);
+    return response.data.data || response.data;
   }
 
   /**
@@ -64,8 +64,8 @@ class EventsService {
     if (filters?.city) params.append('city', filters.city);  // Filtro por ciudad
     if (filters?.organizerId) params.append('organizerId', filters.organizerId);
 
-    const response = await apiClientV2.get<EventsResponse>(`/events/pending?${params.toString()}`);
-    return response.data;
+    const response = await apiClientV2.get(`/events/pending?${params.toString()}`);
+    return response.data.data || response.data;
   }
 
   /**
