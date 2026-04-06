@@ -6,7 +6,8 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
   try {
     const { searchParams } = new URL(request.url);
     const lang = searchParams.get('lang') || undefined;
-    const post = await PostsService.getBySlug(params.slug, lang);
+    const { slug } = await params;
+    const post = await PostsService.getBySlug(slug);
     return apiSuccess(post);
   } catch (error) {
     return apiError(error);
