@@ -13,6 +13,14 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: '**.digitaloceanspaces.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.digitalocean.app',
+      },
+      {
+        protocol: 'https',
         hostname: '**',
       },
       {

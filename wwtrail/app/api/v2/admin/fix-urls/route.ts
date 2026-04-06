@@ -4,8 +4,8 @@ import prisma from '@/lib/db';
 
 /**
  * POST /api/v2/admin/fix-urls
- * Replace localhost:3001 URLs with the production app URL in all image fields.
- * Body: { dryRun?: boolean, targetUrl?: string }
+ * Replace URL patterns in all image fields.
+ * Body: { dryRun?: boolean, targetUrl?: string, sourceUrls?: string[] }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const dryRun = body.dryRun ?? false;
     const appUrl = body.targetUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://wwtrail-5agxm.ondigitalocean.app';
 
-    const oldPatterns = ['http://localhost:3001', 'http://localhost:3000'];
+    const oldPatterns = body.sourceUrls || ['http://localhost:3001', 'http://localhost:3000'];
     const results: Record<string, number> = {};
 
     const fieldsToFix: Array<{ model: string; field: string }> = [
