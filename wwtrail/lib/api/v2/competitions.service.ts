@@ -44,7 +44,7 @@ export const competitionsService = {
     }
 
     const response = await apiClientV2.get(`/competitions${params.toString() ? `?${params.toString()}` : ''}`);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   /**

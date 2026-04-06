@@ -104,7 +104,7 @@ export class EditionPhotoService {
     const processed = await this.processImage(file.path);
 
     // Generar URLs
-    const baseUrl = process.env.API_URL || 'http://localhost:3001';
+    const baseUrl = process.env.NEXT_PUBLIC_SPACES_URL || 'https://wwtrail-uploads.fra1.digitaloceanspaces.com';
     const url = `${baseUrl}/uploads/${path.basename(processed.originalPath)}`;
     const thumbnail = `${baseUrl}/uploads/${path.basename(processed.thumbnailPath)}`;
 

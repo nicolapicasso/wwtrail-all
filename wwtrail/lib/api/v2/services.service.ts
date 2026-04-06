@@ -28,8 +28,8 @@ class ServicesService {
     if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
     if (filters?.language) params.append('language', filters.language);
 
-    const response = await apiClientV2.get<ServicesResponse>(`/services?${params.toString()}`);
-    return response.data;
+    const response = await apiClientV2.get(`/services?${params.toString()}`);
+    return response.data.data || response.data;
   }
 
   /**
