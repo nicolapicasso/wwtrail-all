@@ -9,8 +9,22 @@ const SPACES_URL = process.env.NEXT_PUBLIC_SPACES_URL || 'https://wwtrail-upload
  * Si es relativa y empieza con /uploads, apunta al CDN de Spaces.
  * Si es relativa, le agrega el dominio de la app.
  */
+const LOCALHOST_PATTERNS = ['http://localhost:3001', 'http://localhost:3000'];
+
 export function normalizeImageUrl(url: string | undefined | null): string {
   if (!url) return '';
+
+  // Fix legacy localhost URLs stored in the database
+  for (const pattern of LOCALHOST_PATTERNS) {
+    if (url.startsWith(pattern)) {
+      const relativePath = url.substring(pattern.length);
+      if (relativePath.startsWith('/uploads/')) {
+        return `${SPACES_URL}${relativePath}`;
+      }
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+      return `${baseUrl}${relativePath}`;
+    }
+  }
 
   // Si ya es una URL absoluta, devolverla tal cual
   if (url.startsWith('http://') || url.startsWith('https://')) {

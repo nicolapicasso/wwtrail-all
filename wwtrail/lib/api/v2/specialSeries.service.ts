@@ -27,7 +27,13 @@ class SpecialSeriesService {
     const response = await apiClientV2.get<PaginatedResponse<SpecialSeriesListItem>>(
       `/special-series?${params.toString()}`
     );
-    return response.data;
+    // Unwrap apiSuccess wrapper: response.data = { success, data: { data: [...], pagination } }
+    const inner = response.data?.data || response.data;
+    return {
+      status: 'success',
+      data: inner.data || [],
+      pagination: inner.pagination || { page: 1, limit: 50, total: 0, totalPages: 0 },
+    };
   }
 
   /**
@@ -35,7 +41,7 @@ class SpecialSeriesService {
    */
   async getById(id: string): Promise<SpecialSeries> {
     const response = await apiClientV2.get<ApiResponse<SpecialSeries>>(`/special-series/${id}`);
-    return response.data.data!;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -43,7 +49,7 @@ class SpecialSeriesService {
    */
   async getBySlug(slug: string): Promise<SpecialSeries> {
     const response = await apiClientV2.get<ApiResponse<SpecialSeries>>(`/special-series/slug/${slug}`);
-    return response.data.data!;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -53,7 +59,7 @@ class SpecialSeriesService {
     const response = await apiClientV2.get<ApiResponse<{ available: boolean; slug: string }>>(
       `/special-series/check-slug/${slug}`
     );
-    return response.data.data!;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -61,7 +67,7 @@ class SpecialSeriesService {
    */
   async create(data: CreateSpecialSeriesInput): Promise<SpecialSeries> {
     const response = await apiClientV2.post<ApiResponse<SpecialSeries>>('/special-series', data);
-    return response.data.data!;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -69,7 +75,7 @@ class SpecialSeriesService {
    */
   async update(id: string, data: UpdateSpecialSeriesInput): Promise<SpecialSeries> {
     const response = await apiClientV2.patch<ApiResponse<SpecialSeries>>(`/special-series/${id}`, data);
-    return response.data.data!;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -77,7 +83,7 @@ class SpecialSeriesService {
    */
   async approve(id: string): Promise<SpecialSeries> {
     const response = await apiClientV2.post<ApiResponse<SpecialSeries>>(`/special-series/${id}/approve`);
-    return response.data.data!;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -85,7 +91,7 @@ class SpecialSeriesService {
    */
   async reject(id: string): Promise<SpecialSeries> {
     const response = await apiClientV2.post<ApiResponse<SpecialSeries>>(`/special-series/${id}/reject`);
-    return response.data.data!;
+    return response.data?.data || response.data;
   }
 
   /**

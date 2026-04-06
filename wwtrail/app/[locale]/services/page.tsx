@@ -36,8 +36,8 @@ export default function ServicesPage() {
       setLoading(true);
       try {
         const response = await servicesService.getAll(filters);
-        setServices(response.data);
-        setTotal(response.total);
+        setServices(response.data || []);
+        setTotal(response.pagination?.total || 0);
       } catch (error) {
         console.error('Error fetching services:', error);
       } finally {
