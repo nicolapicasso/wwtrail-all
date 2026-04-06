@@ -12,8 +12,18 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const fieldName = (formData.get('fieldName') as string) || 'uploads';
+
+    // Find the uploaded file from any field name (file, link, logo, cover, etc.)
+    let file: File | null = null;
+    let detectedFieldName = 'uploads';
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File && value.size > 0) {
+        file = value;
+        detectedFieldName = key;
+        break;
+      }
+    }
+    const fieldName = detectedFieldName;
 
     if (!file) {
       throw new ApiError('No file provided', 400);
