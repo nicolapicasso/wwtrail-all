@@ -26,7 +26,11 @@ class CatalogService<T> {
     const response = await apiClientV2.get(`/${this.endpoint}`, {
       params: { isActive: activeOnly ? 'true' : undefined },
     });
-    return response.data.data;
+    const inner = response.data.data;
+    // Handle both flat arrays and paginated { data: [...], pagination } responses
+    if (Array.isArray(inner)) return inner;
+    if (inner?.data && Array.isArray(inner.data)) return inner.data;
+    return [];
   }
 
   /**
