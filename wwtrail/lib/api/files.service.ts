@@ -47,8 +47,13 @@ export async function uploadFile(file: File, fieldname: string = 'file'): Promis
       },
     });
 
-    if (response.data.status === 'success' && response.data.data.url) {
+    if ((response.data.success || response.data.status === 'success') && response.data.data?.url) {
       return response.data.data.url;
+    }
+
+    // Fallback: apiSuccess wraps as { success: true, data: { data: { url } } }
+    if (response.data?.data?.data?.url) {
+      return response.data.data.data.url;
     }
 
     throw new Error('Error al subir el archivo');
@@ -82,8 +87,9 @@ export async function uploadMultipleFiles(files: File[], fieldname: string = 'ga
       },
     });
 
-    if (response.data.status === 'success' && Array.isArray(response.data.data)) {
-      return response.data.data.map((file) => file.url);
+    const filesData = response.data?.data;
+    if ((response.data.success || response.data.status === 'success') && Array.isArray(filesData)) {
+      return filesData.map((file: FileUploadResponse) => file.url);
     }
 
     throw new Error('Error al subir los archivos');
