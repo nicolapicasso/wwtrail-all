@@ -65,6 +65,37 @@ export default function SEOManagementPage() {
   const [regenerating, setRegenerating] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const [bulkGenerating, setBulkGenerating] = useState<string | null>(null);
+  const [bulkResult, setBulkResult] = useState<any>(null);
+
+  const handleBulkGenerate = async (entityType: string) => {
+    try {
+      setBulkGenerating(entityType);
+      setBulkResult(null);
+      const response = await fetch('/api/v2/seo/bulk-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entityType }),
+      });
+      const json = await response.json();
+      const result = json.data || json;
+      setBulkResult(result);
+      toast({
+        title: 'Generación completada',
+        description: `${result.generated || 0} SEOs generados para ${entityType}`,
+      });
+      loadAllSEO();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Error al generar SEO',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkGenerating(null);
+    }
+  };
+
   useEffect(() => {
     loadAllSEO();
   }, []);
@@ -300,11 +331,31 @@ export default function SEOManagementPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">🔍 Gestión de SEO</h1>
-        <p className="text-muted-foreground">
-          Administra el SEO de eventos, competiciones y posts. Agrupado por entidad con todos los idiomas.
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Gestión de SEO</h1>
+          <p className="text-muted-foreground">
+            Administra el SEO de eventos, competiciones y posts. Agrupado por entidad con todos los idiomas.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {['event', 'competition'].map((type) => (
+            <Button
+              key={type}
+              variant="outline"
+              size="sm"
+              disabled={bulkGenerating !== null}
+              onClick={() => handleBulkGenerate(type)}
+            >
+              {bulkGenerating === type ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-1" />
+              )}
+              Generar {type === 'event' ? 'Eventos' : 'Competiciones'}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -328,10 +379,47 @@ export default function SEOManagementPage() {
         </div>
       ) : allSEO.length === 0 ? (
         <Card>
-          <CardContent className="py-16">
-            <div className="text-center text-muted-foreground">
-              No hay SEO generado aún
+          <CardHeader>
+            <CardTitle>No hay SEO generado aún</CardTitle>
+            <CardDescription>
+              Genera SEO automáticamente para todas las entidades publicadas usando IA.
+              Se crearán meta títulos, descripciones y preguntas frecuentes.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { type: 'event', label: 'Eventos', icon: <Award className="h-5 w-5" /> },
+                { type: 'competition', label: 'Competiciones', icon: <Flag className="h-5 w-5" /> },
+                { type: 'service', label: 'Servicios', icon: <Globe className="h-5 w-5" /> },
+                { type: 'specialSeries', label: 'Series Especiales', icon: <FileText className="h-5 w-5" /> },
+              ].map(({ type, label, icon }) => (
+                <Button
+                  key={type}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col items-center gap-2"
+                  disabled={bulkGenerating !== null}
+                  onClick={() => handleBulkGenerate(type)}
+                >
+                  {bulkGenerating === type ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : icon}
+                  <span>Generar SEO de {label}</span>
+                </Button>
+              ))}
             </div>
+            {bulkResult && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm">
+                <p className="font-medium text-green-800">
+                  Generados: {bulkResult.generated} | Errores: {bulkResult.errors} | Total: {bulkResult.total}
+                </p>
+              </div>
+            )}
+            {bulkGenerating && (
+              <p className="mt-4 text-sm text-muted-foreground text-center">
+                Generando SEO con IA... Esto puede tardar varios minutos dependiendo del número de entidades.
+              </p>
+            )}
           </CardContent>
         </Card>
       ) : (
