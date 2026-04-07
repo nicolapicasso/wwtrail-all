@@ -130,8 +130,21 @@ export default function CompetitionForm({
           terrainTypesService.getAll(true), // Only active terrain types
           specialSeriesService.getAll({ status: 'PUBLISHED', limit: 100 }), // Only published special series
         ]);
-        setTerrainTypes(terrainTypesData);
-        setSpecialSeriesList(specialSeriesData.data);
+        // Defensive unwrap: terrainTypesData should be T[] but guard against apiSuccess wrapper
+        const ttArray = Array.isArray(terrainTypesData)
+          ? terrainTypesData
+          : Array.isArray((terrainTypesData as any)?.data)
+            ? (terrainTypesData as any).data
+            : [];
+        setTerrainTypes(ttArray);
+        // specialSeriesData should be { data: [...], pagination } but guard against wrapper
+        const ssRaw = specialSeriesData?.data ?? specialSeriesData;
+        const ssArray = Array.isArray(ssRaw)
+          ? ssRaw
+          : Array.isArray((ssRaw as any)?.data)
+            ? (ssRaw as any).data
+            : [];
+        setSpecialSeriesList(ssArray);
       } catch (err) {
         console.error('Error loading catalogs:', err);
         toast.error('Error al cargar los catálogos');

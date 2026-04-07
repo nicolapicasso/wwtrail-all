@@ -29,10 +29,14 @@ class CatalogService<T> {
         isActive: activeOnly ? 'true' : undefined,
       },
     });
-    const inner = response.data.data;
+    // Unwrap apiSuccess wrapper: axios response.data = { success, data: [...] }
+    const body = response.data;
+    // body might be the apiSuccess wrapper { success, data } or raw data
+    const inner = body?.data ?? body;
     // Handle both flat arrays and paginated { data: [...], pagination } responses
     if (Array.isArray(inner)) return inner;
     if (inner?.data && Array.isArray(inner.data)) return inner.data;
+    console.warn(`[CatalogService.getAll] Unexpected response shape for ${this.endpoint}:`, JSON.stringify(body).slice(0, 200));
     return [];
   }
 
@@ -77,7 +81,11 @@ class CatalogService<T> {
    */
   async getAllAdmin(): Promise<T[]> {
     const response = await apiClientV2.get(`/admin/${this.endpoint}`);
-    return response.data.data;
+    const body = response.data;
+    const inner = body?.data ?? body;
+    if (Array.isArray(inner)) return inner;
+    if (inner?.data && Array.isArray(inner.data)) return inner.data;
+    return [];
   }
 }
 

@@ -70,8 +70,14 @@ export function CompetitionFilters({ onFilterChange, onReset }: CompetitionFilte
   useEffect(() => {
     const loadSpecialSeries = async () => {
       try {
-        const series = await specialSeriesService.getAll(true); // Only active
-        setSpecialSeriesList(series);
+        const seriesData = await specialSeriesService.getAll(true); // Only active/published
+        // Defensive unwrap: guard against apiSuccess wrapper
+        const seriesArray = Array.isArray(seriesData)
+          ? seriesData
+          : Array.isArray((seriesData as any)?.data)
+            ? (seriesData as any).data
+            : [];
+        setSpecialSeriesList(seriesArray);
       } catch (error) {
         console.error('Error loading special series:', error);
       }

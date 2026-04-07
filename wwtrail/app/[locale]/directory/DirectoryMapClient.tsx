@@ -201,8 +201,20 @@ export default function DirectoryMapClient() {
           terrainTypesService.getAll(true),
           specialSeriesService.getAll({ status: 'PUBLISHED', limit: 100 }),
         ]);
-        setTerrainTypes(terrainTypesData);
-        setSpecialSeriesList(specialSeriesData.data);
+        // Defensive unwrap: guard against apiSuccess wrapper
+        const ttArray = Array.isArray(terrainTypesData)
+          ? terrainTypesData
+          : Array.isArray((terrainTypesData as any)?.data)
+            ? (terrainTypesData as any).data
+            : [];
+        setTerrainTypes(ttArray);
+        const ssRaw = specialSeriesData?.data ?? specialSeriesData;
+        const ssArray = Array.isArray(ssRaw)
+          ? ssRaw
+          : Array.isArray((ssRaw as any)?.data)
+            ? (ssRaw as any).data
+            : [];
+        setSpecialSeriesList(ssArray);
       } catch (err) {
         console.error('Error loading catalogs:', err);
       }
