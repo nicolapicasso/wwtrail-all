@@ -417,9 +417,13 @@ class AdminService {
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ users: User[]; pagination: UsersPagination }> {
     const { data } = await apiClientV2.get('/admin/users', { params });
+    // apiSuccess wraps as { success, data: { data: [...], pagination: {...} } }
+    const inner = data.data || data;
+    const users = inner.data || inner;
+    const pagination = inner.pagination || data.pagination;
     return {
-      users: data.data,
-      pagination: data.pagination,
+      users: Array.isArray(users) ? users : [],
+      pagination: pagination || { currentPage: 1, totalPages: 1, totalUsers: 0, hasNext: false, hasPrev: false },
     };
   }
 
@@ -549,9 +553,13 @@ class AdminService {
     };
   }> {
     const { data } = await apiClientV2.get('/admin/insiders');
+    // apiSuccess wraps as { success, data: { insiders: [...], stats: {...} } }
+    const inner = data.data || data;
+    const insiders = inner.insiders || [];
+    const stats = inner.stats || { total: 0, byCountry: {}, byGender: {} };
     return {
-      insiders: data.data,
-      stats: data.stats,
+      insiders: Array.isArray(insiders) ? insiders : [],
+      stats,
     };
   }
 
@@ -895,13 +903,13 @@ class AdminService {
     entityType: NativeImportEntityType,
     file: NativeImportFile
   ): Promise<NativeValidationResult> {
-    const { data } = await apiClientV2.post('/admin/import/native/validate', {
-      ...file,
-      entity: entityType,
-    }, {
-      params: { entityType },
+    const { data } = await apiClientV2.post('/admin/import/native', {
+      entityType,
+      data: file.data,
+      validate: true,
+      dryRun: true,
     });
-    return data.data;
+    return data?.data || data;
   }
 
   /**
@@ -913,15 +921,13 @@ class AdminService {
     options: NativeImportOptions = {}
   ): Promise<NativeImportResult> {
     const { data } = await apiClientV2.post('/admin/import/native', {
-      ...file,
-      entity: entityType,
+      entityType,
+      data: file.data,
       conflictResolution: options.conflictResolution || 'skip',
       dryRun: options.dryRun || false,
       parentId: options.parentId,
-    }, {
-      params: { entityType },
     });
-    return data.data;
+    return data?.data || data;
   }
 
   // ============================================

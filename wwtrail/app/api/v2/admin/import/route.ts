@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 import { ImportService } from '@/lib/services/import.service';
+import { fixEncoding } from '@/lib/utils/encoding';
 
 const importService = new ImportService();
 
@@ -26,7 +27,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ADMIN');
-    const body = await request.json();
+    const rawBody = await request.json();
+    // Normalize UTF-8 encoding on all string fields
+    const body = fixEncoding(rawBody);
     const { type, data } = body;
 
     switch (type) {

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 import { ImportService } from '@/lib/services/import.service';
+import { fixEncoding } from '@/lib/utils/encoding';
 import type { NativeImportOptions } from '@/lib/services/import.service';
 
 const importService = new ImportService();
@@ -13,7 +14,9 @@ const importService = new ImportService();
 export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ADMIN');
-    const body = await request.json();
+    const rawBody = await request.json();
+    // Normalize UTF-8 encoding on all string fields
+    const body = fixEncoding(rawBody);
     const { entityType, data, conflictResolution = 'skip', dryRun = false, parentId } = body;
 
     if (!entityType || !data || !Array.isArray(data)) {

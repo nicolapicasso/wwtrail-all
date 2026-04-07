@@ -25,6 +25,16 @@ export class CatalogService {
   static async getAll(catalogType: CatalogType, activeOnly: boolean = false) {
     const model = catalogModels[catalogType];
 
+    // SpecialSeries doesn't have isActive or sortOrder fields
+    if (catalogType === 'specialSeries') {
+      const where: any = activeOnly ? { status: 'PUBLISHED' } : {};
+      const items = await (model as typeof prisma.specialSeries).findMany({
+        where,
+        orderBy: [{ name: 'asc' }],
+      });
+      return items;
+    }
+
     const where = activeOnly ? { isActive: true } : {};
 
     const items = await model.findMany({

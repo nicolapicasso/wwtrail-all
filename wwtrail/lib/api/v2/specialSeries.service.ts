@@ -27,12 +27,18 @@ class SpecialSeriesService {
     const response = await apiClientV2.get<PaginatedResponse<SpecialSeriesListItem>>(
       `/special-series?${params.toString()}`
     );
-    // Unwrap apiSuccess wrapper: response.data = { success, data: { data: [...], pagination } }
-    const inner = response.data?.data || response.data;
+    // Unwrap apiSuccess wrapper: axios response.data = { success, data: { data: [...], pagination } }
+    const body = response.data as any;
+    // body is the apiSuccess wrapper: { success: true, data: { data: [...], pagination } }
+    // or could already be { data: [...], pagination } if no wrapper
+    const inner = body?.data !== undefined ? body.data : body;
+    // inner should be { data: [...], pagination: {...} }
+    const items = Array.isArray(inner) ? inner : (inner?.data || []);
+    const pagination = inner?.pagination || { page: 1, limit: 50, total: 0, totalPages: 0 };
     return {
-      status: 'success',
-      data: inner.data || [],
-      pagination: inner.pagination || { page: 1, limit: 50, total: 0, totalPages: 0 },
+      status: 'success' as const,
+      data: Array.isArray(items) ? items : [],
+      pagination,
     };
   }
 

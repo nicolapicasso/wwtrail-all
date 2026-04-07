@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       const data = await exportService.exportAll(true);
       return new Response(JSON.stringify(data, null, 2), {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Content-Disposition': `attachment; filename="wwtrail-export-${new Date().toISOString().split('T')[0]}.json"`,
         },
       });
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       const data = await exportService.exportEntity(type as any, true);
       return new Response(JSON.stringify({ entity: type, count: data.length, data }, null, 2), {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Content-Disposition': `attachment; filename="wwtrail-${type}-${new Date().toISOString().split('T')[0]}.json"`,
         },
       });

@@ -227,8 +227,9 @@ function MasterDataReference() {
         terrainTypesService.getAll(),
         specialSeriesService.getAll(),
       ]);
-      setTerrainTypes(tt);
-      setSpecialSeries(ss);
+      // Defensive unwrap: guard against apiSuccess wrapper
+      setTerrainTypes(Array.isArray(tt) ? tt : Array.isArray((tt as any)?.data) ? (tt as any).data : []);
+      setSpecialSeries(Array.isArray(ss) ? ss : Array.isArray((ss as any)?.data) ? (ss as any).data : []);
     } catch (error) {
       console.error('Error loading master data:', error);
     } finally {

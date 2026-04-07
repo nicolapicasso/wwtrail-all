@@ -45,18 +45,18 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
 
-        // WW Trail Running Brand Colors
+        // WW Trail Running Brand Colors (driven by --site-color-* CSS variables)
         'brand': {
-          'primary': '#B5751A',
+          'primary': 'var(--site-color-primary)',
           'neutral': '#FFFFFF',
-          'dark': '#000000',
+          'dark': 'var(--site-color-text)',
           'gray-deep': '#333333',
           'gray-light': '#F5F5F5',
-          'success': '#28A745',
-          'danger': '#DC3545',
+          'success': 'var(--site-color-success)',
+          'danger': 'var(--site-color-danger)',
         },
 
-        hover: "#B66916",
+        hover: "var(--site-color-accent)",
       },
       fontFamily: {
         sans: ['Montserrat', 'sans-serif'],
