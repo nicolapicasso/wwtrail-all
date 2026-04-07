@@ -17,6 +17,7 @@
     "db:import": "tsx scripts/import-content.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1025.0",
     "@hookform/resolvers": "^3.3.4",
     "@prisma/client": "^6.19.0",
     "@radix-ui/react-accordion": "^1.2.12",
