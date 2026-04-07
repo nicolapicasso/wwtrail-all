@@ -12,6 +12,7 @@ import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { terrainTypesService } from '@/lib/api/catalogs.service';
 import aiAutofillService from '@/lib/api/v2/aiAutofill.service';
 import type { CompetitionAutoFillResult, SuggestedImage } from '@/lib/api/v2/aiAutofill.service';
+import { ImageImportSelector } from '@/components/ImageImportSelector';
 import type { Competition, UTMBIndex } from '@/types/competition';
 import type { TerrainType, SpecialSeriesListItem } from '@/types/v2';
 import { CompetitionType, Language } from '@/types/event';
@@ -333,61 +334,21 @@ export default function CompetitionForm({
         )}
       </div>
 
-      {/* Imágenes sugeridas por la IA */}
+      {/* Imágenes sugeridas por la IA — selector interactivo */}
       {showImageSuggestions && suggestedImages.length > 0 && (
-        <div className="rounded-lg bg-amber-50 p-6 shadow-sm border border-amber-200">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-amber-600" />
-              <h3 className="text-lg font-semibold text-amber-900">Imágenes sugeridas</h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowImageSuggestions(false)}
-              className="text-amber-600 hover:text-amber-800"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <p className="text-sm text-amber-700 mb-4">
-            Imágenes encontradas en la web. Haz clic en "Ver" para abrirla y decidir si descargarla.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {suggestedImages.map((img, idx) => (
-              <div key={idx} className="relative group">
-                <div className="aspect-video bg-white rounded-lg border border-amber-200 overflow-hidden">
-                  <img
-                    src={img.url}
-                    alt={img.alt || `Imagen ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-xs text-amber-700 capitalize px-1.5 py-0.5 bg-amber-100 rounded">
-                    {img.type}
-                  </span>
-                  <a
-                    href={img.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-amber-600 hover:text-amber-800 flex items-center gap-1"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Ver
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 p-2 bg-amber-100 border border-amber-200 rounded text-xs text-amber-800">
-            Para usar una imagen, ábrela con "Ver", descárgala, y luego súbela en la sección de medios del formulario.
-          </div>
-        </div>
+        <ImageImportSelector
+          images={suggestedImages}
+          onImport={({ logoUrl, coverImage, gallery }) => {
+            setFormData((prev: any) => ({
+              ...prev,
+              logoUrl: logoUrl || prev.logoUrl,
+              coverImage: coverImage || prev.coverImage,
+              gallery: [...(prev.gallery || []), ...gallery],
+            }));
+            setShowImageSuggestions(false);
+          }}
+          onClose={() => setShowImageSuggestions(false)}
+        />
       )}
 
       {/* Error Alert */}
