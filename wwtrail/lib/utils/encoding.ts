@@ -31,9 +31,11 @@ const ENCODING_FIXES: [RegExp, string][] = [
   [/Ã‰/g, 'É'], [/Ã"/g, 'Ó'], [/Ãš/g, 'Ú'], [/Ã'/g, 'Ñ'],
   [/Ã¶/g, 'ö'], [/Ã¤/g, 'ä'], [/Ã¢/g, 'â'], [/Ãª/g, 'ê'], [/Ã®/g, 'î'],
   [/Ã´/g, 'ô'], [/Ã»/g, 'û'],
-  // Windows-1252 specific
-  [/â€œ/g, '"'], [/â€\u009d/g, '"'], [/â€˜/g, '''], [/â€™/g, '''],
-  [/â€"/g, '—'], [/â€"/g, '–'], [/â€¦/g, '…'],
+  // Windows-1252 specific (using Unicode escapes to avoid parser issues)
+  [/\u00e2\u0080\u009c/g, '\u201c'], [/\u00e2\u0080\u009d/g, '\u201d'],
+  [/\u00e2\u0080\u0098/g, '\u2018'], [/\u00e2\u0080\u0099/g, '\u2019'],
+  [/\u00e2\u0080\u0094/g, '\u2014'], [/\u00e2\u0080\u0093/g, '\u2013'],
+  [/\u00e2\u0080\u00a6/g, '\u2026'],
   // Standalone replacement characters
   [/\uFFFD/g, ''],
 ];
