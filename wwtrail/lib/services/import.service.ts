@@ -1431,10 +1431,11 @@ export class ImportService {
     if (updateData.endDate) updateData.endDate = new Date(updateData.endDate);
     if (updateData.publishedAt) updateData.publishedAt = new Date(updateData.publishedAt);
 
+    const selectFields = this.getSelectFieldsForEntity(entityType);
     const updated = await (model as any).update({
       where: { id: existingId },
       data: updateData,
-      select: { id: true, slug: true, name: true, title: true, year: true },
+      select: selectFields,
     });
 
     // Update location if coordinates provided
