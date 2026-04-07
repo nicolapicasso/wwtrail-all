@@ -20,6 +20,8 @@ export async function GET(request: NextRequest) {
       { model: 'organizer', fields: ['name', 'description', 'city', 'country'] },
       { model: 'specialSeries', fields: ['name', 'description'] },
       { model: 'service', fields: ['name', 'description', 'city', 'country'] },
+      { model: 'competitionType', fields: ['name', 'description'] },
+      { model: 'terrainType', fields: ['name', 'description'] },
       { model: 'eventTranslation', fields: ['name', 'description'] },
       { model: 'competitionTranslation', fields: ['name', 'description'] },
       { model: 'specialSeriesTranslation', fields: ['name', 'description'] },
@@ -99,7 +101,12 @@ export async function POST(request: NextRequest) {
       return await autoFixEncoding();
     }
 
-    // Mode 2: Re-import from source
+    // Mode 2: Fix catalog names (terrain types, competition types) by slug
+    if (body.action === 'fix-catalogs') {
+      return await fixCatalogEncoding();
+    }
+
+    // Mode 3: Re-import from source
     const { entity, data } = body;
 
     if (!entity || !Array.isArray(data)) {
@@ -118,6 +125,8 @@ export async function POST(request: NextRequest) {
       organizer: ['name', 'description', 'city', 'country'],
       specialSeries: ['name', 'description'],
       service: ['name', 'description', 'city', 'country'],
+      competitionType: ['name', 'description'],
+      terrainType: ['name', 'description'],
       eventTranslation: ['name', 'description'],
       competitionTranslation: ['name', 'description'],
       specialSeriesTranslation: ['name', 'description'],
@@ -184,6 +193,8 @@ async function autoFixEncoding() {
     { model: 'organizer', fields: ['name', 'description', 'city', 'country'] },
     { model: 'specialSeries', fields: ['name', 'description'] },
     { model: 'service', fields: ['name', 'description', 'city', 'country'] },
+    { model: 'competitionType', fields: ['name', 'description'] },
+    { model: 'terrainType', fields: ['name', 'description'] },
     { model: 'eventTranslation', fields: ['name', 'description'] },
     { model: 'competitionTranslation', fields: ['name', 'description'] },
     { model: 'specialSeriesTranslation', fields: ['name', 'description'] },
@@ -275,5 +286,87 @@ async function autoFixEncoding() {
     totalFixed,
     details: report,
     note: 'Stripped ?? characters from all affected text fields. Characters that were replaced by ?? during import are lost — re-import from source if original data is available.',
+  });
+}
+
+/**
+ * Fix catalog encoding: update terrain types and competition types
+ * by slug (which doesn't have accents and is correct)
+ */
+async function fixCatalogEncoding() {
+  // Known correct terrain type names (slug → correct name)
+  const terrainFixes: Record<string, string> = {
+    'alta-montana': 'Alta montaña',
+    'pista-de-tierra': 'Pista de tierra',
+    'bosques-y-senderos': 'Bosques y senderos',
+    'terreno-muy-tecnico': 'Terreno muy técnico',
+    'selva-jungla': 'Selva/Jungla',
+    'grandes-lagos': 'Grandes lagos',
+    'llanuras': 'Llanuras',
+    'desiertos': 'Desiertos',
+    'costa-y-playa': 'Costa y playa',
+    'terreno-mixto': 'Terreno mixto',
+    'senderos-boscosos': 'Senderos boscosos',
+    'desierto': 'Desierto',
+    'montana-media': 'Montaña media',
+    'montana-tecnica': 'Montaña técnica',
+    'mixto-asfalto-sendero': 'Mixto asfalto/sendero',
+  };
+
+  // Known correct competition type names
+  const competitionTypeFixes: Record<string, string> = {
+    'trail': 'Trail',
+    'ultra-trail': 'Ultra Trail',
+    'maraton-de-montana': 'Maratón de montaña',
+    'media-maraton-de-montana': 'Media maratón de montaña',
+    'carrera-vertical': 'Carrera vertical',
+    'sky-running': 'Sky Running',
+    'kilómetro-vertical': 'Kilómetro vertical',
+    'kilometro-vertical': 'Kilómetro vertical',
+    'cross-country': 'Cross Country',
+    'canicross': 'Canicross',
+    'raquetas-de-nieve': 'Raquetas de nieve',
+    'marcha-nordica': 'Marcha nórdica',
+    'senderismo': 'Senderismo',
+    'carrera-por-etapas': 'Carrera por etapas',
+  };
+
+  let fixed = 0;
+  const details: string[] = [];
+
+  // Fix terrain types
+  for (const [slug, correctName] of Object.entries(terrainFixes)) {
+    try {
+      const existing = await prisma.terrainType.findUnique({ where: { slug } });
+      if (existing && existing.name !== correctName) {
+        await prisma.terrainType.update({
+          where: { slug },
+          data: { name: correctName, description: `Terreno tipo ${correctName.toLowerCase()}` },
+        });
+        details.push(`terrainType: "${existing.name}" → "${correctName}"`);
+        fixed++;
+      }
+    } catch {}
+  }
+
+  // Fix competition types
+  for (const [slug, correctName] of Object.entries(competitionTypeFixes)) {
+    try {
+      const existing = await prisma.competitionType.findUnique({ where: { slug } });
+      if (existing && existing.name !== correctName) {
+        await prisma.competitionType.update({
+          where: { slug },
+          data: { name: correctName, description: `Tipo de competición: ${correctName}` },
+        });
+        details.push(`competitionType: "${existing.name}" → "${correctName}"`);
+        fixed++;
+      }
+    } catch {}
+  }
+
+  return apiSuccess({
+    action: 'fix-catalogs',
+    totalFixed: fixed,
+    details,
   });
 }
