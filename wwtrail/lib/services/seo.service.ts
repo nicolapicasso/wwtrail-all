@@ -8,8 +8,15 @@ import { TranslationService } from './translation.service';
 import { TranslationConfig, getTargetLanguages, isAutoTranslateEnabled } from '@/lib/utils/translation';
 
 // Configuración de OpenAI
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+async function getOpenAIKey(): Promise<string | null> {
+  try {
+    const { SiteConfigService } = await import('@/lib/services/siteConfig.service');
+    return await SiteConfigService.getOpenAIKey();
+  } catch {}
+  return process.env.OPENAI_API_KEY || null;
+}
 
 interface GenerateSEOInput {
   entityType: string;
@@ -73,9 +80,9 @@ export class SEOService {
     entityData: Record<string, any>
   ): Promise<Array<{ question: string; answer: string }>> {
     try {
-      if (!OPENAI_API_KEY) {
-        logger.error('❌ OPENAI_API_KEY no está configurada en las variables de entorno');
-        logger.warn('⚠️  FAQ will be empty - configure OPENAI_API_KEY to generate FAQs');
+      const apiKey = await getOpenAIKey();
+      if (!apiKey) {
+        logger.warn('⚠️  FAQ will be empty - configure OPENAI_API_KEY in Site Settings or env vars');
         return [];
       }
 
@@ -83,7 +90,6 @@ export class SEOService {
       const processedPrompt = this.applyTemplate(prompt, entityData);
 
       logger.info('🤖 Generating FAQ with OpenAI GPT-4o-mini...');
-      logger.debug('Prompt preview:', processedPrompt.substring(0, 200) + '...');
 
       const response = await axios.post(
         OPENAI_API_URL,
@@ -107,7 +113,7 @@ export class SEOService {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
           },
         }
       );

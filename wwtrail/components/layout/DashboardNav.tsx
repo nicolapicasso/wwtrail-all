@@ -81,6 +81,11 @@ const navItems: NavItem[] = [
         href: '/organizer/landings',
         icon: FileText,
       },
+      {
+        label: 'Ajustes del Sitio',
+        href: '/dashboard/site-config',
+        icon: Settings,
+      },
     ],
   },
   {

@@ -4,8 +4,18 @@
 import axios from 'axios';
 import logger from '@/lib/utils/logger';
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+async function getOpenAIKey(): Promise<string> {
+  try {
+    const { SiteConfigService } = await import('@/lib/services/siteConfig.service');
+    const key = await SiteConfigService.getOpenAIKey();
+    if (key) return key;
+  } catch {}
+  const envKey = process.env.OPENAI_API_KEY;
+  if (envKey) return envKey;
+  throw new Error('OPENAI_API_KEY no configurada. Configúrala en Ajustes del Sitio o en variables de entorno.');
+}
 
 // Resultado del auto-relleno para eventos
 export interface EventAutoFillResult {
@@ -177,9 +187,7 @@ function classifyImage(url: string, alt: string): SuggestedImage['type'] {
  * Auto-rellena datos de un EVENTO usando IA
  */
 export async function autoFillEvent(url: string): Promise<EventAutoFillResult> {
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY no configurada');
-  }
+  const apiKey = await getOpenAIKey();
 
   const pageContent = await fetchPageContent(url);
 
@@ -246,7 +254,7 @@ IMPORTANT RULES:
     {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
       },
     }
   );
@@ -272,9 +280,7 @@ IMPORTANT RULES:
  * Auto-rellena datos de una COMPETICIÓN usando IA
  */
 export async function autoFillCompetition(url: string): Promise<CompetitionAutoFillResult> {
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY no configurada');
-  }
+  const apiKey = await getOpenAIKey();
 
   const pageContent = await fetchPageContent(url);
 
@@ -325,7 +331,7 @@ IMPORTANT RULES:
     {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
       },
     }
   );

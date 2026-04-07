@@ -6,6 +6,7 @@ import { InsiderProvider } from "@/contexts/InsiderContext";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { Toaster } from 'sonner';
 import { IntlProvider } from "@/components/providers/IntlProvider";
+import { SiteStylesProvider } from "@/components/providers/SiteStylesProvider";
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className={inter.className}>
         <IntlProvider locale={locale} messages={messages}>
+          <SiteStylesProvider>
           <AuthProvider>
             <InsiderProvider>
               <LayoutWrapper>
@@ -48,6 +50,7 @@ export default async function RootLayout({
               <Toaster position="top-right" />
             </InsiderProvider>
           </AuthProvider>
+          </SiteStylesProvider>
         </IntlProvider>
       </body>
     </html>

@@ -6,8 +6,19 @@ import { Language, TranslationStatus } from '@prisma/client';
 import axios from 'axios';
 
 // Configuración de OpenAI
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+async function getOpenAIKey(): Promise<string> {
+  // Try DB config first, then env var
+  try {
+    const { SiteConfigService } = await import('@/lib/services/siteConfig.service');
+    const key = await SiteConfigService.getOpenAIKey();
+    if (key) return key;
+  } catch {}
+  const envKey = process.env.OPENAI_API_KEY;
+  if (envKey) return envKey;
+  throw new Error('OPENAI_API_KEY no configurada. Configúrala en Ajustes del Sitio o en variables de entorno.');
+}
 
 // Mapeo de nombres de idiomas para el prompt
 const LANGUAGE_NAMES: Record<Language, string> = {
@@ -45,9 +56,7 @@ export class TranslationService {
    */
   static async translateWithAI(request: TranslationRequest): Promise<TranslationResult> {
     try {
-      if (!OPENAI_API_KEY) {
-        throw new Error('OPENAI_API_KEY no configurada en variables de entorno');
-      }
+      const apiKey = await getOpenAIKey();
 
       const sourceLang = LANGUAGE_NAMES[request.sourceLanguage];
       const targetLang = LANGUAGE_NAMES[request.targetLanguage];
@@ -61,18 +70,18 @@ Return ONLY the translated text, without any explanations or additional comments
       const response = await axios.post(
         OPENAI_API_URL,
         {
-          model: 'gpt-4o-mini', // Modelo más económico y rápido
+          model: 'gpt-4o-mini',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: request.text },
           ],
-          temperature: 0.3, // Baja temperatura para traducciones más consistentes
+          temperature: 0.3,
           max_tokens: 2000,
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
           },
         }
       );
@@ -106,9 +115,7 @@ Return ONLY the translated text, without any explanations or additional comments
     context?: string
   ): Promise<Record<string, string>> {
     try {
-      if (!OPENAI_API_KEY) {
-        throw new Error('OPENAI_API_KEY no configurada');
-      }
+      const apiKey = await getOpenAIKey();
 
       const sourceLang = LANGUAGE_NAMES[sourceLanguage];
       const targetLang = LANGUAGE_NAMES[targetLanguage];
@@ -138,7 +145,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
           },
         }
       );
