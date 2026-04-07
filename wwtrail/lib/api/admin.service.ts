@@ -903,13 +903,13 @@ class AdminService {
     entityType: NativeImportEntityType,
     file: NativeImportFile
   ): Promise<NativeValidationResult> {
-    const { data } = await apiClientV2.post('/admin/import/native/validate', {
-      ...file,
-      entity: entityType,
-    }, {
-      params: { entityType },
+    const { data } = await apiClientV2.post('/admin/import/native', {
+      entityType,
+      data: file.data,
+      validate: true,
+      dryRun: true,
     });
-    return data.data;
+    return data?.data || data;
   }
 
   /**
@@ -921,15 +921,13 @@ class AdminService {
     options: NativeImportOptions = {}
   ): Promise<NativeImportResult> {
     const { data } = await apiClientV2.post('/admin/import/native', {
-      ...file,
-      entity: entityType,
+      entityType,
+      data: file.data,
       conflictResolution: options.conflictResolution || 'skip',
       dryRun: options.dryRun || false,
       parentId: options.parentId,
-    }, {
-      params: { entityType },
     });
-    return data.data;
+    return data?.data || data;
   }
 
   // ============================================
