@@ -3,6 +3,7 @@ import { ApiError as AppError } from '@/lib/utils/errors';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
+import { uploadToSpaces, deleteFromSpaces, getKeyFromUrl, isSpacesConfigured } from '@/lib/services/spaces.client';
 import type {
   UpdatePhotoMetadataInput,
   ReorderPhotosInput,
@@ -10,14 +11,14 @@ import type {
 
 export class EditionPhotoService {
   /**
-   * Procesar imagen con Sharp
-   * - Redimensionar si es muy grande
-   * - Generar thumbnail
-   * - Optimizar calidad
+   * Process image with Sharp and return buffers
+   * - Resize if too large
+   * - Generate thumbnail
+   * - Optimize quality
    */
   static async processImage(filePath: string): Promise<{
-    originalPath: string;
-    thumbnailPath: string;
+    originalBuffer: Buffer;
+    thumbnailBuffer: Buffer;
     width: number;
     height: number;
     fileSize: number;
@@ -26,50 +27,38 @@ export class EditionPhotoService {
       const image = sharp(filePath);
       const metadata = await image.metadata();
 
-      // Configuración
       const maxWidth = 1920;
       const maxHeight = 1080;
       const thumbnailWidth = 400;
 
-      // Procesar imagen original (si es muy grande, redimensionar)
+      // Process original (resize if too large)
+      let originalBuffer: Buffer;
       if (metadata.width && metadata.width > maxWidth) {
-        await image
-          .resize(maxWidth, maxHeight, {
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
+        originalBuffer = await sharp(filePath)
+          .resize(maxWidth, maxHeight, { fit: 'inside', withoutEnlargement: true })
           .jpeg({ quality: 85 })
-          .toFile(filePath + '.tmp');
-
-        // Reemplazar original
-        fs.renameSync(filePath + '.tmp', filePath);
+          .toBuffer();
+      } else {
+        originalBuffer = await sharp(filePath)
+          .jpeg({ quality: 85 })
+          .toBuffer();
       }
 
-      // Generar thumbnail
-      const thumbnailPath = filePath.replace(
-        path.extname(filePath),
-        `-thumb${path.extname(filePath)}`
-      );
-
-      await sharp(filePath)
-        .resize(thumbnailWidth, null, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
+      // Generate thumbnail
+      const thumbnailBuffer = await sharp(filePath)
+        .resize(thumbnailWidth, null, { fit: 'inside', withoutEnlargement: true })
         .jpeg({ quality: 80 })
-        .toFile(thumbnailPath);
+        .toBuffer();
 
-      // Obtener metadata actualizada
-      const processedImage = sharp(filePath);
-      const processedMetadata = await processedImage.metadata();
-      const stats = fs.statSync(filePath);
+      // Get processed metadata
+      const processedMeta = await sharp(originalBuffer).metadata();
 
       return {
-        originalPath: filePath,
-        thumbnailPath,
-        width: processedMetadata.width || 0,
-        height: processedMetadata.height || 0,
-        fileSize: stats.size,
+        originalBuffer,
+        thumbnailBuffer,
+        width: processedMeta.width || 0,
+        height: processedMeta.height || 0,
+        fileSize: originalBuffer.length,
       };
     } catch (error) {
       throw new AppError('Error processing image', 500);
@@ -77,7 +66,7 @@ export class EditionPhotoService {
   }
 
   /**
-   * Subir foto a una edición
+   * Upload photo to an edition
    */
   static async upload(
     editionId: string,
@@ -89,26 +78,54 @@ export class EditionPhotoService {
       isFeatured?: boolean;
     }
   ) {
-    // Verificar que la edición existe
+    // Verify edition exists
     const edition = await prisma.edition.findUnique({
       where: { id: editionId },
     });
 
     if (!edition) {
-      // Eliminar archivo subido
-      fs.unlinkSync(file.path);
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
       throw new AppError('Edition not found', 404);
     }
 
-    // Procesar imagen
+    // Process image
     const processed = await this.processImage(file.path);
 
-    // Generar URLs
-    const baseUrl = process.env.NEXT_PUBLIC_SPACES_URL || 'https://wwtrail-uploads.fra1.digitaloceanspaces.com';
-    const url = `${baseUrl}/uploads/${path.basename(processed.originalPath)}`;
-    const thumbnail = `${baseUrl}/uploads/${path.basename(processed.thumbnailPath)}`;
+    // Generate unique names
+    const ext = '.jpg'; // Sharp outputs JPEG
+    const baseName = path.basename(file.originalname, path.extname(file.originalname))
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .substring(0, 80);
+    const timestamp = Date.now();
+    const rand = Math.random().toString(36).substring(2, 8);
+    const originalKey = `uploads/photos/${baseName}-${timestamp}-${rand}${ext}`;
+    const thumbnailKey = `uploads/photos/${baseName}-${timestamp}-${rand}-thumb${ext}`;
 
-    // Crear registro en DB
+    let url: string;
+    let thumbnail: string;
+
+    if (isSpacesConfigured()) {
+      // Upload to DigitalOcean Spaces
+      url = await uploadToSpaces(processed.originalBuffer, originalKey, 'image/jpeg');
+      thumbnail = await uploadToSpaces(processed.thumbnailBuffer, thumbnailKey, 'image/jpeg');
+    } else {
+      // Fallback: save locally
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'photos');
+      fs.mkdirSync(uploadDir, { recursive: true });
+
+      const originalPath = path.join(uploadDir, `${baseName}-${timestamp}-${rand}${ext}`);
+      const thumbPath = path.join(uploadDir, `${baseName}-${timestamp}-${rand}-thumb${ext}`);
+      fs.writeFileSync(originalPath, processed.originalBuffer);
+      fs.writeFileSync(thumbPath, processed.thumbnailBuffer);
+
+      url = `/uploads/photos/${baseName}-${timestamp}-${rand}${ext}`;
+      thumbnail = `/uploads/photos/${baseName}-${timestamp}-${rand}-thumb${ext}`;
+    }
+
+    // Clean up temp upload file
+    if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+
+    // Create DB record
     const photo = await prisma.editionPhoto.create({
       data: {
         editionId,
@@ -119,7 +136,7 @@ export class EditionPhotoService {
         width: processed.width,
         height: processed.height,
         fileSize: processed.fileSize,
-        mimeType: file.mimetype,
+        mimeType: 'image/jpeg',
         sortOrder: metadata.sortOrder || 0,
         isFeatured: metadata.isFeatured || false,
       },
@@ -129,19 +146,17 @@ export class EditionPhotoService {
   }
 
   /**
-   * Obtener todas las fotos de una edición
+   * Get all photos for an edition
    */
   static async getByEdition(editionId: string) {
-    const photos = await prisma.editionPhoto.findMany({
+    return prisma.editionPhoto.findMany({
       where: { editionId },
       orderBy: [{ isFeatured: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
-
-    return photos;
   }
 
   /**
-   * Obtener una foto por ID
+   * Get photo by ID
    */
   static async getById(photoId: string) {
     const photo = await prisma.editionPhoto.findUnique({
@@ -179,10 +194,9 @@ export class EditionPhotoService {
   }
 
   /**
-   * Actualizar metadata de una foto
+   * Update photo metadata
    */
   static async updateMetadata(photoId: string, data: UpdatePhotoMetadataInput) {
-    // Verificar que la foto existe
     const existingPhoto = await prisma.editionPhoto.findUnique({
       where: { id: photoId },
     });
@@ -191,20 +205,16 @@ export class EditionPhotoService {
       throw new AppError('Photo not found', 404);
     }
 
-    // Actualizar metadata
-    const photo = await prisma.editionPhoto.update({
+    return prisma.editionPhoto.update({
       where: { id: photoId },
       data,
     });
-
-    return photo;
   }
 
   /**
-   * Eliminar una foto
+   * Delete a photo (from Spaces/filesystem and DB)
    */
   static async delete(photoId: string) {
-    // Obtener foto
     const photo = await prisma.editionPhoto.findUnique({
       where: { id: photoId },
     });
@@ -213,39 +223,39 @@ export class EditionPhotoService {
       throw new AppError('Photo not found', 404);
     }
 
-    // Eliminar archivos del filesystem
+    // Delete files
     try {
-      const urlPath = new URL(photo.url).pathname;
-      const filePath = path.join(__dirname, '../..', urlPath);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      if (isSpacesConfigured()) {
+        const key = getKeyFromUrl(photo.url);
+        if (key) await deleteFromSpaces(key);
+        if (photo.thumbnail) {
+          const thumbKey = getKeyFromUrl(photo.thumbnail);
+          if (thumbKey) await deleteFromSpaces(thumbKey);
+        }
+      } else {
+        // Local filesystem fallback
+        const urlPath = photo.url.startsWith('http') ? new URL(photo.url).pathname : photo.url;
+        const filePath = path.join(process.cwd(), 'public', urlPath);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
-      if (photo.thumbnail) {
-        const thumbnailPath = new URL(photo.thumbnail).pathname;
-        const thumbFilePath = path.join(__dirname, '../..', thumbnailPath);
-        if (fs.existsSync(thumbFilePath)) {
-          fs.unlinkSync(thumbFilePath);
+        if (photo.thumbnail) {
+          const thumbUrlPath = photo.thumbnail.startsWith('http') ? new URL(photo.thumbnail).pathname : photo.thumbnail;
+          const thumbFilePath = path.join(process.cwd(), 'public', thumbUrlPath);
+          if (fs.existsSync(thumbFilePath)) fs.unlinkSync(thumbFilePath);
         }
       }
     } catch (error) {
       console.error('Error deleting files:', error);
-      // Continuar aunque falle la eliminación de archivos
     }
 
-    // Eliminar de DB
-    await prisma.editionPhoto.delete({
-      where: { id: photoId },
-    });
-
+    await prisma.editionPhoto.delete({ where: { id: photoId } });
     return { message: 'Photo deleted successfully' };
   }
 
   /**
-   * Reordenar fotos
+   * Reorder photos
    */
   static async reorder(editionId: string, data: ReorderPhotosInput) {
-    // Verificar que la edición existe
     const edition = await prisma.edition.findUnique({
       where: { id: editionId },
     });
@@ -254,7 +264,6 @@ export class EditionPhotoService {
       throw new AppError('Edition not found', 404);
     }
 
-    // Actualizar orden de cada foto
     const updates = data.photoOrders.map((item) =>
       prisma.editionPhoto.update({
         where: { id: item.id },
@@ -263,9 +272,6 @@ export class EditionPhotoService {
     );
 
     await Promise.all(updates);
-
-    // Retornar fotos ordenadas
-    const photos = await this.getByEdition(editionId);
-    return photos;
+    return this.getByEdition(editionId);
   }
 }

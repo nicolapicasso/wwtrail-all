@@ -3,7 +3,7 @@ import { requireAuth, apiSuccess, apiError, ApiError } from '@/lib/auth';
 import prisma from '@/lib/db';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import sharp from 'sharp';
+import { uploadToSpaces, isSpacesConfigured } from '@/lib/services/spaces.client';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
@@ -41,18 +41,26 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Generate unique filename
-    const ext = path.extname(file.name);
-    const basename = path.basename(file.name, ext);
+    const ext = path.extname(file.name) || '.webp';
+    const basename = path.basename(file.name, ext)
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .substring(0, 80);
     const uniqueName = `${basename}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}${ext}`;
+    const spacesKey = `uploads/${fieldName}/${uniqueName}`;
 
-    // Save to public/uploads
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', fieldName);
-    await mkdir(uploadDir, { recursive: true });
-    const filePath = path.join(uploadDir, uniqueName);
-    await writeFile(filePath, buffer);
+    let url: string;
 
-    // Build URL
-    const url = `/uploads/${fieldName}/${uniqueName}`;
+    if (isSpacesConfigured()) {
+      // Upload to DigitalOcean Spaces
+      url = await uploadToSpaces(buffer, spacesKey, file.type);
+    } else {
+      // Fallback: save to local filesystem (dev mode)
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', fieldName);
+      await mkdir(uploadDir, { recursive: true });
+      const filePath = path.join(uploadDir, uniqueName);
+      await writeFile(filePath, buffer);
+      url = `/uploads/${fieldName}/${uniqueName}`;
+    }
 
     // Save to database
     const fileRecord = await prisma.file.create({
@@ -61,7 +69,7 @@ export async function POST(request: NextRequest) {
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
-        path: filePath,
+        path: spacesKey,
         url,
         uploaderId: user.id,
       },
