@@ -1406,29 +1406,25 @@ export class ImportService {
   private async updateNativeEntity(entityType: EntityType, item: any, existingId: string, _userId: string): Promise<any> {
     const model = this.getNativeModel(entityType);
 
-    // Remove fields that shouldn't be updated
-    const updateData = { ...item };
-    delete updateData.id;
-    delete updateData.createdAt;
-    delete updateData.updatedAt;
-    delete updateData.user;
-    delete updateData.organizer;
-    delete updateData.event;
-    delete updateData.competition;
-    delete updateData.competitions;
-    delete updateData.editions;
-    delete updateData.specialSeries;
-    delete updateData.terrainType;
-    delete updateData.category;
-    delete updateData.author;
-    delete updateData.tags;
-    delete updateData.images;
-    delete updateData._count;
-    delete updateData.latitude;
-    delete updateData.longitude;
-    delete updateData.location;
-    delete updateData.translations;
-    delete updateData.createdBy;
+    // Whitelist of scalar fields per entity type (no relations, no computed)
+    const scalarFields: Record<string, string[]> = {
+      events: ['name', 'slug', 'description', 'city', 'country', 'website', 'email', 'phone', 'logoUrl', 'coverImage', 'gallery', 'instagramUrl', 'facebookUrl', 'twitterUrl', 'youtubeUrl', 'status', 'featured', 'typicalMonth', 'firstEditionYear', 'organizerId'],
+      competitions: ['name', 'slug', 'description', 'type', 'baseDistance', 'baseElevation', 'logoUrl', 'coverImage', 'gallery', 'status', 'featured', 'eventId', 'terrainTypeId'],
+      editions: ['year', 'slug', 'name', 'description', 'startDate', 'endDate', 'status', 'distance', 'elevation', 'itra', 'utmb', 'maxParticipants', 'price', 'currency', 'registrationUrl', 'resultsUrl', 'competitionId'],
+      organizers: ['name', 'slug', 'description', 'country', 'website', 'instagramUrl', 'facebookUrl', 'twitterUrl', 'youtubeUrl', 'logoUrl', 'status', 'createdById'],
+      specialSeries: ['name', 'slug', 'description', 'country', 'website', 'instagramUrl', 'facebookUrl', 'twitterUrl', 'youtubeUrl', 'logoUrl', 'status', 'createdById'],
+      services: ['name', 'slug', 'description', 'city', 'country', 'website', 'email', 'phone', 'logoUrl', 'coverImage', 'gallery', 'instagramUrl', 'facebookUrl', 'twitterUrl', 'youtubeUrl', 'status', 'featured', 'categoryId', 'organizerId'],
+      posts: ['title', 'slug', 'content', 'excerpt', 'coverImage', 'gallery', 'status', 'language', 'authorId'],
+    };
+
+    const allowed = scalarFields[entityType] || [];
+    const updateData: Record<string, any> = {};
+
+    for (const field of allowed) {
+      if (item[field] !== undefined) {
+        updateData[field] = item[field];
+      }
+    }
 
     // Handle date fields
     if (updateData.startDate) updateData.startDate = new Date(updateData.startDate);
