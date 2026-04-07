@@ -7,6 +7,19 @@
 
 @layer base {
   :root {
+    /* Site-level CSS variables (defaults before SiteStylesProvider loads) */
+    --site-color-primary: #B5751A;
+    --site-color-secondary: #16A34A;
+    --site-color-accent: #B66916;
+    --site-color-bg: #FFFFFF;
+    --site-color-text: #000000;
+    --site-color-success: #28A745;
+    --site-color-danger: #DC3545;
+    --site-border-radius: 0px;
+    --site-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    --site-font-primary: 'Montserrat', sans-serif;
+    --site-font-secondary: 'Montserrat', sans-serif;
+
     /* WW Trail Running Brand Colors - Guía de Estilo */
     /* Convertidos a HSL para compatibilidad con shadcn/ui */
     --background: 0 0% 100%;           /* #FFFFFF - Blanco puro */

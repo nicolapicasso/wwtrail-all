@@ -47,12 +47,36 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Also scan SEO llmFaq JSON fields for ??
+    let seoCorrupted = 0;
+    try {
+      const seoRecords = await prisma.sEO.findMany({
+        where: { llmFaq: { not: null as any } },
+        select: { id: true, llmFaq: true },
+      });
+      for (const record of seoRecords) {
+        const json = JSON.stringify(record.llmFaq);
+        if (json.includes('??')) seoCorrupted++;
+      }
+      if (seoCorrupted > 0) results['seo.llmFaq'] = seoCorrupted;
+    } catch {}
+
+    // Scan SEO text fields
+    try {
+      for (const field of ['metaTitle', 'metaDescription']) {
+        const count = await prisma.sEO.count({
+          where: { [field]: { contains: '??' } },
+        });
+        if (count > 0) results[`seo.${field}`] = count;
+      }
+    } catch {}
+
     const total = Object.values(results).reduce((sum, n) => sum + n, 0);
 
     return apiSuccess({
       totalCorruptedRecords: total,
       details: results,
-      note: 'The ?? characters indicate data was imported with wrong encoding. Use POST /api/v2/admin/fix-encoding with a JSON export from the source database to fix, or re-import directly with correct UTF-8 encoding using pg_dump --encoding=UTF8.',
+      note: 'Use POST with { action: "auto-fix" } to attempt automatic repair, or { entity, data } to re-import from source.',
     });
   } catch (error) {
     return apiError(error);
@@ -61,18 +85,25 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/v2/admin/fix-encoding
- * Re-import text data from a properly encoded JSON export to fix ?? characters.
- * Body: { entity: 'events' | 'competitions' | ..., data: [...] }
- * Each item in data must have an 'id' field to match with existing records.
+ * Two modes:
+ * 1. { action: "auto-fix" } - Automatically strip ?? from all text fields
+ * 2. { entity, data: [...] } - Re-import from properly encoded source
  */
 export async function POST(request: NextRequest) {
   try {
     await requireRole(request, 'ADMIN');
     const body = await request.json();
+
+    // Mode 1: Automatic fix - strip ?? across all models
+    if (body.action === 'auto-fix') {
+      return await autoFixEncoding();
+    }
+
+    // Mode 2: Re-import from source
     const { entity, data } = body;
 
     if (!entity || !Array.isArray(data)) {
-      return apiSuccess({ error: 'Provide { entity: string, data: Array<{id, ...fields}> }' });
+      return apiSuccess({ error: 'Provide { action: "auto-fix" } or { entity: string, data: Array<{id, ...fields}> }' });
     }
 
     const prismaModel = (prisma as any)[entity];
@@ -80,7 +111,6 @@ export async function POST(request: NextRequest) {
       return apiSuccess({ error: `Unknown entity: ${entity}` });
     }
 
-    // Only update text fields, skip relations and dates
     const textFieldsMap: Record<string, string[]> = {
       event: ['name', 'description', 'city', 'country', 'region'],
       competition: ['name', 'description'],
@@ -141,4 +171,109 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return apiError(error);
   }
+}
+
+/**
+ * Auto-fix: strip/replace ?? patterns in all text fields
+ */
+async function autoFixEncoding() {
+  const modelsAndFields: Array<{ model: string; fields: string[] }> = [
+    { model: 'event', fields: ['name', 'description', 'city', 'country', 'region'] },
+    { model: 'competition', fields: ['name', 'description'] },
+    { model: 'edition', fields: ['name', 'description'] },
+    { model: 'organizer', fields: ['name', 'description', 'city', 'country'] },
+    { model: 'specialSeries', fields: ['name', 'description'] },
+    { model: 'service', fields: ['name', 'description', 'city', 'country'] },
+    { model: 'eventTranslation', fields: ['name', 'description'] },
+    { model: 'competitionTranslation', fields: ['name', 'description'] },
+    { model: 'specialSeriesTranslation', fields: ['name', 'description'] },
+  ];
+
+  const report: Record<string, number> = {};
+  let totalFixed = 0;
+
+  for (const { model, fields } of modelsAndFields) {
+    const prismaModel = (prisma as any)[model];
+    if (!prismaModel) continue;
+
+    for (const field of fields) {
+      try {
+        const records = await prismaModel.findMany({
+          where: { [field]: { contains: '??' } },
+          select: { id: true, [field]: true },
+        });
+
+        for (const record of records) {
+          const original = record[field] as string;
+          // Remove standalone ?? and clean up resulting spaces
+          const fixed = original
+            .replace(/\?\?/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+          if (fixed !== original) {
+            await prismaModel.update({
+              where: { id: record.id },
+              data: { [field]: fixed },
+            });
+            totalFixed++;
+          }
+        }
+
+        if (records.length > 0) {
+          report[`${model}.${field}`] = records.length;
+        }
+      } catch {}
+    }
+  }
+
+  // Fix SEO llmFaq JSON
+  let seoFixed = 0;
+  try {
+    const seoRecords = await prisma.sEO.findMany({
+      where: { llmFaq: { not: null as any } },
+      select: { id: true, llmFaq: true },
+    });
+
+    for (const record of seoRecords) {
+      const json = JSON.stringify(record.llmFaq);
+      if (json.includes('??')) {
+        const fixed = json.replace(/\?\?/g, '').replace(/\s{2,}/g, ' ');
+        await prisma.sEO.update({
+          where: { id: record.id },
+          data: { llmFaq: JSON.parse(fixed) },
+        });
+        seoFixed++;
+      }
+    }
+    if (seoFixed > 0) report['seo.llmFaq'] = seoFixed;
+  } catch {}
+
+  // Fix SEO text fields
+  try {
+    for (const field of ['metaTitle', 'metaDescription']) {
+      const records = await prisma.sEO.findMany({
+        where: { [field]: { contains: '??' } },
+        select: { id: true, [field]: true },
+      });
+      for (const record of records) {
+        const fixed = (record[field] as string).replace(/\?\?/g, '').replace(/\s{2,}/g, ' ').trim();
+        await prisma.sEO.update({
+          where: { id: record.id },
+          data: { [field]: fixed },
+        });
+      }
+      if (records.length > 0) report[`seo.${field}`] = records.length;
+      totalFixed += records.length;
+    }
+  } catch {}
+
+  totalFixed += seoFixed;
+
+  return apiSuccess({
+    action: 'auto-fix',
+    totalFixed,
+    details: report,
+    note: 'Stripped ?? characters from all affected text fields. Characters that were replaced by ?? during import are lost — re-import from source if original data is available.',
+  });
 }

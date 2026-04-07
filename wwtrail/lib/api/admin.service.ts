@@ -417,9 +417,13 @@ class AdminService {
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ users: User[]; pagination: UsersPagination }> {
     const { data } = await apiClientV2.get('/admin/users', { params });
+    // apiSuccess wraps as { success, data: { data: [...], pagination: {...} } }
+    const inner = data.data || data;
+    const users = inner.data || inner;
+    const pagination = inner.pagination || data.pagination;
     return {
-      users: data.data,
-      pagination: data.pagination,
+      users: Array.isArray(users) ? users : [],
+      pagination: pagination || { currentPage: 1, totalPages: 1, totalUsers: 0, hasNext: false, hasPrev: false },
     };
   }
 
@@ -549,9 +553,13 @@ class AdminService {
     };
   }> {
     const { data } = await apiClientV2.get('/admin/insiders');
+    // apiSuccess wraps as { success, data: { insiders: [...], stats: {...} } }
+    const inner = data.data || data;
+    const insiders = inner.insiders || [];
+    const stats = inner.stats || { total: 0, byCountry: {}, byGender: {} };
     return {
-      insiders: data.data,
-      stats: data.stats,
+      insiders: Array.isArray(insiders) ? insiders : [],
+      stats,
     };
   }
 

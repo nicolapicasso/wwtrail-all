@@ -23,8 +23,11 @@ class CatalogService<T> {
    * GET /api/v2/{endpoint}
    */
   async getAll(activeOnly: boolean = false): Promise<T[]> {
-    const response = await apiClientV2.get(`/${this.endpoint}`, {
-      params: { isActive: activeOnly ? 'true' : undefined },
+    const response = await apiClientV2.get(`/catalog`, {
+      params: {
+        type: this.endpoint,
+        isActive: activeOnly ? 'true' : undefined,
+      },
     });
     const inner = response.data.data;
     // Handle both flat arrays and paginated { data: [...], pagination } responses
