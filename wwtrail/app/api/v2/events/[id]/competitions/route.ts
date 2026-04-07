@@ -16,7 +16,7 @@ export async function GET(
         terrainType: { select: { id: true, name: true, slug: true } },
         _count: { select: { editions: true } },
       },
-      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      orderBy: [{ name: 'asc' }],
     });
 
     return apiSuccess(competitions);
