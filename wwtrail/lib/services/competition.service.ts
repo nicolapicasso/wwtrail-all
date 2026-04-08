@@ -245,6 +245,8 @@ export class CompetitionService {
             country: true,
             city: true,
             typicalMonth: true,
+            logoUrl: true,
+            coverImage: true,
           },
         },
         terrainType: {
