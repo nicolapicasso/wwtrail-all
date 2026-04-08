@@ -10,8 +10,19 @@ const SPACES_CDN = process.env.DO_SPACES_CDN || 'https://wwtrail-uploads.fra1.cd
 function toSpacesCdn(url: string): string {
   if (!url || typeof url !== 'string') return url;
 
-  // Already on Spaces CDN
+  // Already on correct Spaces CDN
   if (url.startsWith(SPACES_CDN)) return url;
+
+  // Wrong Spaces region (ams3 instead of fra1, or vice versa)
+  const spacesPattern = /^https:\/\/wwtrail-uploads\.[a-z0-9]+\.cdn\.digitaloceanspaces\.com/;
+  if (spacesPattern.test(url)) {
+    return url.replace(spacesPattern, SPACES_CDN);
+  }
+  // Also handle non-CDN Spaces URLs
+  const spacesOriginPattern = /^https:\/\/wwtrail-uploads\.[a-z0-9]+\.digitaloceanspaces\.com/;
+  if (spacesOriginPattern.test(url)) {
+    return url.replace(spacesOriginPattern, SPACES_CDN);
+  }
 
   // localhost:3001/uploads/... → CDN
   if (url.startsWith('http://localhost:3001/uploads/')) {
