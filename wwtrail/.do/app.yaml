@@ -130,13 +130,13 @@ services:
         type: SECRET
       - key: DO_SPACES_ENDPOINT
         scope: RUN_TIME
-        value: "https://ams3.digitaloceanspaces.com"
+        value: "https://fra1.digitaloceanspaces.com"
       - key: DO_SPACES_BUCKET
         scope: RUN_TIME
         value: "wwtrail-uploads"
       - key: DO_SPACES_CDN
         scope: RUN_TIME
-        value: "https://wwtrail-uploads.ams3.cdn.digitaloceanspaces.com"
+        value: "https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com"
 
 databases:
   - name: db
