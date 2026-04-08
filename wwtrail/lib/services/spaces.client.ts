@@ -6,7 +6,7 @@ import path from 'path';
 
 const endpoint = process.env.DO_SPACES_ENDPOINT || 'https://ams3.digitaloceanspaces.com';
 const bucket = process.env.DO_SPACES_BUCKET || 'wwtrail-uploads';
-const cdnUrl = process.env.DO_SPACES_CDN || 'https://wwtrail-uploads.ams3.cdn.digitaloceanspaces.com';
+const cdnUrl = process.env.DO_SPACES_CDN || 'https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com';
 
 const s3Client = new S3Client({
   endpoint,

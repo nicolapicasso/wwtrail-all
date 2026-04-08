@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 import prisma from '@/lib/db';
 
-const SPACES_CDN = process.env.DO_SPACES_CDN || 'https://wwtrail-uploads.ams3.cdn.digitaloceanspaces.com';
+const SPACES_CDN = process.env.DO_SPACES_CDN || 'https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com';
 
 /**
  * Convert any upload URL to the Spaces CDN URL

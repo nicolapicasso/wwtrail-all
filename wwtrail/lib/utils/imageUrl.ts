@@ -1,7 +1,7 @@
 // lib/utils/imageUrl.ts
 // Utilidades para normalizar URLs de imágenes
 
-const SPACES_URL = process.env.NEXT_PUBLIC_SPACES_URL || 'https://wwtrail-uploads.fra1.digitaloceanspaces.com';
+const SPACES_URL = process.env.NEXT_PUBLIC_SPACES_URL || 'https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com';
 
 /**
  * Normaliza una URL de imagen.
