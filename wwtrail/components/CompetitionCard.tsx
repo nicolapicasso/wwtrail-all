@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Competition } from '@/types/v2';
 import { Mountain, TrendingUp, Users, Calendar, MapPin, Star } from 'lucide-react';
+import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 const COUNTRY_FLAGS: { [key: string]: string } = {
   'ES': '🇪🇸', 'FR': '🇫🇷', 'IT': '🇮🇹', 'CH': '🇨🇭',
@@ -32,8 +33,8 @@ export function CompetitionCard({
   const [imageError, setImageError] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
-  const mainImage = competition.coverImage || (competition as any).event?.coverImage;
-  const logoImage = competition.logoUrl || (competition as any).event?.logoUrl;
+  const mainImage = normalizeImageUrl(competition.coverImage || (competition as any).event?.coverImage);
+  const logoImage = normalizeImageUrl(competition.logoUrl || (competition as any).event?.logoUrl);
 
   const renderImage = () => {
     if (mainImage && !imageError) {
