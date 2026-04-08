@@ -2,155 +2,159 @@ import { NextRequest } from 'next/server';
 import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 import prisma from '@/lib/db';
 
+const SPACES_CDN = process.env.DO_SPACES_CDN || 'https://wwtrail-uploads.ams3.cdn.digitaloceanspaces.com';
+
+/**
+ * Convert any upload URL to the Spaces CDN URL
+ */
+function toSpacesCdn(url: string): string {
+  if (!url || typeof url !== 'string') return url;
+
+  // Already on Spaces CDN
+  if (url.startsWith(SPACES_CDN)) return url;
+
+  // localhost:3001/uploads/... → CDN
+  if (url.startsWith('http://localhost:3001/uploads/')) {
+    return `${SPACES_CDN}${url.substring('http://localhost:3001'.length)}`;
+  }
+  if (url.startsWith('http://localhost:3000/uploads/')) {
+    return `${SPACES_CDN}${url.substring('http://localhost:3000'.length)}`;
+  }
+
+  // localhost:3001/... (non-uploads path)
+  if (url.startsWith('http://localhost:3001')) {
+    const path = url.substring('http://localhost:3001'.length);
+    return `${SPACES_CDN}${path}`;
+  }
+
+  // Production domain /uploads/... → CDN
+  if (url.includes('ondigitalocean.app/uploads/')) {
+    const idx = url.indexOf('/uploads/');
+    return `${SPACES_CDN}${url.substring(idx)}`;
+  }
+
+  // Relative /uploads/... → CDN
+  if (url.startsWith('/uploads/')) {
+    return `${SPACES_CDN}${url}`;
+  }
+
+  // Relative uploads/... (no slash) → CDN
+  if (url.startsWith('uploads/')) {
+    return `${SPACES_CDN}/${url}`;
+  }
+
+  return url;
+}
+
 /**
  * POST /api/v2/admin/fix-urls
- * Replace URL patterns in all image fields.
- * Body: { dryRun?: boolean, targetUrl?: string, sourceUrls?: string[] }
+ * Migrate all image URLs in the database to Spaces CDN.
+ * Body: { dryRun?: boolean }
  */
 export async function POST(request: NextRequest) {
   try {
     await requireRole(request, 'ADMIN');
     const body = await request.json().catch(() => ({}));
     const dryRun = body.dryRun ?? false;
-    const appUrl = body.targetUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://wwtrail-5agxm.ondigitalocean.app';
 
-    const oldPatterns = body.sourceUrls || ['http://localhost:3001', 'http://localhost:3000'];
     const results: Record<string, number> = {};
 
-    const fieldsToFix: Array<{ model: string; field: string }> = [
-      { model: 'user', field: 'avatar' },
-      { model: 'organizer', field: 'logoUrl' },
-      { model: 'event', field: 'logo' },
-      { model: 'event', field: 'coverImage' },
-      { model: 'event', field: 'logoUrl' },
-      { model: 'event', field: 'coverImageUrl' },
-      { model: 'competition', field: 'logoUrl' },
-      { model: 'competition', field: 'coverImage' },
-      { model: 'file', field: 'path' },
-      { model: 'file', field: 'url' },
-      { model: 'specialSeries', field: 'logoUrl' },
-      { model: 'editionPhoto', field: 'url' },
-      { model: 'editionPhoto', field: 'thumbnail' },
-      { model: 'homeConfiguration', field: 'heroImage' },
-      { model: 'service', field: 'logoUrl' },
-      { model: 'service', field: 'coverImage' },
+    // Scalar URL fields
+    const scalarFields: Array<{ model: string; fields: string[] }> = [
+      { model: 'event', fields: ['logoUrl', 'coverImage'] },
+      { model: 'competition', fields: ['logoUrl', 'coverImage'] },
+      { model: 'edition', fields: ['logoUrl', 'coverImage'] },
+      { model: 'organizer', fields: ['logoUrl'] },
+      { model: 'specialSeries', fields: ['logoUrl'] },
+      { model: 'service', fields: ['logoUrl', 'coverImage'] },
+      { model: 'user', fields: ['avatar'] },
+      { model: 'file', fields: ['url'] },
+      { model: 'editionPhoto', fields: ['url', 'thumbnail'] },
+      { model: 'post', fields: ['coverImage'] },
+      { model: 'homeConfiguration', fields: ['heroImage'] },
     ];
 
-    for (const { model, field } of fieldsToFix) {
-      for (const oldPattern of oldPatterns) {
-        try {
-          const prismaModel = (prisma as any)[model];
-          if (!prismaModel) continue;
+    for (const { model, fields } of scalarFields) {
+      const prismaModel = (prisma as any)[model];
+      if (!prismaModel) continue;
 
+      for (const field of fields) {
+        try {
           const records = await prismaModel.findMany({
-            where: { [field]: { startsWith: oldPattern } },
+            where: { [field]: { not: null } },
             select: { id: true, [field]: true },
           });
 
-          if (records.length > 0) {
-            const key = `${model}.${field}`;
-            results[key] = (results[key] || 0) + records.length;
+          for (const record of records) {
+            const oldUrl = record[field] as string;
+            if (!oldUrl) continue;
+            const newUrl = toSpacesCdn(oldUrl);
 
-            if (!dryRun) {
-              for (const record of records) {
-                const oldValue = record[field] as string;
-                const newValue = oldValue.replace(oldPattern, appUrl);
+            if (newUrl !== oldUrl) {
+              if (!dryRun) {
                 await prismaModel.update({
                   where: { id: record.id },
-                  data: { [field]: newValue },
+                  data: { [field]: newUrl },
                 });
               }
+              const key = `${model}.${field}`;
+              results[key] = (results[key] || 0) + 1;
             }
           }
-        } catch (e: any) {
-          // Skip fields that don't exist in this schema version
-        }
+        } catch {}
       }
     }
 
-    // Handle heroImages JSON array in HomeConfiguration
-    try {
-      const homeConfigs = await prisma.homeConfiguration.findMany({
-        select: { id: true, heroImages: true },
-      });
-      for (const config of homeConfigs) {
-        if (Array.isArray(config.heroImages)) {
-          const images = config.heroImages as string[];
-          const hasLocalhost = images.some((img: string) =>
-            typeof img === 'string' && oldPatterns.some(p => img.startsWith(p))
-          );
-          if (hasLocalhost) {
-            results['homeConfiguration.heroImages'] = (results['homeConfiguration.heroImages'] || 0) + 1;
-            if (!dryRun) {
-              const fixed = images.map((img: string) => {
-                if (typeof img !== 'string') return img;
-                let result = img;
-                for (const p of oldPatterns) {
-                  result = result.replace(p, appUrl);
-                }
-                return result;
-              });
-              await prisma.homeConfiguration.update({
-                where: { id: config.id },
-                data: { heroImages: fixed },
-              });
-            }
-          }
-        }
-      }
-    } catch (e: any) {
-      // Skip if homeConfiguration doesn't have heroImages
-    }
+    // Array URL fields (gallery, heroImages)
+    const arrayFields: Array<{ model: string; field: string }> = [
+      { model: 'event', field: 'gallery' },
+      { model: 'competition', field: 'gallery' },
+      { model: 'service', field: 'gallery' },
+      { model: 'post', field: 'gallery' },
+      { model: 'homeConfiguration', field: 'heroImages' },
+    ];
 
-    const totalFixed = Object.values(results).reduce((sum, n) => sum + n, 0);
+    for (const { model, field } of arrayFields) {
+      const prismaModel = (prisma as any)[model];
+      if (!prismaModel) continue;
 
-    // Handle String[] gallery fields across models
-    const galleryModels = ['event', 'competition', 'edition', 'service', 'promotion', 'organizer'];
-    for (const model of galleryModels) {
       try {
-        const prismaModel = (prisma as any)[model];
-        if (!prismaModel) continue;
-
         const records = await prismaModel.findMany({
-          select: { id: true, gallery: true },
+          select: { id: true, [field]: true },
         });
 
         for (const record of records) {
-          if (!Array.isArray(record.gallery) || record.gallery.length === 0) continue;
-          const urls = record.gallery as string[];
-          const hasMatch = urls.some((url: string) =>
-            typeof url === 'string' && oldPatterns.some(p => url.includes(p))
-          );
-          if (hasMatch) {
-            const key = `${model}.gallery`;
-            results[key] = (results[key] || 0) + 1;
+          const arr = record[field];
+          if (!Array.isArray(arr) || arr.length === 0) continue;
+
+          let changed = false;
+          const newArr = arr.map((url: string) => {
+            if (typeof url !== 'string') return url;
+            const newUrl = toSpacesCdn(url);
+            if (newUrl !== url) changed = true;
+            return newUrl;
+          });
+
+          if (changed) {
             if (!dryRun) {
-              const fixed = urls.map((url: string) => {
-                if (typeof url !== 'string') return url;
-                let result = url;
-                for (const p of oldPatterns) {
-                  result = result.split(p).join(appUrl);
-                }
-                return result;
-              });
               await prismaModel.update({
                 where: { id: record.id },
-                data: { gallery: fixed },
+                data: { [field]: field === 'heroImages' ? newArr : newArr },
               });
             }
+            const key = `${model}.${field}`;
+            results[key] = (results[key] || 0) + 1;
           }
         }
-      } catch (e: any) {
-        // Skip models without gallery field
-      }
+      } catch {}
     }
 
-    const totalFixedFinal = Object.values(results).reduce((sum, n) => sum + n, 0);
+    const total = Object.values(results).reduce((sum, n) => sum + n, 0);
 
     return apiSuccess({
       dryRun,
-      targetUrl: appUrl,
-      totalRecordsFixed: totalFixedFinal,
+      spacesCdn: SPACES_CDN,
+      totalRecordsFixed: total,
       details: results,
     });
   } catch (error) {
