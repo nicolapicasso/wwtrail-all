@@ -1,16 +1,31 @@
 // lib/utils/imageUrl.ts
-// Utilidades para normalizar URLs de imágenes
+// Utilidades para normalizar URLs de imágenes.
+//
+// Importante: la reescritura de rutas /uploads/* hacia el CDN de Spaces solo
+// ocurre cuando el almacenamiento en Spaces está EXPLÍCITAMENTE activo, vía
+// NEXT_PUBLIC_STORAGE_TYPE === 'spaces'. Así el cliente coincide con el backend
+// (que sube a Spaces solo cuando isSpacesConfigured()). Si Spaces no está
+// activo, las rutas /uploads/* se sirven desde el mismo origen (disco de la
+// app), que es donde realmente están los archivos.
 
 const SPACES_URL = process.env.NEXT_PUBLIC_SPACES_URL || 'https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com';
+const USE_SPACES = process.env.NEXT_PUBLIC_STORAGE_TYPE === 'spaces';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
+
+const LOCALHOST_PATTERNS = ['http://localhost:3001', 'http://localhost:3000'];
+
+/** Resuelve una ruta /uploads/... al backend correcto (Spaces o mismo origen). */
+function resolveUploadPath(path: string): string {
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return USE_SPACES ? `${SPACES_URL}${p}` : `${APP_URL}${p}`;
+}
 
 /**
  * Normaliza una URL de imagen.
- * Si la URL ya es absoluta (http/https), la devuelve sin cambios.
- * Si es relativa y empieza con /uploads, apunta al CDN de Spaces.
- * Si es relativa, le agrega el dominio de la app.
+ * - URLs absolutas (http/https) se devuelven tal cual.
+ * - Rutas /uploads/... apuntan a Spaces (si está activo) o al mismo origen.
+ * - Otras rutas relativas usan la URL base de la app.
  */
-const LOCALHOST_PATTERNS = ['http://localhost:3001', 'http://localhost:3000'];
-
 export function normalizeImageUrl(url: string | undefined | null): string {
   if (!url) return '';
 
@@ -19,10 +34,9 @@ export function normalizeImageUrl(url: string | undefined | null): string {
     if (url.startsWith(pattern)) {
       const relativePath = url.substring(pattern.length);
       if (relativePath.startsWith('/uploads/')) {
-        return `${SPACES_URL}${relativePath}`;
+        return resolveUploadPath(relativePath);
       }
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-      return `${baseUrl}${relativePath}`;
+      return `${APP_URL}${relativePath}`;
     }
   }
 
@@ -31,20 +45,18 @@ export function normalizeImageUrl(url: string | undefined | null): string {
     return url;
   }
 
-  // Si es una ruta de uploads, apuntar al CDN de Spaces
+  // Si es una ruta de uploads, resolver según el backend de almacenamiento
   if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
-    const path = url.startsWith('/') ? url : `/${url}`;
-    return `${SPACES_URL}${path}`;
+    return resolveUploadPath(url);
   }
 
   // Si es relativa, usar la URL base de la app (same-origin)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-  return `${baseUrl}${url.startsWith('/') ? url : '/' + url}`;
+  return `${APP_URL}${url.startsWith('/') ? url : '/' + url}`;
 }
 
 /**
  * Normaliza un array de URLs de imágenes
  */
 export function normalizeImageUrls(urls: (string | undefined | null)[]): string[] {
-  return urls.map(normalizeImageUrl).filter(url => url !== '');
+  return urls.map(normalizeImageUrl).filter((url) => url !== '');
 }
