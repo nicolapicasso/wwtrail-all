@@ -1,4 +1,8 @@
 // types/event.ts - Event types for API v2
+//
+// Source of truth: the Prisma `Event` model + the shape the API actually
+// returns (apiSuccess wraps payloads in { success, data }; PostGIS enrichment
+// injects flat `latitude`/`longitude`). Field names mirror Prisma.
 
 /**
  * Event Status
@@ -35,73 +39,144 @@ export enum Language {
 }
 
 /**
+ * Organizer entity reference (the real organizing club/society).
+ * This is the `Organizer` relation — NOT the user who created the event.
+ */
+export interface EventOrganizerRef {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string | null;
+}
+
+/**
+ * Event creator/manager reference (a `User` with permissions over the event).
+ * This is the `user` relation (relation "EventCreator") — distinct from the
+ * `organizer` entity above. Historically these were both called "organizer",
+ * which caused the type to never line up with the data.
+ */
+export interface EventCreatorRef {
+  id: string;
+  username: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+}
+
+/**
+ * Nested competition summary returned on event detail endpoints.
+ */
+export interface EventCompetitionSummary {
+  id: string;
+  slug: string;
+  name: string;
+  baseDistance?: number | null;
+  baseElevation?: number | null;
+  status?: EventStatus;
+  displayOrder?: number;
+  _count?: {
+    editions?: number;
+  };
+}
+
+/**
  * Event - Permanent event entity
  * Example: "UTMB Mont Blanc"
+ *
+ * Mirrors the Prisma `Event` model plus the API's flat lat/lon enrichment.
+ * Relations (`organizer`, `user`, `competitions`, `translations`, `_count`)
+ * are optional because different endpoints include different subsets.
  */
 export interface Event {
   id: string;
   slug: string;
   name: string;
-  description?: string;
+  description?: string | null;
+  language: Language;
+
+  // Location — the API returns flat coordinates (PostGIS), not a nested object.
   country: string;
   city: string;
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
+  latitude?: number | null;
+  longitude?: number | null;
 
-    // Imágenes del evento
-  imageUrl?: string;       // Imagen principal del evento (800x600 recomendado)
-  logoUrl?: string;        // Logo del evento (400x400 recomendado)
-  coverImage?: string;     // Imagen hero/banner (1920x600 recomendado)
-  coverImageUrl?: string;  // ✅ URL del cover (nuevo campo)
-  thumbnailUrl?: string;   // Miniatura para listados (200x200 recomendado)
-  
-  websiteUrl?: string;
-  facebookUrl?: string;
-  instagramUrl?: string;
-  email?: string;
-  phone?: string;
-  status: EventStatus;
-  isActive: boolean;
-  isHighlighted: boolean;
-  viewCount: number;
-  firstEditionYear?: number;
-  originalLanguage: Language;
+  // Contact / links
+  website?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  twitterUrl?: string | null;
+  youtubeUrl?: string | null;
 
-  // User who created the event
+  // Images
+  logo?: string | null;
+  logoUrl?: string | null;
+  coverImage?: string | null;
+  coverImageUrl?: string | null;
+  gallery: string[]; // Prisma String[]: always present (defaults to [])
+
+  // Ownership
   userId: string;
+  organizerId?: string | null;
 
-  // Optional organizer entity (club/society)
-  organizerId?: string;
-  organizer?: {
-    id: string;
-    name: string;
-    slug: string;
-    logoUrl?: string;
-  };
+  // Status & temporal
+  status: EventStatus;
+  typicalMonth?: number | null;
+  firstEditionYear: number;
+
+  // Classification (FASE 1 fields)
+  competitionTypeId?: string | null;
+  terrainTypeId?: string | null;
+  itraPoints?: number | null;
+  utmbPoints?: number | null;
+
+  // Metrics
+  viewCount: number;
+  featured: boolean;
 
   createdAt: string;
   updatedAt: string;
 
+  // Relations (endpoint-dependent)
+  organizer?: EventOrganizerRef | null;
+  user?: EventCreatorRef | null;
+  competitions?: EventCompetitionSummary[];
+  translations?: EventTranslation[];
   _count?: {
     competitions?: number;
     editions?: number;
     reviews?: number;
+    translations?: number;
   };
+
+  // getMyEvents adds these for non-admins
+  isOwner?: boolean;
+  isManager?: boolean;
 }
 
 /**
- * Event with organizer info
+ * Event with its creator/manager user guaranteed present.
+ * (Formerly `EventWithOrganizer`, which mislabeled the creator as the organizer.)
  */
-export interface EventWithOrganizer extends Event {
-  organizer: {
-    id: string;
-    username: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-  };
+export interface EventWithCreator extends Event {
+  user: EventCreatorRef;
+}
+
+/**
+ * Event as seen in management/moderation UIs.
+ *
+ * NOTE: `adminNotes`, `rejectionReason`, `isFeatured` and the `REJECTED` status
+ * are NOT backed by the current Prisma schema (EventStatus is DRAFT/PUBLISHED/
+ * CANCELLED; there is no moderation model yet). They are typed as optional here
+ * so the management views compile honestly; they will only ever be populated
+ * once/if a moderation feature is added on the backend.
+ */
+export interface ManagedEvent extends Event {
+  status: EventStatus | 'REJECTED';
+  isFeatured?: boolean;
+  adminNotes?: string | null;
+  rejectionReason?: string | null;
 }
 
 /**
@@ -109,34 +184,24 @@ export interface EventWithOrganizer extends Event {
  */
 export interface EventWithCounts extends Event {
   _count: {
-    competitions: number;
-    translations: number;
+    competitions?: number;
+    translations?: number;
+    editions?: number;
+    reviews?: number;
   };
 }
 
 /**
  * Event with full details (for detail page)
  */
-export interface EventDetail extends EventWithOrganizer {
-  competitions: Array<{
-    id: string;
-    slug: string;
-    name: string;
-    type: CompetitionType;
-    baseDistance?: number;
-    baseElevation?: number;
-    isActive: boolean;
-    displayOrder: number;
-  }>;
-  translations: Array<{
-    id: string;
-    language: Language;
-    name: string;
-    description?: string;
-  }>;
+export interface EventDetail extends Event {
+  organizer?: EventOrganizerRef | null;
+  user?: EventCreatorRef | null;
+  competitions: EventCompetitionSummary[];
+  translations: EventTranslation[];
   _count: {
-    competitions: number;
-    translations: number;
+    competitions?: number;
+    translations?: number;
   };
 }
 
@@ -148,7 +213,7 @@ export interface EventTranslation {
   eventId: string;
   language: Language;
   name: string;
-  description?: string;
+  description?: string | null;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW';
   createdAt: string;
   updatedAt: string;
@@ -197,21 +262,24 @@ export interface CreateEventInput {
   latitude?: number;
   longitude?: number;
 
-// Imágenes
-  imageUrl?: string;
+  // Images
+  logo?: string;
   logoUrl?: string;
   coverImage?: string;
-  thumbnailUrl?: string;
-  coverImageUrl?: string;  // ✅ Nuevo campo
+  coverImageUrl?: string;
+  gallery?: string[];
 
-  websiteUrl?: string;
+  website?: string;
   facebookUrl?: string;
   instagramUrl?: string;
+  twitterUrl?: string;
+  youtubeUrl?: string;
   email?: string;
   phone?: string;
+  typicalMonth?: number;
   firstEditionYear?: number;
-  isHighlighted?: boolean;
-  originalLanguage?: Language;
+  featured?: boolean;
+  language?: Language;
 }
 
 /**
@@ -224,22 +292,24 @@ export interface UpdateEventInput {
   city?: string;
   latitude?: number;
   longitude?: number;
-  
-  // Imágenes
-  imageUrl?: string;
+
+  // Images
+  logo?: string;
   logoUrl?: string;
   coverImage?: string;
-  thumbnailUrl?: string;
-  coverImageUrl?: string;  // ✅ Nuevo campo
+  coverImageUrl?: string;
+  gallery?: string[];
 
-  websiteUrl?: string;
+  website?: string;
   facebookUrl?: string;
   instagramUrl?: string;
+  twitterUrl?: string;
+  youtubeUrl?: string;
   email?: string;
   phone?: string;
   status?: EventStatus;
-  isActive?: boolean;
-  isHighlighted?: boolean;
+  typicalMonth?: number;
+  featured?: boolean;
 }
 
 /**
@@ -250,8 +320,11 @@ export interface EventFilters {
   limit?: number;
   search?: string;
   country?: string;
+  city?: string;
   status?: EventStatus;
-  isHighlighted?: boolean;
+  featured?: boolean;
+  typicalMonth?: number;
+  organizerId?: string;
   language?: Language;
   sortBy?: 'name' | 'createdAt' | 'viewCount' | 'firstEditionYear';
   sortOrder?: 'asc' | 'desc';
@@ -268,6 +341,29 @@ export interface EventListResponse {
     total: number;
     pages: number;
   };
+}
+
+/**
+ * API response envelopes (apiSuccess wraps data in { success, data }).
+ */
+export type EventsResponse = EventListResponse; // list endpoints unwrap to { data, pagination }
+export interface EventResponse {
+  success: boolean;
+  data: Event;
+}
+export interface EventStatsResponse {
+  success: boolean;
+  data: EventStats;
+}
+
+/**
+ * Write payloads (aliases of the input types for the API client).
+ */
+export type CreateEventData = CreateEventInput;
+export type UpdateEventData = UpdateEventInput;
+export interface RejectEventData {
+  reason?: string;
+  adminNotes?: string;
 }
 
 /**

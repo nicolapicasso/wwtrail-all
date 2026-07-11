@@ -8,7 +8,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import CompetitionForm from '@/components/forms/CompetitionForm';
 import eventsService from '@/lib/api/v2/events.service';
-import type { Event } from '@/types/api';
+import type { Event } from '@/types/event';
 
 function NewCompetitionContent() {
   const router = useRouter();

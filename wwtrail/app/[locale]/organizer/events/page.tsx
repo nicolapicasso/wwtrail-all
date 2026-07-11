@@ -9,7 +9,7 @@ import EventCard from '@/components/EventCard';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import eventsService from '@/lib/api/v2/events.service';
-import { Event, EventStatus, EventStats as EventStatsType } from '@/lib/types/event';
+import { Event, EventStatus, EventStats as EventStatsType } from '@/types/event';
 import { useAuth } from '@/hooks/useAuth';
 
 type ViewMode = 'list' | 'grid';

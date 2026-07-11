@@ -15,7 +15,7 @@ import { AddParticipationButton } from '@/components/AddParticipationButton';
 import { AdminEditButtonFloating } from '@/components/AdminEditButton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Event } from '@/types/api';
+import { Event } from '@/types/event';
 import { Service } from '@/types/v2';
 
 // ============================================================================

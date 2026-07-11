@@ -10,7 +10,7 @@ import dynamic from 'next/dynamic';
 import { servicesService } from '@/lib/api/v2';
 import { eventsService } from '@/lib/api/events.service';
 import { Service } from '@/types/v2';
-import { Event } from '@/types/api';
+import { Event } from '@/types/event';
 import { MapPin, ArrowLeft, Eye, Tag, Star, Loader2, ExternalLink } from 'lucide-react';
 import EventGallery from '@/components/EventGallery';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';

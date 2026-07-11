@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
+import { EventStatus } from '@/types/event';
 import 'leaflet/dist/leaflet.css';
 import eventsService from '@/lib/api/v2/events.service';
 import competitionsService from '@/lib/api/v2/competitions.service';
@@ -143,7 +144,7 @@ export function MapBlock({ config }: MapBlockProps) {
       if (config.showEvents) {
         try {
           const eventsData = await eventsService.getAll({
-            status: 'PUBLISHED',
+            status: EventStatus.PUBLISHED,
             limit: 500,
           });
 

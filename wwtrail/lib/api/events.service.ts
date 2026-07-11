@@ -4,7 +4,7 @@
  * ✅ FIX: Agregado soporte para parámetro featured
  */
 import { apiClientV1, apiClientV2 } from './client';
-import { Event } from '@/types/api';
+import { Event } from '@/types/event';
 
 // ============================================================================
 // 📦 TIPOS - V1 específicos
@@ -25,9 +25,8 @@ export interface EventsResponseV1 {
 }
 
 export interface EventResponseV1 {
-  data: {
-    event: Event;
-  };
+  // The real API returns { success, data: Event }; getById/getBySlug unwrap `data`.
+  data: Event;
 }
 
 export interface EventFilters {
@@ -151,4 +150,3 @@ export const eventsService = {
   }
 };
 
-export type { EventsResponseV1, EventResponseV1, EventFilters };
