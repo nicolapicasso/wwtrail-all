@@ -1704,3 +1704,33 @@ model SiteConfig {
 
   @@map("site_config")
 }
+
+// Saved theme presets — a named snapshot of typography, colors and borders/shadows
+// that an admin can load into the SiteConfig later. Built-in presets live in code
+// (lib/theme/presets.ts); this table only stores user-created ones.
+model ThemePreset {
+  id   String @id @default(uuid())
+  name String @unique @db.VarChar(80)
+
+  // Typography
+  fontPrimary   String @default("Montserrat") @db.VarChar(100)
+  fontSecondary String @default("sans-serif") @db.VarChar(100)
+
+  // Colors
+  colorPrimary    String @default("#B5751A") @db.VarChar(20)
+  colorSecondary  String @default("#16A34A") @db.VarChar(20)
+  colorAccent     String @default("#B66916") @db.VarChar(20)
+  colorBackground String @default("#FFFFFF") @db.VarChar(20)
+  colorText       String @default("#333333") @db.VarChar(20)
+  colorSuccess    String @default("#28A745") @db.VarChar(20)
+  colorDanger     String @default("#DC3545") @db.VarChar(20)
+
+  // Borders & Shadows
+  borderRadius String @default("0") @db.VarChar(10)
+  shadowStyle  String @default("subtle") @db.VarChar(20)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("theme_preset")
+}

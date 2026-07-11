@@ -205,18 +205,18 @@ export default function EventFilters({
   const hasActiveFilters = searchValue || selectedCountry || selectedCity || selectedMonth || selectedStatus !== 'ALL' || selectedOrganizer || selectedHighlighted !== 'all';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+    <div className="rounded-lg border border-border bg-surface p-4 shadow-card">
       {/* Search Bar */}
       <div className="flex flex-col md:flex-row gap-4">
         {/* ✅ CRÍTICO: Input controlado desde fuera - NO deshabilitado durante carga para evitar pérdida de foco */}
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-faint" />
           <input
             type="text"
             placeholder="Buscar eventos por nombre o ubicación..."
             value={searchValue}  // ✅ Valor controlado
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
+            className="w-full rounded-md border border-border py-2 pl-10 pr-10 text-[15px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
           />
           {searchValue && (
             <button
@@ -237,7 +237,7 @@ export default function EventFilters({
           <Filter className="h-5 w-5" />
           Filtros
           {hasActiveFilters && (
-            <span className="bg-[#B66916] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="bg-green-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
               {[searchValue, selectedCountry, selectedCity, selectedMonth, selectedHighlighted !== 'all'].filter(Boolean).length}
             </span>
           )}

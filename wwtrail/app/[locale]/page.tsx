@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { homeService } from '@/lib/api/home.service';
 import { HeroSection } from '@/components/home/HeroSection';
 import { HomeBlockRenderer } from '@/components/home/HomeBlockRenderer';
+import { ValueProps } from '@/components/home/ValueProps';
+import { MapBand } from '@/components/home/MapBand';
 import type { HomeConfiguration } from '@/types/home';
 
 export default function HomePage() {
@@ -31,10 +33,10 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Cargando...</p>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-brand border-t-transparent" />
+          <p className="text-text-muted">Cargando...</p>
         </div>
       </div>
     );
@@ -42,10 +44,10 @@ export default function HomePage() {
 
   if (error || !config) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center max-w-md px-4">
-          <h1 className="text-2xl font-bold text-red-600 mb-2">Error</h1>
-          <p className="text-gray-600">{error || 'No se pudo cargar la configuración'}</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="max-w-md px-4 text-center">
+          <h1 className="mb-2 text-2xl font-bold text-destructive">Error</h1>
+          <p className="text-text-muted">{error || 'No se pudo cargar la configuración'}</p>
         </div>
       </div>
     );
@@ -54,34 +56,35 @@ export default function HomePage() {
   // Ordenar bloques por order
   const sortedBlocks = [...config.blocks].sort((a, b) => a.order - b.order);
 
-  // Debug: Log configuration
-  console.log('Home Config:', config);
-  console.log('Sorted Blocks:', sortedBlocks);
-
   // Obtener imágenes del hero: usar heroImages si existe, sino heroImage como fallback
   const heroImages = config.heroImages || (config.heroImage ? [config.heroImage] : []);
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Hero Section con Slider */}
+    <main className="min-h-screen">
+      {/* Hero */}
       <HeroSection
         images={heroImages}
         title={config.heroTitle}
         subtitle={config.heroSubtitle}
       />
 
-      {/* Bloques dinámicos */}
+      {/* Fixed section: value propositions */}
+      <ValueProps />
+
+      {/* Admin-configurable content blocks */}
       <div className="relative">
-        {sortedBlocks.map((block) => {
-          console.log('Rendering block:', block.id, block.type, 'visible:', block.visible, 'config:', block.config);
-          return <HomeBlockRenderer key={block.id} block={block} />;
-        })}
+        {sortedBlocks.map((block) => (
+          <HomeBlockRenderer key={block.id} block={block} />
+        ))}
       </div>
 
-      {/* Fallback si no hay bloques */}
+      {/* Fixed section: map band */}
+      <MapBand />
+
+      {/* Fallback when no blocks are configured */}
       {sortedBlocks.length === 0 && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <p className="text-gray-500">
+        <div className="mx-auto max-w-content px-6 py-16 text-center sm:px-8">
+          <p className="text-text-muted">
             La home está en configuración. Pronto habrá contenido aquí.
           </p>
         </div>

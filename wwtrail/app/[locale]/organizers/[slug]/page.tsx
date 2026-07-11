@@ -45,8 +45,8 @@ export default function OrganizerDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando organizador...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-green-brand mx-auto mb-4" />
+          <p className="text-text-muted">Cargando organizador...</p>
         </div>
       </div>
     );
@@ -58,10 +58,10 @@ export default function OrganizerDetailPage() {
         <div className="text-center">
           <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Organizador no encontrado</h2>
-          <p className="text-gray-600 mb-4">{error || 'Este organizador no existe'}</p>
+          <p className="text-text-muted mb-4">{error || 'Este organizador no existe'}</p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700"
+            className="inline-flex items-center gap-2 text-green-brand hover:text-green-brand"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
@@ -72,37 +72,42 @@ export default function OrganizerDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-green-600 py-16">
-        <div className="absolute inset-0 bg-black/20"></div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            {/* Logo */}
-            {organizer.logoUrl && (
-              <div className="flex-shrink-0">
-                <div className="relative w-32 h-32 bg-white rounded-full p-4 shadow-lg">
+    <div className="min-h-screen">
+      {/* Banner */}
+      <div
+        className="relative overflow-hidden py-16"
+        style={{ background: 'linear-gradient(105deg, #173f6e 0%, #1f7a4d 100%)' }}
+      >
+        <div className="ww-topo--light absolute inset-0 opacity-60" aria-hidden />
+        <div className="relative z-10 mx-auto max-w-content px-6 sm:px-8 lg:px-10">
+          <div className="flex flex-col items-center gap-8 md:flex-row">
+            {/* Avatar (logo or initials) */}
+            <div className="shrink-0">
+              {organizer.logoUrl ? (
+                <div className="relative h-[132px] w-[132px] overflow-hidden rounded-full border-4 border-white/80 bg-surface shadow-floating">
                   <Image
                     src={normalizeImageUrl(organizer.logoUrl)}
                     alt={`${organizer.name} logo`}
                     fill
-                    className="object-contain p-2"
+                    className="object-contain p-3"
                   />
                 </div>
-              </div>
-            )}
+              ) : (
+                <span className="flex h-[132px] w-[132px] items-center justify-center rounded-full border-4 border-white/80 bg-white/15 font-stat text-[48px] font-bold text-white">
+                  {(organizer.name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase()}
+                </span>
+              )}
+            </div>
 
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
-              <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
-                <Building2 className="h-6 w-6 text-white" />
-                <span className="text-white/90 text-sm font-medium">Organizador</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+              <span className="mb-3 inline-flex items-center gap-1.5 rounded-pill bg-white/15 px-3 py-1 text-[12px] font-bold uppercase tracking-wide text-white">
+                <Building2 className="h-3.5 w-3.5" /> Organizador
+              </span>
+              <h1 className="text-[36px] font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-[48px]">
                 {organizer.name}
               </h1>
-              <div className="flex items-center gap-2 text-white/90 justify-center md:justify-start">
+              <div className="mt-2 flex items-center justify-center gap-2 text-[14px] font-semibold text-white/85 md:justify-start">
                 <MapPin className="h-4 w-4" />
                 <span>{organizer.country}</span>
               </div>
@@ -112,15 +117,15 @@ export default function OrganizerDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid gap-8 lg:grid-cols-3">
+      <div className="mx-auto max-w-content px-6 py-10 sm:px-8 lg:px-10">
+        <div className="grid grid-cols-1 items-start gap-7 lg:grid-cols-[1fr_360px]">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-8">
             {/* Description */}
             {organizer.description && (
-              <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold mb-4">Sobre el Organizador</h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+                <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">Sobre el Organizador</h2>
+                <p className="text-text-muted leading-relaxed whitespace-pre-wrap">
                   {organizer.description}
                 </p>
               </div>
@@ -128,9 +133,9 @@ export default function OrganizerDetailPage() {
 
             {/* Events */}
             {organizer.events && organizer.events.length > 0 && (
-              <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Calendar className="h-6 w-6 text-blue-600" />
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+                <h2 className="mb-4 flex items-center gap-2 text-[22px] font-black tracking-[-0.01em] text-ink-2">
+                  <Calendar className="h-6 w-6 text-green-brand" />
                   Eventos Organizados ({organizer.events.length})
                 </h2>
 
@@ -156,10 +161,10 @@ export default function OrganizerDetailPage() {
                           )}
 
                           <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-brand transition-colors">
                               {event.name}
                             </h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                            <div className="flex items-center gap-2 text-sm text-text-muted mt-1">
                               <MapPin className="h-4 w-4" />
                               {event.city}, {event.country}
                             </div>
@@ -170,7 +175,7 @@ export default function OrganizerDetailPage() {
                       {/* Competitions */}
                       {event.competitions && event.competitions.length > 0 && (
                         <div className="ml-20 mt-3 space-y-2">
-                          <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                          <p className="text-sm font-medium text-text-muted flex items-center gap-2">
                             <Trophy className="h-4 w-4 text-green-600" />
                             Competiciones ({event.competitions.length})
                           </p>
@@ -179,14 +184,14 @@ export default function OrganizerDetailPage() {
                               <Link
                                 key={competition.id}
                                 href={`/events/${event.slug}/${competition.slug}`}
-                                className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2 p-2 rounded hover:bg-blue-50"
+                                className="text-sm text-text-muted hover:text-green-brand transition-colors flex items-center gap-2 p-2 rounded hover:bg-[#fbfdfb]"
                               >
-                                <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                <span className="text-xs px-2 py-1 rounded bg-gray-100 text-text-muted font-medium">
                                   {competition.type}
                                 </span>
                                 <span>{competition.name}</span>
                                 {competition.baseDistance && (
-                                  <span className="text-xs text-gray-500">
+                                  <span className="text-xs text-text-faint">
                                     ({competition.baseDistance}km)
                                   </span>
                                 )}
@@ -205,7 +210,7 @@ export default function OrganizerDetailPage() {
             {(!organizer.events || organizer.events.length === 0) && (
               <div className="rounded-lg border border-dashed border-gray-300 bg-white p-12 text-center">
                 <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600">
+                <p className="text-text-muted">
                   Este organizador aún no tiene eventos publicados
                 </p>
               </div>
@@ -213,10 +218,10 @@ export default function OrganizerDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <aside className="space-y-6 lg:sticky lg:top-[130px]">
             {/* Contact & Social Media */}
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="font-bold text-lg mb-4">Contacto y Redes</h3>
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">Contacto y Redes</h3>
               <div className="space-y-3">
                 {/* Website */}
                 {organizer.website && (
@@ -224,7 +229,7 @@ export default function OrganizerDetailPage() {
                     href={organizer.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors"
+                    className="flex items-center gap-3 text-text-muted hover:text-green-brand transition-colors"
                   >
                     <Globe className="h-5 w-5 flex-shrink-0" />
                     <span className="text-sm truncate">Sitio Web</span>
@@ -237,7 +242,7 @@ export default function OrganizerDetailPage() {
                     href={organizer.instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-gray-700 hover:text-pink-600 transition-colors"
+                    className="flex items-center gap-3 text-text-muted hover:text-pink-600 transition-colors"
                   >
                     <Instagram className="h-5 w-5 flex-shrink-0" />
                     <span className="text-sm truncate">Instagram</span>
@@ -250,7 +255,7 @@ export default function OrganizerDetailPage() {
                     href={organizer.facebookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors"
+                    className="flex items-center gap-3 text-text-muted hover:text-green-brand transition-colors"
                   >
                     <Facebook className="h-5 w-5 flex-shrink-0" />
                     <span className="text-sm truncate">Facebook</span>
@@ -263,7 +268,7 @@ export default function OrganizerDetailPage() {
                     href={organizer.twitterUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-gray-700 hover:text-blue-400 transition-colors"
+                    className="flex items-center gap-3 text-text-muted hover:text-blue-400 transition-colors"
                   >
                     <Twitter className="h-5 w-5 flex-shrink-0" />
                     <span className="text-sm truncate">Twitter / X</span>
@@ -276,7 +281,7 @@ export default function OrganizerDetailPage() {
                     href={organizer.youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-gray-700 hover:text-red-600 transition-colors"
+                    className="flex items-center gap-3 text-text-muted hover:text-red-600 transition-colors"
                   >
                     <Youtube className="h-5 w-5 flex-shrink-0" />
                     <span className="text-sm truncate">YouTube</span>
@@ -286,7 +291,7 @@ export default function OrganizerDetailPage() {
                 {/* No contact info */}
                 {!organizer.website && !organizer.instagramUrl && !organizer.facebookUrl &&
                  !organizer.twitterUrl && !organizer.youtubeUrl && (
-                  <p className="text-sm text-gray-500 italic">
+                  <p className="text-sm text-text-faint italic">
                     No hay información de contacto disponible
                   </p>
                 )}
@@ -294,18 +299,18 @@ export default function OrganizerDetailPage() {
             </div>
 
             {/* Statistics */}
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="font-bold text-lg mb-4">Estadísticas</h3>
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">Estadísticas</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Eventos organizados:</span>
+                  <span className="text-sm text-text-muted">Eventos organizados:</span>
                   <span className="font-semibold text-gray-900">
                     {organizer._count?.events || 0}
                   </span>
                 </div>
                 {organizer.events && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Competiciones totales:</span>
+                    <span className="text-sm text-text-muted">Competiciones totales:</span>
                     <span className="font-semibold text-gray-900">
                       {organizer.events.reduce((total, event) =>
                         total + (event.competitions?.length || 0), 0
@@ -315,7 +320,7 @@ export default function OrganizerDetailPage() {
                 )}
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>

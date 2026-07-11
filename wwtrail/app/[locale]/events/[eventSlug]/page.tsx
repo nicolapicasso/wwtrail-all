@@ -26,6 +26,7 @@ import { RelatedArticles } from '@/components/RelatedArticles';
 import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 import { AdminEditButtonFloating } from '@/components/AdminEditButton';
+import { SaveEventButton } from '@/components/events/SaveEventButton';
 
 // ============================================================================
 // 📋 METADATA
@@ -128,77 +129,88 @@ export default async function EventDetailPage({
     notFound();
   }
 
+  const yearsOfHistory = event.firstEditionYear
+    ? 2026 - event.firstEditionYear + 1
+    : null;
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* ============================================================ */}
-      {/* 🖼️ HERO SECTION CON COVER IMAGE */}
+      {/* HERO */}
       {/* ============================================================ */}
-      <div className="relative h-96 bg-gradient-to-r from-blue-600 to-green-600">
+      <div className="relative h-[420px] bg-ink">
         {(event.coverImage || event.coverImageUrl) ? (
           <img
             src={normalizeImageUrl(event.coverImage || event.coverImageUrl)}
             alt={event.name}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
           />
-        ) : null}
-        <div className="absolute inset-0 bg-black/40"></div>
-        
-        {/* Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
-          <div className="container mx-auto">
-            <div className="flex items-end justify-between">
-              <div>
-                {/* Breadcrumbs */}
-                <div className="mb-4">
-                  <nav className="flex items-center gap-2 text-sm text-white/80">
-                    <Link href="/events" className="hover:text-white transition-colors">
-                      Eventos
-                    </Link>
-                    <span>/</span>
-                    <span className="text-white font-semibold">{event.name}</span>
-                  </nav>
-                </div>
+        ) : (
+          <div className="ww-topo absolute inset-0 opacity-70" aria-hidden />
+        )}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, rgba(15,19,21,.25) 30%, rgba(15,19,21,.9))' }}
+        />
 
-                {event.featured && (
-                  <div className="mb-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-semibold">
-                      <Trophy className="h-4 w-4 fill-white" />
-                      Featured
-                    </span>
-                  </div>
-                )}
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  {event.name}
-                </h1>
-                <div className="flex flex-wrap gap-4 text-white/90">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5" />
-                    <span>{event.city}, {event.country}</span>
-                  </div>
-                  {event.typicalMonth && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      <span>{getMonthName(event.typicalMonth)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+        {/* Title overlay */}
+        <div className="absolute inset-x-0 bottom-0">
+          <div className="mx-auto max-w-content px-6 pb-9 sm:px-8 lg:px-10">
+            {/* Breadcrumb */}
+            <nav className="mb-4 flex items-center gap-2 text-[13px] text-white/70">
+              <Link href="/events" className="hover:text-white">Eventos</Link>
+              <span>/</span>
+              <span className="font-semibold text-white">{event.name}</span>
+            </nav>
+
+            {event.featured && (
+              <span
+                className="mb-3 inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-[12px] font-extrabold uppercase tracking-wide text-white"
+                style={{ backgroundColor: '#f0a05a' }}
+              >
+                <Trophy className="h-3.5 w-3.5" /> Featured
+              </span>
+            )}
+
+            <h1 className="max-w-4xl text-[36px] font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-[52px]">
+              {event.name}
+            </h1>
+
+            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[14px] font-semibold text-white/85">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4" /> {event.city}, {event.country}
+              </span>
+              {event.typicalMonth && (
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4" /> {getMonthName(event.typicalMonth)}
+                </span>
+              )}
+              {event._count?.competitions ? (
+                <span className="flex items-center gap-1.5">
+                  <Trophy className="h-4 w-4" /> {event._count.competitions} competiciones
+                </span>
+              ) : null}
+              {yearsOfHistory && (
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" /> {yearsOfHistory} años de historia
+                </span>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-content px-6 py-10 sm:px-8 lg:px-10">
+        <div className="grid grid-cols-1 items-start gap-7 lg:grid-cols-[1fr_380px]">
           {/* ============================================================ */}
           {/* 📄 COLUMNA PRINCIPAL - Información detallada */}
           {/* ============================================================ */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6">
             
             {/* Descripción */}
             {event.description && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold mb-4">Sobre el Evento</h2>
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+                <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">Sobre el Evento</h2>
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {event.description}
                 </p>
@@ -212,9 +224,9 @@ export default async function EventDetailPage({
 />
             {/* Competiciones del Evento */}
             {event.competitions && event.competitions.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Trophy className="h-6 w-6 text-green-600" />
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+                <h2 className="mb-4 flex items-center gap-2 text-[22px] font-black tracking-[-0.01em] text-ink-2">
+                  <Trophy className="h-5 w-5 text-green-brand" />
                   Competiciones ({event.competitions.length})
                 </h2>
                 <div className="space-y-3">
@@ -222,19 +234,26 @@ export default async function EventDetailPage({
                     <Link
                       key={competition.id}
                       href={`/events/${event.slug}/${competition.slug}`}
-                      className="block p-4 border rounded-lg hover:border-green-600 hover:bg-green-50 transition-colors"
+                      className="flex items-center gap-4 rounded-md border border-border p-3 transition-colors hover:border-green-brand hover:bg-[#fbfdfb]"
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold text-lg">{competition.name}</h3>
-                          <p className="text-sm text-gray-600">
-                            {competition._count?.editions && competition._count.editions > 0
-                              ? `${competition._count.editions} ediciones`
-                              : 'Aún sin ediciones creadas'}
-                          </p>
-                        </div>
-                        <span className="text-green-600 font-semibold">→</span>
+                      {/* km chip */}
+                      <div className="flex h-14 w-16 shrink-0 flex-col items-center justify-center rounded-sm bg-surface-alt">
+                        <span className="font-stat text-[22px] font-bold leading-none text-ink-2">
+                          {competition.baseDistance ?? '—'}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-text-faint">
+                          km
+                        </span>
                       </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-[16px] font-extrabold text-ink-2">{competition.name}</h3>
+                        <p className="text-[13px] text-text-muted">
+                          {competition._count?.editions && competition._count.editions > 0
+                            ? `${competition._count.editions} ediciones`
+                            : 'Aún sin ediciones creadas'}
+                        </p>
+                      </div>
+                      <span className="text-green-brand">→</span>
                     </Link>
                   ))}
                 </div>
@@ -242,8 +261,8 @@ export default async function EventDetailPage({
             )}
 
             {/* Información Detallada */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-4">Información Detallada</h2>
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+              <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">Información Detallada</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoRow label="País" value={event.country} />
@@ -264,13 +283,16 @@ export default async function EventDetailPage({
           </div>
 
           {/* ============================================================ */}
-          {/* 📊 SIDEBAR DERECHO - Logo, Mapa, Contacto */}
+          {/* SIDEBAR (sticky) */}
           {/* ============================================================ */}
-          <div className="space-y-6">
-            
+          <aside className="space-y-6 lg:sticky lg:top-[88px]">
+
+            {/* CTA: guardar evento */}
+            <SaveEventButton eventId={event.id} />
+
             {/* ✅ LOGO DEL EVENTO */}
             {(event.logo || event.logoUrl) && (
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
                 <div className="flex justify-center">
                   <img
                     src={normalizeImageUrl(event.logo || event.logoUrl)}
@@ -288,9 +310,9 @@ export default async function EventDetailPage({
 
             {/* ✅ MAPA INTERACTIVO */}
             {event.latitude && event.longitude && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-green-600" />
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+                <h3 className="mb-4 flex items-center gap-2 text-[16px] font-black text-ink-2">
+                  <MapPin className="h-5 w-5 text-green-brand" />
                   Ubicación
                 </h3>
                 <EventMap
@@ -329,7 +351,7 @@ export default async function EventDetailPage({
                     href={`https://www.google.com/maps?q=${event.latitude},${event.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-[#B66916] hover:underline flex items-center gap-2"
+                    className="text-sm text-green-brand hover:underline flex items-center gap-2"
                   >
                     <MapPin className="h-4 w-4" />
                     Ver en Google Maps
@@ -339,8 +361,8 @@ export default async function EventDetailPage({
             )}
             
             {/* Estadísticas */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-bold text-lg mb-4">Estadísticas</h3>
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">Estadísticas</h3>
               <div className="space-y-3">
                 <StatItem
                   icon={<Eye className="h-5 w-5 text-gray-500" />}
@@ -365,8 +387,8 @@ export default async function EventDetailPage({
             </div>
 
             {/* ✅ CONTACTO Y REDES SOCIALES - ACTUALIZADO */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-bold text-lg mb-4">Contacto y Redes</h3>
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">Contacto y Redes</h3>
               <div className="space-y-3">
                 {/* Sitio Web */}
                 {event.website && (
@@ -374,7 +396,7 @@ export default async function EventDetailPage({
                     href={event.website}
                     icon={<Globe className="h-5 w-5" />}
                     label="Sitio Web"
-                    color="text-[#B66916]"
+                    color="text-green-brand"
                   />
                 )}
                 
@@ -451,8 +473,8 @@ export default async function EventDetailPage({
 
             {/* Eventos Similares */}
             {nearbyEvents && nearbyEvents.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="font-bold text-lg mb-4">
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+                <h3 className="mb-4 text-[16px] font-black text-ink-2">
                   Eventos Cercanos ({nearbyEvents.length})
                 </h3>
                 <div className="space-y-2">
@@ -460,7 +482,7 @@ export default async function EventDetailPage({
                     <Link
                       key={nearbyEvent.id}
                       href={`/events/${nearbyEvent.slug}`}
-                      className="block text-sm text-[#B66916] hover:text-[#8B4F12] hover:underline"
+                      className="block text-sm text-green-brand hover:text-green hover:underline"
                     >
                       → {nearbyEvent.name}
                     </Link>
@@ -468,7 +490,7 @@ export default async function EventDetailPage({
                 </div>
               </div>
             )}
-          </div>
+          </aside>
         </div>
 
         {/* Related Articles */}
@@ -495,9 +517,11 @@ export default async function EventDetailPage({
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="font-semibold text-gray-700 w-32">{label}:</div>
-      <div className="flex-1 text-gray-900">{value}</div>
+    <div className="rounded-md bg-surface-alt p-3">
+      <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-text-faint">
+        {label}
+      </div>
+      <div className="mt-0.5 text-[15px] font-semibold text-ink-2">{value}</div>
     </div>
   );
 }
@@ -505,11 +529,11 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function StatItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-gray-600">
+      <div className="flex items-center gap-2 text-text-muted">
         {icon}
-        <span className="text-sm">{label}</span>
+        <span className="text-[14px]">{label}</span>
       </div>
-      <span className="font-bold text-gray-900">{value}</span>
+      <span className="font-stat text-[20px] font-bold text-ink-2">{value}</span>
     </div>
   );
 }
@@ -518,7 +542,7 @@ function ContactLink({
   href,
   icon,
   label,
-  color = "text-[#B66916]"
+  color = "text-green-brand"
 }: {
   href: string;
   icon: React.ReactNode;
@@ -530,12 +554,12 @@ function ContactLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 text-gray-700 hover:text-[#B66916] transition-colors group"
+      className="group flex items-center gap-3 text-text-muted transition-colors hover:text-green-brand"
     >
-      <div className={`${color} group-hover:scale-110 transition-transform`}>
+      <div className={`${color} transition-transform group-hover:scale-110`}>
         {icon}
       </div>
-      <span className="text-sm group-hover:underline">{label}</span>
+      <span className="text-[14px] group-hover:underline">{label}</span>
     </a>
   );
 }

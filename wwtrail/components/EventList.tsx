@@ -7,12 +7,10 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useEvents } from '@/hooks/useEvents';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutGrid, Rows3 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// ============================================================================
-// ✅ IMPORTS CORREGIDOS - Usando default exports
-// ============================================================================
-import EventCard from './EventCard';
+import { PublicEventCard } from './public/EventCard';
 import EventFilters from './EventFilters';
 
 // ============================================================================
@@ -55,6 +53,7 @@ export function EventList({
 }: EventListProps) {
   const [page, setPage] = useState(initialPage);
   const [limitState] = useState(customLimit || initialLimit);
+  const [view, setView] = useState<'grid' | 'list'>(viewMode);
 
   // ✅ SOLUCIÓN: Separar searchQuery (input) de filters (API query)
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,112 +223,123 @@ export function EventList({
       )}
 
       {/* ============================================================ */}
-      {/* 📊 CONTADOR DE RESULTADOS */}
+      {/* TOOLBAR: título + contador + segmented Grid/Lista */}
       {/* ============================================================ */}
-      {pagination && !loading && !featuredOnly && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Showing <span className="font-medium">{events?.length || 0}</span> of{' '}
-            <span className="font-medium">{pagination.total}</span> events
-          </p>
-          {pagination.pages > 1 && (
-            <p className="text-sm text-muted-foreground">
-              Page {pagination.page} of {pagination.pages}
-            </p>
-          )}
+      {!featuredOnly && (
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-[22px] font-black tracking-[-0.01em] text-ink-2">
+              Todos los eventos
+            </h2>
+            {pagination && !loading && (
+              <p className="mt-1 text-[13px] text-text-muted">
+                Mostrando <span className="font-semibold text-ink-2">{events?.length || 0}</span> de{' '}
+                <span className="font-semibold text-ink-2">{pagination.total}</span>
+                {pagination.pages > 1 && (
+                  <> · página {pagination.page} de {pagination.pages}</>
+                )}
+              </p>
+            )}
+          </div>
+
+          {/* Segmented control */}
+          <div className="flex rounded-md bg-[#e7e5dd] p-1">
+            {([
+              { key: 'grid', Icon: LayoutGrid, label: 'Grid' },
+              { key: 'list', Icon: Rows3, label: 'Lista' },
+            ] as const).map(({ key, Icon, label }) => (
+              <button
+                key={key}
+                onClick={() => setView(key)}
+                aria-pressed={view === key}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[13px] font-bold transition-colors',
+                  view === key
+                    ? 'bg-surface text-ink-2 shadow-card'
+                    : 'text-text-muted hover:text-ink-2'
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* ============================================================ */}
-      {/* ⚠ ERROR STATE */}
-      {/* ============================================================ */}
+      {/* ERROR STATE */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-800">Error loading events: {error}</p>
+        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+          <p className="text-sm text-destructive">Error al cargar eventos: {error}</p>
         </div>
       )}
 
-      {/* ============================================================ */}
-      {/* 🎴 GRID/LIST DE EVENTOS */}
-      {/* ============================================================ */}
+      {/* GRID / LISTA */}
       <div
         className={
-          viewMode === 'grid'
+          view === 'grid'
             ? featuredOnly
-              ? 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6'
-              : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-            : 'flex flex-col gap-4'
+              ? 'grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-5'
+              : 'grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3'
+            : 'flex flex-col gap-5'
         }
       >
         {loading && events.length === 0 ? (
-          // Loading skeleton
           Array.from({ length: limitState }).map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="bg-gray-200 h-48 rounded-t-lg"></div>
-              <div className="bg-white p-4 rounded-b-lg">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div key={i} className="overflow-hidden rounded-lg border border-border bg-surface">
+              <div className="h-[180px] animate-pulse bg-surface-alt" />
+              <div className="space-y-2 p-[18px]">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-surface-alt" />
+                <div className="h-12 animate-pulse rounded bg-surface-alt" />
               </div>
             </div>
           ))
         ) : events && events.length > 0 ? (
           events.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              showStats={!simplified}
-              managementMode={false}
-              simplified={simplified}
-            />
+            <PublicEventCard key={event.id} event={event} viewMode={view} />
           ))
         ) : (
-          // Empty state
-          <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500 text-lg">
+          <div className="col-span-full rounded-lg border border-border bg-surface py-16 text-center">
+            <p className="text-[15px] text-text-muted">
               {filters.search || filters.country || filters.month
-                ? 'No events match your filters'
-                : 'No events found'}
+                ? 'Ningún evento coincide con los filtros'
+                : 'No se encontraron eventos'}
             </p>
           </div>
         )}
       </div>
 
-      {/* ============================================================ */}
-      {/* 📄 PAGINACIÓN - NO mostrar si featuredOnly */}
-      {/* ============================================================ */}
+      {/* PAGINACIÓN */}
       {pagination && pagination.pages > 1 && !loading && !featuredOnly && (
-        <div className="flex items-center justify-center gap-2">
-          {/* Previous button */}
+        <div className="flex items-center justify-center gap-2 pt-2">
           <button
             onClick={handlePreviousPage}
             disabled={page === 1}
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
-            aria-label="Previous page"
+            className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-surface text-ink-2 transition-colors hover:border-green-brand disabled:pointer-events-none disabled:opacity-40"
+            aria-label="Página anterior"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
 
-          {/* Page numbers */}
           {getPageNumbers().map((pageNum, index) => {
             if (pageNum === '...') {
               return (
-                <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
-                  ...
+                <span key={`ellipsis-${index}`} className="px-1 text-text-faint">
+                  …
                 </span>
               );
             }
-
             const isActive = pageNum === page;
             return (
               <button
                 key={pageNum}
                 onClick={() => handlePageClick(pageNum as number)}
-                className={`flex h-9 w-9 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-sm border text-[14px] font-stat font-bold transition-colors',
                   isActive
-                    ? 'border-green-600 bg-green-600 text-white'
-                    : 'border-input bg-background hover:bg-accent hover:text-accent-foreground'
-                }`}
-                aria-label={`Go to page ${pageNum}`}
+                    ? 'border-green-brand bg-green-brand text-white'
+                    : 'border-border bg-surface text-ink-2 hover:border-green-brand'
+                )}
                 aria-current={isActive ? 'page' : undefined}
               >
                 {pageNum}
@@ -337,12 +347,11 @@ export function EventList({
             );
           })}
 
-          {/* Next button */}
           <button
             onClick={handleNextPage}
             disabled={page === pagination.pages}
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
-            aria-label="Next page"
+            className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-surface text-ink-2 transition-colors hover:border-green-brand disabled:pointer-events-none disabled:opacity-40"
+            aria-label="Página siguiente"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -391,29 +400,24 @@ export function EventListSimple({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
       {loading ? (
         Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="bg-gray-200 h-48 rounded-t-lg"></div>
-            <div className="bg-white p-4 rounded-b-lg">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div key={i} className="overflow-hidden rounded-lg border border-border bg-surface">
+            <div className="h-[180px] animate-pulse bg-surface-alt" />
+            <div className="space-y-2 p-[18px]">
+              <div className="h-4 w-3/4 animate-pulse rounded bg-surface-alt" />
+              <div className="h-12 animate-pulse rounded bg-surface-alt" />
             </div>
           </div>
         ))
       ) : events && events.length > 0 ? (
         events.map((event) => (
-          <EventCard 
-            key={event.id} 
-            event={event}
-            showStats={true}
-            managementMode={false}
-          />
+          <PublicEventCard key={event.id} event={event} />
         ))
       ) : (
-        <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 text-lg">No events found</p>
+        <div className="col-span-full rounded-lg border border-border bg-surface py-16 text-center">
+          <p className="text-[15px] text-text-muted">No se encontraron eventos</p>
         </div>
       )}
     </div>

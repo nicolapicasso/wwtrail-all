@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { ArticleCard } from '@/components/ArticleCard';
 import postsService from '@/lib/api/v2/posts.service';
 import type { PostListItem } from '@/types/v2';
@@ -44,13 +44,13 @@ export function PostsBlock({ config }: PostsBlockProps) {
 
   if (loading) {
     return (
-      <div className="w-full bg-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="w-full px-6 py-16 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-content">
           <div className="flex items-center justify-center py-12">
-            <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-brand border-t-transparent" />
           </div>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -59,43 +59,40 @@ export function PostsBlock({ config }: PostsBlockProps) {
   }
 
   return (
-    <div className="w-full bg-white py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full px-6 py-16 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-content">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <BookOpen className="w-8 h-8 text-green-600" />
+            <h2 className="text-[28px] font-black tracking-[-0.02em] text-ink-2">
               {title || DEFAULT_TITLE}
             </h2>
             {(subtitle || (!title && DEFAULT_SUBTITLE)) && (
-              <p className="text-gray-600 mt-2">{subtitle || DEFAULT_SUBTITLE}</p>
+              <p className="mt-1.5 text-[15px] text-text-muted">{subtitle || DEFAULT_SUBTITLE}</p>
             )}
           </div>
           <Link
             href="/magazine"
-            className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition-colors"
+            className="flex shrink-0 items-center gap-1.5 text-[14px] font-extrabold text-green-brand hover:underline"
           >
             Ver todos
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        {/* Contenido */}
-        {viewType === HomeBlockViewType.CARDS ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <ArticleCard key={post.id} article={post} />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {posts.map((post) => (
-              <ArticleCard key={post.id} article={post} />
-            ))}
-          </div>
-        )}
+        {/* Content */}
+        <div
+          className={
+            viewType === HomeBlockViewType.CARDS
+              ? 'grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3'
+              : 'flex flex-col gap-4'
+          }
+        >
+          {posts.map((post) => (
+            <ArticleCard key={post.id} article={post} />
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

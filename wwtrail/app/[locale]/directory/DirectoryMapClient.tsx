@@ -291,7 +291,7 @@ export default function DirectoryMapClient() {
                     <strong>Lugar:</strong> ${event.city}, ${event.country}
                   </p>
                   <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
-                    <a href="/events/${event.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
+                    <a href="/events/${event.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#1f7a4d'" onmouseout="this.style.color='#000'">
                       Ver evento →
                     </a>
                   </div>
@@ -426,9 +426,9 @@ export default function DirectoryMapClient() {
                   </p>
                   ${comp.baseDistance ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Distancia:</strong> ${comp.baseDistance} km</p>` : ''}
                   ${comp.baseElevation ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Desnivel +:</strong> ${comp.baseElevation}m+</p>` : ''}
-                  ${comp.specialSeries ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Special series:</strong> <a href="/special-series/${comp.specialSeries.slug}" style="color: #000; text-decoration: underline;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">${comp.specialSeries.name}</a></p>` : ''}
+                  ${comp.specialSeries ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>Special series:</strong> <a href="/special-series/${comp.specialSeries.slug}" style="color: #000; text-decoration: underline;" onmouseover="this.style.color='#1f7a4d'" onmouseout="this.style.color='#000'">${comp.specialSeries.name}</a></p>` : ''}
                   <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
-                    <a href="/events/${comp.event.slug}/${comp.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
+                    <a href="/events/${comp.event.slug}/${comp.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#1f7a4d'" onmouseout="this.style.color='#000'">
                       Ver competición →
                     </a>
                   </div>
@@ -494,7 +494,7 @@ export default function DirectoryMapClient() {
                     ${service.city}, ${service.country}
                   </p>
                   <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
-                    <a href="/services/${service.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#B66916'" onmouseout="this.style.color='#000'">
+                    <a href="/services/${service.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#1f7a4d'" onmouseout="this.style.color='#000'">
                       Ver →
                     </a>
                   </div>
@@ -534,7 +534,7 @@ export default function DirectoryMapClient() {
       className: 'custom-marker-event',
       html: `
         <div style="
-          background-color: #10b981;
+          background-color: #1f7a4d;
           width: 36px;
           height: 36px;
           border-radius: 50% 50% 50% 0;
@@ -559,7 +559,7 @@ export default function DirectoryMapClient() {
       className: 'custom-marker-competition',
       html: `
         <div style="
-          background-color: #3b82f6;
+          background-color: #173f6e;
           width: 36px;
           height: 36px;
           border-radius: 50% 50% 50% 0;
@@ -585,7 +585,7 @@ export default function DirectoryMapClient() {
       className: 'custom-marker-service',
       html: `
         <div style="
-          background-color: #f97316;
+          background-color: #d1631f;
           width: 36px;
           height: 36px;
           border-radius: 50% 50% 50% 0;
@@ -643,43 +643,43 @@ export default function DirectoryMapClient() {
     <div className="flex h-screen overflow-hidden">
       {/* Filters Sidebar - Collapsible */}
       <div
-        className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
-          showFilters ? 'w-80' : 'w-0'
+        className={`bg-surface border-r border-hairline flex flex-col transition-all duration-300 ${
+          showFilters ? 'w-[340px]' : 'w-0'
         }`}
       >
         {showFilters && (
-          <div className="flex flex-col h-full min-w-[320px]">
+          <div className="flex flex-col h-full min-w-[340px]">
             {/* Sidebar Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center justify-between px-5 py-4 border-b border-hairline flex-shrink-0">
+              <h2 className="text-[17px] font-black tracking-[-0.01em] text-ink-2 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-green-brand" />
                 Filtros
               </h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={clearFilters}
-                  className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                  className="text-[12px] font-semibold text-green-brand hover:underline flex items-center gap-1"
                 >
                   <X className="w-3 h-3" />
                   Limpiar
                 </button>
                 <button
                   onClick={() => setShowFilters(false)}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  className="p-1 hover:bg-surface-alt rounded-sm transition-colors"
                   title="Ocultar filtros"
                 >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                  <ChevronLeft className="w-5 h-5 text-text-muted" />
                 </button>
               </div>
             </div>
 
             {/* Scrollable Filter Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
 
               {/* Item Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo de item
+                <label className="block text-[12px] font-bold uppercase tracking-wide text-text-faint mb-2">
+                  Tipo de ítem
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
@@ -691,10 +691,10 @@ export default function DirectoryMapClient() {
                     <button
                       key={value}
                       onClick={() => handleFilterChange('itemType', value)}
-                      className={`p-2 rounded-lg border text-sm flex items-center gap-2 justify-center transition-colors ${
+                      className={`p-2 rounded-md border text-[13px] font-semibold flex items-center gap-2 justify-center transition-colors ${
                         filters.itemType === value
-                          ? 'bg-blue-50 border-blue-600 text-blue-600'
-                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          ? 'bg-green-tint-bg border-green-tint-border text-green-brand'
+                          : 'border-border text-text-muted hover:border-green-brand'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -706,24 +706,24 @@ export default function DirectoryMapClient() {
 
               {/* Search */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-[12px] font-bold uppercase tracking-wide text-text-faint mb-1.5">
                   Buscar
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-faint" />
                   <input
                     type="text"
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
                     placeholder="Nombre..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full pl-10 pr-4 py-2 border border-border rounded-md outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30 text-[14px]"
                   />
                 </div>
               </div>
 
               {/* Country */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-[12px] font-bold uppercase tracking-wide text-text-faint mb-1.5">
                   País
                 </label>
                 <CountrySelect
@@ -737,7 +737,7 @@ export default function DirectoryMapClient() {
 
               {/* Distance Range */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-[12px] font-bold uppercase tracking-wide text-text-faint mb-1.5">
                   Distancia (km)
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -747,7 +747,7 @@ export default function DirectoryMapClient() {
                     onChange={(e) => handleFilterChange('minDistance', e.target.value)}
                     placeholder="Desde"
                     min="0"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-border rounded-md outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30 text-[14px]"
                   />
                   <input
                     type="number"
@@ -755,14 +755,14 @@ export default function DirectoryMapClient() {
                     onChange={(e) => handleFilterChange('maxDistance', e.target.value)}
                     placeholder="Hasta"
                     min="0"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-border rounded-md outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30 text-[14px]"
                   />
                 </div>
               </div>
 
               {/* Elevation Range */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-[12px] font-bold uppercase tracking-wide text-text-faint mb-1.5">
                   Desnivel positivo (m)
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -772,7 +772,7 @@ export default function DirectoryMapClient() {
                     onChange={(e) => handleFilterChange('minElevation', e.target.value)}
                     placeholder="Desde"
                     min="0"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-border rounded-md outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30 text-[14px]"
                   />
                   <input
                     type="number"
@@ -780,38 +780,39 @@ export default function DirectoryMapClient() {
                     onChange={(e) => handleFilterChange('maxElevation', e.target.value)}
                     placeholder="Hasta"
                     min="0"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-border rounded-md outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30 text-[14px]"
                   />
                 </div>
               </div>
 
               {/* Terrain Types (Multiple) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-[12px] font-bold uppercase tracking-wide text-text-faint mb-1.5">
                   Tipos de terreno
                 </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                <div className="space-y-1 max-h-48 overflow-y-auto border border-border rounded-md p-2">
                   {terrainTypes.length === 0 ? (
-                    <p className="text-xs text-gray-500 p-2">No hay tipos de terreno disponibles</p>
+                    <p className="text-[12px] text-text-faint p-2">No hay tipos de terreno disponibles</p>
                   ) : (
                     terrainTypes.map((type) => (
                       <label
                         key={type.id}
-                        className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                        className="flex items-center gap-2 cursor-pointer hover:bg-surface-alt p-2 rounded-sm"
                       >
                         <input
                           type="checkbox"
                           checked={filters.terrainTypeIds.includes(type.id)}
                           onChange={() => handleTerrainTypeToggle(type.id)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          className="w-4 h-4 accent-green-brand border-border rounded focus:ring-green-brand"
+                          style={{ accentColor: '#1f7a4d' }}
                         />
-                        <span className="text-sm text-gray-700">{type.name}</span>
+                        <span className="text-[14px] text-text-muted">{type.name}</span>
                       </label>
                     ))
                   )}
                 </div>
                 {filters.terrainTypeIds.length > 0 && (
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-[12px] font-semibold text-green-brand mt-1">
                     {filters.terrainTypeIds.length} seleccionado(s)
                   </p>
                 )}
@@ -819,14 +820,14 @@ export default function DirectoryMapClient() {
 
               {/* Special Series */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
+                <label className="text-[12px] font-bold uppercase tracking-wide text-text-faint mb-1.5 flex items-center gap-1">
+                  <Sparkles className="w-4 h-4 text-orange-strong" />
                   Serie especial
                 </label>
                 <select
                   value={filters.specialSeriesId}
                   onChange={(e) => handleFilterChange('specialSeriesId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-border rounded-md outline-none focus:border-green-brand focus:ring-2 focus:ring-green-brand/30 text-[14px] bg-surface"
                 >
                   <option value="">Todas las series</option>
                   {specialSeriesList.map((series) => (
@@ -838,10 +839,10 @@ export default function DirectoryMapClient() {
               </div>
 
               {/* Results count */}
-              <div className="pt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Resultados:</span>
-                  <span className="font-semibold text-gray-900">
+              <div className="pt-4 border-t border-hairline">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-text-muted">Resultados:</span>
+                  <span className="font-stat text-[20px] font-bold text-ink-2">
                     {events.length + competitions.length + services.length}
                   </span>
                 </div>
@@ -860,11 +861,11 @@ export default function DirectoryMapClient() {
             {!showFilters && (
               <button
                 onClick={() => setShowFilters(true)}
-                className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                className="bg-surface px-3 py-2 rounded-md shadow-floating border border-hairline hover:border-green-brand transition-colors flex items-center gap-2"
                 title="Mostrar filtros"
               >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Filtros</span>
+                <ChevronRight className="w-5 h-5 text-text-muted" />
+                <span className="text-[13px] font-semibold text-ink-2">Filtros</span>
               </button>
             )}
           </div>
@@ -873,20 +874,20 @@ export default function DirectoryMapClient() {
           <div className="pointer-events-auto relative">
             <button
               onClick={() => setShowMapModeMenu(!showMapModeMenu)}
-              className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
+              className="bg-surface px-3 py-2 rounded-md shadow-floating border border-hairline hover:border-green-brand transition-colors flex items-center gap-2"
               title="Cambiar tipo de mapa"
             >
-              <Layers className="w-5 h-5 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">{MAP_TILES[mapMode].name}</span>
+              <Layers className="w-5 h-5 text-text-muted" />
+              <span className="text-[13px] font-semibold text-ink-2">{MAP_TILES[mapMode].name}</span>
             </button>
 
             {/* Map Mode Dropdown */}
             {showMapModeMenu && (
-              <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden min-w-[140px]">
+              <div className="absolute top-full right-0 mt-2 bg-surface rounded-md shadow-floating border border-hairline overflow-hidden min-w-[150px]">
                 <button
                   onClick={() => changeMapMode('street')}
-                  className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
-                    mapMode === 'street' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                  className={`w-full px-4 py-2.5 text-left text-[13px] font-semibold flex items-center gap-2 hover:bg-surface-alt ${
+                    mapMode === 'street' ? 'bg-green-tint-bg text-green-brand' : 'text-text-muted'
                   }`}
                 >
                   <MapIcon className="w-4 h-4" />
@@ -894,8 +895,8 @@ export default function DirectoryMapClient() {
                 </button>
                 <button
                   onClick={() => changeMapMode('satellite')}
-                  className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
-                    mapMode === 'satellite' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                  className={`w-full px-4 py-2.5 text-left text-[13px] font-semibold flex items-center gap-2 hover:bg-surface-alt ${
+                    mapMode === 'satellite' ? 'bg-green-tint-bg text-green-brand' : 'text-text-muted'
                   }`}
                 >
                   <Satellite className="w-4 h-4" />
@@ -903,8 +904,8 @@ export default function DirectoryMapClient() {
                 </button>
                 <button
                   onClick={() => changeMapMode('terrain')}
-                  className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 ${
-                    mapMode === 'terrain' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                  className={`w-full px-4 py-2.5 text-left text-[13px] font-semibold flex items-center gap-2 hover:bg-surface-alt ${
+                    mapMode === 'terrain' ? 'bg-green-tint-bg text-green-brand' : 'text-text-muted'
                   }`}
                 >
                   <MountainSnow className="w-4 h-4" />
@@ -915,12 +916,34 @@ export default function DirectoryMapClient() {
           </div>
         </div>
 
+        {/* Floating legend card */}
+        <div className="absolute bottom-6 left-4 z-[1001] rounded-lg border border-hairline bg-surface/95 px-4 py-3 shadow-floating backdrop-blur-sm">
+          <p className="mb-2 font-stat text-[18px] font-bold leading-none text-ink-2">
+            {events.length + competitions.length + services.length}
+            <span className="ml-1.5 font-sans text-[12px] font-semibold text-text-muted">en el mapa</span>
+          </p>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-[12px] text-text-muted">
+              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: '#1f7a4d' }} />
+              Eventos
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-text-muted">
+              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: '#173f6e' }} />
+              Competiciones
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-text-muted">
+              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: '#d1631f' }} />
+              Servicios
+            </div>
+          </div>
+        </div>
+
         {/* Loading overlay */}
         {isLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+          <div className="absolute inset-0 bg-paper/70 flex items-center justify-center z-10">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Cargando datos...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-brand mx-auto mb-4"></div>
+              <p className="text-text-muted">Cargando datos...</p>
             </div>
           </div>
         )}
