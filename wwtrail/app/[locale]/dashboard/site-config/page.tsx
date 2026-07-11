@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import {
   Settings, Save, Loader2, Key, Palette, Type, Square,
-  Sun, Upload, Eye, EyeOff, Check
+  Sun, Upload, Eye, EyeOff, Check, Bookmark, Trash2, Plus, Sparkles
 } from 'lucide-react';
 import { apiClientV2 } from '@/lib/api/client';
 import { uploadFile } from '@/lib/api/files.service';
+import { THEME_FIELDS, type ThemePreset } from '@/lib/theme/presets';
 
 interface SiteConfig {
   id: string;
@@ -61,9 +62,69 @@ export default function SiteConfigPage() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
 
+  // Theme presets
+  const [presets, setPresets] = useState<ThemePreset[]>([]);
+  const [newPresetName, setNewPresetName] = useState('');
+  const [savingPreset, setSavingPreset] = useState(false);
+  const [presetMsg, setPresetMsg] = useState<string | null>(null);
+
   useEffect(() => {
     fetchConfig();
+    fetchPresets();
   }, []);
+
+  const fetchPresets = async () => {
+    try {
+      const res = await apiClientV2.get('/admin/theme-presets');
+      setPresets(res.data?.data || res.data || []);
+    } catch {
+      // Non-critical: presets just won't show
+    }
+  };
+
+  // Load a preset's values into the form (does not persist until "Guardar").
+  const applyPreset = (preset: ThemePreset) => {
+    if (!config) return;
+    const patch: Partial<SiteConfig> = {};
+    THEME_FIELDS.forEach((field) => {
+      patch[field] = preset[field];
+    });
+    setConfig({ ...config, ...patch });
+    setPresetMsg(`Preset "${preset.name}" cargado — pulsa Guardar para aplicarlo`);
+    setTimeout(() => setPresetMsg(null), 5000);
+  };
+
+  const saveCurrentAsPreset = async () => {
+    if (!config || !newPresetName.trim()) return;
+    try {
+      setSavingPreset(true);
+      setError(null);
+      const payload: any = { name: newPresetName.trim() };
+      THEME_FIELDS.forEach((field) => {
+        payload[field] = config[field];
+      });
+      await apiClientV2.post('/admin/theme-presets', payload);
+      setNewPresetName('');
+      setPresetMsg(`Preset "${payload.name}" guardado`);
+      setTimeout(() => setPresetMsg(null), 4000);
+      await fetchPresets();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error guardando el preset');
+    } finally {
+      setSavingPreset(false);
+    }
+  };
+
+  const deletePreset = async (preset: ThemePreset) => {
+    if (preset.builtin) return;
+    if (!confirm(`¿Eliminar el preset "${preset.name}"?`)) return;
+    try {
+      await apiClientV2.delete(`/admin/theme-presets/${preset.id}`);
+      await fetchPresets();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error eliminando el preset');
+    }
+  };
 
   const fetchConfig = async () => {
     try {
@@ -181,6 +242,97 @@ export default function SiteConfigPage() {
           {error}
         </div>
       )}
+
+      {/* Theme Presets Section */}
+      <section className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <Bookmark className="h-5 w-5 text-green-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Presets de tema</h2>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Carga una configuración de estilos guardada o guarda la actual con un nombre.
+            Aplicar un preset rellena el formulario; recuerda pulsar <strong>Guardar</strong> para publicarlo.
+          </p>
+        </div>
+        <div className="p-6 space-y-5">
+          {presetMsg && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-sm">
+              {presetMsg}
+            </div>
+          )}
+
+          {/* Preset cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {presets.map((preset) => (
+              <div
+                key={preset.id}
+                className="relative rounded-lg border border-gray-200 p-3 hover:border-green-400 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      {preset.builtin && <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
+                      <h3 className="text-sm font-semibold text-gray-900 truncate">{preset.name}</h3>
+                    </div>
+                    {preset.description && (
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{preset.description}</p>
+                    )}
+                  </div>
+                  {!preset.builtin && (
+                    <button
+                      onClick={() => deletePreset(preset)}
+                      className="text-gray-300 hover:text-red-500 transition-colors shrink-0"
+                      title="Eliminar preset"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Color swatches */}
+                <div className="flex items-center gap-1 mt-3">
+                  {[preset.colorPrimary, preset.colorSecondary, preset.colorAccent, preset.colorBackground, preset.colorText].map((c, i) => (
+                    <span
+                      key={i}
+                      className="h-5 w-5 rounded-full border border-gray-200"
+                      style={{ backgroundColor: c }}
+                      title={c}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => applyPreset(preset)}
+                  className="mt-3 w-full text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg py-1.5 transition-colors"
+                >
+                  Aplicar
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Save current as preset */}
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+            <input
+              type="text"
+              value={newPresetName}
+              onChange={(e) => setNewPresetName(e.target.value)}
+              placeholder="Nombre del nuevo preset..."
+              maxLength={80}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+            />
+            <button
+              onClick={saveCurrentAsPreset}
+              disabled={savingPreset || !newPresetName.trim()}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 disabled:opacity-40 transition-colors text-sm whitespace-nowrap"
+            >
+              {savingPreset ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Guardar tema actual
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* API Keys Section */}
       <section className="bg-white rounded-lg border border-gray-200 shadow-sm">
