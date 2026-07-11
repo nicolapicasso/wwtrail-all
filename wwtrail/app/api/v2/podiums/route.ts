@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const podium = await EditionPodiumService.create(data);
+    const podium = await EditionPodiumService.create(data.editionId, data);
     return apiSuccess(podium, 201);
   } catch (error) { return apiError(error); }
 }

@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
   try {
     await requireRole(request, 'ADMIN');
     const data = await request.json();
-    const result = await CatalogService.create(data);
+    const catalogType = (data.catalogType || data.type || 'competitionType') as 'competitionType' | 'terrainType';
+    const result = await CatalogService.create(catalogType, data);
     return apiSuccess(result, 201);
   } catch (error) { return apiError(error); }
 }

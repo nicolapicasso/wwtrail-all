@@ -102,11 +102,11 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
                 <td className="whitespace-nowrap px-6 py-4">
                   <div className="flex items-center">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-600 font-semibold">
-                      {user.name?.charAt(0).toUpperCase() || 'U'}
+                      {user.fullName?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {user.name || 'Sin nombre'}
+                        {user.fullName || 'Sin nombre'}
                       </div>
                     </div>
                   </div>

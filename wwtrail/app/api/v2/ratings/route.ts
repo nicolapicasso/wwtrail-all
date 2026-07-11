@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const editionId = searchParams.get('editionId');
     if (!editionId) return apiError(new Error('editionId required'));
-    const result = await EditionRatingService.getByEdition(editionId);
+    const result = await EditionRatingService.getByEdition(editionId, 1, 100);
     return apiSuccess(result);
   } catch (error) { return apiError(error); }
 }

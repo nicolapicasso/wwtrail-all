@@ -80,7 +80,7 @@ export default function UserEditModal({ user, onClose, onSave }: UserEditModalPr
                 return (
                   <button
                     key={role.value}
-                    onClick={() => setSelectedRole(role.value)}
+                    onClick={() => setSelectedRole(role.value as any)}
                     className={`
                       w-full rounded-lg border-2 p-4 text-left transition-all
                       ${isSelected 
