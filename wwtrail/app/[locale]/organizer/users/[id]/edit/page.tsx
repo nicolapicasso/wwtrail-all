@@ -29,29 +29,7 @@ import { adminService } from '@/lib/api/admin.service';
 import { COUNTRIES } from '@/lib/utils/countries';
 import FileUpload from '@/components/FileUpload';
 
-interface UserProfile {
-  id: string;
-  email: string;
-  username: string;
-  firstName: string | null;
-  lastName: string | null;
-  role: string;
-  isActive: boolean;
-  avatar: string | null;
-  bio: string | null;
-  phone: string | null;
-  city: string | null;
-  country: string | null;
-  language: string;
-  gender: string | null;
-  birthDate: string | null;
-  isPublic: boolean;
-  isInsider: boolean;
-  instagramUrl: string | null;
-  facebookUrl: string | null;
-  twitterUrl: string | null;
-  youtubeUrl: string | null;
-}
+import type { User as UserProfile } from '@/lib/api/admin.service';
 
 export default function AdminEditUserPage() {
   const { user: currentUser, loading: authLoading } = useAuth();
@@ -100,7 +78,7 @@ export default function AdminEditUserPage() {
           city: data.city || '',
           gender: data.gender || '',
           birthDate: data.birthDate ? data.birthDate.split('T')[0] : '',
-          isPublic: data.isPublic,
+          isPublic: data.isPublic ?? false,
           instagramUrl: data.instagramUrl || '',
           facebookUrl: data.facebookUrl || '',
           twitterUrl: data.twitterUrl || '',
