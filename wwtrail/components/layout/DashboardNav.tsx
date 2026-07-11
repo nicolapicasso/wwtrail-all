@@ -221,6 +221,11 @@ const navItems: NavItem[] = [
         icon: Upload,
       },
       {
+        label: 'Importador IA',
+        href: '/organizer/scraper',
+        icon: Sparkles,
+      },
+      {
         label: 'Exportación',
         href: '/organizer/export',
         icon: Download,

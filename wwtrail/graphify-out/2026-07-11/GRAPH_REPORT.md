@@ -1,16 +1,16 @@
 # Graph Report - wwtrail  (2026-07-11)
 
 ## Corpus Check
-- 488 files · ~262,112 words
+- 488 files · ~262,542 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2859 nodes · 6483 edges · 181 communities (102 shown, 79 thin omitted)
+- 2872 nodes · 6501 edges · 190 communities (118 shown, 72 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.55)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `68640fe7`
+- Built from commit: `daedb546`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -107,7 +107,9 @@
 - devDependencies
 - error-handler.ts
 - competition-admin.service.ts
+- FeaturedEvents.tsx
 - types.ts
+- CatalogService
 - TranslationsService
 - edition.schema.ts
 - translation.schema.ts
@@ -121,8 +123,12 @@
 - route.ts
 - review.schema.ts
 - omniwallet.service.ts
+- omniwallet.service.ts
+- DirectoryMapClient.tsx
 - participant.schema.ts
 - ServiceService
+- EventCard.tsx
+- events.service.ts
 - useSlugValidation.ts
 - bcryptjs
 - package.json
@@ -142,6 +148,7 @@
 - StatsCard.tsx
 - favorites.schema.ts
 - next.config.js
+- SearchableEntitySelect.tsx
 - axios
 - EventSelect.tsx
 - class-variance-authority
@@ -163,9 +170,11 @@
 - @radix-ui/react-label
 - @radix-ui/react-select
 - @radix-ui/react-slot
+- UserStatsCards.tsx
 - @radix-ui/react-toast
 - react-dom
 - react-hook-form
+- autoprefixer
 - slugify
 - sonner
 - tailwindcss-animate
@@ -187,11 +196,9 @@
 - @types/leaflet
 - @types/js-cookie
 - @types/react-dom
-- @types/nodemailer
 - tailwind.config.ts
 - apiClient
 - cacheService
-- react
 
 ## God Nodes (most connected - your core abstractions)
 1. `apiSuccess()` - 276 edges
@@ -206,121 +213,129 @@
 10. `cn()` - 35 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `LoginPage()` --calls--> `useAuth()`  [EXTRACTED]
-  wwtrail/app/[locale]/auth/login/page.tsx → wwtrail/contexts/AuthContext.tsx
-- `RegisterPage()` --calls--> `useAuth()`  [EXTRACTED]
-  wwtrail/app/[locale]/auth/register/page.tsx → wwtrail/contexts/AuthContext.tsx
 - `MagazineCategoryPage()` --indirect_call--> `PostCategory`  [INFERRED]
   wwtrail/app/[locale]/magazine/[category]/page.tsx → wwtrail/types/post.ts
+- `OrganizerCompetitionsPage()` --calls--> `useAuth()`  [EXTRACTED]
+  wwtrail/app/[locale]/organizer/competitions/page.tsx → wwtrail/hooks/useAuth.ts
 - `NewEventPage()` --calls--> `useAuth()`  [EXTRACTED]
   wwtrail/app/[locale]/organizer/events/new/page.tsx → wwtrail/contexts/AuthContext.tsx
 - `MyEventsPage()` --calls--> `useAuth()`  [EXTRACTED]
   wwtrail/app/[locale]/organizer/events/page.tsx → wwtrail/hooks/useAuth.ts
+- `OrganizerLayout()` --calls--> `useAuth()`  [EXTRACTED]
+  wwtrail/app/[locale]/organizer/layout.tsx → wwtrail/contexts/AuthContext.tsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (181 total, 79 thin omitted)
+## Communities (190 total, 72 thin omitted)
 
 ### Community 0 - "apiSuccess"
-Cohesion: 0.05
-Nodes (66): POST(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), GET(), POST() (+58 more)
+Cohesion: 0.07
+Nodes (28): POST(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), GET(), POST() (+20 more)
 
 ### Community 1 - "requireRole"
 Cohesion: 0.04
-Nodes (28): adminService, GET(), adminService, GET(), adminService, GET(), adminService, GET() (+20 more)
+Nodes (27): adminService, GET(), adminService, GET(), adminService, GET(), adminService, GET() (+19 more)
 
 ### Community 2 - "admin.service.ts"
 Cohesion: 0.04
-Nodes (41): FilterRow(), getOperatorsForType(), OPERATOR_LABELS, ENTITY_OPTIONS, EXAMPLE_JSON, FullImportResult, ImportData, ImportResult (+33 more)
+Nodes (47): FilterRow(), getOperatorsForType(), OPERATOR_LABELS, ENTITY_OPTIONS, EXAMPLE_JSON, FullImportResult, ImportData, ImportResult (+39 more)
 
 ### Community 3 - "button.tsx"
-Cohesion: 0.09
-Nodes (43): LoginPage(), RegisterPage(), ExportStats, COLUMNS, LANGUAGES, InsiderConfig, InsiderStats, ACTION_ICONS (+35 more)
+Cohesion: 0.08
+Nodes (34): FooterAdminPage(), ALL_LANGUAGES, EditLandingPage(), LandingsAdminPage(), ACTION_ICONS, ACTION_LABELS, PARTICIPATION_STATUSES, SEOConfigPage() (+26 more)
 
 ### Community 4 - "requireAuth"
-Cohesion: 0.09
-Nodes (19): GET(), GET(), GET(), POST(), GET(), GET(), GET(), GET() (+11 more)
+Cohesion: 0.15
+Nodes (12): MagazineCategoryPage(), OrganizerPostsPage(), ArticleCard(), ArticleCardProps, ArticleGrid(), ArticleGridProps, RelatedArticlesProps, MyStats (+4 more)
 
 ### Community 6 - "useAuth"
-Cohesion: 0.06
-Nodes (34): DashboardPage(), FooterAdminPage(), ALL_LANGUAGES, EditLandingPage(), LandingsAdminPage(), PromotionsAnalyticsPage(), EditPromotionPage(), NewPromotionPage() (+26 more)
+Cohesion: 0.10
+Nodes (23): LoginPage(), RegisterPage(), DashboardPage(), NewLandingPage(), PromotionsAnalyticsPage(), EditPromotionPage(), NewPromotionPage(), NewServicePage() (+15 more)
 
 ### Community 7 - "homeConfiguration.schema.ts"
-Cohesion: 0.09
-Nodes (21): ContentBlockConfig, ContentBlockConfigSchema, createHomeBlockSchema, createHomeConfigurationSchema, HomeBlockTypeSchema, HomeBlockViewTypeSchema, HomeTextSizeSchema, HomeTextVariantSchema (+13 more)
+Cohesion: 0.14
+Nodes (19): COLUMNS, LANGUAGES, InsiderConfig, InsiderStats, GroupedSEO, Table, TableBody, TableCaption (+11 more)
 
 ### Community 8 - "page.tsx"
-Cohesion: 0.06
-Nodes (48): GroupedSEO, SEOManagementPage(), AdminUsersPage(), ROLE_OPTIONS, CategoryType, initialFormData, ParticipationFormData, ParticipationStatus (+40 more)
+Cohesion: 0.10
+Nodes (31): AdminUsersPage(), ROLE_OPTIONS, CategoryType, initialFormData, ParticipationFormData, ParticipationStatus, AddParticipationButton(), AddParticipationButtonProps (+23 more)
 
 ### Community 9 - "index.ts"
 Cohesion: 0.05
-Nodes (41): POST(), POST(), GET(), POST(), toSpacesCdn(), adminService, GET(), PUT() (+33 more)
+Nodes (59): GET(), POST(), toSpacesCdn(), adminService, GET(), PUT(), GET(), GET() (+51 more)
 
 ### Community 10 - "layout.tsx"
 Cohesion: 0.14
-Nodes (13): archivo, barlow, metadata, BACKOFFICE_ROUTES, LayoutWrapper(), LayoutWrapperProps, NO_FOOTER_ROUTES, IntlProvider() (+5 more)
+Nodes (17): EditProfilePage(), INSIDER_COLORS, insiderColor(), InsiderData, insiderInitials(), InsidersPage(), UserList(), UserListProps (+9 more)
 
 ### Community 11 - "user.service.ts"
-Cohesion: 0.10
-Nodes (29): InsidersAdminPage(), InsiderData, InsidersPage(), ParticipationCard(), UserProfilePage(), InsiderBadge(), InsiderBadgeProps, positionClasses (+21 more)
+Cohesion: 0.05
+Nodes (40): archivo, barlow, metadata, InsidersAdminPage(), ParticipationCard(), profileInitials(), UserProfilePage(), InsiderBadge() (+32 more)
 
 ### Community 12 - "edition.ts"
 Cohesion: 0.09
-Nodes (37): EditEditionPageProps, ConfirmDialog(), ConfirmDialogProps, EditionCard(), EditionCardProps, EditionsGridProps, EditionFormProps, competitionsService (+29 more)
+Nodes (33): EditCompetitionPageProps, EditEditionPageProps, EditionCard(), EditionCardProps, EditionsGridProps, EditionFormProps, competitionsService, EditionBackendResponse (+25 more)
 
 ### Community 13 - "competition.ts"
-Cohesion: 0.24
-Nodes (8): CompetitionCardProps, CompetitionList(), CompetitionListCompact(), CompetitionListCompactProps, CompetitionListProps, UseCompetitionResult, useCompetitions(), UseCompetitionsResult
+Cohesion: 0.13
+Nodes (17): CompetitionCard(), CompetitionCardCompactProps, CompetitionCardProps, COUNTRY_FLAGS, CompetitionGridProps, CompetitionCardProps, CompetitionList(), CompetitionListCompact() (+9 more)
 
 ### Community 14 - "page.tsx"
-Cohesion: 0.12
-Nodes (18): DELETE(), PATCH(), POST(), GET(), POST(), POST(), GET(), POST() (+10 more)
+Cohesion: 0.08
+Nodes (31): GET(), POST(), PUT(), ContentBlockConfig, ContentBlockConfigSchema, CreateHomeBlockInput, createHomeBlockSchema, CreateHomeConfigurationInput (+23 more)
 
 ### Community 15 - "import.service.ts"
 Cohesion: 0.17
 Nodes (12): FullImport, FullImportResult, fullImportSchema, ImportCompetition, importCompetitionSchema, ImportEvent, importEventSchema, ImportOrganizer (+4 more)
+
+### Community 16 - "EventService"
+Cohesion: 0.09
+Nodes (11): DELETE(), GET(), PUT(), GET(), GET(), GET(), POST(), GET() (+3 more)
 
 ### Community 17 - "post.ts"
 Cohesion: 0.12
 Nodes (11): ForgotPasswordInput, forgotPasswordSchema, LoginInput, loginSchema, RefreshTokenInput, refreshTokenSchema, RegisterInput, registerSchema (+3 more)
 
 ### Community 18 - "event.service.ts"
-Cohesion: 0.13
-Nodes (19): prisma, CreatePostInput, PostFilters, UpdatePostInput, GenerateSEOInput, TODO: Implementar cuando exista CompetitionService, TODO: Implementar cuando exista PostService, SEOResult (+11 more)
+Cohesion: 0.11
+Nodes (26): prisma, CreateEventInput, EventFilters, UpdateEventInput, CreatePostInput, PostFilters, UpdatePostInput, CreatePromotionInput (+18 more)
+
+### Community 20 - "CompetitionService"
+Cohesion: 0.12
+Nodes (10): POST(), POST(), DELETE(), GET(), PATCH(), PUT(), GET(), POST() (+2 more)
 
 ### Community 21 - "rating.ts"
-Cohesion: 0.22
-Nodes (11): PodiumCardProps, PodiumPositionProps, PodiumFormProps, podiumsService, CreatePodiumDTO, EditionPodium, MEDAL_EMOJIS, PODIUM_TYPE_LABELS (+3 more)
+Cohesion: 0.06
+Nodes (41): EditEditionPage(), EditionDetailTabs(), EditionDetailTabsProps, TODO: Get from API, TabKey, PodiumCardProps, PodiumPositionProps, PodiumFormProps (+33 more)
 
 ### Community 23 - "page.tsx"
-Cohesion: 0.11
-Nodes (19): EditCompetitionPageProps, NewLandingPage(), EditServicePage(), EventManagersPanel(), EventManagersPanelProps, GenerateTranslationsButton(), GenerateTranslationsButtonProps, TranslationStatus (+11 more)
+Cohesion: 0.19
+Nodes (8): EditServicePage(), EventManagersPanel(), GenerateTranslationsButton(), GenerateTranslationsButtonProps, TranslationStatus, ButtonProps, buttonVariants, TranslatableEntityType
 
 ### Community 24 - "promotion.ts"
-Cohesion: 0.13
-Nodes (17): PromotionsService, AddCodesResponse, AddCouponCodesInput, CouponAnalyticsResponse, CouponCode, CouponRedemption, CouponRedemptionResponse, CouponStats (+9 more)
+Cohesion: 0.06
+Nodes (30): PromotionCategoriesPage(), AdminPromotionsPage(), ServiceCategoriesAdminPage(), PromotionCardProps, PromotionFormProps, PromotionsService, CreateServiceCategoryInput, ServiceCategoriesService (+22 more)
 
 ### Community 25 - "compilerOptions"
 Cohesion: 0.07
 Nodes (28): ./*, dom, dom.iterable, esnext, next-env.d.ts, .next/types/**/*.ts, node_modules, **/*.ts (+20 more)
 
 ### Community 26 - "ImportService"
-Cohesion: 0.13
-Nodes (19): loginSchema, POST(), POST(), POST(), registerSchema, POST(), GET(), POST() (+11 more)
+Cohesion: 0.20
+Nodes (13): loginSchema, POST(), POST(), POST(), registerSchema, POST(), AuthUser, comparePassword() (+5 more)
 
 ### Community 27 - "HomeService"
-Cohesion: 0.06
-Nodes (49): BlockConfigModal(), BlockConfigModalProps, HeroConfigForm(), HeroConfigFormProps, CompetitionsBlock(), CompetitionsBlockProps, EditionsBlock(), EditionsBlockProps (+41 more)
+Cohesion: 0.05
+Nodes (47): BlockConfigModal(), BlockConfigModalProps, HeroConfigForm(), HeroConfigFormProps, CompetitionsBlock(), CompetitionsBlockProps, EditionsBlock(), EditionsBlockProps (+39 more)
 
 ### Community 28 - "generateUniqueSlug"
-Cohesion: 0.08
-Nodes (23): cache, memoryCache, CreateEventInput, EventFilters, UpdateEventInput, CreateOrganizerInput, OrganizerFilters, UpdateOrganizerInput (+15 more)
+Cohesion: 0.13
+Nodes (13): MyEventsPage(), ViewMode, BulkActionsBar(), BulkActionsBarProps, COUNTRY_FLAGS, EventCard(), EventCardProps, MONTHS (+5 more)
 
 ### Community 29 - "Language"
-Cohesion: 0.16
-Nodes (12): FileUpload(), LANGUAGES, PromotionForm(), PromotionFormProps, RichTextEditor(), RichTextEditorProps, apiClientFiles, filesService (+4 more)
+Cohesion: 0.13
+Nodes (14): FileUpload(), FileUploadProps, PostForm(), PostFormProps, LANGUAGES, PromotionForm(), RichTextEditor(), RichTextEditorProps (+6 more)
 
 ### Community 30 - "use-toast.ts"
 Cohesion: 0.12
@@ -335,48 +350,48 @@ Cohesion: 0.11
 Nodes (9): GET(), GET(), DELETE(), GET(), PUT(), GET(), POST(), GET() (+1 more)
 
 ### Community 33 - "catalog.service.ts"
-Cohesion: 0.13
-Nodes (14): CreateCatalogInput, createCatalogSchema, CreateSpecialSeriesInput, createSpecialSeriesSchema, GetCatalogQuery, getCatalogQuerySchema, UpdateCatalogInput, updateCatalogSchema (+6 more)
+Cohesion: 0.17
+Nodes (13): CreateCatalogInput, createCatalogSchema, CreateSpecialSeriesInput, createSpecialSeriesSchema, GetCatalogQuery, getCatalogQuerySchema, UpdateCatalogInput, updateCatalogSchema (+5 more)
 
 ### Community 34 - "PromotionForm.tsx"
-Cohesion: 0.24
-Nodes (9): RatingFormProps, RecentRatingsWidgetProps, ratingsService, CreateRatingDTO, EditionRating, RATING_CRITERIA, RatingCriterion, RatingsResponse (+1 more)
+Cohesion: 0.21
+Nodes (16): POST(), autoFillCompetition(), autoFillEvent(), classifyImage(), CompetitionAutoFillResult, EventAutoFillResult, extractImagesFromHtml(), fetchPageContent() (+8 more)
 
 ### Community 35 - "index.ts"
-Cohesion: 0.08
-Nodes (24): MagazineCategoryPage(), NewEventPage(), OrganizerPostsPage(), ArticleCard(), ArticleCardProps, ArticleGrid(), ArticleGridProps, FileUploadProps (+16 more)
+Cohesion: 0.07
+Nodes (21): NewEventPage(), PageProps, ServiceFormProps, SpecialSeriesForm(), SpecialSeriesFormProps, CreateLandingInput, GetLandingsParams, GetLandingsResponse (+13 more)
 
 ### Community 36 - "organizers.service.ts"
-Cohesion: 0.09
-Nodes (15): ORG_COLORS, OrganizersPublicPage(), orgColor(), orgInitials(), MyStats, apiClientV1, apiClientV2, Footer (+7 more)
+Cohesion: 0.22
+Nodes (6): OrganizersService, CreateOrganizerInput, Organizer, OrganizerFilters, OrganizerListItem, UpdateOrganizerInput
 
 ### Community 37 - "events.service.ts"
-Cohesion: 0.22
-Nodes (9): WeatherCardProps, WeatherDetailProps, WeatherResponse, weatherService, EditionWeather, WEATHER_COLORS, WEATHER_ICONS, WeatherCondition (+1 more)
+Cohesion: 0.18
+Nodes (13): CompetitionDetailPage(), OrganizerDetailPage(), EventMap, ServiceDetailPage(), EventGallery(), EventGalleryProps, ServiceForm(), OrganizerCard() (+5 more)
 
 ### Community 39 - "ZancadasBalance.tsx"
 Cohesion: 0.12
-Nodes (18): ProfilePage(), Skeleton(), ZancadasBalance(), ZancadasBalanceProps, ACTION_ICONS, ACTION_LABELS, ZancadasHistory(), ZancadasHistoryProps (+10 more)
+Nodes (19): ProfilePage(), Skeleton(), ZancadasBalance(), ZancadasBalanceProps, ACTION_ICONS, ACTION_LABELS, ZancadasHistory(), ZancadasHistoryProps (+11 more)
 
 ### Community 40 - "errors.ts"
 Cohesion: 0.06
-Nodes (19): CreatePodiumInput, createPodiumSchema, UpdateChronicleInput, updateChronicleSchema, UpdatePodiumInput, updatePodiumSchema, EditionPodiumService, prisma (+11 more)
+Nodes (18): CreatePodiumInput, createPodiumSchema, UpdateChronicleInput, updateChronicleSchema, UpdatePodiumInput, updatePodiumSchema, prisma, UserCompetitionService (+10 more)
 
 ### Community 41 - "EditionPodiumService"
 Cohesion: 0.19
 Nodes (8): AgendaRow(), CalEdition, CalView, editionHref(), effDistance(), effElevation(), MONTHS_ES, MonthView()
 
 ### Community 42 - "serviceCategories.service.ts"
-Cohesion: 0.29
-Nodes (5): AdminPromotionsPage(), PromotionCardProps, Promotion, PromotionStatus, PromotionType
+Cohesion: 0.13
+Nodes (12): CreateEventInput, EventCompetitionSummary, EventCreatorRef, EventListResponse, EventNearby, EventSearchResult, EventStats, EventTranslation (+4 more)
 
 ### Community 43 - "home.ts"
-Cohesion: 0.23
-Nodes (11): BORDER_RADIUS_OPTIONS, FONT_OPTIONS, SHADOW_OPTIONS, SiteConfig, SiteConfigPage(), ThemePresetService, BUILTIN_PRESETS, pickThemeValues() (+3 more)
+Cohesion: 0.20
+Nodes (12): DELETE(), BORDER_RADIUS_OPTIONS, FONT_OPTIONS, SHADOW_OPTIONS, SiteConfig, SiteConfigPage(), ThemePresetService, BUILTIN_PRESETS (+4 more)
 
 ### Community 44 - "user-competitions.service.ts"
-Cohesion: 0.14
-Nodes (10): UserStatsCards(), useUserStats(), userCompetitionsService, AddResultData, MarkCompetitionData, RankingEntry, UpdateUserCompetitionData, UserCompetition (+2 more)
+Cohesion: 0.16
+Nodes (7): userCompetitionsService, AddResultData, MarkCompetitionData, RankingEntry, UpdateUserCompetitionData, UserCompetition, UserStats
 
 ### Community 45 - "apiClientV2"
 Cohesion: 0.17
@@ -387,20 +402,20 @@ Cohesion: 0.18
 Nodes (11): EmailTemplatesPage(), EmailTemplatesService, CreateEmailTemplateInput, EMAIL_TEMPLATE_TYPES, EmailTemplate, EmailTemplatePreviewResponse, EmailTemplateResponse, EmailTemplatesResponse (+3 more)
 
 ### Community 47 - "auth.schema.ts"
-Cohesion: 0.16
-Nodes (8): ParticipationsPage(), editionIdParamSchema, participationIdParamSchema, SearchEditionsQuery, searchEditionsSchema, UserEditionInput, userEditionSchema, UserEditionService
+Cohesion: 0.18
+Nodes (7): editionIdParamSchema, participationIdParamSchema, SearchEditionsQuery, searchEditionsSchema, UserEditionInput, userEditionSchema, UserEditionService
 
 ### Community 48 - "event.schema.ts"
 Cohesion: 0.10
 Nodes (19): CreateEventInput, createEventSchema, eventIdSchema, EventsByCountryParams, EventsByCountryQuery, eventsByCountrySchema, eventSlugSchema, FeaturedEventsQuery (+11 more)
 
 ### Community 49 - "index.ts"
-Cohesion: 0.08
-Nodes (25): OrganizerCompetitionsPage(), OrganizerEditionsPage(), EditEventPage(), EditOrganizerPage(), OrganizersListPage(), SpecialSeriesListPage(), CompetitionForm(), CompetitionFormProps (+17 more)
+Cohesion: 0.09
+Nodes (22): OrganizerEditionsPage(), EditEventPage(), EditOrganizerPage(), OrganizersListPage(), OrganizerDashboard(), CompetitionForm(), EventForm(), EventFormProps (+14 more)
 
 ### Community 50 - "ai-autofill.service.ts"
 Cohesion: 0.06
-Nodes (50): DELETE(), ALLOWED_CONTENT_TYPES, POST(), ALLOWED_TYPES, POST(), ALLOWED_TYPES, POST(), POST() (+42 more)
+Nodes (38): GET(), DELETE(), ALLOWED_CONTENT_TYPES, POST(), ALLOWED_TYPES, POST(), ALLOWED_TYPES, POST() (+30 more)
 
 ### Community 51 - "OrganizerService"
 Cohesion: 0.15
@@ -411,96 +426,104 @@ Cohesion: 0.29
 Nodes (7): DRY, main(), prisma, repairValue(), Rule, RULES, TEXT_KEYS
 
 ### Community 53 - "page.tsx"
-Cohesion: 0.04
-Nodes (45): MyEventsPage(), ViewMode, BulkActionsBar(), BulkActionsBarProps, EventCardProps, EventStatusBadge(), EventStatusBadgeProps, COUNTRY_FLAGS (+37 more)
+Cohesion: 0.16
+Nodes (8): EventsService, CreateEventData, EventFilters, EventResponse, EventsResponse, EventStatsResponse, RejectEventData, UpdateEventData
 
 ### Community 54 - "components.json"
 Cohesion: 0.11
 Nodes (18): aliases, components, hooks, lib, ui, utils, iconLibrary, registries (+10 more)
 
 ### Community 55 - "HomeBlockRenderer.tsx"
-Cohesion: 0.21
-Nodes (4): RatingCardProps, RatingSummaryProps, StarRatingProps, RatingSummary
+Cohesion: 0.18
+Nodes (14): convertUrl(), DRY_RUN, fileExistsOnSpaces(), fs, getAllFiles(), main(), MIME_TYPES, path (+6 more)
 
 ### Community 56 - "useAuth.ts"
-Cohesion: 0.19
-Nodes (10): AuthContextType, AuthContextValue, AuthService, createResponseInterceptor(), AuthResponse, LoginCredentials, RefreshTokenResponse, RegisterData (+2 more)
+Cohesion: 0.10
+Nodes (21): DashboardLayout(), DashboardLayoutProps, OrganizerLayout(), CollapsibleUserInfo(), CollapsibleUserInfoProps, DashboardNav(), NavItem, navItems (+13 more)
 
 ### Community 57 - "bulk-edit.service.ts"
 Cohesion: 0.15
 Nodes (10): BulkEditEntityType, BulkEditFilters, BulkEditOperation, BulkEditPreview, BulkEditResult, BulkEditService, EntityMetadata, FieldMetadata (+2 more)
 
 ### Community 58 - "SEOService"
-Cohesion: 0.16
+Cohesion: 0.15
 Nodes (3): getOpenAIKey(), SEOService, getOpenAIKey()
 
 ### Community 59 - "useAuth"
-Cohesion: 0.13
-Nodes (13): DirectoryFilters, DirectoryMapClient(), ItemType, MAP_TILES, MapMode, spreadOverlappingMarkers(), CountrySelect(), CountrySelectProps (+5 more)
+Cohesion: 0.23
+Nodes (9): ORG_COLORS, OrganizersPublicPage(), orgColor(), orgInitials(), CountrySelect(), CountrySelectProps, COUNTRIES, Country (+1 more)
 
 ### Community 60 - "EventList.tsx"
-Cohesion: 0.09
-Nodes (18): EventFilters, EventList(), EventListProps, EventListSimple(), EventListSimpleProps, FeaturedEvents(), LargeCard(), mediaUrl() (+10 more)
+Cohesion: 0.16
+Nodes (8): EventFilters, EventList(), EventListProps, EventListSimple(), EventListSimpleProps, PaginationData, useEvents(), UseEventsResult
 
 ### Community 61 - "EventForm.tsx"
-Cohesion: 0.22
-Nodes (6): COMPETITION_TYPES, COUNTRIES, FilterState, SORT_OPTIONS, CompetitionGridSkeleton(), competitionsService
+Cohesion: 0.18
+Nodes (10): COMPETITION_TYPES, CompetitionFilters(), CompetitionFiltersProps, COUNTRIES, FilterState, SORT_OPTIONS, CompetitionGrid(), CompetitionGridSkeleton() (+2 more)
 
 ### Community 62 - "editionRating.schema.ts"
 Cohesion: 0.13
-Nodes (10): CreateEditionRatingInput, createEditionRatingSchema, GetRatingsQuery, getRatingsQuerySchema, GetRecentRatingsQuery, getRecentRatingsSchema, ratingSchema, UpdateEditionRatingInput (+2 more)
+Nodes (11): POST(), CreateEditionRatingInput, createEditionRatingSchema, GetRatingsQuery, getRatingsQuerySchema, GetRecentRatingsQuery, getRecentRatingsSchema, ratingSchema (+3 more)
 
 ### Community 63 - "ExportService"
 Cohesion: 0.24
 Nodes (3): ExportOptions, ExportResult, ExportService
+
+### Community 64 - "TranslationService"
+Cohesion: 0.17
+Nodes (3): GET(), POST(), TranslationService
 
 ### Community 65 - "PromotionService"
 Cohesion: 0.18
 Nodes (7): DELETE(), GET(), PUT(), GET(), POST(), GET(), PromotionService
 
 ### Community 66 - "CompetitionActions.tsx"
-Cohesion: 0.15
-Nodes (17): CompetitionActionsProps, LanguageSelector(), Navbar(), DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioItem (+9 more)
+Cohesion: 0.23
+Nodes (10): Navbar(), DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut() (+2 more)
 
 ### Community 67 - "Event"
-Cohesion: 0.18
-Nodes (10): ConflictItem, ConflictResolution, EntityType, LANGUAGE_MAPPING, NativeImportFile, NativeImportOptions, NativeImportResult, NativeImportResultItem (+2 more)
+Cohesion: 0.20
+Nodes (9): ConflictItem, ConflictResolution, EntityType, LANGUAGE_MAPPING, NativeImportFile, NativeImportResult, NativeImportResultItem, TERRAIN_MAPPING (+1 more)
 
 ### Community 68 - "services.service.ts"
-Cohesion: 0.12
-Nodes (14): OrganizerServicesPage(), COUNTRY_FLAGS, ServiceCard(), ServiceCardProps, ServicesService, CategoriesResponse, CreateServiceInput, Service (+6 more)
+Cohesion: 0.22
+Nodes (8): ServicesService, CategoriesResponse, CreateServiceInput, ServiceFilters, ServiceResponse, ServicesResponse, ServiceStatus, UpdateServiceInput
 
 ### Community 69 - "LandingService"
 Cohesion: 0.15
 Nodes (9): CreateLandingInput, createLandingSchema, GetLandingsQuery, getLandingsSchema, TranslateLandingInput, translateLandingSchema, UpdateLandingInput, updateLandingSchema (+1 more)
 
 ### Community 70 - "route.ts"
-Cohesion: 0.22
-Nodes (7): getCountryName(), ROLE_LABELS, StatsPage(), STATUS_LABELS, TYPE_LABELS, ComprehensiveStats, ZancadasStats
+Cohesion: 0.09
+Nodes (28): EventMap, ExportStats, getCountryName(), ROLE_LABELS, StatsPage(), STATUS_LABELS, TYPE_LABELS, ENTITY_CONFIGS (+20 more)
 
 ### Community 72 - "page.tsx"
 Cohesion: 0.33
 Nodes (6): EventMap(), EventMapMarker, EventMapProps, MAP_TILES, MapMode, spreadOverlappingMarkers()
+
+### Community 74 - "v2.ts"
+Cohesion: 0.20
+Nodes (5): DELETE(), PUT(), GET(), POST(), EditionPodiumService
 
 ### Community 75 - "competition-admin.schema.ts"
 Cohesion: 0.12
 Nodes (15): ApproveCompetitionInput, ApproveCompetitionParams, approveCompetitionSchema, GetOrganizerCompetitionsQuery, getOrganizerCompetitionsSchema, GetPendingCompetitionsQuery, getPendingCompetitionsSchema, GetStatsQuery (+7 more)
 
 ### Community 76 - "SpecialSeries"
-Cohesion: 0.12
-Nodes (16): abbreviate(), colorFor(), HEADER_COLORS, SpecialSeriesCard(), SpecialSeriesCardProps, SpecialSeriesGrid(), SpecialSeriesGridProps, SpecialSeriesService (+8 more)
+Cohesion: 0.11
+Nodes (16): SpecialSeriesListPage(), abbreviate(), colorFor(), HEADER_COLORS, SpecialSeriesCard(), SpecialSeriesCardProps, SpecialSeriesGrid(), SpecialSeriesGridProps (+8 more)
 
 ### Community 77 - "ContentBlockConfig"
-Cohesion: 0.33
-Nodes (8): EditEditionPage(), EditionDetailTabs(), EditionDetailTabsProps, TODO: Get from API, TabKey, usePodiums(), useRatings(), useWeather()
+Cohesion: 0.17
+Nodes (5): AdminEditButton(), AdminEditButtonFloating(), AdminEditButtonProps, EditionParticipants(), RelatedArticles()
 
 ### Community 78 - "Service"
-Cohesion: 0.33
-Nodes (6): PromotionCategoriesPage(), ServiceCategoriesAdminPage(), CreateServiceCategoryInput, ServiceCategory, ServiceCategoryWithCount, UpdateServiceCategoryInput
+Cohesion: 0.19
+Nodes (9): EventsBlock(), EventsBlockProps, EventMedia(), MONTHS_ES, PublicEventCard(), PublicEventCardProps, Event, EventDetail (+1 more)
 
 ### Community 79 - "SpecialSeries"
-Cohesion: 0.29
-Nodes (6): ENTITY_CONFIGS, EntityConfig, EntityStats, EntityType, TranslationsDashboardPage(), TranslationStats
+Cohesion: 0.26
+Nodes (6): OrganizerServicesPage(), COUNTRY_FLAGS, ServiceCard(), ServiceCardProps, Service, ServiceCategory
 
 ### Community 80 - "user-competition.schema.ts"
 Cohesion: 0.13
@@ -510,13 +533,25 @@ Nodes (14): AddResultInput, addResultSchema, competitionIdParamSchema, GetMyComp
 Cohesion: 0.39
 Nodes (7): base64UrlDecodeToString(), base64UrlToUint8Array(), EdgeTokenPayload, verifyJwtEdge(), config, intlMiddleware, middleware()
 
+### Community 83 - "userEdition.schema.ts"
+Cohesion: 0.15
+Nodes (8): apiClientV2, Footer, FooterContent, FooterService, BulkTranslationResponse, EntityStats, TranslationResponse, TranslationStatsResponse
+
+### Community 84 - "EventManagersPanel.tsx"
+Cohesion: 0.38
+Nodes (8): CompetitionDetailPage(), EditionSelector(), EditionSelectorCompact(), EditionSelectorProps, useCompetition(), useAvailableYears(), useEditionByYear(), useEditions()
+
 ### Community 85 - "catalogs.service.ts"
-Cohesion: 0.08
-Nodes (24): CompetitionCard(), CompetitionCardCompactProps, CompetitionCardProps, COUNTRY_FLAGS, COMPETITION_TYPES, CompetitionFilters(), CompetitionFiltersProps, COUNTRIES (+16 more)
+Cohesion: 0.17
+Nodes (11): CatalogService, catalogsService, competitionTypesService, CatalogType, CompetitionType, CreateCatalogDTO, CreateSpecialSeriesDTO, SpecialSeries (+3 more)
 
 ### Community 86 - "admin.schema.ts"
 Cohesion: 0.14
 Nodes (13): DeleteUserInput, deleteUserSchema, getStatsSchema, GetUserByIdInput, getUserByIdSchema, GetUsersInput, getUsersSchema, GetUserStatsInput (+5 more)
+
+### Community 87 - "CatalogService"
+Cohesion: 0.22
+Nodes (4): EventDetailPage(), getMonthName(), NOTE: event favorites are not yet backed by an API (the spec marks this as, SaveEventButton()
 
 ### Community 88 - "photos.service.ts"
 Cohesion: 0.28
@@ -524,23 +559,23 @@ Nodes (7): EditionGalleryProps, photosService, EditionPhoto, PHOTO_UPLOAD_CONFIG
 
 ### Community 89 - "devDependencies"
 Cohesion: 0.15
-Nodes (13): autoprefixer, eslint, devDependencies, autoprefixer, eslint, @types/node, @types/react, @types/uuid (+5 more)
+Nodes (13): eslint, devDependencies, eslint, @types/js-cookie, @types/nodemailer, @types/react, @types/uuid, typescript (+5 more)
 
 ### Community 90 - "error-handler.ts"
 Cohesion: 0.17
 Nodes (5): ApiError, ApiResponse, Language, LANGUAGE_NAMES, LANGUAGES
 
 ### Community 91 - "competition-admin.service.ts"
-Cohesion: 0.17
-Nodes (6): CompetitionAdminService, GetOrganizerOptions, GetPendingOptions, PaginatedCompetitions, TODO: Enviar notificación al organizador, TODO: Enviar notificación al organizador con razón
+Cohesion: 0.09
+Nodes (15): cache, memoryCache, CompetitionAdminService, GetOrganizerOptions, GetPendingOptions, PaginatedCompetitions, TODO: Enviar notificación al organizador, TODO: Enviar notificación al organizador con razón (+7 more)
+
+### Community 92 - "FeaturedEvents.tsx"
+Cohesion: 0.29
+Nodes (6): FeaturedEvents(), LargeCard(), mediaUrl(), SmallCard(), StatChip(), StatChipProps
 
 ### Community 93 - "types.ts"
 Cohesion: 0.23
 Nodes (10): ApiError, ApiResponse, AuthResponse, Competition, CompetitionFilters, LoginCredentials, PaginatedResponse, RegisterData (+2 more)
-
-### Community 95 - "TranslationsService"
-Cohesion: 0.16
-Nodes (5): BulkTranslationResponse, EntityStats, TranslationResponse, TranslationsService, TranslationStatsResponse
 
 ### Community 96 - "edition.schema.ts"
 Cohesion: 0.17
@@ -558,9 +593,13 @@ Nodes (13): scripts, build, db:export, db:fix-home-encoding, db:import, dev, lin
 Cohesion: 0.18
 Nodes (11): @aws-sdk/client-s3, js-cookie, jsonwebtoken, dependencies, @aws-sdk/client-s3, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
 
+### Community 100 - "PostsService"
+Cohesion: 0.18
+Nodes (3): PostsService, ServiceCategoryService, generateUniqueSlug()
+
 ### Community 101 - "SEOService"
-Cohesion: 0.05
-Nodes (37): CompetitionDetailPage(), EventMap, CompetitionDetailPage(), EventDetailPage(), getMonthName(), OrganizerDetailPage(), EventMap, ServiceDetailPage() (+29 more)
+Cohesion: 0.11
+Nodes (7): FAQItem, SEOFaqSchema(), SEOFaqSchemaProps, GenerateSEOInput, SEOConfig, SEOService, UpsertConfigInput
 
 ### Community 102 - "competition.schema.ts"
 Cohesion: 0.20
@@ -571,8 +610,12 @@ Cohesion: 0.20
 Nodes (9): CreateResultInput, createResultSchema, GetResultsQuery, getResultsSchema, ImportResultsInput, importResultsSchema, resultIdSchema, UpdateResultInput (+1 more)
 
 ### Community 104 - "SpecialSeriesService"
-Cohesion: 0.29
-Nodes (6): COMMUNITY, EXPLORE, Footer(), FOOTER_EXCLUDED_ROUTES, FooterLink, SOCIAL
+Cohesion: 0.36
+Nodes (6): LanguageSelector(), Locale, localeFlags, localeNames, locales, { Link, redirect, usePathname, useRouter }
+
+### Community 105 - "route.ts"
+Cohesion: 0.31
+Nodes (4): GET(), PUT(), GET(), SiteConfigService
 
 ### Community 106 - "review.schema.ts"
 Cohesion: 0.22
@@ -580,11 +623,31 @@ Nodes (8): CreateReviewInput, createReviewSchema, GetReviewsParams, GetReviewsQu
 
 ### Community 107 - "omniwallet.service.ts"
 Cohesion: 0.10
-Nodes (23): globalForPrisma, TokenPayload, SendCouponEmailParams, CreateEmailTemplateInput, UpdateEmailTemplateInput, AddManagerInput, EventManagerWithUser, UpdateFooterInput (+15 more)
+Nodes (20): globalForPrisma, TokenPayload, SendCouponEmailParams, CreateEmailTemplateInput, UpdateEmailTemplateInput, AddManagerInput, EventManagerWithUser, UpdateFooterInput (+12 more)
+
+### Community 108 - "omniwallet.service.ts"
+Cohesion: 0.22
+Nodes (8): AddPointsData, CreateCustomerData, CustomerAttributes, CustomerLinks, CustomerResponse, OmniwalletConfig, TransactionAttributes, TransactionResponse
+
+### Community 109 - "DirectoryMapClient.tsx"
+Cohesion: 0.29
+Nodes (7): DirectoryFilters, DirectoryMapClient(), ItemType, MAP_TILES, MapMode, spreadOverlappingMarkers(), terrainTypesService
 
 ### Community 110 - "participant.schema.ts"
 Cohesion: 0.25
 Nodes (7): CreateParticipantInput, createParticipantSchema, GetParticipantsQuery, getParticipantsSchema, participantIdSchema, UpdateParticipantInput, updateParticipantSchema
+
+### Community 111 - "ServiceService"
+Cohesion: 0.16
+Nodes (8): DELETE(), GET(), PUT(), GET(), GET(), POST(), GET(), ServiceService
+
+### Community 112 - "EventCard.tsx"
+Cohesion: 0.38
+Nodes (4): EventCardProps, EventStatusBadge(), EventStatusBadgeProps, EventWithCounts
+
+### Community 113 - "events.service.ts"
+Cohesion: 0.29
+Nodes (6): apiClientV1, ApiResponse, EventFilters, EventResponseV1, EventsResponseV1, PaginationData
 
 ### Community 114 - "useSlugValidation.ts"
 Cohesion: 0.38
@@ -599,40 +662,40 @@ Cohesion: 0.40
 Nodes (3): EditionStatsCompactProps, EditionStatsProps, EditionStats
 
 ### Community 121 - "client.ts"
-Cohesion: 0.22
-Nodes (12): importService, POST(), DELETE(), GET(), importService, POST(), ENCODING_FIXES, fixEncoding() (+4 more)
+Cohesion: 0.20
+Nodes (13): importService, POST(), DELETE(), GET(), importService, POST(), NativeImportOptions, ENCODING_FIXES (+5 more)
 
 ### Community 125 - "export-local.ts"
 Cohesion: 0.67
 Nodes (3): exportAll(), getCoordinates(), prisma
 
 ### Community 127 - "useUserCompetitions"
-Cohesion: 0.50
-Nodes (4): MyRegistrationsPage(), CompetitionActions(), useCompetitionStatus(), useUserCompetitions()
+Cohesion: 0.36
+Nodes (6): MyRegistrationsPage(), CompetitionActions(), CompetitionActionsProps, useCompetitionStatus(), useUserCompetitions(), UserCompetitionStatus
 
-### Community 191 - "react"
-Cohesion: 0.18
-Nodes (11): DashboardLayout(), DashboardLayoutProps, OrganizerLayout(), CollapsibleUserInfo(), CollapsibleUserInfoProps, DashboardNav(), NavItem, navItems (+3 more)
+### Community 138 - "EventSelect.tsx"
+Cohesion: 0.25
+Nodes (5): OrganizerCompetitionsPage(), ConfirmDialog(), ConfirmDialogProps, EventOption, EventSelectProps
 
 ## Knowledge Gaps
-- **719 isolated node(s):** `CalView`, `CalEdition`, `MONTHS_ES`, `EventMap`, `DashboardLayoutProps` (+714 more)
+- **721 isolated node(s):** `CalView`, `CalEdition`, `MONTHS_ES`, `EventMap`, `DashboardLayoutProps` (+716 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **79 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **72 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `apiClientV2` connect `organizers.service.ts` to `admin.service.ts`, `button.tsx`, `useAuth`, `user.service.ts`, `edition.ts`, `rating.ts`, `promotion.ts`, `HomeService`, `PromotionForm.tsx`, `index.ts`, `events.service.ts`, `ZancadasBalance.tsx`, `home.ts`, `apiClientV2`, `email-templates.service.ts`, `index.ts`, `page.tsx`, `SpecialSeries`, `Service`, `catalogs.service.ts`, `photos.service.ts`, `types.ts`, `TranslationsService`, `SEOService`?**
-  _High betweenness centrality (0.253) - this node is a cross-community bridge._
+- **Why does `apiClientV2` connect `userEdition.schema.ts` to `admin.service.ts`, `button.tsx`, `layout.tsx`, `edition.ts`, `rating.ts`, `promotion.ts`, `HomeService`, `index.ts`, `organizers.service.ts`, `ZancadasBalance.tsx`, `home.ts`, `apiClientV2`, `email-templates.service.ts`, `index.ts`, `page.tsx`, `services.service.ts`, `SpecialSeries`, `EventManagersPanel.tsx`, `catalogs.service.ts`, `photos.service.ts`, `types.ts`, `SEOService`, `events.service.ts`?**
+  _High betweenness centrality (0.263) - this node is a cross-community bridge._
 - **What connects `CalView`, `CalEdition`, `MONTHS_ES` to the rest of the system?**
-  _728 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _730 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `apiSuccess` be split into smaller, more focused modules?**
-  _Cohesion score 0.05196717862402693 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07171717171717172 - nodes in this community are weakly interconnected._
 - **Should `requireRole` be split into smaller, more focused modules?**
-  _Cohesion score 0.03989071038251366 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04149620105201637 - nodes in this community are weakly interconnected._
 - **Should `admin.service.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.04480874316939891 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04251469923111714 - nodes in this community are weakly interconnected._
 - **Should `button.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.08647936786654961 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08470588235294117 - nodes in this community are weakly interconnected._
 - **Should `requireAuth` be split into smaller, more focused modules?**
-  _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1455026455026455 - nodes in this community are weakly interconnected._
