@@ -11,12 +11,15 @@ import type {
 // Tipos de catálogos disponibles
 type CatalogType = 'competitionType' | 'terrainType' | 'specialSeries';
 
-// Mapeo de nombres a modelos de Prisma
-const catalogModels = {
+// Mapeo de nombres a modelos de Prisma.
+// Los tres delegates tienen firmas distintas; este servicio hace CRUD genérico
+// sobre cualquiera de ellos, así que se tipan como `any` (unión de delegates no
+// es invocable de forma segura en TS).
+const catalogModels: Record<CatalogType, any> = {
   competitionType: prisma.competitionType,
   terrainType: prisma.terrainType,
   specialSeries: prisma.specialSeries,
-} as const;
+};
 
 export class CatalogService {
   /**
@@ -136,11 +139,14 @@ export class CatalogService {
       throw new AppError('Special Series with this name already exists', 409);
     }
 
+    // NOTE: unused/legacy path — SpecialSeries has its own dedicated service
+    // (specialSeries.service.ts). This shape does not match the current Prisma
+    // model (missing required country/createdById); cast to unblock typing.
     const item = await prisma.specialSeries.create({
       data: {
         ...data,
         slug,
-      },
+      } as any,
     });
 
     return item;

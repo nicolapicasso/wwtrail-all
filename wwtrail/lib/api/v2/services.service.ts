@@ -49,7 +49,7 @@ class ServicesService {
    */
   async getById(id: string): Promise<ServiceResponse> {
     const response = await apiClientV2.get<ServiceResponse>(`/services/${id}`);
-    return response.data?.data || response.data;
+    return response.data;
   }
 
   /**
@@ -57,7 +57,7 @@ class ServicesService {
    */
   async getBySlug(slug: string): Promise<ServiceResponse> {
     const response = await apiClientV2.get<ServiceResponse>(`/services/slug/${slug}`);
-    return response.data?.data || response.data;
+    return response.data;
   }
 
   /**
@@ -67,7 +67,7 @@ class ServicesService {
     const response = await apiClientV2.get<{ status: string; data: Service[]; count: number }>(
       `/services/organizer/${organizerId}`
     );
-    const inner = response.data?.data || response.data;
+    const inner: any = response.data?.data || response.data;
     return {
       status: 'success',
       data: Array.isArray(inner) ? inner : (inner.data || []),
@@ -80,7 +80,7 @@ class ServicesService {
    */
   async create(data: CreateServiceInput): Promise<ServiceResponse> {
     const response = await apiClientV2.post<ServiceResponse>('/services', data);
-    return response.data?.data || response.data;
+    return response.data;
   }
 
   /**
@@ -88,7 +88,7 @@ class ServicesService {
    */
   async update(id: string, data: UpdateServiceInput): Promise<ServiceResponse> {
     const response = await apiClientV2.put<ServiceResponse>(`/services/${id}`, data);
-    return response.data?.data || response.data;
+    return response.data;
   }
 
   /**
@@ -96,7 +96,7 @@ class ServicesService {
    */
   async delete(id: string): Promise<{ status: string; message: string }> {
     const response = await apiClientV2.delete<{ status: string; message: string }>(`/services/${id}`);
-    return response.data?.data || response.data;
+    return response.data;
   }
 
   /**
@@ -104,7 +104,7 @@ class ServicesService {
    */
   async toggleFeatured(id: string): Promise<ServiceResponse> {
     const response = await apiClientV2.patch<ServiceResponse>(`/services/${id}/featured`);
-    return response.data?.data || response.data;
+    return response.data;
   }
 
   /**
@@ -114,7 +114,7 @@ class ServicesService {
     const response = await apiClientV2.get<{ status: string; data: Service[] }>(
       `/services/nearby?lat=${lat}&lon=${lon}&radius=${radius}`
     );
-    const inner = response.data?.data || response.data;
+    const inner: any = response.data?.data || response.data;
     const items = inner?.data || inner;
     return Array.isArray(items) ? items : [];
   }
