@@ -6,18 +6,21 @@ import { UserRole } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+
 // Access and refresh tokens MUST NOT share a signing secret, otherwise a leaked
 // access token could be replayed as a refresh token. Require a dedicated secret
 // in production; only derive a distinct fallback for local development.
-const JWT_REFRESH_SECRET = (() => {
+// Resolved lazily (on first use) so importing this module — e.g. during
+// `next build` page-data collection — never throws.
+function getRefreshSecret(): string {
   if (process.env.JWT_REFRESH_SECRET) return process.env.JWT_REFRESH_SECRET;
   if (process.env.NODE_ENV === 'production') {
     throw new Error('JWT_REFRESH_SECRET must be set in production');
   }
   // Dev-only: derive a value that is guaranteed different from JWT_SECRET.
-  return `${process.env.JWT_SECRET!}-refresh`;
-})();
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+  return `${process.env.JWT_SECRET}-refresh`;
+}
 
 export interface TokenPayload {
   id: string;
@@ -53,7 +56,7 @@ export async function generateTokens(user: { id: string; email: string; role: Us
     expiresIn: JWT_EXPIRES_IN,
   } as jwt.SignOptions);
 
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
+  const refreshToken = jwt.sign(payload, getRefreshSecret(), {
     expiresIn: JWT_REFRESH_EXPIRES_IN,
   } as jwt.SignOptions);
 
@@ -79,7 +82,7 @@ export function verifyToken(token: string): TokenPayload {
 
 // Verify JWT refresh token
 export function verifyRefreshToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_REFRESH_SECRET) as TokenPayload;
+  return jwt.verify(token, getRefreshSecret()) as TokenPayload;
 }
 
 // Extract authenticated user from request (for API routes)
