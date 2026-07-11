@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "app/[locale]/dashboard/site-config/page.tsx": {
-    "mtime": 1783752630.7294705,
-    "ast_hash": "5f936a5b1c2aedc9c2fa80c21d86e750",
+    "mtime": 1783766710.382414,
+    "ast_hash": "6b38fc3f2eb6c04c5c13b557a522eb60",
     "semantic_hash": ""
   },
   "app/[locale]/demo/ratings/page.tsx": {
@@ -2382,6 +2382,31 @@
   "types/weather.ts": {
     "mtime": 1783752630.867011,
     "ast_hash": "fb01e2bcc41111ce5407511102396760",
+    "semantic_hash": ""
+  },
+  "app/api/v2/admin/theme-presets/[id]/route.ts": {
+    "mtime": 1783766664.7944152,
+    "ast_hash": "65c9945bf8f309b03664a4d08d408c4b",
+    "semantic_hash": ""
+  },
+  "app/api/v2/admin/theme-presets/route.ts": {
+    "mtime": 1783766660.4064152,
+    "ast_hash": "6d8f498291521ef3b0a91f1e6539bc0e",
+    "semantic_hash": ""
+  },
+  "lib/services/themePreset.service.ts": {
+    "mtime": 1783766654.9624155,
+    "ast_hash": "c3134a8188c0ade64cfdad82fe3fae5d",
+    "semantic_hash": ""
+  },
+  "lib/theme/presets.ts": {
+    "mtime": 1783766640.3344157,
+    "ast_hash": "ca5815389978e828164b48bd277f3fc5",
+    "semantic_hash": ""
+  },
+  "prisma/migrations/20260711120000_add_theme_preset/migration.sql": {
+    "mtime": 1783766625.0697618,
+    "ast_hash": "b9f750076ca810a1b2a2009bcaba716e",
     "semantic_hash": ""
   }
 }
