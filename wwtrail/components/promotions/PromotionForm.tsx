@@ -17,12 +17,12 @@ interface PromotionFormProps {
 }
 
 const LANGUAGES: { value: Language; label: string }[] = [
-  { value: 'ES', label: 'Español' },
-  { value: 'EN', label: 'English' },
-  { value: 'IT', label: 'Italiano' },
-  { value: 'CA', label: 'Català' },
-  { value: 'FR', label: 'Français' },
-  { value: 'DE', label: 'Deutsch' },
+  { value: Language.ES, label: 'Español' },
+  { value: Language.EN, label: 'English' },
+  { value: Language.IT, label: 'Italiano' },
+  { value: Language.CA, label: 'Català' },
+  { value: Language.FR, label: 'Français' },
+  { value: Language.DE, label: 'Deutsch' },
 ];
 
 export default function PromotionForm({ promotion, onSuccess }: PromotionFormProps) {
@@ -42,13 +42,13 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
   const [coverImage, setCoverImage] = useState(promotion?.coverImage || '');
   const [gallery, setGallery] = useState<string[]>(promotion?.gallery || []);
   const [brandUrl, setBrandUrl] = useState(promotion?.brandUrl || '');
-  const [language, setLanguage] = useState<Language>(promotion?.language || 'ES');
+  const [language, setLanguage] = useState<Language>((promotion?.language as Language) || Language.ES);
   const [isGlobal, setIsGlobal] = useState(promotion?.isGlobal || false);
   const [countries, setCountries] = useState<string[]>(
     promotion?.countries?.map(c => c.countryCode) || []
   );
   const [featured, setFeatured] = useState(promotion?.featured || false);
-  const [status, setStatus] = useState<PostStatus>(promotion?.status || PostStatus.DRAFT);
+  const [status, setStatus] = useState<PostStatus>((promotion?.status as unknown as PostStatus) || PostStatus.DRAFT);
 
   // Type-specific fields
   const [exclusiveContent, setExclusiveContent] = useState(promotion?.exclusiveContent || '');

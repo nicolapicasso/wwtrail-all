@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Language } from '@/types/v2';
 
-const ALL_LANGUAGES: Language[] = ['ES', 'EN', 'IT', 'CA', 'FR', 'DE'];
+const ALL_LANGUAGES: Language[] = [Language.ES, Language.EN, Language.IT, Language.CA, Language.FR, Language.DE];
 
 export default function EditLandingPage({ params }: { params: { id: string } }) {
   const { user, loading: authLoading } = useAuth();
