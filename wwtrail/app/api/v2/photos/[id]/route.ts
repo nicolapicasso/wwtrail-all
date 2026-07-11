@@ -6,7 +6,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const photo = await EditionPhotoService.update(params.id, data);
+    const photo = await EditionPhotoService.updateMetadata(params.id, data);
     return apiSuccess(photo);
   } catch (error) { return apiError(error); }
 }

@@ -9,12 +9,12 @@ export async function GET(request: NextRequest) {
 
     if (action === 'balance') {
       const user = await requireAuth(request);
-      const balance = await zancadasService.getBalance(user.id);
+      const balance = await zancadasService.getUserBalance(user.id);
       return apiSuccess(balance);
     }
     if (action === 'transactions') {
       const user = await requireAuth(request);
-      const transactions = await zancadasService.getTransactions(user.id);
+      const transactions = await zancadasService.getUserTransactions(user.id);
       return apiSuccess(transactions);
     }
 

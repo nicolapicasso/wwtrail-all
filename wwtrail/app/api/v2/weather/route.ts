@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const editionId = searchParams.get('editionId');
     if (!editionId) return apiError(new Error('editionId required'));
-    const weather = await WeatherService.getByEdition(editionId);
+    const weather = await WeatherService.getEditionWeather(editionId);
     return apiSuccess(weather);
   } catch (error) { return apiError(error); }
 }
