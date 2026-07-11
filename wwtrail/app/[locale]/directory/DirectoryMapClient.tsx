@@ -314,7 +314,12 @@ export default function DirectoryMapClient() {
             limit: 1000,
           });
 
-          const competitionsWithLocation = competitionsData.competitions.filter(
+          // findAll returns a plain array; be tolerant of a wrapped shape too.
+          const competitionsArray: any[] = Array.isArray(competitionsData)
+            ? competitionsData
+            : competitionsData?.competitions ?? competitionsData?.data ?? [];
+
+          const competitionsWithLocation = competitionsArray.filter(
             (c: any) => c.event?.latitude && c.event?.longitude
           );
 
@@ -457,7 +462,11 @@ export default function DirectoryMapClient() {
             search: filters.search || undefined,
           });
 
-          const servicesWithLocation = servicesData.data.filter(
+          const servicesArray: any[] = Array.isArray(servicesData)
+            ? servicesData
+            : (servicesData as any)?.data ?? (servicesData as any)?.services ?? [];
+
+          const servicesWithLocation = servicesArray.filter(
             (s: any) => s.latitude && s.longitude
           );
 
@@ -640,7 +649,9 @@ export default function DirectoryMapClient() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    // `isolate` + z-0 keeps Leaflet's internal panes/controls (z up to 1001)
+    // inside this stacking context, so they never paint over the sticky navbar.
+    <div className="relative z-0 isolate flex h-screen overflow-hidden">
       {/* Filters Sidebar - Collapsible */}
       <div
         className={`bg-surface border-r border-hairline flex flex-col transition-all duration-300 ${
