@@ -104,59 +104,6 @@ const config: Config = {
         elevated: '0 12px 40px rgba(0,0,0,.35)',
         floating: '0 4px 18px rgba(0,0,0,.22)',
       },
-      keyframes: {
-        twinkle: {
-          '0%, 100%': { opacity: '0.3' },
-          '50%': { opacity: '1' },
-        },
-        'cloud-float': {
-          'from': { transform: 'translateX(-150px)' },
-          'to': { transform: 'translateX(calc(100vw + 150px))' },
-        },
-        wave: {
-          '0%, 100%': { transform: 'translateX(-25%)' },
-          '50%': { transform: 'translateX(0%)' },
-        },
-        'wave-reverse': {
-          '0%, 100%': { transform: 'translateX(0%)' },
-          '50%': { transform: 'translateX(-25%)' },
-        },
-        'windmill-spin': {
-          'from': { transform: 'rotate(0deg)' },
-          'to': { transform: 'rotate(360deg)' },
-        },
-        firefly: {
-          '0%, 100%': { opacity: '0', transform: 'translate(0, 0)' },
-          '25%': { opacity: '1' },
-          '50%': { opacity: '1', transform: 'translate(10px, -15px)' },
-          '75%': { opacity: '0.5' },
-        },
-        tumbleweed: {
-          '0%': { transform: 'translateX(-30px) rotate(0deg)', opacity: '0' },
-          '5%': { opacity: '1' },
-          '95%': { opacity: '1' },
-          '100%': { transform: 'translateX(calc(100vw + 30px)) rotate(720deg)', opacity: '0' },
-        },
-        'bird-fly': {
-          '0%': { transform: 'translateX(-20px)' },
-          '100%': { transform: 'translateX(calc(100vw + 20px))' },
-        },
-        'bird-flap': {
-          '0%, 100%': { transform: 'scaleY(1)' },
-          '50%': { transform: 'scaleY(0.6)' },
-        },
-      },
-      animation: {
-        twinkle: 'twinkle 3s ease-in-out infinite',
-        'cloud-float': 'cloud-float 50s linear infinite',
-        wave: 'wave 8s ease-in-out infinite',
-        'wave-reverse': 'wave-reverse 6s ease-in-out infinite',
-        'windmill-spin': 'windmill-spin 8s linear infinite',
-        firefly: 'firefly 4s ease-in-out infinite',
-        tumbleweed: 'tumbleweed 30s linear infinite',
-        'bird-fly': 'bird-fly 30s linear infinite',
-        'bird-flap': 'bird-flap 0.4s ease-in-out infinite',
-      },
     },
   },
   plugins: [require("tailwindcss-animate")],

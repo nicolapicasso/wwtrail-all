@@ -1,145 +1,128 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
+import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { footerService, FooterContent } from '@/lib/api/footer.service';
-import { LandscapeBackground } from '@/components/footer/landscapes';
+import { Instagram, Facebook, Youtube } from 'lucide-react';
 
-// Routes where footer should NOT be shown (matched by path segment, not substring)
-const FOOTER_EXCLUDED_ROUTES = ['organizer', 'dashboard', 'directory'];
+// Routes where the footer should NOT be shown (segment match)
+const FOOTER_EXCLUDED_ROUTES = ['organizer', 'dashboard', 'directory', 'admin'];
+
+const LOGO_SRC =
+  'https://wwtrail-uploads.fra1.digitaloceanspaces.com/uploads/others/logo_cabecera.webp';
+
+type FooterLink = { label: string; href: string };
+
+const EXPLORE: FooterLink[] = [
+  { label: 'Eventos', href: '/events' },
+  { label: 'Competiciones', href: '/competitions' },
+  { label: 'Special Series', href: '/special-series' },
+  { label: 'Servicios', href: '/services' },
+  { label: 'Mapa', href: '/directory' },
+];
+
+const COMMUNITY: FooterLink[] = [
+  { label: 'Organizadores', href: '/organizers' },
+  { label: 'Directorio de usuarios', href: '/users' },
+  { label: 'Insiders', href: '/users/insiders' },
+  { label: 'Ventajas', href: '/promotions' },
+  { label: 'Revista', href: '/magazine' },
+];
+
+const SOCIAL = [
+  { label: 'Instagram', href: 'https://instagram.com', Icon: Instagram },
+  { label: 'Facebook', href: 'https://facebook.com', Icon: Facebook },
+  { label: 'YouTube', href: 'https://youtube.com', Icon: Youtube },
+];
+
+function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
+  return (
+    <div>
+      <h4 className="mb-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white/50">
+        {title}
+      </h4>
+      <ul className="space-y-2.5">
+        {links.map((l) => (
+          <li key={l.href}>
+            <Link
+              href={l.href}
+              className="text-[14px] text-white/75 transition-colors hover:text-white"
+            >
+              {l.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Footer() {
-  const locale = useLocale();
   const pathname = usePathname();
-  const [content, setContent] = useState<FooterContent>({
-    leftColumn: null,
-    centerColumn: null,
-    rightColumn: null,
-  });
-  const [loading, setLoading] = useState(true);
-
-  // Check if current route should hide the footer (using segment matching, not substring)
   const segments = pathname?.split('/').filter(Boolean) || [];
-  const shouldHideFooter = FOOTER_EXCLUDED_ROUTES.some(route => segments.includes(route));
+  const shouldHide = FOOTER_EXCLUDED_ROUTES.some((r) => segments.includes(r));
+  if (shouldHide) return null;
 
-  useEffect(() => {
-    // Skip loading footer data if we're on excluded routes
-    if (shouldHideFooter) {
-      setLoading(false);
-      return;
-    }
-
-    const loadFooter = async () => {
-      try {
-        const data = await footerService.getPublicFooter(locale.toUpperCase());
-        setContent(data);
-      } catch (error) {
-        console.error('Error loading footer:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFooter();
-  }, [locale, shouldHideFooter]);
-
-  // Don't render on excluded routes
-  if (shouldHideFooter) {
-    return null;
-  }
-
-  // Don't render anything while loading
-  if (loading) {
-    return null;
-  }
-
-  // Check if there's column content to display
-  const hasContent = content.leftColumn || content.centerColumn || content.rightColumn;
+  const year = 2026; // build-time constant (Date.now() is unavailable at build)
 
   return (
-    <div className="footer-wrapper fixed bottom-0 left-0 right-0 h-[360px] z-0">
-      <footer className="absolute inset-0 overflow-hidden">
-        {/* Landscape Background Layer */}
-        <LandscapeBackground />
+    <footer className="w-full bg-ink text-white">
+      <div className="mx-auto max-w-content px-6 py-14 sm:px-8 lg:px-10">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          {/* Brand block */}
+          <div>
+            <Link href="/" className="inline-flex items-center">
+              <span className="relative block h-9 w-40">
+                <Image src={LOGO_SRC} alt="WWTRAIL" fill className="object-contain object-left" />
+              </span>
+            </Link>
+            <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/60">
+              Toda carrera de montaña del mundo, en un solo lugar. Descubre eventos,
+              competiciones y circuitos de trail running.
+            </p>
+          </div>
 
-        {/* Semi-transparent overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-10" />
+          {/* Link columns */}
+          <FooterColumn title="Explorar" links={EXPLORE} />
+          <FooterColumn title="Comunidad" links={COMMUNITY} />
 
-        {/* Content Layer - only render if there's content */}
-        {hasContent && (
-          <div className="absolute inset-x-0 bottom-0 z-20">
-            <div className="container mx-auto px-4 py-8">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                {/* Left Column (1/4) */}
-                {content.leftColumn && (
-                  <div
-                    className="footer-column"
-                    dangerouslySetInnerHTML={{ __html: content.leftColumn }}
-                  />
-                )}
-
-                {/* Center Column (2/4) */}
-                {content.centerColumn && (
-                  <div
-                    className="footer-column md:col-span-2"
-                    dangerouslySetInnerHTML={{ __html: content.centerColumn }}
-                  />
-                )}
-
-                {/* Right Column (1/4) */}
-                {content.rightColumn && (
-                  <div
-                    className="footer-column"
-                    dangerouslySetInnerHTML={{ __html: content.rightColumn }}
-                  />
-                )}
-              </div>
+          {/* Social */}
+          <div>
+            <h4 className="mb-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white/50">
+              Síguenos
+            </h4>
+            <div className="flex gap-3">
+              {SOCIAL.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="flex h-10 w-10 items-center justify-center rounded-pill border border-white/15 text-white/75 transition-colors hover:border-green-bright hover:text-green-bright"
+                >
+                  <Icon className="h-4.5 w-4.5" />
+                </a>
+              ))}
             </div>
           </div>
-        )}
-      </footer>
+        </div>
+      </div>
 
-      <style jsx>{`
-        :global(.footer-column) {
-          color: white;
-        }
-        :global(.footer-column h1),
-        :global(.footer-column h2),
-        :global(.footer-column h3),
-        :global(.footer-column h4),
-        :global(.footer-column h5),
-        :global(.footer-column h6) {
-          color: white;
-          margin-bottom: 1rem;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        :global(.footer-column p) {
-          color: rgba(255, 255, 255, 0.9);
-          margin-bottom: 0.5rem;
-          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        :global(.footer-column a) {
-          color: rgba(255, 255, 255, 0.85);
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        :global(.footer-column a:hover) {
-          color: white;
-          text-decoration: underline;
-        }
-        :global(.footer-column ul) {
-          list-style: none;
-          padding: 0;
-        }
-        :global(.footer-column li) {
-          margin-bottom: 0.5rem;
-        }
-        :global(.footer-column img) {
-          max-width: 100%;
-          height: auto;
-        }
-      `}</style>
-    </div>
+      {/* Bottom bar */}
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-content flex-col items-center justify-between gap-2 px-6 py-5 text-[13px] text-white/50 sm:flex-row sm:px-8 lg:px-10">
+          <span>© {year} WWTRAIL. Todos los derechos reservados.</span>
+          <div className="flex gap-5">
+            <Link href="/legal/privacy" className="hover:text-white/80">
+              Privacidad
+            </Link>
+            <Link href="/legal/terms" className="hover:text-white/80">
+              Términos
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }
