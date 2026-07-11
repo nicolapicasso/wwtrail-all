@@ -68,6 +68,15 @@ export class ScraperService {
       eventId = graph.event.existing.id;
       result.event = { id: eventId, slug: graph.event.existing.slug, created: false };
     } else {
+      // Event.firstEditionYear is required. Fall back to the earliest edition
+      // year found, else the current year.
+      const editionYears = graph.competitions
+        .flatMap((c) => c.editions.map((e) => e.year))
+        .filter((y): y is number => Number.isFinite(y));
+      const firstEditionYear =
+        graph.event.firstEditionYear ||
+        (editionYears.length ? Math.min(...editionYears) : new Date().getFullYear());
+
       const created = await EventService.create(
         {
           name: graph.event.name,
@@ -75,7 +84,7 @@ export class ScraperService {
           country: graph.event.country || null,
           website: graph.event.website || undefined,
           typicalMonth: graph.event.typicalMonth || undefined,
-          firstEditionYear: graph.event.firstEditionYear || undefined,
+          firstEditionYear,
           description: graph.event.description || undefined,
         },
         userId,
