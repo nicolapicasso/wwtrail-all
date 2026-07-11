@@ -6,15 +6,15 @@ import { UserList } from '@/components/UserList';
 
 export default function UsersPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-paper">
+      <div className="mx-auto max-w-content px-6 py-10 sm:px-8 lg:px-10">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Users className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Comunidad</h1>
+        <div className="mb-6">
+          <div className="mb-2 flex items-center gap-3">
+            <Users className="h-8 w-8 text-green-brand" />
+            <h1 className="text-[34px] font-black tracking-[-0.02em] text-ink-2">Comunidad</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-[15px] text-text-muted">
             Descubre a otros corredores de trail y sus logros
           </p>
         </div>

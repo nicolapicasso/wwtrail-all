@@ -75,21 +75,21 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-brand border-t-transparent"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-paper flex flex-col items-center justify-center">
         <div className="text-center">
-          <UserIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{error}</h1>
+          <UserIcon className="mx-auto mb-4 h-16 w-16 text-text-faint/40" />
+          <h1 className="mb-2 text-[24px] font-black text-ink-2">{error}</h1>
           <button
             onClick={() => router.back()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 rounded-md bg-green-brand px-4 py-2 font-semibold text-white hover:brightness-95"
           >
             Volver
           </button>
@@ -100,222 +100,191 @@ export default function UserProfilePage() {
 
   if (!profile) return null;
 
+  const isInsider = profile.isInsider;
+  const heroBg = isInsider
+    ? 'linear-gradient(105deg,#e8961f 0%,#d1631f 100%)'
+    : 'linear-gradient(120deg,#173f6e 0%,#1f7a4d 100%)';
+  const avatarColor = isInsider ? '#b9541a' : '#0e3f36';
+  const initials = profileInitials(profile.fullName, profile.username);
+  const hasSocials = !!(profile.instagramUrl || profile.facebookUrl || profile.twitterUrl || profile.youtubeUrl);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with gradient */}
-      <div className="bg-gradient-to-br from-blue-600 to-purple-700 text-white">
-        <div className="container mx-auto px-4 py-8">
-          {/* Back button */}
+    <div className="min-h-screen bg-paper">
+      {/* Hero */}
+      <div className="relative h-[300px] overflow-hidden" style={{ background: heroBg }}>
+        <svg className="absolute inset-0 h-full w-full opacity-[.16]" preserveAspectRatio="none" viewBox="0 0 1360 300" aria-hidden>
+          <g fill="none" stroke="#fff" strokeWidth="1.2">
+            <path d="M0 210 Q340 150 680 185 T1360 165" />
+            <path d="M0 168 Q340 105 680 145 T1360 120" />
+            <path d="M0 126 Q340 62 680 102 T1360 78" />
+          </g>
+        </svg>
+        <div className="relative mx-auto flex h-full max-w-content flex-col justify-center px-6 text-white sm:px-8 lg:px-10">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
+            className="absolute left-6 top-6 flex items-center gap-2 text-[14px] font-bold opacity-90 hover:opacity-100 sm:left-8 lg:left-10"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
+            <ArrowLeft className="h-4 w-4" /> Volver
           </button>
 
-          {/* Profile header */}
-          <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="flex flex-col items-center gap-7 md:flex-row md:items-center">
             {/* Avatar */}
-            <div className="relative w-32 h-32 md:w-40 md:h-40">
-              <div className="w-full h-full rounded-full overflow-hidden bg-white shadow-lg">
-                {profile.avatar ? (
-                  <Image
-                    src={profile.avatar}
-                    alt={profile.fullName}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <UserIcon className="w-16 h-16 text-gray-400" />
-                  </div>
-                )}
-              </div>
-              {profile.isInsider && <InsiderBadge badgeUrl={badgeUrl} size="lg" />}
+            <div
+              className="flex h-[132px] w-[132px] shrink-0 items-center justify-center rounded-[20px] border-4 border-white/50 text-[40px] font-black text-white shadow-floating"
+              style={{ backgroundColor: profile.avatar ? undefined : avatarColor }}
+            >
+              {profile.avatar ? (
+                <div className="relative h-full w-full overflow-hidden rounded-[16px]">
+                  <Image src={profile.avatar} alt={profile.fullName} fill className="object-cover" />
+                </div>
+              ) : (
+                initials
+              )}
             </div>
 
-            {/* Insider label */}
-            {profile.isInsider && (
-              <div className="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-medium">
-                <Star className="w-4 h-4 fill-white" />
-                WWTrail Insider
-              </div>
-            )}
-
             {/* Info */}
-            <div className="text-center md:text-left">
-              <h1 className="text-3xl md:text-4xl font-bold mb-1">{profile.fullName}</h1>
-              <p className="text-white/80 text-lg mb-3">@{profile.username}</p>
-
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-white/90">
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex flex-wrap items-center justify-center gap-4 md:justify-start">
+                <h1 className="text-[36px] font-black leading-none tracking-[-0.02em] sm:text-[46px]">{profile.fullName}</h1>
+                {isInsider && (
+                  <span className="rounded-pill bg-orange-accent px-3.5 py-1.5 text-[13px] font-extrabold text-[#241202]">
+                    ⭐ WWTrail Insider
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 text-[18px] font-semibold opacity-90">@{profile.username}</div>
+              <div className="mt-3.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[15px] font-semibold opacity-90 md:justify-start">
                 {profile.country && (
-                  <span className="flex items-center gap-1">
-                    <span className="text-xl">{getCountryFlag(profile.country)}</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-lg">{getCountryFlag(profile.country)}</span>
                     {getCountryName(profile.country, locale)}
                   </span>
                 )}
-                {profile.city && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    {profile.city}
-                  </span>
-                )}
-                {profile.age && (
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {profile.age} años
-                  </span>
-                )}
+                {profile.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {profile.city}</span>}
                 {genderLabel && <span>{genderLabel}</span>}
               </div>
-
-              {/* Social links */}
-              {(profile.instagramUrl ||
-                profile.facebookUrl ||
-                profile.twitterUrl ||
-                profile.youtubeUrl) && (
-                <div className="flex items-center justify-center md:justify-start gap-3 mt-4">
-                  {profile.instagramUrl && (
-                    <a
-                      href={profile.instagramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <Instagram className="w-5 h-5" />
-                    </a>
-                  )}
-                  {profile.facebookUrl && (
-                    <a
-                      href={profile.facebookUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <Facebook className="w-5 h-5" />
-                    </a>
-                  )}
-                  {profile.twitterUrl && (
-                    <a
-                      href={profile.twitterUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <Twitter className="w-5 h-5" />
-                    </a>
-                  )}
-                  {profile.youtubeUrl && (
-                    <a
-                      href={profile.youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <Youtube className="w-5 h-5" />
-                    </a>
-                  )}
+              {hasSocials && (
+                <div className="mt-4 flex items-center justify-center gap-2.5 md:justify-start">
+                  {profile.instagramUrl && <SocialIcon href={profile.instagramUrl}><Instagram className="h-4 w-4" /></SocialIcon>}
+                  {profile.facebookUrl && <SocialIcon href={profile.facebookUrl}><Facebook className="h-4 w-4" /></SocialIcon>}
+                  {profile.twitterUrl && <SocialIcon href={profile.twitterUrl}><Twitter className="h-4 w-4" /></SocialIcon>}
+                  {profile.youtubeUrl && <SocialIcon href={profile.youtubeUrl}><Youtube className="h-4 w-4" /></SocialIcon>}
                 </div>
               )}
             </div>
 
             {/* Stats */}
-            <div className="flex gap-6 md:ml-auto">
-              <div className="text-center">
-                <div className="text-3xl font-bold">{profile.stats.totalFinishes}</div>
-                <div className="text-white/80 text-sm">Finishes</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">{profile.stats.totalParticipations}</div>
-                <div className="text-white/80 text-sm">Carreras</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">{profile.stats.totalDNF}</div>
-                <div className="text-white/80 text-sm">DNF</div>
-              </div>
+            <div className="flex gap-9 self-center">
+              <HeroStat value={profile.stats.totalFinishes} label="Finishes" />
+              <HeroStat value={profile.stats.totalParticipations} label="Carreras" />
+              <HeroStat value={profile.stats.totalDNF} label="DNF" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left column - Bio */}
-          <div className="lg:col-span-1">
-            {profile.bio && (
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Sobre mí</h2>
-                <p className="text-gray-600 whitespace-pre-wrap">{profile.bio}</p>
-              </div>
-            )}
-
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Información</h2>
-              <dl className="space-y-3">
-                <div className="flex justify-between">
-                  <dt className="text-gray-500">Miembro desde</dt>
-                  <dd className="text-gray-900">
-                    {new Date(profile.createdAt).toLocaleDateString(locale, {
-                      year: 'numeric',
-                      month: 'long',
-                    })}
-                  </dd>
-                </div>
-                {profile.country && (
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">País</dt>
-                    <dd className="text-gray-900 flex items-center gap-1">
-                      <span>{getCountryFlag(profile.country)}</span>
-                      {getCountryName(profile.country, locale)}
-                    </dd>
-                  </div>
-                )}
-                {profile.city && (
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Ciudad</dt>
-                    <dd className="text-gray-900">{profile.city}</dd>
-                  </div>
-                )}
-              </dl>
+      <div className="mx-auto grid max-w-content grid-cols-1 items-start gap-7 px-6 py-8 sm:px-8 lg:grid-cols-[360px_1fr] lg:px-10">
+        {/* Left column */}
+        <div className="flex flex-col gap-5">
+          {profile.bio && (
+            <div className="rounded-[18px] border border-border bg-surface p-6 shadow-card">
+              <h2 className="mb-3 text-[20px] font-black text-ink-2">Sobre mí</h2>
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-text-muted">{profile.bio}</p>
             </div>
-          </div>
+          )}
 
-          {/* Right column - Participations */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Historial de carreras
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {profile.participations.length} carreras
-                </span>
-              </div>
-
-              {profile.participations.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No hay participaciones registradas</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {profile.participations.map((participation) => (
-                    <ParticipationCard
-                      key={participation.id}
-                      participation={participation}
-                      locale={locale}
-                    />
-                  ))}
-                </div>
+          <div className="rounded-[18px] border border-border bg-surface p-6 shadow-card">
+            <h2 className="mb-4 text-[20px] font-black text-ink-2">Información</h2>
+            <div className="flex flex-col">
+              <InfoRow label="Miembro desde" value={new Date(profile.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'long' })} />
+              {profile.country && (
+                <InfoRow
+                  label="País"
+                  value={<span className="flex items-center gap-1.5">{getCountryFlag(profile.country)} {getCountryName(profile.country, locale)}</span>}
+                />
               )}
+              {profile.city && <InfoRow label="Ciudad" value={profile.city} last />}
             </div>
           </div>
+
+          {isInsider && (
+            <div className="rounded-[18px] p-6 text-white" style={{ background: 'linear-gradient(135deg,#e8961f,#d1631f)' }}>
+              <div className="mb-1.5 text-[17px] font-black">⭐ WWTrail Insider</div>
+              <p className="text-[13.5px] leading-[1.55] text-[#ffeacf]">
+                Embajador verificado de la comunidad. Comparte experiencias, guías y recomendaciones de carreras.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Right column */}
+        <div className="min-h-[380px] rounded-[18px] border border-border bg-surface p-[30px] shadow-card">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-[22px] font-black tracking-[-0.01em] text-ink-2">Historial de carreras</h2>
+            <span className="text-[14px] font-semibold text-text-faint">{profile.participations.length} carreras</span>
+          </div>
+
+          {profile.participations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-[70px] text-center">
+              <div className="text-[56px] opacity-50">🏆</div>
+              <div className="mt-3 text-[15px] font-semibold text-text-faint">No hay participaciones registradas</div>
+              <Link
+                href="/events"
+                className="mt-5 rounded-md bg-green-brand px-[22px] py-3 text-[14px] font-extrabold text-white transition-[filter] hover:brightness-95"
+              >
+                Explorar carreras →
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {profile.participations.map((participation) => (
+                <ParticipationCard key={participation.id} participation={participation} locale={locale} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+function HeroStat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="text-center">
+      <div className="font-stat text-[44px] font-bold leading-none">{value}</div>
+      <div className="mt-1 text-[12px] font-bold uppercase tracking-[0.08em] opacity-85">{label}</div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value, last }: { label: string; value: React.ReactNode; last?: boolean }) {
+  return (
+    <div className={`flex justify-between py-[13px] ${last ? '' : 'border-b border-hairline'}`}>
+      <span className="text-[14px] font-semibold text-text-muted">{label}</span>
+      <span className="text-[14px] font-bold text-ink-2">{value}</span>
+    </div>
+  );
+}
+
+function SocialIcon({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25"
+    >
+      {children}
+    </a>
+  );
+}
+
+function profileInitials(name: string, fallback: string): string {
+  const words = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return (fallback || '?').slice(0, 2).toUpperCase();
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
 }
 
 // Participation card component
@@ -330,33 +299,29 @@ function ParticipationCard({
   const isDNF = participation.status === 'DNF';
 
   return (
-    <Link
-      href={`/${locale}/editions/${participation.edition.slug}`}
-    >
-      <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+    <Link href={`/${locale}/editions/${participation.edition.slug}`} className="block">
+      <div className="rounded-lg border border-border p-4 transition-colors hover:border-green-brand hover:bg-[#fbfdfb]">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-gray-900">
-                {participation.edition.competition.event.name}
-              </h3>
+            <div className="mb-1 flex items-center gap-2">
+              <h3 className="font-extrabold text-ink-2">{participation.edition.competition.event.name}</h3>
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                className={`rounded-pill px-2 py-0.5 text-[11px] font-bold ${
                   isFinisher
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-green-tint-bg text-green-brand'
                     : isDNF
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-gray-100 text-gray-700'
+                    ? 'bg-destructive/10 text-destructive'
+                    : 'bg-surface-alt text-text-muted'
                 }`}
               >
                 {isFinisher ? 'Finisher' : isDNF ? 'DNF' : participation.status}
               </span>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
-              {participation.edition.competition.name} - {participation.edition.year}
+            <p className="mb-2 text-[13.5px] text-text-muted">
+              {participation.edition.competition.name} · {participation.edition.year}
             </p>
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <Flag className="w-3 h-3" />
+            <div className="flex items-center gap-1 text-[12px] text-text-faint">
+              <Flag className="h-3 w-3" />
               {getCountryName(participation.edition.competition.event.country, locale)}
             </div>
           </div>
@@ -365,19 +330,19 @@ function ParticipationCard({
           {isFinisher && (participation.finishTime || participation.position) && (
             <div className="text-right">
               {participation.position && (
-                <div className="flex items-center gap-1 text-sm">
-                  <Medal className="w-4 h-4 text-yellow-500" />
-                  <span className="font-medium">#{participation.position}</span>
+                <div className="flex items-center justify-end gap-1 text-[14px]">
+                  <Medal className="h-4 w-4 text-orange-accent" />
+                  <span className="font-bold text-ink-2">#{participation.position}</span>
                 </div>
               )}
               {participation.finishTime && (
-                <div className="flex items-center gap-1 text-sm text-gray-600">
-                  <Clock className="w-4 h-4" />
+                <div className="flex items-center justify-end gap-1 text-[14px] text-text-muted">
+                  <Clock className="h-4 w-4" />
                   {participation.finishTime}
                 </div>
               )}
               {participation.categoryPosition && participation.categoryType && (
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="mt-1 text-[12px] text-text-faint">
                   Cat. #{participation.categoryPosition} (
                   {participation.categoryType === 'CATEGORY'
                     ? participation.categoryName

@@ -132,84 +132,78 @@ export function UserList({
     <div>
       {/* Filters */}
       {showFilters && (
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex flex-wrap gap-4">
-            {/* Search */}
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar usuarios..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
-                />
-              </div>
-            </div>
-
-            {/* Country filter */}
-            <div className="w-48">
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
-              >
-                <option value="">Todos los pa{'\u00ed'}ses</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Age range */}
-            <div className="flex items-center gap-2">
+        <div className="mb-7 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card">
+          {/* Search */}
+          <div className="min-w-[200px] flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-faint" />
               <input
-                type="number"
-                placeholder="Edad min"
-                value={minAge || ''}
-                onChange={(e) => setMinAge(e.target.value ? Number(e.target.value) : undefined)}
-                className="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
-                min="0"
-                max="100"
-              />
-              <span className="text-gray-500">-</span>
-              <input
-                type="number"
-                placeholder="Edad max"
-                value={maxAge || ''}
-                onChange={(e) => setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
-                className="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
-                min="0"
-                max="100"
+                type="text"
+                placeholder="Buscar corredores\u2026"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-md border border-border bg-surface-alt py-2.5 pl-10 pr-4 text-[15px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
               />
             </div>
+          </div>
 
-            {/* View toggle */}
-            <div className="flex gap-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 rounded-lg transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-[#16A34A] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
-                }`}
-              >
-                Grid
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-2 rounded-lg transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-[#16A34A] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
-                }`}
-              >
-                Lista
-              </button>
-            </div>
+          {/* Country filter */}
+          <div className="w-48">
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="w-full rounded-md border border-border bg-surface-alt px-3 py-2.5 text-[14px] font-semibold text-ink-2 outline-none focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
+            >
+              <option value="">Todos los pa{'\u00ed'}ses</option>
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Age range */}
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              placeholder="Edad m\u00edn"
+              value={minAge || ''}
+              onChange={(e) => setMinAge(e.target.value ? Number(e.target.value) : undefined)}
+              className="w-24 rounded-md border border-border px-3 py-2.5 text-[14px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
+              min="0"
+              max="100"
+            />
+            <span className="text-text-faint">\u2013</span>
+            <input
+              type="number"
+              placeholder="Edad m\u00e1x"
+              value={maxAge || ''}
+              onChange={(e) => setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
+              className="w-24 rounded-md border border-border px-3 py-2.5 text-[14px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
+              min="0"
+              max="100"
+            />
+          </div>
+
+          {/* View toggle */}
+          <div className="flex gap-0.5 rounded-md bg-[#e7e5dd] p-[3px]">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`rounded-sm px-4 py-2 text-[13.5px] font-bold transition-colors ${
+                viewMode === 'grid' ? 'bg-surface text-ink-2 shadow-card' : 'text-text-muted hover:text-ink-2'
+              }`}
+            >
+              \u25a6 Grid
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`rounded-sm px-4 py-2 text-[13.5px] font-bold transition-colors ${
+                viewMode === 'list' ? 'bg-surface text-ink-2 shadow-card' : 'text-text-muted hover:text-ink-2'
+              }`}
+            >
+              \u2630 Lista
+            </button>
           </div>
         </div>
       )}
@@ -217,17 +211,17 @@ export function UserList({
       {/* Loading */}
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B66916]"></div>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-brand border-t-transparent"></div>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="text-center py-12">
-          <p className="text-red-600">{error}</p>
+        <div className="py-12 text-center">
+          <p className="text-destructive">{error}</p>
           <button
             onClick={fetchUsers}
-            className="mt-4 px-4 py-2 bg-[#16A34A] text-white rounded-lg hover:bg-[#B66916]"
+            className="mt-4 rounded-md bg-green-brand px-4 py-2 font-semibold text-white hover:brightness-95"
           >
             Reintentar
           </button>
@@ -236,10 +230,10 @@ export function UserList({
 
       {/* Empty state */}
       {!loading && !error && users.length === 0 && (
-        <div className="text-center py-12">
-          <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron usuarios</h3>
-          <p className="text-gray-500">Intenta ajustar los filtros de b{'\u00fa'}squeda</p>
+        <div className="py-16 text-center">
+          <Users className="mx-auto mb-4 h-16 w-16 text-text-faint/40" />
+          <h3 className="mb-2 text-[18px] font-extrabold text-ink-2">No se encontraron corredores</h3>
+          <p className="text-[15px] text-text-muted">Intenta ajustar los filtros de b{'\u00fa'}squeda</p>
         </div>
       )}
 
@@ -260,54 +254,49 @@ export function UserList({
 
           {/* Pagination */}
           {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
+            <div className="mt-8 flex items-center justify-center gap-2">
               <button
                 onClick={handlePreviousPage}
                 disabled={!pagination.hasPrev}
-                className={`p-2 rounded-lg transition-colors ${
-                  pagination.hasPrev
-                    ? 'hover:bg-[#B66916] hover:text-white text-gray-700'
-                    : 'text-gray-300 cursor-not-allowed'
-                }`}
+                className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-surface text-ink-2 transition-colors hover:border-green-brand disabled:pointer-events-none disabled:opacity-40"
+                aria-label="Página anterior"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="h-4 w-4" />
               </button>
 
-              {getPageNumbers().map((pageNum, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => typeof pageNum === 'number' && setPage(pageNum)}
-                  disabled={pageNum === '...'}
-                  className={`px-3 py-1 rounded-lg transition-colors ${
-                    pageNum === page
-                      ? 'bg-[#16A34A] text-white'
-                      : pageNum === '...'
-                      ? 'text-gray-400 cursor-default'
-                      : 'hover:bg-[#B66916] hover:text-white text-gray-700'
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              ))}
+              {getPageNumbers().map((pageNum, idx) =>
+                pageNum === '...' ? (
+                  <span key={`e-${idx}`} className="px-1 text-text-faint">…</span>
+                ) : (
+                  <button
+                    key={idx}
+                    onClick={() => setPage(pageNum as number)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-sm border font-stat text-[14px] font-bold transition-colors ${
+                      pageNum === page
+                        ? 'border-green-brand bg-green-brand text-white'
+                        : 'border-border bg-surface text-ink-2 hover:border-green-brand'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                )
+              )}
 
               <button
                 onClick={handleNextPage}
                 disabled={!pagination.hasNext}
-                className={`p-2 rounded-lg transition-colors ${
-                  pagination.hasNext
-                    ? 'hover:bg-[#B66916] hover:text-white text-gray-700'
-                    : 'text-gray-300 cursor-not-allowed'
-                }`}
+                className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-surface text-ink-2 transition-colors hover:border-green-brand disabled:pointer-events-none disabled:opacity-40"
+                aria-label="Página siguiente"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           )}
 
           {/* Results info */}
           {pagination && (
-            <p className="text-center text-sm text-gray-500 mt-4">
-              Mostrando {users.length} de {pagination.totalUsers} usuarios
+            <p className="mt-4 text-center text-[13px] text-text-muted">
+              Mostrando {users.length} de {pagination.totalUsers} corredores
             </p>
           )}
         </>
