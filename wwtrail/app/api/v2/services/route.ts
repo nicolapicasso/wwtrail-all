@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const service = await ServiceService.create(data, user.id, user.role);
+    data.organizerId = user.id;
+    const service = await ServiceService.create(data);
     return apiSuccess(service, 201);
   } catch (error) {
     return apiError(error);

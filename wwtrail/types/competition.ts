@@ -63,6 +63,14 @@ export interface Competition {
     logoUrl?: string;      // For logo inheritance fallback
   };
 
+  // Traducciones (cuando el endpoint las incluye)
+  translations?: Array<{
+    id: string;
+    language: Language;
+    name?: string;
+    description?: string;
+  }>;
+
   // Contador de ediciones
   _count?: {
     editions: number;

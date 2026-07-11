@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const promotion = await PromotionService.create(data, user.id);
+    data.createdById = user.id;
+    const promotion = await PromotionService.create(data);
     return apiSuccess(promotion, 201);
   } catch (error) { return apiError(error); }
 }

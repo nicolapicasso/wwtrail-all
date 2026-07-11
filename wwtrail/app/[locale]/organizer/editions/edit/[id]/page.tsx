@@ -177,7 +177,7 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
             loading={weatherLoading}
             fetching={weatherFetching}
             canFetch={true}
-            onFetch={fetchWeather}
+            onFetch={fetchWeather as any}
           />
         </div>
 

@@ -27,7 +27,7 @@ function NewCompetitionContent() {
     const fetchEvent = async () => {
       try {
         const data = await eventsService.getById(eventId);
-        setEvent(data);
+        setEvent((data as any).data ?? data);
       } catch (error) {
         console.error('Error fetching event:', error);
         router.push('/organizer/events');

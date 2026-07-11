@@ -62,6 +62,8 @@ export interface CompetitionFilters {
   status?: string;
   limit?: number;
   page?: number;
+  isFeatured?: boolean;
+  language?: string;
 }
 
 // Registration Types
