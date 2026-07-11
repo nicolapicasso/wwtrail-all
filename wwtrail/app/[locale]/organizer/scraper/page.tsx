@@ -20,6 +20,7 @@ interface Edition {
   registrationUrl?: string | null;
   existing?: { id: string } | null;
 }
+interface MatchInfo { id: string; slug?: string; name: string; score: number; reason: string; }
 interface Competition {
   name: string;
   description?: string | null;
@@ -29,6 +30,7 @@ interface Competition {
   itraPoints?: number | null;
   editions: Edition[];
   existing?: { id: string; slug: string } | null;
+  suggestion?: MatchInfo | null;
   _include?: boolean; // client-only
 }
 interface EventNode {
@@ -40,6 +42,7 @@ interface EventNode {
   typicalMonth?: number | null;
   firstEditionYear?: number | null;
   existing?: { id: string; slug: string; name: string } | null;
+  suggestion?: MatchInfo | null;
 }
 interface Graph { event: EventNode; competitions: Competition[]; }
 interface ScanResult { sourceUrl: string | null; fetchMode: FetchMode; title: string | null; graph: Graph; warnings: string[]; }
@@ -104,6 +107,15 @@ export default function ScraperPage() {
     const comps = [...graph.competitions];
     comps[i] = { ...comps[i], ...patch };
     setGraph({ ...graph, competitions: comps });
+  };
+
+  const promoteEventSuggestion = () => {
+    const s = graph?.event.suggestion;
+    if (s) setEvent({ existing: { id: s.id, slug: s.slug || '', name: s.name }, suggestion: null });
+  };
+  const promoteCompSuggestion = (i: number) => {
+    const s = graph?.competitions[i]?.suggestion;
+    if (s) setComp(i, { existing: { id: s.id, slug: s.slug || '' }, suggestion: null, _include: false });
   };
 
   if (authLoading) {
@@ -221,7 +233,16 @@ export default function ScraperPage() {
                 <Calendar className="h-5 w-5 text-green-600" /> Evento
               </h2>
               {graph.event.existing ? (
-                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">Ya existe · se reutilizará</span>
+                <span className="flex items-center gap-2 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+                  Ya existe · se reutilizará
+                  <button onClick={() => setEvent({ existing: null })} className="text-blue-500 underline">deshacer</button>
+                </span>
+              ) : graph.event.suggestion ? (
+                <div className="flex items-center gap-2 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
+                  <span title={graph.event.suggestion.reason}>¿Es «{graph.event.suggestion.name}»? ({Math.round(graph.event.suggestion.score * 100)}%)</span>
+                  <button onClick={promoteEventSuggestion} className="rounded bg-amber-600 px-2 py-0.5 text-white">Sí, usar</button>
+                  <button onClick={() => setEvent({ suggestion: null })} className="text-amber-700 underline">No, es nuevo</button>
+                </div>
               ) : (
                 <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700">Nuevo</span>
               )}
@@ -243,18 +264,28 @@ export default function ScraperPage() {
             </h2>
             <div className="space-y-3">
               {graph.competitions.map((c, i) => (
-                <div key={i} className={`rounded-lg border p-3 ${c.existing ? 'border-gray-200 bg-gray-50' : 'border-green-200'}`}>
+                <div key={i} className={`rounded-lg border p-3 ${c.existing ? 'border-gray-200 bg-gray-50' : c.suggestion ? 'border-amber-200 bg-amber-50/40' : 'border-green-200'}`}>
                   <div className="flex items-center gap-3">
                     {!c.existing && (
                       <input type="checkbox" checked={!!c._include} onChange={(e) => setComp(i, { _include: e.target.checked })} className="h-4 w-4" style={{ accentColor: '#1f7a4d' }} />
                     )}
                     <input value={c.name} onChange={(e) => setComp(i, { name: e.target.value })} className="flex-1 rounded border border-gray-300 px-2 py-1 text-sm font-semibold" />
                     {c.existing ? (
-                      <span className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700">Existe</span>
+                      <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700">
+                        Existe
+                        <button onClick={() => setComp(i, { existing: null, _include: true })} className="text-blue-500 underline">deshacer</button>
+                      </span>
                     ) : (
                       <span className="shrink-0 rounded-full bg-green-50 px-2 py-0.5 text-xs font-bold text-green-700">Nueva</span>
                     )}
                   </div>
+                  {c.suggestion && !c.existing && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md bg-amber-100/60 px-2 py-1.5 pl-7 text-xs text-amber-900">
+                      <span title={c.suggestion.reason}>Posible duplicado: <b>{c.suggestion.name}</b> ({Math.round(c.suggestion.score * 100)}% · {c.suggestion.reason})</span>
+                      <button onClick={() => promoteCompSuggestion(i)} className="rounded bg-amber-600 px-2 py-0.5 font-semibold text-white">Sí, es la misma</button>
+                      <button onClick={() => setComp(i, { suggestion: null })} className="underline">No, es nueva</button>
+                    </div>
+                  )}
                   <div className="mt-2 flex flex-wrap items-center gap-2 pl-7 text-sm">
                     <label className="flex items-center gap-1 text-gray-500">Dist.
                       <input type="number" value={c.baseDistance ?? ''} onChange={(e) => setComp(i, { baseDistance: e.target.value ? Number(e.target.value) : null })} className="w-16 rounded border border-gray-300 px-1.5 py-0.5" /> km</label>
