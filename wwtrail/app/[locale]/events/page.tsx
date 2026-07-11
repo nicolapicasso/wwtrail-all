@@ -1,89 +1,40 @@
-// app/events/page.tsx - Enhanced Events listing page with rich visuals
-// FIXED VERSION - Todos los problemas corregidos
+// app/[locale]/events/page.tsx — Events listing (redesign)
 
 'use client';
 
-import { useState } from 'react';
 import { useLocale } from 'next-intl';
-import { MapPin, Calendar, Users, Mountain, Search, Filter, Globe, Star } from 'lucide-react';
 import { EventList } from '@/components/EventList';
+import { FeaturedEvents } from '@/components/events/FeaturedEvents';
 
 export default function EventsPage() {
   const locale = useLocale();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Featured Section */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-            <h2 className="text-2xl font-bold text-gray-900">Featured Events</h2>
-          </div>
-          {/*
-            FIX #4: Agregar EventList con featuredOnly
-            - Mostrar solo 6 eventos destacados en modo grid
-            - Sin filtros visibles (showFilters={false})
-            - Modo simplificado: solo imagen + logo
-          */}
-          <EventList
-            viewMode="grid"
-            featuredOnly={true}
-            showFilters={false}
-            limit={6}
-            simplified={true}
-            locale={locale}
-          />
-        </div>
+    <div className="min-h-screen">
+      {/* Featured hero (dark) */}
+      <section className="relative overflow-hidden bg-ink text-white">
+        <div className="ww-hatch absolute inset-0" aria-hidden />
+        <div className="ww-topo absolute inset-0 opacity-70" aria-hidden />
+        <div className="relative z-10 mx-auto max-w-content px-6 py-14 sm:px-8 lg:px-10">
+          <p className="mb-3 text-[13px] font-bold uppercase tracking-[0.14em] text-orange-accent">
+            Eventos destacados
+          </p>
+          <h1 className="max-w-3xl text-[36px] font-black leading-[1.02] tracking-[-0.03em] sm:text-[46px]">
+            Encuentra tu próxima montaña
+          </h1>
+          <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-white/70">
+            Explora y filtra todos los eventos de trail running del mundo.
+          </p>
 
-        {/* All Events Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">All Events</h2>
-              <p className="text-gray-600">Browse through all trail running events</p>
-            </div>
-            
-            {/* View Toggle - FIX #3: Asegurar que funciona */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-[#16A34A] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
-                }`}
-                aria-pressed={viewMode === 'grid'}
-              >
-                Grid
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-[#16A34A] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-[#B66916] hover:text-white'
-                }`}
-                aria-pressed={viewMode === 'list'}
-              >
-                List
-              </button>
-            </div>
+          <div className="mt-9">
+            <FeaturedEvents />
           </div>
         </div>
+      </section>
 
-        {/* 
-          Events list with filters 
-          FIX #1: Los filtros están dentro de EventList
-          FIX #3: Pasar viewMode correctamente
-        */}
-        <EventList
-          viewMode={viewMode}
-          showFilters={true}
-          locale={locale}
-        />
+      {/* Listing */}
+      <div className="mx-auto max-w-content px-6 py-12 sm:px-8 lg:px-10">
+        <EventList viewMode="grid" showFilters={true} locale={locale} />
       </div>
     </div>
   );
