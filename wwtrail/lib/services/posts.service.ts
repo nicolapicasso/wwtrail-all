@@ -167,7 +167,7 @@ export class PostsService {
       }
 
       // Generar slug único
-      const slug = await generateUniqueSlug(data.title, prisma.post);
+      const slug = await generateUniqueSlug(data.title, 'post');
 
       // Preparar datos del post
       const postData: any = {
@@ -524,7 +524,7 @@ export class PostsService {
 
       // Si se cambia el título, regenerar slug
       if (data.title) {
-        updateData.slug = await generateUniqueSlug(data.title, prisma.post, id);
+        updateData.slug = await generateUniqueSlug(data.title, 'post', id);
       }
 
       // Si hay imágenes, borrar las existentes y crear las nuevas
