@@ -732,6 +732,122 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
     }
   }
 
+  /**
+   * Estadísticas de traducción por tipo de entidad (para el dashboard admin).
+   * Devuelve, por cada tipo, el total de entidades, cuántas tienen al menos una
+   * traducción, y cuántas están pendientes.
+   */
+  static async getStats() {
+    const distinct = async (
+      groupByFn: (args: any) => Promise<any[]>,
+      field: string
+    ): Promise<number> => {
+      const rows = await groupByFn({ by: [field] });
+      return rows.length;
+    };
+
+    const [
+      eventsTotal, eventsWith,
+      compsTotal, compsWith,
+      postsTotal, postsWith,
+      servicesTotal, servicesWith,
+      promosTotal, promosWith,
+      seriesTotal, seriesWith,
+    ] = await Promise.all([
+      prisma.event.count(),
+      distinct((a) => prisma.eventTranslation.groupBy(a), 'eventId'),
+      prisma.competition.count(),
+      distinct((a) => prisma.competitionTranslation.groupBy(a), 'competitionId'),
+      prisma.post.count(),
+      distinct((a) => prisma.postTranslation.groupBy(a), 'postId'),
+      prisma.service.count(),
+      distinct((a) => prisma.serviceTranslation.groupBy(a), 'serviceId'),
+      prisma.promotion.count(),
+      distinct((a) => prisma.promotionTranslation.groupBy(a), 'promotionId'),
+      prisma.specialSeries.count(),
+      distinct((a) => prisma.specialSeriesTranslation.groupBy(a), 'specialSeriesId'),
+    ]);
+
+    const mk = (total: number, withT: number) => ({
+      total,
+      withTranslations: withT,
+      missingTranslations: Math.max(0, total - withT),
+    });
+
+    return {
+      events: mk(eventsTotal, eventsWith),
+      competitions: mk(compsTotal, compsWith),
+      posts: mk(postsTotal, postsWith),
+      services: mk(servicesTotal, servicesWith),
+      promotions: mk(promosTotal, promosWith),
+      specialSeries: mk(seriesTotal, seriesWith),
+    };
+  }
+
+  /**
+   * Traducción masiva de todas las entidades pendientes de un tipo.
+   * Solo traduce entidades sin ninguna traducción previa.
+   */
+  static async bulkTranslateType(
+    entityType: 'event' | 'competition' | 'post' | 'service' | 'promotion' | 'specialSeries',
+    targetLanguages: Language[] = ['ES', 'EN', 'IT', 'CA', 'FR', 'DE']
+  ) {
+    // Map each type to how we list ids and which already have translations.
+    const listMissingIds: Record<string, () => Promise<string[]>> = {
+      event: async () => {
+        const withT = (await prisma.eventTranslation.groupBy({ by: ['eventId'] })).map((r) => r.eventId);
+        const all = await prisma.event.findMany({ select: { id: true } });
+        return all.map((e) => e.id).filter((id) => !withT.includes(id));
+      },
+      competition: async () => {
+        const withT = (await prisma.competitionTranslation.groupBy({ by: ['competitionId'] })).map((r) => r.competitionId);
+        const all = await prisma.competition.findMany({ select: { id: true } });
+        return all.map((e) => e.id).filter((id) => !withT.includes(id));
+      },
+      post: async () => {
+        const withT = (await prisma.postTranslation.groupBy({ by: ['postId'] })).map((r) => r.postId);
+        const all = await prisma.post.findMany({ select: { id: true } });
+        return all.map((e) => e.id).filter((id) => !withT.includes(id));
+      },
+      service: async () => {
+        const withT = (await prisma.serviceTranslation.groupBy({ by: ['serviceId'] })).map((r) => r.serviceId);
+        const all = await prisma.service.findMany({ select: { id: true } });
+        return all.map((e) => e.id).filter((id) => !withT.includes(id));
+      },
+      promotion: async () => {
+        const withT = (await prisma.promotionTranslation.groupBy({ by: ['promotionId'] })).map((r) => r.promotionId);
+        const all = await prisma.promotion.findMany({ select: { id: true } });
+        return all.map((e) => e.id).filter((id) => !withT.includes(id));
+      },
+      specialSeries: async () => {
+        const withT = (await prisma.specialSeriesTranslation.groupBy({ by: ['specialSeriesId'] })).map((r) => r.specialSeriesId);
+        const all = await prisma.specialSeries.findMany({ select: { id: true } });
+        return all.map((e) => e.id).filter((id) => !withT.includes(id));
+      },
+    };
+
+    const lister = listMissingIds[entityType];
+    if (!lister) {
+      throw new Error(`Tipo de entidad no soportado: ${entityType}`);
+    }
+
+    const ids = await lister();
+    let translated = 0;
+    let errors = 0;
+
+    for (const id of ids) {
+      try {
+        await this.autoTranslate({ entityType, entityId: id, targetLanguages, overwrite: false });
+        translated++;
+      } catch (error) {
+        errors++;
+        logger.error(`Error bulk-translating ${entityType} ${id}: ${error}`);
+      }
+    }
+
+    return { entityType, translated, errors, targetLanguages };
+  }
+
   // Alias methods for backwards compatibility
   static async translateEvent(eventId: string, targetLanguages: Language[]) {
     return this.autoTranslateEvent(eventId, targetLanguages, false);

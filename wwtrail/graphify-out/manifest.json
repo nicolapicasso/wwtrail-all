@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "app/[locale]/directory/DirectoryMapClient.tsx": {
-    "mtime": 1783765971.9072862,
-    "ast_hash": "c8a04ba051dfa7856b1276c0067cd4d5",
+    "mtime": 1783785245.1689782,
+    "ast_hash": "fd6cb494e2bf01ecbd96f3c4a9386a45",
     "semantic_hash": ""
   },
   "app/[locale]/directory/page.tsx": {
@@ -325,8 +325,8 @@
     "semantic_hash": ""
   },
   "app/[locale]/organizer/translations/page.tsx": {
-    "mtime": 1783752630.7547169,
-    "ast_hash": "6de9eeb8204f7ae420c3d19306b18eab",
+    "mtime": 1783785715.0849676,
+    "ast_hash": "3947011a2f03572a918befaba7c47059",
     "semantic_hash": ""
   },
   "app/[locale]/organizer/users/[id]/edit/page.tsx": {
@@ -1710,8 +1710,8 @@
     "semantic_hash": ""
   },
   "lib/api/user.service.ts": {
-    "mtime": 1783752630.8348498,
-    "ast_hash": "13d87bfcdbda89c0953c13f59f0b54e8",
+    "mtime": 1783785227.0929787,
+    "ast_hash": "b2c23d4dbd64475ac291841adb8bdbcf",
     "semantic_hash": ""
   },
   "lib/api/v2/aiAutofill.service.ts": {
@@ -2085,8 +2085,8 @@
     "semantic_hash": ""
   },
   "lib/services/translation.service.ts": {
-    "mtime": 1783752630.849274,
-    "ast_hash": "66e77f4f6b157fbaea0dfba8ad51181a",
+    "mtime": 1783785675.3489685,
+    "ast_hash": "d54fb127a046b012f2b8767ead67bfaf",
     "semantic_hash": ""
   },
   "lib/services/user-competition.service.ts": {
@@ -2412,6 +2412,21 @@
   "scripts/fix-home-encoding.ts": {
     "mtime": 1783768034.4920323,
     "ast_hash": "6cbc5d15ae39819595bee008f59b24a5",
+    "semantic_hash": ""
+  },
+  "app/api/v2/users/profile/[username]/route.ts": {
+    "mtime": 1783785221.484979,
+    "ast_hash": "56567e2ef34f707339b615e6a7c9a70f",
+    "semantic_hash": ""
+  },
+  "app/api/v2/translations/bulk/generate/route.ts": {
+    "mtime": 1783785690.864968,
+    "ast_hash": "5ed91f84cd264fe1c7dbb56bf05b43e6",
+    "semantic_hash": ""
+  },
+  "app/api/v2/translations/bulk/status/route.ts": {
+    "mtime": 1783785685.0369682,
+    "ast_hash": "c80c24cef984d99f201d0b530c8b34f6",
     "semantic_hash": ""
   }
 }

@@ -121,17 +121,17 @@ export default function TranslationsDashboardPage() {
     }
   };
 
-  const getProgressPercentage = (entityStats: EntityStats) => {
-    if (entityStats.total === 0) return 100;
+  const getProgressPercentage = (entityStats?: EntityStats) => {
+    if (!entityStats || entityStats.total === 0) return 100;
     return Math.round((entityStats.withTranslations / entityStats.total) * 100);
   };
 
   const getTotalStats = () => {
     if (!stats) return { total: 0, withTranslations: 0, missingTranslations: 0 };
     return {
-      total: Object.values(stats).reduce((acc, s) => acc + s.total, 0),
-      withTranslations: Object.values(stats).reduce((acc, s) => acc + s.withTranslations, 0),
-      missingTranslations: Object.values(stats).reduce((acc, s) => acc + s.missingTranslations, 0),
+      total: Object.values(stats).reduce((acc, s) => acc + (s?.total || 0), 0),
+      withTranslations: Object.values(stats).reduce((acc, s) => acc + (s?.withTranslations || 0), 0),
+      missingTranslations: Object.values(stats).reduce((acc, s) => acc + (s?.missingTranslations || 0), 0),
     };
   };
 
@@ -265,7 +265,7 @@ export default function TranslationsDashboardPage() {
                                        config.key === 'post' ? 'posts' :
                                        config.key === 'service' ? 'services' :
                                        config.key === 'promotion' ? 'promotions' :
-                                       'specialSeries'];
+                                       'specialSeries'] ?? { total: 0, withTranslations: 0, missingTranslations: 0 };
             const Icon = config.icon;
             const progress = getProgressPercentage(entityStats);
             const isTranslating = translatingEntity === config.key;

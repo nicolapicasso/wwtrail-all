@@ -189,9 +189,12 @@ export const userService = {
    */
   async getPublicUsers(params: GetPublicUsersParams = {}) {
     const response = await apiClientV2.get('/users', { params });
+    // apiSuccess wraps the service result under `data`, and the service returns
+    // { users, pagination } — so both live under response.data.data.
+    const inner = response.data?.data ?? response.data;
     return {
-      users: response.data.data as PublicUser[],
-      pagination: response.data.pagination as PaginationInfo,
+      users: (inner.users ?? []) as PublicUser[],
+      pagination: inner.pagination as PaginationInfo,
     };
   },
 
