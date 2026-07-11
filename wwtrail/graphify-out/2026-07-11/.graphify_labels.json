@@ -173,6 +173,7 @@
   "171": "@tiptap/extension-text-style",
   "172": "@tiptap/extension-underline",
   "173": "@tiptap/starter-kit",
+  "174": "@types/nodemailer",
   "175": "yet-another-react-lightbox",
   "176": "zod",
   "177": "postcss",

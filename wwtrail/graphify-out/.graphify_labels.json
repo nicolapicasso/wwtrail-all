@@ -182,14 +182,21 @@
   "180": "@types/bcryptjs",
   "181": "@types/jsonwebtoken",
   "182": "@types/leaflet",
+  "183": "CompetitionActions.tsx",
   "184": "@types/react-dom",
+  "185": "footer.service.ts",
   "186": "import-remote.ts",
   "187": "tailwind.config.ts",
   "188": "apiClient",
   "189": "cacheService",
   "190": "postcss.config.js",
+  "191": "MapBlock.tsx",
   "192": "page.tsx",
+  "193": "UserStatsCards.tsx",
+  "194": "autoprefixer",
   "195": "MapBlock.tsx",
   "196": "bcryptjs",
-  "197": ".approveContent"
+  "197": ".approveContent",
+  "198": "eslint-config-next",
+  "199": "@types/node"
 }

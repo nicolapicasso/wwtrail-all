@@ -1,16 +1,16 @@
 # Graph Report - wwtrail  (2026-07-11)
 
 ## Corpus Check
-- 498 files · ~267,994 words
+- 498 files · ~268,010 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2930 nodes · 6655 edges · 192 communities (118 shown, 74 thin omitted)
+- 2930 nodes · 6655 edges · 193 communities (119 shown, 74 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.55)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cbb60fbd`
+- Built from commit: `48999b87`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -186,6 +186,7 @@
 - @tiptap/extension-text-style
 - @tiptap/extension-underline
 - @tiptap/starter-kit
+- @types/nodemailer
 - yet-another-react-lightbox
 - zod
 - postcss
@@ -229,15 +230,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (192 total, 74 thin omitted)
+## Communities (193 total, 74 thin omitted)
 
 ### Community 0 - "apiSuccess"
-Cohesion: 0.04
-Nodes (98): POST(), GET(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), POST() (+90 more)
+Cohesion: 0.05
+Nodes (60): POST(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), GET(), POST() (+52 more)
 
 ### Community 1 - "requireRole"
 Cohesion: 0.04
-Nodes (27): adminService, GET(), adminService, GET(), adminService, GET(), adminService, GET() (+19 more)
+Nodes (28): adminService, GET(), adminService, GET(), adminService, GET(), adminService, GET() (+20 more)
 
 ### Community 2 - "admin.service.ts"
 Cohesion: 0.08
@@ -292,8 +293,8 @@ Cohesion: 0.17
 Nodes (12): FullImport, FullImportResult, fullImportSchema, ImportCompetition, importCompetitionSchema, ImportEvent, importEventSchema, ImportOrganizer (+4 more)
 
 ### Community 16 - "EventService"
-Cohesion: 0.10
-Nodes (9): DELETE(), GET(), PUT(), GET(), GET(), GET(), POST(), GET() (+1 more)
+Cohesion: 0.11
+Nodes (8): DELETE(), GET(), PUT(), GET(), GET(), GET(), POST(), EventService
 
 ### Community 17 - "post.ts"
 Cohesion: 0.12
@@ -553,7 +554,7 @@ Nodes (7): EditionGalleryProps, photosService, EditionPhoto, PHOTO_UPLOAD_CONFIG
 
 ### Community 89 - "devDependencies"
 Cohesion: 0.15
-Nodes (13): eslint, devDependencies, eslint, @types/js-cookie, @types/nodemailer, @types/react, @types/uuid, typescript (+5 more)
+Nodes (13): autoprefixer, eslint-config-next, devDependencies, autoprefixer, eslint-config-next, @types/node, @types/react, @types/uuid (+5 more)
 
 ### Community 90 - "error-handler.ts"
 Cohesion: 0.17
@@ -581,7 +582,7 @@ Nodes (13): scripts, build, db:export, db:fix-home-encoding, db:import, dev, lin
 
 ### Community 99 - "dependencies"
 Cohesion: 0.18
-Nodes (11): js-cookie, jsonwebtoken, dependencies, js-cookie, jsonwebtoken, @radix-ui/react-slot, @radix-ui/react-tabs, @tiptap/react (+3 more)
+Nodes (11): @aws-sdk/client-s3, js-cookie, jsonwebtoken, dependencies, @aws-sdk/client-s3, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
 
 ### Community 101 - "EventMap.tsx"
 Cohesion: 0.33
@@ -667,6 +668,10 @@ Nodes (18): CompetitionCard(), CompetitionCardCompactProps, CompetitionCardProps
 Cohesion: 0.12
 Nodes (11): cache, memoryCache, CreateOrganizerInput, OrganizerFilters, UpdateOrganizerInput, CreateServiceCategoryInput, ServiceCategoryService, UpdateServiceCategoryInput (+3 more)
 
+### Community 143 - "eslint-config-next"
+Cohesion: 0.05
+Nodes (38): GET(), POST(), toSpacesCdn(), adminService, GET(), PUT(), POST(), POST() (+30 more)
+
 ### Community 165 - ".approveContent"
 Cohesion: 0.14
 Nodes (10): EditEventPage(), EditOrganizerPage(), OrganizersListPage(), OrganizerDashboard(), SpecialSeriesListPage(), OrganizerForm(), OrganizerFormProps, SpecialSeriesForm() (+2 more)
@@ -692,9 +697,9 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `CalView`, `CalEdition`, `MONTHS_ES` to the rest of the system?**
   _744 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `apiSuccess` be split into smaller, more focused modules?**
-  _Cohesion score 0.03771712158808933 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05239075726378403 - nodes in this community are weakly interconnected._
 - **Should `requireRole` be split into smaller, more focused modules?**
-  _Cohesion score 0.04149620105201637 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03989071038251366 - nodes in this community are weakly interconnected._
 - **Should `admin.service.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.08143939393939394 - nodes in this community are weakly interconnected._
 - **Should `button.tsx` be split into smaller, more focused modules?**

@@ -6,6 +6,8 @@ import { useLocale } from 'next-intl';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
+import { startImpersonation } from '@/lib/impersonation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -645,6 +647,14 @@ export default function AdminUsersPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => startImpersonation(user.id).catch((e) => setError(e?.response?.data?.error || 'Error al suplantar'))}
+                                className="text-amber-700"
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                Ver panel como este usuario
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handleOpenEditDialog(user)}>
                                 <Edit className="w-4 h-4 mr-2" />
