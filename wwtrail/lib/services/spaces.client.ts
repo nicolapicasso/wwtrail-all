@@ -4,14 +4,16 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import path from 'path';
 
-const endpoint = process.env.DO_SPACES_ENDPOINT || 'https://ams3.digitaloceanspaces.com';
+// Región del bucket (Frankfurt por defecto — coincide con wwtrail-uploads/fra1).
+const region = process.env.DO_SPACES_REGION || 'fra1';
+const endpoint = process.env.DO_SPACES_ENDPOINT || `https://${region}.digitaloceanspaces.com`;
 const bucket = process.env.DO_SPACES_BUCKET || 'wwtrail-uploads';
-const cdnUrl = process.env.DO_SPACES_CDN || 'https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com';
+const cdnUrl = process.env.DO_SPACES_CDN || `https://${bucket}.${region}.cdn.digitaloceanspaces.com`;
 
 const s3Client = new S3Client({
   endpoint,
   forcePathStyle: false,
-  region: 'ams3',
+  region,
   credentials: {
     accessKeyId: process.env.DO_SPACES_KEY || '',
     secretAccessKey: process.env.DO_SPACES_SECRET || '',

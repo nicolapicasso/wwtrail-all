@@ -26,6 +26,9 @@ export interface TokenPayload {
   id: string;
   email: string;
   role: UserRole;
+  // When present, the session is an ADMIN impersonating this user; holds the
+  // real admin's id so impersonation can be ended and audited.
+  impersonatedBy?: string;
 }
 
 export interface AuthUser {
@@ -83,6 +86,25 @@ export function verifyToken(token: string): TokenPayload {
 // Verify JWT refresh token
 export function verifyRefreshToken(token: string): TokenPayload {
   return jwt.verify(token, getRefreshSecret()) as TokenPayload;
+}
+
+// Sign a standalone access token (used for impersonation). No refresh token is
+// created — impersonation is access-only and ends when the token expires or the
+// admin exits.
+export function signAccessToken(payload: TokenPayload): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
+}
+
+// Read the raw (verified) access-token payload from a request, including the
+// optional impersonatedBy claim. Returns null if missing/invalid.
+export function readAccessTokenPayload(request: NextRequest): TokenPayload | null {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  try {
+    return verifyToken(authHeader.substring(7));
+  } catch {
+    return null;
+  }
 }
 
 // Extract authenticated user from request (for API routes)

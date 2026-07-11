@@ -34,9 +34,16 @@ COPY . .
 # Build arg for public env vars needed at build time
 ARG NEXT_PUBLIC_APP_URL=https://wwtrail.com
 ARG NEXT_PUBLIC_APP_NAME=WWTRAIL
+# Storage backend for image URLs (baked into the client at build time). Defaults
+# to Spaces so /uploads/* resolve to the DO Spaces CDN. Override to 'local' for
+# same-origin serving in dev.
+ARG NEXT_PUBLIC_STORAGE_TYPE=spaces
+ARG NEXT_PUBLIC_SPACES_URL=https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com
 
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
+ENV NEXT_PUBLIC_STORAGE_TYPE=$NEXT_PUBLIC_STORAGE_TYPE
+ENV NEXT_PUBLIC_SPACES_URL=$NEXT_PUBLIC_SPACES_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 

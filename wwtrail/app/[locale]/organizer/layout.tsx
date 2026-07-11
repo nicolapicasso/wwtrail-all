@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Trophy, Menu, X } from 'lucide-react';
 import { DashboardNav } from '@/components/layout/DashboardNav';
 import { CollapsibleUserInfo } from '@/components/layout/CollapsibleUserInfo';
+import { ImpersonationBar } from '@/components/layout/ImpersonationBar';
 
 export default function OrganizerLayout({
   children,
@@ -147,6 +148,7 @@ export default function OrganizerLayout({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
+          <ImpersonationBar />
           {children}
         </main>
       </div>

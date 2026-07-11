@@ -60,6 +60,14 @@ services:
       - key: NEXT_PUBLIC_APP_NAME
         scope: BUILD_TIME
         value: "WWTRAIL"
+      # Storage backend for client-side image URL resolution (baked at build time).
+      # Must match STORAGE_TYPE below so /uploads/* resolve to the Spaces CDN.
+      - key: NEXT_PUBLIC_STORAGE_TYPE
+        scope: BUILD_TIME
+        value: "spaces"
+      - key: NEXT_PUBLIC_SPACES_URL
+        scope: BUILD_TIME
+        value: "https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com"
 
       # Node environment
       - key: NODE_ENV
