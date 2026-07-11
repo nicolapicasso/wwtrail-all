@@ -9,7 +9,8 @@ import { useState, useRef, ChangeEvent, DragEvent, useEffect } from 'react';
 import { uploadFile, uploadMultipleFiles } from '@/lib/api/files.service';
 
 interface FileUploadProps {
-  onUpload: (url: string) => void;
+  // Optional: not needed in `multiple` mode, where onUploadMultiple is used instead.
+  onUpload?: (url: string) => void;
   onUploadMultiple?: (urls: string[]) => void;
   currentUrl?: string;
   currentUrls?: string[];  // ✅ Para cargar galería existente
@@ -106,7 +107,7 @@ export default function FileUpload({
         console.log('✅ Upload successful:', url);
         
         setPreviewUrl(url);
-        onUpload(url);
+        onUpload?.(url);
       }
     } catch (err: any) {
       console.error('❌ Upload error:', err);

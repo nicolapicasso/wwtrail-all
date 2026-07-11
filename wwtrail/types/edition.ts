@@ -1,10 +1,22 @@
 // types/edition.ts - Edition types for API v2
 
-import { EditionStatus, RegistrationStatus, Language } from './competition';
+import { EditionStatus, RegistrationStatus, Language, UTMBIndex } from './competition';
 import { EditionRating, RatingSummary } from './rating';
 import { EditionPodium } from './podium';
 import { EditionPhoto } from './photo';
 import { EditionWeather } from './weather';
+import { TerrainType } from './terrainType';
+import { SpecialSeries } from './specialSeries';
+
+/**
+ * Edition prices (Prisma Json field: { early, normal, late })
+ */
+export interface EditionPrices {
+  early?: number;
+  normal?: number;
+  late?: number;
+  [key: string]: number | undefined;
+}
 
 /**
  * Edition - Annual edition of a competition
@@ -38,6 +50,20 @@ export interface Edition {
 
   // NUEVO: Crónica
   chronicle?: string;
+
+  // Imágenes (Prisma: coverImage, gallery)
+  coverImage?: string;
+  gallery?: string[];
+
+  // Precios (Prisma Json)
+  prices?: EditionPrices;
+
+  // Contenido / meta (Prisma)
+  language?: Language;
+  regulations?: string;
+  notes?: string;
+  featured?: boolean;
+  viewCount?: number;
 
   // NUEVO: Datos meteorológicos
   weather?: EditionWeather;
@@ -107,10 +133,19 @@ export interface EditionFull extends Edition {
     slug: string;
     name: string;
     type: string;
+    description?: string;
     baseDistance?: number;
     baseElevation?: number;
     baseMaxParticipants?: number;
     logoUrl?: string;
+    coverImage?: string;
+    gallery?: string[];
+    terrainTypeId?: string;
+    itraPoints?: number;
+    utmbIndex?: UTMBIndex;
+    // Relations — only present when the service includes them (see edition.service include)
+    terrainType?: TerrainType | null;
+    specialSeries?: SpecialSeries[];
   };
   event: {
     id: string;

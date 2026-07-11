@@ -63,7 +63,7 @@ function transformToEditionFull(response: EditionBackendResponse): EditionFull {
   if (hasNestedCompetition) {
     // Formato ANIDADO
     const comp = response.competition!;
-    const event = comp.event || {};
+    const event = comp.event || ({} as NonNullable<typeof comp.event>);
 
     return {
       ...response,
