@@ -16,7 +16,7 @@
 
 import { useState, useEffect } from 'react';
 import { eventsService } from '@/lib/api/events.service';
-import type { Event } from '@/types/api';
+import type { Event } from '@/types/event';
 
 // ============================================================================
 // 📦 TIPOS

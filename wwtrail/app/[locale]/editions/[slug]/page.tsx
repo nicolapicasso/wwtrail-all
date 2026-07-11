@@ -15,7 +15,7 @@ import { AddParticipationButton } from '@/components/AddParticipationButton';
 import { AdminEditButtonFloating } from '@/components/AdminEditButton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Event } from '@/types/api';
+import { Event } from '@/types/event';
 import { Service } from '@/types/v2';
 
 // ============================================================================
@@ -81,6 +81,8 @@ export default async function EditionDetailPage({
   }
 
   const { competition, event } = editionWithDetails;
+  // specialSeries is a many-to-many array; the UI highlights the first one.
+  const primarySeries = competition.specialSeries?.[0];
   const edition = editionWithDetails; // For backwards compatibility with existing code
 
   // Helper to format dates
@@ -258,7 +260,7 @@ export default async function EditionDetailPage({
                     latitude: event.latitude,
                     longitude: event.longitude,
                     categoryIcon: '🏃', // Icon for edition
-                    type: competition.type,
+                    type: 'event', // map marker kind (not the race type)
                   }}
                   nearbyEvents={nearbyEvents}
                   nearbyServices={nearbyServices
@@ -289,7 +291,7 @@ export default async function EditionDetailPage({
             )}
 
             {/* Classification & Certifications (from Competition) */}
-            {(competition.terrainType || competition.specialSeries || competition.itraPoints !== undefined || competition.utmbIndex) && (
+            {(competition.terrainType || primarySeries || competition.itraPoints !== undefined || competition.utmbIndex) && (
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <Award className="h-5 w-5 text-black" />
@@ -310,7 +312,7 @@ export default async function EditionDetailPage({
                   )}
 
                   {/* Special Series */}
-                  {competition.specialSeries && (
+                  {primarySeries && (
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
                         <Sparkles className="h-5 w-5 text-black" />
@@ -318,16 +320,16 @@ export default async function EditionDetailPage({
                       <div className="flex-1">
                         <p className="text-xs text-gray-500">Serie Especial</p>
                         <Link
-                          href={`/special-series/${competition.specialSeries.slug}`}
+                          href={`/special-series/${primarySeries.slug}`}
                           className="font-semibold hover:text-gray-600 transition-colors"
                         >
-                          {competition.specialSeries.name}
+                          {primarySeries.name}
                         </Link>
                       </div>
-                      {competition.specialSeries.logoUrl && (
+                      {primarySeries.logoUrl && (
                         <img
-                          src={competition.specialSeries.logoUrl}
-                          alt={competition.specialSeries.name}
+                          src={primarySeries.logoUrl}
+                          alt={primarySeries.name}
                           className="h-8 w-8 object-contain"
                         />
                       )}

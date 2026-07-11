@@ -8,7 +8,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import CompetitionForm from '@/components/forms/CompetitionForm';
 import eventsService from '@/lib/api/v2/events.service';
-import type { Event } from '@/types/api';
+import type { Event } from '@/types/event';
 
 function NewCompetitionContent() {
   const router = useRouter();
@@ -27,7 +27,7 @@ function NewCompetitionContent() {
     const fetchEvent = async () => {
       try {
         const data = await eventsService.getById(eventId);
-        setEvent(data);
+        setEvent((data as any).data ?? data);
       } catch (error) {
         console.error('Error fetching event:', error);
         router.push('/organizer/events');

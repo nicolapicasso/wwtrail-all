@@ -12,13 +12,18 @@ export type PromotionStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
 /**
  * Language enum
+ * Local to this module — the canonical `Language` is re-exported from
+ * ./event via the types/v2 barrel. Kept unexported to avoid a barrel name
+ * clash (TS2308).
  */
-export type Language = 'ES' | 'EN' | 'IT' | 'CA' | 'FR' | 'DE';
+type Language = 'ES' | 'EN' | 'IT' | 'CA' | 'FR' | 'DE';
 
 /**
  * Service Category interface
+ * Local to this module — the canonical `ServiceCategory` comes from ./service
+ * via the types/v2 barrel. Kept unexported to avoid a barrel name clash.
  */
-export interface ServiceCategory {
+interface ServiceCategory {
   id: string;
   name: string;
   slug: string;

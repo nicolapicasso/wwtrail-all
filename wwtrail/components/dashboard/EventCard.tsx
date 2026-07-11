@@ -23,9 +23,9 @@ export function EventCard({
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
       {/* Imagen */}
       <div className="relative h-48 bg-gray-100">
-        {event.imageUrl ? (
+        {(event.coverImage || event.coverImageUrl || event.logoUrl) ? (
           <Image
-            src={event.imageUrl}
+            src={(event.coverImage || event.coverImageUrl || event.logoUrl)!}
             alt={event.name}
             fill
             className="object-cover"
@@ -54,7 +54,7 @@ export function EventCard({
         </div>
 
         {/* Badge de destacado */}
-        {event.isHighlighted && (
+        {event.featured && (
           <div className="absolute top-3 left-3">
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 text-yellow-900 text-xs font-medium rounded">
               ⭐ Destacado

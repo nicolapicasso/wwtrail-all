@@ -6,7 +6,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Event } from '@/lib/types/event';
+import { ManagedEvent } from '@/types/event';
 import { 
   Calendar, MapPin, Users, Eye, Edit, Trash2, Plus, 
   CheckCircle, XCircle, Clock, Star, Mountain, Globe, 
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 interface EventCardProps {
-  event: Event;
+  event: ManagedEvent;
   showStats?: boolean;
   onClick?: () => void;
   viewMode?: 'grid' | 'list';

@@ -304,7 +304,7 @@ export function DashboardNav() {
 
   const isChildActive = (children?: NavItem[]) => {
     if (!children) return false;
-    return children.some((child) => pathname.startsWith(child.href));
+    return children.some((child) => pathname.startsWith(child.href || ""));
   };
 
   return (
@@ -415,12 +415,12 @@ export function DashboardNav() {
               <div className="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 pl-4">
                 {item.children!.map((child) => {
                   const ChildIcon = child.icon;
-                  const childIsActive = pathname.startsWith(child.href);
+                  const childIsActive = pathname.startsWith(child.href || "");
 
                   return (
                     <Link
                       key={child.href}
-                      href={child.href}
+                      href={child.href || "#"}
                       className={`
                         flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg
                         transition-colors

@@ -2,6 +2,8 @@
 
 import { apiClientV2 } from '../client';
 import { Edition, EditionFull, EditionStats } from '@/types/edition';
+import type { TerrainType } from '@/types/terrainType';
+import type { SpecialSeries } from '@/types/specialSeries';
 
 /**
  * Editions Service - USA V2
@@ -26,6 +28,13 @@ interface EditionBackendResponse extends Edition {
     baseElevation?: number;
     baseMaxParticipants?: number;
     logoUrl?: string;
+    coverImage?: string;
+    gallery?: string[];
+    terrainTypeId?: string;
+    itraPoints?: number;
+    utmbIndex?: any;
+    terrainType?: TerrainType | null;
+    specialSeries?: SpecialSeries[];
     event?: {
       id: string;
       name: string;
@@ -63,7 +72,7 @@ function transformToEditionFull(response: EditionBackendResponse): EditionFull {
   if (hasNestedCompetition) {
     // Formato ANIDADO
     const comp = response.competition!;
-    const event = comp.event || {};
+    const event = comp.event || ({} as NonNullable<typeof comp.event>);
 
     return {
       ...response,
@@ -80,6 +89,13 @@ function transformToEditionFull(response: EditionBackendResponse): EditionFull {
         baseElevation: comp.baseElevation,
         baseMaxParticipants: comp.baseMaxParticipants,
         logoUrl: comp.logoUrl,
+        coverImage: comp.coverImage,
+        gallery: comp.gallery,
+        terrainTypeId: comp.terrainTypeId,
+        itraPoints: comp.itraPoints,
+        utmbIndex: comp.utmbIndex,
+        terrainType: comp.terrainType,
+        specialSeries: comp.specialSeries,
       },
       event: {
         id: event.id || '',
@@ -129,7 +145,7 @@ export const editionsService = {
    * Get all editions with optional filters
    * GET /editions
    */
-  async getAll(filters?: { limit?: number; offset?: number; isFeatured?: boolean }): Promise<{ editions: EditionFull[] }> {
+  async getAll(filters?: { limit?: number; offset?: number; isFeatured?: boolean; sortBy?: string; sortOrder?: 'asc' | 'desc' }): Promise<{ editions: EditionFull[] }> {
     const params = new URLSearchParams();
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.offset) params.append('offset', filters.offset.toString());
@@ -204,13 +220,13 @@ export const editionsService = {
 
   /**
    * Get edition by slug with inheritance (resolved fields)
-   * GET /editions/slug/:slug/with-inheritance
+   * GET /editions/slug/:slug?withInheritance=true
    */
   async getBySlugWithInheritance(slug: string): Promise<EditionFull> {
     const response = await apiClientV2.get<{
       status: string;
       data: EditionBackendResponse;
-    }>(`/editions/slug/${slug}/with-inheritance`);
+    }>(`/editions/slug/${slug}?withInheritance=true`);
     return transformToEditionFull(response.data.data);
   },
 
@@ -226,13 +242,13 @@ export const editionsService = {
 
   /**
    * Get edition with inheritance (resolved fields)
-   * GET /editions/:id/with-inheritance
+   * GET /editions/:id?withInheritance=true
    */
   async getWithInheritance(id: string): Promise<EditionFull> {
     const response = await apiClientV2.get<{
       status: string;
       data: EditionBackendResponse;
-    }>(`/editions/${id}/with-inheritance`);
+    }>(`/editions/${id}?withInheritance=true`);
     return transformToEditionFull(response.data.data);
   },
 

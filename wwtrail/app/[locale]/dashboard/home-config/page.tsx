@@ -141,6 +141,7 @@ export default function HomeConfigPage() {
       POSTS: 'Artículos',
       TEXT: 'Texto',
       LINKS: 'Enlaces',
+      MAP: 'Mapa',
     };
     return labels[type] || type;
   };
@@ -154,6 +155,7 @@ export default function HomeConfigPage() {
       POSTS: 'bg-emerald-100 text-emerald-800',
       TEXT: 'bg-gray-100 text-gray-800',
       LINKS: 'bg-amber-100 text-amber-800',
+      MAP: 'bg-teal-100 text-teal-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
   };

@@ -7,27 +7,6 @@ import { Competition, CompetitionFilters, PaginatedCompetitionsResponse } from '
  * Usa apiClientV2 que tiene baseURL=/api/v2
  */
 
-export interface Edition {
-  id: string;
-  competitionId: string;
-  year: number;
-  slug: string;
-  startDate?: string;
-  endDate?: string;
-  distance?: number;
-  elevation?: number;
-  maxParticipants?: number;
-  currentParticipants?: number;
-  price?: number;
-  city?: string;
-  status: string;
-  registrationStatus: string;
-  notes?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export const competitionsService = {
   /**
    * Get all competitions with optional filters

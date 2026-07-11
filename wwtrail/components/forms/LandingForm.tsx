@@ -18,12 +18,12 @@ interface LandingFormProps {
 }
 
 const LANGUAGES: { value: Language; label: string }[] = [
-  { value: 'ES', label: 'Español' },
-  { value: 'EN', label: 'English' },
-  { value: 'IT', label: 'Italiano' },
-  { value: 'CA', label: 'Català' },
-  { value: 'FR', label: 'Français' },
-  { value: 'DE', label: 'Deutsch' },
+  { value: Language.ES, label: 'Español' },
+  { value: Language.EN, label: 'English' },
+  { value: Language.IT, label: 'Italiano' },
+  { value: Language.CA, label: 'Català' },
+  { value: Language.FR, label: 'Français' },
+  { value: Language.DE, label: 'Deutsch' },
 ];
 
 export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
@@ -36,7 +36,7 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
   // Form data
   const [title, setTitle] = useState(landing?.title || '');
   const [slug, setSlug] = useState(landing?.slug || '');
-  const [language, setLanguage] = useState<Language>(landing?.language || 'ES');
+  const [language, setLanguage] = useState<Language>((landing?.language as Language) || Language.ES);
   const [coverImage, setCoverImage] = useState(landing?.coverImage || '');
   const [gallery, setGallery] = useState<string[]>(landing?.gallery || []);
   const [content, setContent] = useState(landing?.content || '');

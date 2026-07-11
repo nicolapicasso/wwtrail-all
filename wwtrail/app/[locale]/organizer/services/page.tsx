@@ -287,7 +287,7 @@ export default function OrganizerServicesPage() {
                 key={service.id}
                 service={service}
                 managementMode
-                userRole={user.role}
+                userRole={user.role as any}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onToggleFeatured={user.role === 'ADMIN' ? handleToggleFeatured : undefined}

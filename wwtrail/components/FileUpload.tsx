@@ -9,9 +9,11 @@ import { useState, useRef, ChangeEvent, DragEvent, useEffect } from 'react';
 import { uploadFile, uploadMultipleFiles } from '@/lib/api/files.service';
 
 interface FileUploadProps {
-  onUpload: (url: string) => void;
+  // Optional: not needed in `multiple` mode, where onUploadMultiple is used instead.
+  onUpload?: (url: string) => void;
   onUploadMultiple?: (urls: string[]) => void;
   currentUrl?: string;
+  initialPreview?: string;  // Alias for currentUrl (initial single-image preview)
   currentUrls?: string[];  // ✅ Para cargar galería existente
   multiple?: boolean;
   accept?: string;
@@ -26,6 +28,7 @@ export default function FileUpload({
   onUpload,
   onUploadMultiple,
   currentUrl,
+  initialPreview,
   currentUrls,
   multiple = false,
   accept = 'image/*',
@@ -36,7 +39,7 @@ export default function FileUpload({
   fieldname = 'file',
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || initialPreview || null);
   const [previewUrls, setPreviewUrls] = useState<string[]>(currentUrls || []);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -106,7 +109,7 @@ export default function FileUpload({
         console.log('✅ Upload successful:', url);
         
         setPreviewUrl(url);
-        onUpload(url);
+        onUpload?.(url);
       }
     } catch (err: any) {
       console.error('❌ Upload error:', err);
@@ -236,7 +239,7 @@ export default function FileUpload({
             onClick={(e) => {
               e.stopPropagation();
               setPreviewUrl(null);
-              onUpload('');
+              onUpload?.('');
             }}
             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
             title="Eliminar imagen"

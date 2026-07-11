@@ -10,7 +10,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Event } from '@/types/api';
+import { Event } from '@/types/event';
 import { Layers, Map as MapIcon, Satellite, MountainSnow } from 'lucide-react';
 
 // Fix para iconos de Leaflet en Next.js
@@ -53,7 +53,7 @@ const MAP_TILES = {
  * @param radius Radio del círculo en grados (~0.003 = 300m)
  * @returns Array de items con coordenadas ajustadas
  */
-function spreadOverlappingMarkers<T extends { latitude: number; longitude: number }>(
+function spreadOverlappingMarkers<T extends { latitude?: number | null; longitude?: number | null }>(
   items: T[],
   centerLat: number,
   centerLon: number,
@@ -116,10 +116,27 @@ function spreadOverlappingMarkers<T extends { latitude: number; longitude: numbe
   return result;
 }
 
+/**
+ * Lightweight marker shape — the only fields EventMap needs to render a pin
+ * and its popup. Callers pass partial event/service objects (not full Events),
+ * so the props are typed to this minimal contract instead of the whole Event.
+ */
+export interface EventMapMarker {
+  id: string;
+  name: string;
+  slug?: string;
+  city?: string;
+  country?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  categoryIcon?: string;
+  type?: 'event' | 'service';
+}
+
 interface EventMapProps {
-  event: Event & { categoryIcon?: string; type?: 'event' | 'service' }; // Agregamos soporte para icono de categoría y tipo
-  nearbyEvents?: Event[];
-  nearbyServices?: Event[]; // Services passed as Event-like objects with categoryIcon
+  event: EventMapMarker;
+  nearbyEvents?: EventMapMarker[];
+  nearbyServices?: EventMapMarker[]; // Services passed as marker-like objects with categoryIcon
   nearbyLinkPrefix?: string; // Prefijo para links de nearby (default: '/events/')
   mainLinkPrefix?: string; // Prefijo para link del marcador principal (default: '/events/')
 }

@@ -47,7 +47,7 @@ class SpecialSeriesService {
    */
   async getById(id: string): Promise<SpecialSeries> {
     const response = await apiClientV2.get<ApiResponse<SpecialSeries>>(`/special-series/${id}`);
-    return response.data?.data || response.data;
+    return (response.data?.data || response.data) as SpecialSeries;
   }
 
   /**
@@ -55,7 +55,7 @@ class SpecialSeriesService {
    */
   async getBySlug(slug: string): Promise<SpecialSeries> {
     const response = await apiClientV2.get<ApiResponse<SpecialSeries>>(`/special-series/slug/${slug}`);
-    return response.data?.data || response.data;
+    return (response.data?.data || response.data) as SpecialSeries;
   }
 
   /**
@@ -65,7 +65,7 @@ class SpecialSeriesService {
     const response = await apiClientV2.get<ApiResponse<{ available: boolean; slug: string }>>(
       `/special-series/check-slug/${slug}`
     );
-    return response.data?.data || response.data;
+    return (response.data?.data || response.data) as { available: boolean; slug: string };
   }
 
   /**
@@ -73,7 +73,7 @@ class SpecialSeriesService {
    */
   async create(data: CreateSpecialSeriesInput): Promise<SpecialSeries> {
     const response = await apiClientV2.post<ApiResponse<SpecialSeries>>('/special-series', data);
-    return response.data?.data || response.data;
+    return (response.data?.data || response.data) as SpecialSeries;
   }
 
   /**
@@ -81,7 +81,7 @@ class SpecialSeriesService {
    */
   async update(id: string, data: UpdateSpecialSeriesInput): Promise<SpecialSeries> {
     const response = await apiClientV2.patch<ApiResponse<SpecialSeries>>(`/special-series/${id}`, data);
-    return response.data?.data || response.data;
+    return (response.data?.data || response.data) as SpecialSeries;
   }
 
   /**
@@ -89,7 +89,7 @@ class SpecialSeriesService {
    */
   async approve(id: string): Promise<SpecialSeries> {
     const response = await apiClientV2.post<ApiResponse<SpecialSeries>>(`/special-series/${id}/approve`);
-    return response.data?.data || response.data;
+    return (response.data?.data || response.data) as SpecialSeries;
   }
 
   /**
@@ -97,7 +97,7 @@ class SpecialSeriesService {
    */
   async reject(id: string): Promise<SpecialSeries> {
     const response = await apiClientV2.post<ApiResponse<SpecialSeries>>(`/special-series/${id}/reject`);
-    return response.data?.data || response.data;
+    return (response.data?.data || response.data) as SpecialSeries;
   }
 
   /**

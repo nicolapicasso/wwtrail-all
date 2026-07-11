@@ -132,11 +132,13 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
 
         {/* Date */}
         <p className="text-sm text-muted-foreground mb-3">
-          {new Date(edition.startDate).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          {edition.startDate
+            ? new Date(edition.startDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            : 'Fecha por confirmar'}
         </p>
 
         {/* Stats Grid */}

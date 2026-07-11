@@ -140,7 +140,7 @@ export default function SEOManagementPage() {
         groups.set(key, {
           entityType: seo.entityType,
           entityId: seo.entityId || '',
-          slug: seo.slug,
+          slug: seo.slug ?? null,
           entityName: seo.metaTitle?.split('|')[0]?.trim() || seo.slug || seo.entityId || 'Sin nombre',
           languages: [],
         });
@@ -489,7 +489,7 @@ export default function SEOManagementPage() {
                                 <TableRow key={seo.id}>
                                   <TableCell>
                                     <Badge variant="secondary">
-                                      {getLanguageLabel(seo.language)}
+                                      {getLanguageLabel((seo as any).language)}
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="font-medium max-w-xs truncate">

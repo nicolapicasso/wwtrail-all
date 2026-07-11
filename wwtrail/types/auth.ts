@@ -13,6 +13,8 @@ export interface User {
   bio?: string;
   country?: string;
   city?: string;
+  isPublic?: boolean;
+  isInsider?: boolean;
   createdAt: string;
   updatedAt: string;
 }

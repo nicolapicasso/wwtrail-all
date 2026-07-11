@@ -21,7 +21,7 @@ export function slugify(text: string): string {
  */
 export async function generateUniqueSlug(
   name: string,
-  type: 'event' | 'competition' | 'edition' | 'service' | 'service-category' | 'special-series' = 'event',
+  type: 'event' | 'competition' | 'edition' | 'service' | 'service-category' | 'special-series' | 'post' | 'organizer' | 'promotion' = 'event',
   currentSlug?: string
 ): Promise<string> {
   let slug = slugify(name);
@@ -80,6 +80,24 @@ export async function generateUniqueSlug(
 
       case 'special-series':
         exists = await prisma.specialSeries.findUnique({
+          where: { slug: testSlug },
+        });
+        break;
+
+      case 'post':
+        exists = await prisma.post.findUnique({
+          where: { slug: testSlug },
+        });
+        break;
+
+      case 'organizer':
+        exists = await prisma.organizer.findUnique({
+          where: { slug: testSlug },
+        });
+        break;
+
+      case 'promotion':
+        exists = await prisma.promotion.findUnique({
           where: { slug: testSlug },
         });
         break;

@@ -9,7 +9,8 @@ import EventCard from '@/components/EventCard';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import eventsService from '@/lib/api/v2/events.service';
-import { Event, EventStatus, EventStats as EventStatsType } from '@/lib/types/event';
+import { Event, EventStatus } from '@/types/event';
+import type { EventStatsData } from '@/components/EventStats';
 import { useAuth } from '@/hooks/useAuth';
 
 type ViewMode = 'list' | 'grid';
@@ -20,7 +21,7 @@ export default function MyEventsPage() {
 
   // State
   const [events, setEvents] = useState<Event[]>([]);
-  const [stats, setStats] = useState<EventStatsType>({
+  const [stats, setStats] = useState<EventStatsData>({
     total: 0,
     published: 0,
     draft: 0,
@@ -145,7 +146,7 @@ export default function MyEventsPage() {
   const fetchStats = useCallback(async () => {
     try {
       const response = await eventsService.getStats();
-      setStats(response.data);
+      setStats(response.data as unknown as EventStatsData);
     } catch (error: any) {
       console.error('Error fetching stats:', error);
     }
@@ -190,8 +191,8 @@ export default function MyEventsPage() {
   /**
    * Handle status filter
    */
-  const handleFilterStatus = (status: EventStatus | 'ALL') => {
-    setStatusFilter(status);
+  const handleFilterStatus = (status: string) => {
+    setStatusFilter(status as EventStatus | 'ALL');
     setPage(1);
   };
 
@@ -232,7 +233,7 @@ export default function MyEventsPage() {
    */
   const handleBulkStatusChange = (newStatus: EventStatus) => {
     const count = selectedEventIds.size;
-    const statusLabels = {
+    const statusLabels: Record<string, string> = {
       PUBLISHED: 'publicar',
       DRAFT: 'cambiar a borrador',
       CANCELLED: 'cancelar',
@@ -547,7 +548,7 @@ export default function MyEventsPage() {
                 event={event}
                 viewMode={viewMode}
                 managementMode={true}
-                userRole={user?.role || 'ATHLETE'}
+                userRole={(user?.role as any) || 'ATHLETE'}
                 isSelected={selectedEventIds.has(event.id)}
                 onSelect={() => toggleEventSelection(event.id)}
                 onEdit={handleEdit}

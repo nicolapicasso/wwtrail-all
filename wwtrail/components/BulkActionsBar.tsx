@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2, CheckCircle, FileText, XCircle, X } from 'lucide-react';
-import { EventStatus } from '@/lib/types/event';
+import { EventStatus } from '@/types/event';
 
 interface BulkActionsBarProps {
   selectedCount: number;
@@ -35,7 +35,7 @@ export default function BulkActionsBar({
         <div className="flex items-center gap-2">
           {/* Publicar */}
           <button
-            onClick={() => onChangeStatus('PUBLISHED')}
+            onClick={() => onChangeStatus(EventStatus.PUBLISHED)}
             disabled={isLoading}
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-green-700 
                      hover:bg-green-50 rounded-md transition-colors disabled:opacity-50 
@@ -48,7 +48,7 @@ export default function BulkActionsBar({
 
           {/* Borrador */}
           <button
-            onClick={() => onChangeStatus('DRAFT')}
+            onClick={() => onChangeStatus(EventStatus.DRAFT)}
             disabled={isLoading}
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-yellow-700 
                      hover:bg-yellow-50 rounded-md transition-colors disabled:opacity-50 
@@ -61,7 +61,7 @@ export default function BulkActionsBar({
 
           {/* Cancelar */}
           <button
-            onClick={() => onChangeStatus('CANCELLED')}
+            onClick={() => onChangeStatus(EventStatus.CANCELLED)}
             disabled={isLoading}
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 
                      hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50 

@@ -1,13 +1,22 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/db';
 import { UserRole } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET!;
+// Access and refresh tokens MUST NOT share a signing secret, otherwise a leaked
+// access token could be replayed as a refresh token. Require a dedicated secret
+// in production; only derive a distinct fallback for local development.
+const JWT_REFRESH_SECRET = (() => {
+  if (process.env.JWT_REFRESH_SECRET) return process.env.JWT_REFRESH_SECRET;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_REFRESH_SECRET must be set in production');
+  }
+  // Dev-only: derive a value that is guaranteed different from JWT_SECRET.
+  return `${process.env.JWT_SECRET!}-refresh`;
+})();
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
 export interface TokenPayload {
@@ -42,11 +51,11 @@ export async function generateTokens(user: { id: string; email: string; role: Us
 
   const accessToken = jwt.sign(payload, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
-  });
+  } as jwt.SignOptions);
 
   const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRES_IN,
-  });
+  } as jwt.SignOptions);
 
   // Store refresh token in DB
   const expiresAt = new Date();

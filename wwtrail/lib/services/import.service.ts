@@ -1244,7 +1244,7 @@ export class ImportService {
 
     const edition = await prisma.edition.create({
       data,
-      select: { id: true, year: true, slug: true, name: true },
+      select: { id: true, year: true, slug: true },
     });
 
     // Set location if coordinates provided
@@ -1256,8 +1256,8 @@ export class ImportService {
       `;
     }
 
-    logger.info(`Imported edition: ${edition.name || edition.year} (${edition.id})`);
-    return { ...edition, name: edition.name || `${edition.year}` };
+    logger.info(`Imported edition: ${edition.year} (${edition.id})`);
+    return { ...edition, name: `${edition.year}` };
   }
 
   private async createNativeOrganizer(item: any, userId: string): Promise<any> {

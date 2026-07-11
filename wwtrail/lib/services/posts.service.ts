@@ -62,6 +62,8 @@ interface PostFilters {
   language?: Language;
   status?: PostStatus;
   authorId?: string;
+  eventId?: string;
+  competitionId?: string;
   editionId?: string;
   sortBy?: 'publishedAt' | 'createdAt' | 'viewCount' | 'title';
   sortOrder?: 'asc' | 'desc';
@@ -167,7 +169,7 @@ export class PostsService {
       }
 
       // Generar slug único
-      const slug = await generateUniqueSlug(data.title, prisma.post);
+      const slug = await generateUniqueSlug(data.title, 'post');
 
       // Preparar datos del post
       const postData: any = {
@@ -450,7 +452,7 @@ export class PostsService {
       }
 
       // Guardar en cache
-      await cache.set(cacheKey, JSON.stringify(post), 'EX', CACHE_TTL.MEDIUM);
+      await cache.set(cacheKey, JSON.stringify(post), CACHE_TTL);
 
       // Incrementar contador de vistas
       await prisma.post.update({
@@ -524,7 +526,7 @@ export class PostsService {
 
       // Si se cambia el título, regenerar slug
       if (data.title) {
-        updateData.slug = await generateUniqueSlug(data.title, prisma.post, id);
+        updateData.slug = await generateUniqueSlug(data.title, 'post', id);
       }
 
       // Si hay imágenes, borrar las existentes y crear las nuevas

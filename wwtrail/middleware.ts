@@ -1,6 +1,9 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { locales, defaultLocale } from './i18n';
+import { verifyJwtEdge } from './lib/auth/edge';
+
+const JWT_SECRET = process.env.JWT_SECRET || '';
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -9,7 +12,7 @@ const intlMiddleware = createIntlMiddleware({
   localeDetection: true,
 });
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip API routes entirely (no i18n needed for API)
@@ -20,8 +23,10 @@ export function middleware(request: NextRequest) {
   // Apply i18n middleware
   const response = intlMiddleware(request);
 
-  // Auth logic
-  const accessToken = request.cookies.get('accessToken')?.value;
+  // Auth logic: verify the token signature + expiry, not just its presence.
+  const rawToken = request.cookies.get('accessToken')?.value;
+  const validPayload = rawToken ? await verifyJwtEdge(rawToken, JWT_SECRET) : null;
+  const accessToken = validPayload ? rawToken : undefined;
 
   const publicRoutes = [
     '/',

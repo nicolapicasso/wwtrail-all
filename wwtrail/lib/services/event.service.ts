@@ -56,7 +56,7 @@ interface EventFilters {
   search?: string;
   country?: string;
   city?: string;
-  featured?: boolean;
+  featured?: boolean | string;
   status?: EventStatus;
   typicalMonth?: number | string;  // Filtro por mes típico del evento
   organizerId?: string;  // Filtro por entidad organizadora
@@ -394,7 +394,7 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       const status = userRole === 'ADMIN' ? 'PUBLISHED' : 'DRAFT';
 
       // Generar slug único
-      const slug = await generateUniqueSlug(data.name, prisma.event);
+      const slug = await generateUniqueSlug(data.name, 'event');
 
       // Preparar datos mapeando correctamente los campos del schema
       const eventData: any = {

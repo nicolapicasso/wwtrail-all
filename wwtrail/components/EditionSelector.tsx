@@ -160,11 +160,13 @@ export function EditionSelector({
             <div>
               <h4 className="font-semibold text-2xl">{selectedYear}</h4>
               <p className="text-sm text-muted-foreground">
-                {new Date(edition.startDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {edition.startDate
+                  ? new Date(edition.startDate).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : 'Fecha por confirmar'}
               </p>
             </div>
             <div className="flex flex-col items-end gap-1">

@@ -177,7 +177,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
       };
 
       // ✅ FILTRAR campos undefined para no enviarlos al backend
-      const cleanOrganizerData = Object.fromEntries(
+      const cleanOrganizerData: any = Object.fromEntries(
         Object.entries(organizerData).filter(([_, value]) => value !== undefined)
       );
 

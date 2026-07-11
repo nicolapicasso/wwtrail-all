@@ -353,7 +353,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
       };
 
       // ✅ FILTRAR campos undefined para no enviarlos al backend
-      const cleanEventData = Object.fromEntries(
+      const cleanEventData: any = Object.fromEntries(
         Object.entries(eventData).filter(([_, value]) => value !== undefined)
       );
 

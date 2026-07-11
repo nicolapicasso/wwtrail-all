@@ -7,7 +7,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const edition = await EditionService.findById(params.id);
+    const withInheritance = new URL(request.url).searchParams.get('withInheritance') === 'true';
+    const edition = withInheritance
+      ? await EditionService.getWithInheritance(params.id)
+      : await EditionService.findById(params.id);
     return apiSuccess(edition);
   } catch (error) {
     return apiError(error);

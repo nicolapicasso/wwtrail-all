@@ -6,17 +6,19 @@ import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { homeService } from '@/lib/api/home.service';
 import FileUpload from '@/components/FileUpload';
-import type {
-  HomeBlock,
+import {
   HomeBlockType,
-  ContentBlockConfig,
-  TextBlockConfig,
-  LinksBlockConfig,
-  MapBlockConfig,
   HomeBlockViewType,
   HomeTextSize,
   HomeTextVariant,
   HomeTextAlign,
+} from '@/types/home';
+import type {
+  HomeBlock,
+  ContentBlockConfig,
+  TextBlockConfig,
+  LinksBlockConfig,
+  MapBlockConfig,
   LinkItem,
   MapMode,
 } from '@/types/home';
@@ -32,31 +34,31 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
   const isEditing = !!block;
 
   // Common fields
-  const [blockType, setBlockType] = useState<HomeBlockType>(block?.type || 'EVENTS');
+  const [blockType, setBlockType] = useState<HomeBlockType>(block?.type || HomeBlockType.EVENTS);
   const [visible, setVisible] = useState(block?.visible ?? true);
   const [order, setOrder] = useState(block?.order ?? 0);
 
   // Content block config (EVENTS, COMPETITIONS, EDITIONS, SERVICES, POSTS)
   const [limit, setLimit] = useState(6);
-  const [viewType, setViewType] = useState<HomeBlockViewType>('CARDS');
+  const [viewType, setViewType] = useState<HomeBlockViewType>(HomeBlockViewType.CARDS);
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [contentTitle, setContentTitle] = useState('');
   const [contentSubtitle, setContentSubtitle] = useState('');
 
   // Text block config
   const [textContent, setTextContent] = useState('');
-  const [textSize, setTextSize] = useState<HomeTextSize>('MD');
-  const [textVariant, setTextVariant] = useState<HomeTextVariant>('PARAGRAPH');
-  const [textAlign, setTextAlign] = useState<HomeTextAlign>('LEFT');
+  const [textSize, setTextSize] = useState<HomeTextSize>(HomeTextSize.MD);
+  const [textVariant, setTextVariant] = useState<HomeTextVariant>(HomeTextVariant.PARAGRAPH);
+  const [textAlign, setTextAlign] = useState<HomeTextAlign>(HomeTextAlign.LEFT);
 
   // Links block config
   const [items, setItems] = useState<LinkItem[]>([]);
   const [linksTitle, setLinksTitle] = useState('');
-  const [linksTitleSize, setLinksTitleSize] = useState<HomeTextSize>('XL');
-  const [linksTitleAlign, setLinksTitleAlign] = useState<HomeTextAlign>('CENTER');
+  const [linksTitleSize, setLinksTitleSize] = useState<HomeTextSize>(HomeTextSize.XL);
+  const [linksTitleAlign, setLinksTitleAlign] = useState<HomeTextAlign>(HomeTextAlign.CENTER);
   const [linksSubtitle, setLinksSubtitle] = useState('');
-  const [linksSubtitleSize, setLinksSubtitleSize] = useState<HomeTextSize>('MD');
-  const [linksSubtitleAlign, setLinksSubtitleAlign] = useState<HomeTextAlign>('CENTER');
+  const [linksSubtitleSize, setLinksSubtitleSize] = useState<HomeTextSize>(HomeTextSize.MD);
+  const [linksSubtitleAlign, setLinksSubtitleAlign] = useState<HomeTextAlign>(HomeTextAlign.CENTER);
 
   // Map block config
   const [mapHeight, setMapHeight] = useState(400);
@@ -84,16 +86,16 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         setTextContent(textConfig.content);
         setTextSize(textConfig.size);
         setTextVariant(textConfig.variant);
-        setTextAlign(textConfig.align || 'LEFT');
+        setTextAlign(textConfig.align || HomeTextAlign.LEFT);
       } else if (block.type === 'LINKS') {
         const linksConfig = config as LinksBlockConfig;
         setItems(linksConfig.items || []);
         setLinksTitle(linksConfig.title || '');
-        setLinksTitleSize(linksConfig.titleSize || 'XL');
-        setLinksTitleAlign(linksConfig.titleAlign || 'CENTER');
+        setLinksTitleSize(linksConfig.titleSize || HomeTextSize.XL);
+        setLinksTitleAlign(linksConfig.titleAlign || HomeTextAlign.CENTER);
         setLinksSubtitle(linksConfig.subtitle || '');
-        setLinksSubtitleSize(linksConfig.subtitleSize || 'MD');
-        setLinksSubtitleAlign(linksConfig.subtitleAlign || 'CENTER');
+        setLinksSubtitleSize(linksConfig.subtitleSize || HomeTextSize.MD);
+        setLinksSubtitleAlign(linksConfig.subtitleAlign || HomeTextAlign.CENTER);
       } else if (block.type === 'MAP') {
         const mapConfig = config as MapBlockConfig;
         setMapHeight(mapConfig.height || 400);
@@ -141,7 +143,8 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         showServices,
       } as MapBlockConfig;
     }
-    return {};
+    // All HomeBlockType values are handled above; this is unreachable.
+    return undefined;
   };
 
   const handleSave = async () => {

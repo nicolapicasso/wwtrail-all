@@ -200,7 +200,7 @@ export default function CompetitionForm({
     setLoading(true);
 
     try {
-      const payload = {
+      const payload: any = {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
         type: formData.type,

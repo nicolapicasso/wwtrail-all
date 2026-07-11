@@ -28,7 +28,7 @@ export function PostsBlock({ config }: PostsBlockProps) {
       try {
         const response = await postsService.getAll({
           limit,
-          status: 'PUBLISHED'
+          status: 'PUBLISHED' as any
         });
         setPosts(response?.data || []);
       } catch (error) {

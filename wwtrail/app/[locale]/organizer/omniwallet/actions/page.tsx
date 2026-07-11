@@ -93,7 +93,7 @@ export default function OmniwalletActionsPage() {
         isEnabled: edited.isEnabled,
         triggerStatuses: edited.triggerStatuses,
       });
-      toast.success(`Acción "${ACTION_LABELS[action.code] || action.code}" actualizada`);
+      toast.success(`Acción "${ACTION_LABELS[action.actionCode] || action.actionCode}" actualizada`);
       await loadActions();
     } catch (error) {
       console.error('Error saving action:', error);
@@ -152,7 +152,7 @@ export default function OmniwalletActionsPage() {
       {/* Actions List */}
       <div className="grid gap-6">
         {actions.map((action) => {
-          const Icon = ACTION_ICONS[action.code] || Footprints;
+          const Icon = ACTION_ICONS[action.actionCode] || Footprints;
           const edited = editedActions[action.id] || {};
           const changed = hasChanges(action);
 
@@ -166,7 +166,7 @@ export default function OmniwalletActionsPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg">
-                        {ACTION_LABELS[action.code] || action.code}
+                        {ACTION_LABELS[action.actionCode] || action.actionCode}
                       </CardTitle>
                       <CardDescription>{action.description}</CardDescription>
                     </div>
@@ -250,7 +250,7 @@ export default function OmniwalletActionsPage() {
                 </div>
 
                 {/* Trigger Statuses for PARTICIPATION */}
-                {action.code === 'PARTICIPATION' && (
+                {action.actionCode === 'PARTICIPATION' && (
                   <div className="space-y-3 pt-4 border-t">
                     <Label>Estados que otorgan puntos</Label>
                     <p className="text-sm text-muted-foreground">

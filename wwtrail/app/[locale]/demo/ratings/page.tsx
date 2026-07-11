@@ -227,7 +227,7 @@ export default function DemoRatingsPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               7. Weather Card (Condiciones Meteorológicas)
             </h2>
-            <WeatherCard weather={mockWeather} canRefetch={false} />
+            <WeatherCard weather={mockWeather as any} weatherFetched={true} />
           </section>
 
           {/* 8. Recent Ratings Widget */}

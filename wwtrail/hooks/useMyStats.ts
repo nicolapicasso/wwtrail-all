@@ -23,10 +23,10 @@ export function useMyStats() {
         setLoading(true);
         setError(null);
         
-        const response = await eventsService.getMyStats();
+        const response = await eventsService.getStats();
         
         // ✅ CORRECCIÓN: Usar response directamente, no response.data
-        setStats(response);
+        setStats(response as any);
       } catch (err: any) {
         console.error('Error fetching my stats:', err);
         setError(err.response?.data?.message || 'Error al cargar estadísticas');

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const photo = await EditionPhotoService.create(data);
+    const photo = await EditionPhotoService.upload(data.editionId, data.file, data);
     return apiSuccess(photo, 201);
   } catch (error) { return apiError(error); }
 }

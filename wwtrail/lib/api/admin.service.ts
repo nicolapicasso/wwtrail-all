@@ -34,8 +34,17 @@ export interface User {
   isInsider?: boolean;
   isPublic?: boolean;
   avatar?: string;
+  bio?: string;
+  phone?: string;
   country?: string;
+  city?: string;
   gender?: string;
+  birthDate?: string;
+  language?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
+  youtubeUrl?: string;
   createdAt: string;
   updatedAt: string;
   stats?: {

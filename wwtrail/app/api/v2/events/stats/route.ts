@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request);
     const isAdmin = user.role === 'ADMIN';
 
-    const where = isAdmin ? {} : { createdById: user.id };
+    const where: any = isAdmin ? {} : { createdById: user.id };
 
     const [total, published, draft, rejected] = await Promise.all([
       prisma.event.count({ where }),

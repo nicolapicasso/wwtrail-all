@@ -1,7 +1,7 @@
 // src/schemas/competition-admin.schema.ts
 
 import { z } from 'zod';
-import { CompetitionStatus } from '@prisma/client';
+import { EventStatus as CompetitionStatus } from '@prisma/client';
 
 // ============================================
 // SCHEMAS PARA ADMIN - APROBACIÓN DE COMPETICIONES

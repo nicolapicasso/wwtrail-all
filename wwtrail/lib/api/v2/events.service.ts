@@ -8,7 +8,7 @@ import {
   UpdateEventData,
   RejectEventData,
   EventFilters,
-} from '@/lib/types/event';
+} from '@/types/event';
 
 class EventsService {
   /**
@@ -23,9 +23,9 @@ class EventsService {
     if (filters?.status) params.append('status', filters.status);
     if (filters?.country) params.append('country', filters.country);
     if (filters?.city) params.append('city', filters.city);
-    if (filters?.month) params.append('typicalMonth', filters.month);  // Backend uses typicalMonth
+    if (filters?.typicalMonth) params.append('typicalMonth', filters.typicalMonth.toString());  // Backend uses typicalMonth
     if (filters?.organizerId) params.append('organizerId', filters.organizerId);
-    if (typeof filters?.isFeatured === 'boolean') params.append('featured', filters.isFeatured.toString());
+    if (typeof filters?.featured === 'boolean') params.append('featured', filters.featured.toString());
 
     const response = await apiClientV2.get(`/events?${params.toString()}`);
     return response.data.data || response.data;
@@ -43,9 +43,9 @@ class EventsService {
     if (filters?.status) params.append('status', filters.status);
     if (filters?.country) params.append('country', filters.country);
     if (filters?.city) params.append('city', filters.city);
-    if (filters?.month) params.append('typicalMonth', filters.month);  // Backend uses typicalMonth
+    if (filters?.typicalMonth) params.append('typicalMonth', filters.typicalMonth.toString());  // Backend uses typicalMonth
     if (filters?.organizerId) params.append('organizerId', filters.organizerId);
-    if (typeof filters?.isFeatured === 'boolean') params.append('featured', filters.isFeatured.toString());
+    if (typeof filters?.featured === 'boolean') params.append('featured', filters.featured.toString());
 
     const response = await apiClientV2.get(`/events/my-events?${params.toString()}`);
     return response.data.data || response.data;

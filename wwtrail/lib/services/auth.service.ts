@@ -257,12 +257,12 @@ export class AuthService {
     // Access token
     const accessToken = jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
-    });
+    } as jwt.SignOptions);
 
     // Refresh token
     const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
       expiresIn: JWT_REFRESH_EXPIRES_IN,
-    });
+    } as jwt.SignOptions);
 
     // Guardar refresh token en BD
     const expiresAt = new Date();

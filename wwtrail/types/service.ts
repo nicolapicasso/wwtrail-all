@@ -121,13 +121,17 @@ export interface ServiceFilters {
 export interface ServicesResponse {
   status: 'success';
   data: Service[];
-  total: number;
-  page: number;
-  totalPages: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface ServiceResponse {
-  status: 'success';
+  success?: boolean;
+  status?: 'success';
   data: Service;
 }
 

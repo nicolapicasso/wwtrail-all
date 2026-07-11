@@ -24,8 +24,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await requireRole(request, 'ADMIN');
-    await PostsService.delete(params.id);
+    const user = await requireRole(request, 'ADMIN');
+    await PostsService.delete(params.id, user.id);
     return apiSuccess({ message: 'Post deleted' });
   } catch (error) {
     return apiError(error);

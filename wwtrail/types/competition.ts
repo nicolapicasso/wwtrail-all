@@ -1,4 +1,4 @@
-import { CompetitionType, Language } from './event';
+import { CompetitionType, Language, EventOrganizerRef, EventStatus } from './event';
 import { TerrainType } from './terrainType';
 import { SpecialSeries } from './specialSeries';
 
@@ -28,6 +28,11 @@ export interface Competition {
   baseMaxParticipants?: number;
   isActive: boolean;
   displayOrder: number;
+  // Prisma scalars used by forms/listings
+  language?: Language;
+  status?: EventStatus;
+  featured?: boolean;
+  viewCount?: number;
   createdAt: string;
   updatedAt: string;
 
@@ -52,10 +57,19 @@ export interface Competition {
     country: string;
     city: string;
     organizerId: string;
+    organizer?: EventOrganizerRef | null; // Organizer entity (when included)
     latitude?: number;     // For map display
     longitude?: number;    // For map display
     logoUrl?: string;      // For logo inheritance fallback
   };
+
+  // Traducciones (cuando el endpoint las incluye)
+  translations?: Array<{
+    id: string;
+    language: Language;
+    name?: string;
+    description?: string;
+  }>;
 
   // Contador de ediciones
   _count?: {
@@ -74,6 +88,7 @@ export interface CompetitionWithEvent extends Competition {
     country: string;
     city: string;
     organizerId: string;
+    organizer?: EventOrganizerRef | null;
     latitude?: number;
     longitude?: number;
     logoUrl?: string;
@@ -91,6 +106,9 @@ export interface CompetitionFilters {
   search?: string;
   minDistance?: number;
   maxDistance?: number;
+  isFeatured?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 /**

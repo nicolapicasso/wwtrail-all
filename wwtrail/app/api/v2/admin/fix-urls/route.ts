@@ -72,16 +72,16 @@ export async function POST(request: NextRequest) {
 
     // Scalar URL fields
     const scalarFields: Array<{ model: string; fields: string[] }> = [
-      { model: 'event', fields: ['logoUrl', 'coverImage'] },
+      { model: 'event', fields: ['logo', 'logoUrl', 'coverImage', 'coverImageUrl'] },
       { model: 'competition', fields: ['logoUrl', 'coverImage'] },
-      { model: 'edition', fields: ['logoUrl', 'coverImage'] },
+      { model: 'edition', fields: ['coverImage'] },
       { model: 'organizer', fields: ['logoUrl'] },
       { model: 'specialSeries', fields: ['logoUrl'] },
       { model: 'service', fields: ['logoUrl', 'coverImage'] },
       { model: 'user', fields: ['avatar'] },
       { model: 'file', fields: ['url'] },
       { model: 'editionPhoto', fields: ['url', 'thumbnail'] },
-      { model: 'post', fields: ['coverImage'] },
+      { model: 'post', fields: ['featuredImage'] },
       { model: 'homeConfiguration', fields: ['heroImage'] },
     ];
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
               results[key] = (results[key] || 0) + 1;
             }
           }
-        } catch {}
+        } catch (e) { console.warn(`[fix-urls] ${model}.${field} skipped:`, (e as any)?.message); }
       }
     }
 
@@ -120,8 +120,8 @@ export async function POST(request: NextRequest) {
     const arrayFields: Array<{ model: string; field: string }> = [
       { model: 'event', field: 'gallery' },
       { model: 'competition', field: 'gallery' },
+      { model: 'edition', field: 'gallery' },
       { model: 'service', field: 'gallery' },
-      { model: 'post', field: 'gallery' },
       { model: 'homeConfiguration', field: 'heroImages' },
     ];
 
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
             results[key] = (results[key] || 0) + 1;
           }
         }
-      } catch {}
+      } catch (e) { console.warn(`[fix-urls] ${model}.${field} skipped:`, (e as any)?.message); }
     }
 
     const total = Object.values(results).reduce((sum, n) => sum + n, 0);

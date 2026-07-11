@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { FavoritesService } from '@/lib/services/favorites.service';
+import FavoritesService from '@/lib/services/favorites.service';
 import { requireAuth, apiSuccess, apiError } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {

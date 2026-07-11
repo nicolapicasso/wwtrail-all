@@ -7,18 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiClientV2 } from '@/lib/api/client';
-
-// ============================================================================
-// 📦 TIPOS
-// ============================================================================
-
-interface Edition {
-  id: string;
-  year: number;
-  date: string;
-  competitionId: string;
-  // ... otros campos
-}
+import type { Edition } from '@/types/edition';
 
 // ============================================================================
 // 🪝 HOOK: Años disponibles de una competición
@@ -44,7 +33,7 @@ export function useAvailableYears(competitionId: string) {
         const { data } = await apiClientV2.get(`/competitions/${competitionId}/editions`);
         
         // Extraer años únicos y ordenar
-        const uniqueYears = [...new Set(data.data.map((edition: Edition) => edition.year))];
+        const uniqueYears = [...new Set<number>(data.data.map((edition: Edition) => edition.year))];
         setYears(uniqueYears.sort((a, b) => b - a)); // Descendente (más reciente primero)
       } catch (err) {
         console.error('Error fetching available years:', err);

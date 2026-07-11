@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { MapPin, ArrowRight } from 'lucide-react';
 import EventCard from '@/components/EventCard';
 import eventsService from '@/lib/api/v2/events.service';
-import type { Event } from '@/types/api';
+import type { Event } from '@/types/event';
+import { EventStatus } from '@/types/event';
 import type { ContentBlockConfig } from '@/types/home';
 import { HomeBlockViewType } from '@/types/home';
 
@@ -29,8 +30,8 @@ export function EventsBlock({ config }: EventsBlockProps) {
         console.log('[EventsBlock] Fetching events with config:', { limit, featuredOnly });
         const response = await eventsService.getAll({
           limit,
-          isFeatured: featuredOnly,
-          status: 'PUBLISHED'
+          featured: featuredOnly,
+          status: EventStatus.PUBLISHED
         });
         console.log('[EventsBlock] API Response:', response);
         console.log('[EventsBlock] Events count:', response?.data?.length || 0);

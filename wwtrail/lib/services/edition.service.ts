@@ -72,7 +72,7 @@ export class EditionService {
     const slug = await this.generateUniqueSlug(baseSlug);
 
     // Crear edición
-    const edition = await prisma.edition.create({
+    const edition = await (prisma.edition.create as any)({
       data: {
         competitionId,
         year: data.year,
@@ -174,7 +174,7 @@ export class EditionService {
     // Crear ediciones en transacción
     const editions = await prisma.$transaction(
       years.map((year) =>
-        prisma.edition.create({
+        (prisma.edition.create as any)({
           data: {
             competitionId,
             year,
@@ -319,6 +319,8 @@ export class EditionService {
                 logoUrl: true,
               },
             },
+            terrainType: true,
+            specialSeries: true,
           },
         },
         _count: {
@@ -386,6 +388,8 @@ export class EditionService {
                 logoUrl: true,
               },
             },
+            terrainType: true,
+            specialSeries: true,
           },
         },
         _count: {

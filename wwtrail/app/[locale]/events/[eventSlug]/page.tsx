@@ -10,7 +10,7 @@
 import { eventsService } from '@/lib/api/events.service';
 import { seoService } from '@/lib/api/seo.service';
 import servicesService from '@/lib/api/v2/services.service';
-import { Event } from '@/types/api';
+import { Event } from '@/types/event';
 import { Service } from '@/types/v2';
 import {
   MapPin, Calendar, Globe, Mail, Phone, Facebook, Instagram, Twitter, Youtube,
@@ -248,27 +248,15 @@ export default async function EventDetailPage({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoRow label="País" value={event.country} />
                 <InfoRow label="Ciudad" value={event.city} />
-                {event.region && <InfoRow label="Región" value={event.region} />}
-                
-                {event.type && (
-                  <div className="flex items-start gap-3">
-                    <div className="font-semibold text-gray-700 w-32">Tipo:</div>
-                    <div className="flex-1">
-                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
-                        {event.type}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                
+
                 {event.firstEditionYear && (
                   <InfoRow label="Primera Edición" value={event.firstEditionYear.toString()} />
                 )}
-                
+
                 {event.organizer && (
-                  <InfoRow 
-                    label="Organizador" 
-                    value={`${event.organizer.firstName || ''} ${event.organizer.lastName || ''}`.trim() || event.organizer.username}
+                  <InfoRow
+                    label="Organizador"
+                    value={event.organizer.name}
                   />
                 )}
               </div>

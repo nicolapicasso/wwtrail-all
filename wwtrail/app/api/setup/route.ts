@@ -12,8 +12,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, username, password, firstName, lastName, setupSecret } = body;
 
-    // Verify setup secret
-    const expectedSecret = process.env.SETUP_SECRET || process.env.JWT_SECRET;
+    // Verify setup secret. Must be a dedicated secret — never fall back to
+    // JWT_SECRET, which is used to sign tokens and would let anyone who knows it
+    // create an admin account.
+    const expectedSecret = process.env.SETUP_SECRET;
+    if (!expectedSecret) {
+      return Response.json(
+        { error: 'Setup endpoint is disabled (SETUP_SECRET not configured)' },
+        { status: 403 }
+      );
+    }
     if (!setupSecret || setupSecret !== expectedSecret) {
       return Response.json(
         { error: 'Invalid setup secret' },
@@ -86,12 +94,10 @@ export async function GET() {
       where: { role: 'ADMIN' },
     });
 
-    const userCount = await prisma.user.count();
-
+    // Only expose whether initial setup is still needed. Do not leak user
+    // counts or other reconnaissance-friendly details.
     return Response.json({
       setupNeeded: adminCount === 0,
-      adminExists: adminCount > 0,
-      totalUsers: userCount,
     });
   } catch (error: any) {
     return Response.json(

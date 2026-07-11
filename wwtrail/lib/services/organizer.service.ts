@@ -53,7 +53,7 @@ export class OrganizerService {
       const status = userRole === 'ADMIN' ? 'PUBLISHED' : 'DRAFT';
 
       // Generar slug único
-      const slug = await generateUniqueSlug(data.name, prisma.organizer);
+      const slug = await generateUniqueSlug(data.name, 'organizer');
 
       const organizer = await prisma.organizer.create({
         data: {

@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
+import { EventStatus } from '@/types/event';
 import 'leaflet/dist/leaflet.css';
 import { Search, MapPin, Mountain, Sparkles, Award, X, Building2, ChevronLeft, ChevronRight, Layers, Map as MapIcon, Satellite, MountainSnow } from 'lucide-react';
 import eventsService from '@/lib/api/v2/events.service';
@@ -37,7 +38,7 @@ const MAP_TILES = {
 /**
  * Ajusta coordenadas de marcadores que se solapan, distribuyéndolos en círculo
  */
-function spreadOverlappingMarkers<T extends { latitude: number; longitude: number }>(
+function spreadOverlappingMarkers<T extends { latitude?: number | null; longitude?: number | null }>(
   items: T[],
   radius: number = 0.003
 ): (T & { originalLat?: number; originalLon?: number })[] {
@@ -251,7 +252,7 @@ export default function DirectoryMapClient() {
         try {
           // Load ALL events (no country filter) for counting
           const eventsData = await eventsService.getAll({
-            status: 'PUBLISHED',
+            status: EventStatus.PUBLISHED,
             limit: 1000,
             search: filters.search || undefined,
           });

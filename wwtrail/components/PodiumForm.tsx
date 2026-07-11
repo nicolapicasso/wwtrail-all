@@ -5,7 +5,8 @@
 import { useState } from 'react';
 import { X, Trophy } from 'lucide-react';
 import { PODIUM_TYPE_LABELS } from '@/types/podium';
-import type { EditionPodium, PodiumType, CreatePodiumDTO } from '@/types/podium';
+import type { EditionPodium, CreatePodiumDTO } from '@/types/podium';
+import { PodiumType } from '@/types/podium';
 
 interface PodiumFormProps {
   editionId: string;
@@ -23,7 +24,7 @@ export default function PodiumForm({
   loading = false,
 }: PodiumFormProps) {
   const [formData, setFormData] = useState<CreatePodiumDTO>({
-    type: podium?.type || 'GENERAL',
+    type: podium?.type || PodiumType.GENERAL,
     categoryName: podium?.categoryName || undefined,
     firstPlace: podium?.firstPlace || '',
     firstTime: podium?.firstTime || undefined,
@@ -85,10 +86,10 @@ export default function PodiumForm({
   };
 
   const podiumTypes: { value: PodiumType; label: string }[] = [
-    { value: 'GENERAL', label: PODIUM_TYPE_LABELS.GENERAL },
-    { value: 'MALE', label: PODIUM_TYPE_LABELS.MALE },
-    { value: 'FEMALE', label: PODIUM_TYPE_LABELS.FEMALE },
-    { value: 'CATEGORY', label: PODIUM_TYPE_LABELS.CATEGORY },
+    { value: PodiumType.GENERAL, label: PODIUM_TYPE_LABELS.GENERAL },
+    { value: PodiumType.MALE, label: PODIUM_TYPE_LABELS.MALE },
+    { value: PodiumType.FEMALE, label: PODIUM_TYPE_LABELS.FEMALE },
+    { value: PodiumType.CATEGORY, label: PODIUM_TYPE_LABELS.CATEGORY },
   ];
 
   return (

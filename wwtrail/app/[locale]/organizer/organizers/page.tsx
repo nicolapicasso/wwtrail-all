@@ -48,7 +48,7 @@ export default function OrganizersListPage() {
       const response = await organizersService.getAll(filters);
 
       setOrganizers(response.data);
-      setTotalPages(response.pagination.pages);
+      setTotalPages(response.pagination.pages || 0);
     } catch (error: any) {
       console.error('Error fetching organizers:', error);
       alert(error.response?.data?.message || 'Error al cargar organizadores');

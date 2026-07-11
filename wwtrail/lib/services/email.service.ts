@@ -20,14 +20,14 @@ export class EmailService {
       // Try different ways to access createTransporter
       let createTransporter: any;
 
-      if (typeof nodemailer.createTransporter === 'function') {
-        createTransporter = nodemailer.createTransporter;
-      } else if (typeof (nodemailer as any).default?.createTransporter === 'function') {
-        createTransporter = (nodemailer as any).default.createTransporter;
+      if (typeof (nodemailer as any).createTransport === 'function') {
+        createTransporter = (nodemailer as any).createTransport;
+      } else if (typeof (nodemailer as any).default?.createTransport === 'function') {
+        createTransporter = (nodemailer as any).default.createTransport;
       } else {
         // Last resort: require it directly
         const nm = require('nodemailer');
-        createTransporter = nm.createTransporter || nm.default?.createTransporter;
+        createTransporter = nm.createTransport || nm.default?.createTransport;
       }
 
       if (!createTransporter) {
@@ -44,7 +44,7 @@ export class EmailService {
         },
       });
     }
-    return this._transporter;
+    return this._transporter!;
   }
 
   /**

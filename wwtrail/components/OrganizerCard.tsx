@@ -5,14 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Building2 } from 'lucide-react';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
+import type { EventOrganizerRef } from '@/types/event';
 
 interface OrganizerCardProps {
-  organizer: {
-    id: string;
-    name: string;
-    slug: string;
-    logoUrl?: string;
-  };
+  organizer: EventOrganizerRef;
   className?: string;
 }
 

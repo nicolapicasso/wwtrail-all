@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { AdminService } from '@/lib/services/admin.service';
+import AdminService from '@/lib/services/admin.service';
 import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       const stats = await AdminService.getComprehensiveStats();
       return apiSuccess(stats);
     }
-    const stats = await AdminService.getStats();
+    const stats = await AdminService.getDashboardStats();
     return apiSuccess(stats);
   } catch (error) { return apiError(error); }
 }

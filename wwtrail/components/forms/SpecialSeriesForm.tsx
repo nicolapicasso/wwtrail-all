@@ -181,7 +181,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
       };
 
       // ✅ FILTRAR campos undefined para no enviarlos al backend
-      const cleanSpecialSeriesData = Object.fromEntries(
+      const cleanSpecialSeriesData: any = Object.fromEntries(
         Object.entries(specialSeriesData).filter(([_, value]) => value !== undefined)
       );
 
