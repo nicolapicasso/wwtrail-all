@@ -2,7 +2,7 @@
 import React from 'react';
 import { Calendar, CheckCircle, Clock, XCircle, TrendingUp } from 'lucide-react';
 
-interface EventStatsData {
+export interface EventStatsData {
   total: number;
   published: number;
   draft: number;
