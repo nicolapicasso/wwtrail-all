@@ -49,7 +49,11 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-RUN apk add --no-cache openssl curl
+# openssl+curl for runtime; chromium + fonts for the AI scraper's headless
+# rendering of JavaScript sites (e.g. UTMB).
+RUN apk add --no-cache \
+    openssl curl \
+    chromium nss freetype harfbuzz ca-certificates ttf-freefont
 
 # Create non-root user with writable home directory
 RUN addgroup --system --gid 1001 nodejs && \
@@ -71,6 +75,12 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 # Install only prisma CLI for runtime migrations (minimal install)
 RUN npm install --no-save prisma@6.19.0
 
+# playwright-core for the scraper's headless rendering. Uses the system Chromium
+# installed above (no browser download). Installed here because the Next.js
+# standalone output doesn't trace this runtime-only optional dependency.
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+RUN npm install --no-save playwright-core@1.49.1
+
 # Copy entrypoint script
 COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
@@ -87,6 +97,8 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
+# Headless Chromium for the AI scraper (Alpine's chromium package)
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium-browser
 
 EXPOSE 3000
 

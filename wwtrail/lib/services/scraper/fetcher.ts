@@ -8,9 +8,29 @@
 // 'auto' tries static and, if the extracted text looks too thin (typical of a
 // JS-only SPA shell), falls back to render when available.
 
+import { existsSync } from 'fs';
 import { assertSafeUrl } from '@/lib/utils/ssrf';
 import logger from '@/lib/utils/logger';
 import type { FetchMode } from './types';
+
+// Resolve a Chromium executable for headless rendering. Prefers an explicit env
+// var, then common system locations (Alpine's chromium package, dev browsers).
+// Returns undefined to let playwright-core resolve its own bundled browser.
+function resolveChromiumPath(): string | undefined {
+  const candidates = [
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
+    process.env.CHROMIUM_PATH,
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/opt/pw-browsers/chromium/chrome-linux/chrome',
+  ].filter(Boolean) as string[];
+  for (const p of candidates) {
+    try {
+      if (existsSync(p)) return p;
+    } catch {}
+  }
+  return undefined;
+}
 
 const USER_AGENT =
   'Mozilla/5.0 (compatible; WWTrailBot/1.0; +https://wwtrail.app) AppleWebKit/537.36';
@@ -101,10 +121,7 @@ async function fetchRendered(url: string): Promise<string> {
     );
   }
 
-  const executablePath =
-    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ||
-    process.env.CHROMIUM_PATH ||
-    undefined;
+  const executablePath = resolveChromiumPath();
 
   const browser = await chromium.launch({
     headless: true,
