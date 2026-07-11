@@ -55,12 +55,14 @@ export default function CompetitionDetailPage() {
 
   // Fetch nearby events and services when competition data is available
   useEffect(() => {
-    if (competition?.event?.latitude && competition?.event?.longitude) {
+    const lat = competition?.event?.latitude;
+    const lon = competition?.event?.longitude;
+    if (lat != null && lon != null) {
       const fetchNearby = async () => {
         try {
           const events = await eventsService.getNearby(
-            competition.event.latitude,
-            competition.event.longitude,
+            lat,
+            lon,
             50 // 50km radius
           );
           setNearbyEvents(events);
@@ -70,8 +72,8 @@ export default function CompetitionDetailPage() {
 
         try {
           const services = await servicesService.getNearby(
-            competition.event.latitude,
-            competition.event.longitude,
+            lat,
+            lon,
             50 // 50km radius
           );
           setNearbyServices(services);
@@ -355,7 +357,7 @@ export default function CompetitionDetailPage() {
                     latitude: competition.event.latitude,
                     longitude: competition.event.longitude,
                     categoryIcon: '🏃', // Icon for competition
-                    type: competition.type,
+                    type: 'event', // map marker kind (not the race type)
                   }}
                   nearbyEvents={nearbyEvents}
                   nearbyServices={nearbyServices

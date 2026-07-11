@@ -1,4 +1,4 @@
-import { CompetitionType, Language } from './event';
+import { CompetitionType, Language, EventOrganizerRef } from './event';
 import { TerrainType } from './terrainType';
 import { SpecialSeries } from './specialSeries';
 
@@ -52,6 +52,7 @@ export interface Competition {
     country: string;
     city: string;
     organizerId: string;
+    organizer?: EventOrganizerRef | null; // Organizer entity (when included)
     latitude?: number;     // For map display
     longitude?: number;    // For map display
     logoUrl?: string;      // For logo inheritance fallback
@@ -74,6 +75,7 @@ export interface CompetitionWithEvent extends Competition {
     country: string;
     city: string;
     organizerId: string;
+    organizer?: EventOrganizerRef | null;
     latitude?: number;
     longitude?: number;
     logoUrl?: string;
