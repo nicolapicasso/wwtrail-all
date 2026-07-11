@@ -122,12 +122,14 @@ class CompetitionAdminService {
           slug: comp.event.slug,
           country: comp.event.country,
           city: comp.event.city,
-          organizer: {
-            id: comp.event.organizer.id,
-            email: comp.event.organizer.createdBy.email,
-            username: comp.event.organizer.createdBy.username,
-            fullName: `${comp.event.organizer.createdBy.firstName || ''} ${comp.event.organizer.createdBy.lastName || ''}`.trim() || comp.event.organizer.createdBy.username,
-          },
+          organizer: comp.event.organizer
+            ? {
+                id: comp.event.organizer.id,
+                email: comp.event.organizer.createdBy.email,
+                username: comp.event.organizer.createdBy.username,
+                fullName: `${comp.event.organizer.createdBy.firstName || ''} ${comp.event.organizer.createdBy.lastName || ''}`.trim() || comp.event.organizer.createdBy.username,
+              }
+            : null,
         },
         totalEditions: comp._count.editions,
       })),

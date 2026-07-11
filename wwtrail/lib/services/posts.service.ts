@@ -62,6 +62,8 @@ interface PostFilters {
   language?: Language;
   status?: PostStatus;
   authorId?: string;
+  eventId?: string;
+  competitionId?: string;
   editionId?: string;
   sortBy?: 'publishedAt' | 'createdAt' | 'viewCount' | 'title';
   sortOrder?: 'asc' | 'desc';
@@ -450,7 +452,7 @@ export class PostsService {
       }
 
       // Guardar en cache
-      await cache.set(cacheKey, JSON.stringify(post), 'EX', CACHE_TTL.MEDIUM);
+      await cache.set(cacheKey, JSON.stringify(post), CACHE_TTL);
 
       // Incrementar contador de vistas
       await prisma.post.update({
