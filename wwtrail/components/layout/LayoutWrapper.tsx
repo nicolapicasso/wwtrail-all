@@ -65,8 +65,8 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
         className="page-content relative z-10"
         style={{ marginBottom: `-${FOOTER_HEIGHT}px` }}
       >
-        {/* Content with white background - ends before spacer */}
-        <div className="bg-white min-h-screen">
+        {/* Content with paper background - ends before spacer */}
+        <div className="bg-paper min-h-screen">
           <main className="flex-1">
             {children}
           </main>

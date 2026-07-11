@@ -52,9 +52,9 @@ export default function Navbar() {
   // Mostrar un placeholder mientras carga
   if (loading) {
     return (
-      <nav className="bg-black border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+      <nav className="bg-black border-b border-white/10">
+        <div className="max-w-content mx-auto px-8">
+          <div className="flex justify-between h-[68px]">
             <div className="flex items-center">
               <Link href="/" className="flex items-center gap-2">
                 <div className="relative h-10 w-40">
@@ -78,9 +78,9 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 bg-black border-b border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+    <nav className="sticky top-0 z-50 bg-black border-b border-white/10">
+      <div className="max-w-content mx-auto px-8">
+        <div className="flex justify-between h-[68px]">
           {/* Logo and Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export default function Navbar() {
               {/* Eventos con dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
+                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors">
                     {t('events')}
                     <ChevronDown className="h-4 w-4" />
                   </button>
@@ -122,7 +122,7 @@ export default function Navbar() {
               {/* Competiciones con dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
+                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors">
                     {t('competitions')}
                     <ChevronDown className="h-4 w-4" />
                   </button>
@@ -143,13 +143,13 @@ export default function Navbar() {
 
               <Link
                 href="/services"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors"
               >
                 {t('services')}
               </Link>
               <Link
                 href="/directory"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors"
               >
                 Mapa
               </Link>
@@ -157,7 +157,7 @@ export default function Navbar() {
               {/* Comunidad dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors">
+                  <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors">
                     Comunidad
                     <ChevronDown className="h-4 w-4" />
                   </button>
@@ -187,7 +187,7 @@ export default function Navbar() {
 
               <Link
                 href="/magazine"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-hover transition-colors"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors"
               >
                 {t('magazine')}
               </Link>
@@ -200,7 +200,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-hover hover:bg-gray-900">
+                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-green-bright hover:bg-gray-900">
                     <User className="h-5 w-5" />
                     <span>{user?.username || user?.email}</span>
                     <ChevronDown className="h-4 w-4" />
@@ -249,7 +249,7 @@ export default function Navbar() {
           <div className="flex items-center md:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-hover hover:bg-gray-900"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-green-bright hover:bg-gray-900"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <Menu className="h-6 w-6" />
@@ -269,14 +269,14 @@ export default function Navbar() {
             </div>
             <Link
               href="/events"
-              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               → {t('events')}
             </Link>
             <Link
               href="/organizers"
-              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               → {t('organizers')}
@@ -284,28 +284,28 @@ export default function Navbar() {
             {/* Competiciones section */}
             <Link
               href="/competitions"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('competitions')}
             </Link>
             <Link
               href="/special-series"
-              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               → {t('specialSeries')}
             </Link>
             <Link
               href="/services"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('services')}
             </Link>
             <Link
               href="/directory"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Mapa
@@ -316,28 +316,28 @@ export default function Navbar() {
             </div>
             <Link
               href="/users"
-              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               → Directorio de usuarios
             </Link>
             <Link
               href="/users/insiders"
-              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               → Insiders
             </Link>
             <Link
               href="/promotions"
-              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               → Ventajas
             </Link>
             <Link
               href="/magazine"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('magazine')}
@@ -352,7 +352,7 @@ export default function Navbar() {
               </div>
               <Link
                 href="/profile"
-                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center">
@@ -363,7 +363,7 @@ export default function Navbar() {
               {/* Mis participaciones - Próximamente */}
               <Link
                 href="/dashboard"
-                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-hover transition-colors"
+                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center">
