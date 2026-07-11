@@ -50,7 +50,7 @@ export default function OmniwalletConfigPage() {
       }
     } catch (error) {
       console.error('Error loading config:', error);
-      toast.error('Error al cargar la configuraci\u00f3n');
+      toast.error('Error al cargar la configuración');
     } finally {
       setLoading(false);
     }
@@ -63,13 +63,13 @@ export default function OmniwalletConfigPage() {
       setConnectionStatus(result.connected ? 'success' : 'error');
 
       if (result.connected) {
-        toast.success('Conexi\u00f3n exitosa con Omniwallet');
+        toast.success('Conexión exitosa con Omniwallet');
       } else {
-        toast.error(`Error de conexi\u00f3n: ${result.message}`);
+        toast.error(`Error de conexión: ${result.message}`);
       }
     } catch (error) {
       setConnectionStatus('error');
-      toast.error('Error al probar la conexi\u00f3n');
+      toast.error('Error al probar la conexión');
     }
   };
 
@@ -91,10 +91,10 @@ export default function OmniwalletConfigPage() {
       }));
 
       await loadData();
-      toast.success('Configuraci\u00f3n guardada correctamente');
+      toast.success('Configuración guardada correctamente');
     } catch (error) {
       console.error('Error saving config:', error);
-      toast.error('Error al guardar la configuraci\u00f3n');
+      toast.error('Error al guardar la configuración');
     } finally {
       setSaving(false);
     }
@@ -131,9 +131,9 @@ export default function OmniwalletConfigPage() {
           <Wallet className="h-6 w-6 text-primary-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Configuraci\u00f3n de Omniwallet</h1>
+          <h1 className="text-2xl font-bold">Configuración de Omniwallet</h1>
           <p className="text-muted-foreground">
-            Configura la conexi\u00f3n con Omniwallet para el sistema de Zancadas
+            Configura la conexión con Omniwallet para el sistema de Zancadas
           </p>
         </div>
       </div>
@@ -186,9 +186,9 @@ export default function OmniwalletConfigPage() {
       {/* Connection Config */}
       <Card>
         <CardHeader>
-          <CardTitle>Conexi\u00f3n con Omniwallet</CardTitle>
+          <CardTitle>Conexión con Omniwallet</CardTitle>
           <CardDescription>
-            Configura los datos de conexi\u00f3n con tu cuenta de Omniwallet
+            Configura los datos de conexión con tu cuenta de Omniwallet
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -215,7 +215,7 @@ export default function OmniwalletConfigPage() {
                 onChange={(e) => setConfig((prev) => ({ ...prev, apiToken: e.target.value }))}
               />
               {originalConfig?.hasToken && (
-                <p className="text-xs text-green-600">Token ya configurado. Deja vac\u00edo para mantener el actual.</p>
+                <p className="text-xs text-green-600">Token ya configurado. Deja vacío para mantener el actual.</p>
               )}
             </div>
           </div>
@@ -251,7 +251,7 @@ export default function OmniwalletConfigPage() {
                 {connectionStatus === 'testing' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {connectionStatus === 'success' && <CheckCircle className="mr-2 h-4 w-4 text-green-500" />}
                 {connectionStatus === 'error' && <XCircle className="mr-2 h-4 w-4 text-red-500" />}
-                Probar Conexi\u00f3n
+                Probar Conexión
               </Button>
               <Button onClick={saveConfig} disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -265,9 +265,9 @@ export default function OmniwalletConfigPage() {
       {/* Sync Management */}
       <Card>
         <CardHeader>
-          <CardTitle>Sincronizaci\u00f3n</CardTitle>
+          <CardTitle>Sincronización</CardTitle>
           <CardDescription>
-            Gestiona la sincronizaci\u00f3n de transacciones con Omniwallet
+            Gestiona la sincronización de transacciones con Omniwallet
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -290,7 +290,7 @@ export default function OmniwalletConfigPage() {
       {stats && stats.transactionsByAction.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Transacciones por Acci\u00f3n</CardTitle>
+            <CardTitle>Transacciones por Acción</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
