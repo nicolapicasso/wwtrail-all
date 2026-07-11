@@ -1,16 +1,16 @@
 # Graph Report - wwtrail  (2026-07-11)
 
 ## Corpus Check
-- 498 files · ~266,835 words
+- 498 files · ~266,917 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2918 nodes · 6628 edges · 187 communities (113 shown, 74 thin omitted)
+- 2918 nodes · 6628 edges · 188 communities (114 shown, 74 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.55)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c74fba66`
+- Built from commit: `755ab593`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -119,16 +119,17 @@
 - SEOService
 - competition.schema.ts
 - result.schema.ts
+- uuid
 - route.ts
 - review.schema.ts
 - omniwallet.service.ts
+- @types/node
 - DirectoryMapClient.tsx
 - participant.schema.ts
 - ServiceService
 - EventCard.tsx
 - events.service.ts
 - useSlugValidation.ts
-- bcryptjs
 - package.json
 - EditionStats.tsx
 - @radix-ui/react-switch
@@ -225,7 +226,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (187 total, 74 thin omitted)
+## Communities (188 total, 74 thin omitted)
 
 ### Community 0 - "apiSuccess"
 Cohesion: 0.06
@@ -248,12 +249,12 @@ Cohesion: 0.08
 Nodes (24): MagazineCategoryPage(), PromotionsAnalyticsPage(), ArticleCard(), ArticleCardProps, ArticleGrid(), ArticleGridProps, PostForm(), PostFormProps (+16 more)
 
 ### Community 6 - "useAuth"
-Cohesion: 0.10
-Nodes (25): LoginPage(), RegisterPage(), DashboardPage(), NewLandingPage(), OrganizerPostsPage(), EditPromotionPage(), NewPromotionPage(), EditServicePage() (+17 more)
+Cohesion: 0.07
+Nodes (33): LoginPage(), RegisterPage(), DashboardPage(), NewLandingPage(), OrganizerPostsPage(), EditPromotionPage(), NewPromotionPage(), EditServicePage() (+25 more)
 
 ### Community 7 - "homeConfiguration.schema.ts"
-Cohesion: 0.11
-Nodes (28): COLUMNS, FooterAdminPage(), LANGUAGES, InsiderConfig, InsiderStats, EditLandingPage(), LandingsAdminPage(), SEOConfigPage() (+20 more)
+Cohesion: 0.10
+Nodes (26): COLUMNS, FooterAdminPage(), LANGUAGES, InsiderConfig, InsiderStats, EditLandingPage(), LandingsAdminPage(), SEOConfigPage() (+18 more)
 
 ### Community 8 - "page.tsx"
 Cohesion: 0.09
@@ -269,7 +270,7 @@ Nodes (7): getCountryName(), ROLE_LABELS, StatsPage(), STATUS_LABELS, TYPE_LABEL
 
 ### Community 11 - "user.service.ts"
 Cohesion: 0.07
-Nodes (36): InsidersAdminPage(), INSIDER_COLORS, insiderColor(), InsiderData, insiderInitials(), InsidersPage(), ParticipationCard(), profileInitials() (+28 more)
+Nodes (38): InsidersAdminPage(), INSIDER_COLORS, insiderColor(), InsiderData, insiderInitials(), InsidersPage(), ParticipationCard(), profileInitials() (+30 more)
 
 ### Community 12 - "edition.ts"
 Cohesion: 0.11
@@ -488,8 +489,8 @@ Cohesion: 0.15
 Nodes (9): CreateLandingInput, createLandingSchema, GetLandingsQuery, getLandingsSchema, TranslateLandingInput, translateLandingSchema, UpdateLandingInput, updateLandingSchema (+1 more)
 
 ### Community 70 - "route.ts"
-Cohesion: 0.07
-Nodes (45): EventMap, EditEventPage(), ExportStats, ACTION_ICONS, ACTION_LABELS, PARTICIPATION_STATUSES, ENTITY_CONFIGS, EntityConfig (+37 more)
+Cohesion: 0.13
+Nodes (27): EventMap, ExportStats, ACTION_ICONS, ACTION_LABELS, PARTICIPATION_STATUSES, TODO: Implement actual API call to change password, Card, CardContent (+19 more)
 
 ### Community 72 - "page.tsx"
 Cohesion: 0.33
@@ -523,6 +524,10 @@ Nodes (14): AddResultInput, addResultSchema, competitionIdParamSchema, GetMyComp
 Cohesion: 0.39
 Nodes (7): base64UrlDecodeToString(), base64UrlToUint8Array(), EdgeTokenPayload, verifyJwtEdge(), config, intlMiddleware, middleware()
 
+### Community 83 - "userEdition.schema.ts"
+Cohesion: 0.19
+Nodes (10): EditEventPage(), EditionParticipantsProps, Participant, ParticipantUser, GenerateTranslationsButton(), GenerateTranslationsButtonProps, TranslationStatus, Button (+2 more)
+
 ### Community 84 - "EventManagersPanel.tsx"
 Cohesion: 0.57
 Nodes (5): EditionSelector(), EditionSelectorCompact(), EditionSelectorProps, useAvailableYears(), useEditionByYear()
@@ -545,7 +550,7 @@ Nodes (7): EditionGalleryProps, photosService, EditionPhoto, PHOTO_UPLOAD_CONFIG
 
 ### Community 89 - "devDependencies"
 Cohesion: 0.15
-Nodes (13): autoprefixer, eslint, devDependencies, autoprefixer, eslint, @types/node, @types/react, @types/uuid (+5 more)
+Nodes (13): eslint, devDependencies, eslint, @types/js-cookie, @types/nodemailer, @types/react, @types/uuid, typescript (+5 more)
 
 ### Community 90 - "error-handler.ts"
 Cohesion: 0.17
@@ -569,7 +574,7 @@ Nodes (13): scripts, build, db:export, db:fix-home-encoding, db:import, dev, lin
 
 ### Community 99 - "dependencies"
 Cohesion: 0.18
-Nodes (11): js-cookie, jsonwebtoken, dependencies, js-cookie, jsonwebtoken, @radix-ui/react-tabs, @tiptap/react, uuid (+3 more)
+Nodes (11): bcryptjs, js-cookie, jsonwebtoken, dependencies, bcryptjs, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
 
 ### Community 101 - "SEOService"
 Cohesion: 0.10

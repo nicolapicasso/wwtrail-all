@@ -231,6 +231,8 @@ export default function ScraperPage() {
               <Field label="País (ISO-2)"><input value={graph.event.country || ''} onChange={(e) => setEvent({ country: e.target.value.toUpperCase().slice(0, 2) })} className={inputCls} /></Field>
               <Field label="Ciudad"><input value={graph.event.city || ''} onChange={(e) => setEvent({ city: e.target.value })} className={inputCls} /></Field>
               <Field label="Web"><input value={graph.event.website || ''} onChange={(e) => setEvent({ website: e.target.value })} className={inputCls} /></Field>
+              <Field label="Primera edición (año)"><input type="number" value={graph.event.firstEditionYear ?? ''} onChange={(e) => setEvent({ firstEditionYear: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
+              <Field label="Mes habitual (1-12)"><input type="number" min="1" max="12" value={graph.event.typicalMonth ?? ''} onChange={(e) => setEvent({ typicalMonth: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
             </div>
           </div>
 
