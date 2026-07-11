@@ -38,10 +38,7 @@ export async function uploadFile(file: File, fieldname: string = 'file'): Promis
     const formData = new FormData();
     formData.append(fieldname, file);  // ✅ Ahora fieldname está definido
 
-    const response = await apiClientFiles.post<{
-      status: string;
-      data: FileUploadResponse;
-    }>('/files/upload', formData, {
+    const response = await apiClientFiles.post<any>('/files/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -78,10 +75,7 @@ export async function uploadMultipleFiles(files: File[], fieldname: string = 'ga
       formData.append(fieldname, file);  // ✅ Ahora fieldname está definido
     });
 
-    const response = await apiClientFiles.post<{
-      status: string;
-      data: FileUploadResponse[];
-    }>('/files/upload-multiple', formData, {
+    const response = await apiClientFiles.post<any>('/files/upload-multiple', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
