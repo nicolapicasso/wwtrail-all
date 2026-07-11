@@ -624,6 +624,13 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
             },
           },
           translations: true,  // ✅ NUEVO: Include translations
+          // Minimal competition fields to derive listing aggregates (max distance / elevation)
+          competitions: {
+            select: {
+              baseDistance: true,
+              baseElevation: true,
+            },
+          },
           _count: {
             select: {
               competitions: true,
@@ -637,8 +644,26 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     // ✅ Enriquecer con coordenadas PostGIS
     const enrichedEvents = await this.enrichWithCoordinates(events);
 
+    // ✅ Derivar agregados de competiciones (maxDistance / maxElevation) y no
+    // devolver el array completo de competiciones en el listado.
+    const aggregatedEvents = enrichedEvents.map((event: any) => {
+      const comps: any[] = Array.isArray(event.competitions) ? event.competitions : [];
+      const distances = comps
+        .map((c) => Number(c.baseDistance))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      const elevations = comps
+        .map((c) => Number(c.baseElevation))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      const { competitions, ...rest } = event;
+      return {
+        ...rest,
+        maxDistance: distances.length ? Math.max(...distances) : null,
+        maxElevation: elevations.length ? Math.max(...elevations) : null,
+      };
+    });
+
     // ✅ NUEVO: Apply translations based on requested language
-    const translatedEvents = applyTranslationsToList(enrichedEvents, language);
+    const translatedEvents = applyTranslationsToList(aggregatedEvents, language);
 
     // ✅ Shuffle results for featured queries to show variety
     const finalEvents = isFeaturedQuery

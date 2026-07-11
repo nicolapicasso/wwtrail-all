@@ -189,5 +189,7 @@
   "187": "tailwind.config.ts",
   "188": "apiClient",
   "189": "cacheService",
-  "190": "postcss.config.js"
+  "190": "postcss.config.js",
+  "191": "react",
+  "192": "@tiptap/react"
 }

@@ -14,7 +14,8 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
     "db:export": "tsx scripts/export-content.ts",
-    "db:import": "tsx scripts/import-content.ts"
+    "db:import": "tsx scripts/import-content.ts",
+    "db:fix-home-encoding": "tsx scripts/fix-home-encoding.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1025.0",
