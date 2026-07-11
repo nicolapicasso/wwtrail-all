@@ -1,0 +1,33 @@
+# Docs
+*.md
+*.mdx
+*.qmd
+*.txt
+*.rst
+*.html
+*.yaml
+*.yml
+
+# Imágenes
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.ico
+
+# PDFs y binarios
+*.pdf
+*.lock
+
+# Directorios ruidosos
+vendor/
+node_modules/
+storage/
+logs/
+.claude/
+graphify-out/
+documentos/
+nginx/
+.git/
