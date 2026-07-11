@@ -153,6 +153,12 @@ export default function Navbar() {
               >
                 Mapa
               </Link>
+              <Link
+                href="/calendar"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors"
+              >
+                Calendario
+              </Link>
 
               {/* Comunidad dropdown */}
               <DropdownMenu>
@@ -309,6 +315,13 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Mapa
+            </Link>
+            <Link
+              href="/calendar"
+              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Calendario
             </Link>
             {/* Comunidad section */}
             <div className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300">

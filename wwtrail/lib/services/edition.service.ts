@@ -262,6 +262,110 @@ export class EditionService {
   }
 
   /**
+   * Listado optimizado para el calendario: ediciones con fecha dentro de un
+   * rango, con datos heredados de competición y evento, y los mismos filtros
+   * que el mapa. No calcula coordenadas (el calendario no las necesita).
+   */
+  static async findForCalendar(filters: {
+    dateFrom?: string;
+    dateTo?: string;
+    country?: string;
+    competitionType?: string;
+    specialSeriesId?: string;
+    terrainTypeIds?: string[];
+    minDistance?: number;
+    maxDistance?: number;
+    minElevation?: number;
+    maxElevation?: number;
+    search?: string;
+    limit?: number;
+  } = {}) {
+    const where: any = {};
+
+    // Rango de fechas sobre startDate
+    if (filters.dateFrom || filters.dateTo) {
+      where.startDate = {};
+      if (filters.dateFrom) where.startDate.gte = new Date(filters.dateFrom);
+      if (filters.dateTo) where.startDate.lte = new Date(filters.dateTo);
+    }
+
+    // Filtros sobre la competición
+    const compWhere: any = {};
+    if (filters.competitionType) compWhere.type = filters.competitionType;
+    if (filters.terrainTypeIds && filters.terrainTypeIds.length > 0) {
+      compWhere.terrainTypeId = { in: filters.terrainTypeIds };
+    }
+    if (filters.specialSeriesId) {
+      compWhere.specialSeries = { some: { id: filters.specialSeriesId } };
+    }
+    // Distancia / desnivel sobre baseDistance/baseElevation (como el mapa)
+    if (filters.minDistance != null || filters.maxDistance != null) {
+      compWhere.baseDistance = {};
+      if (filters.minDistance != null) compWhere.baseDistance.gte = filters.minDistance;
+      if (filters.maxDistance != null) compWhere.baseDistance.lte = filters.maxDistance;
+    }
+    if (filters.minElevation != null || filters.maxElevation != null) {
+      compWhere.baseElevation = {};
+      if (filters.minElevation != null) compWhere.baseElevation.gte = filters.minElevation;
+      if (filters.maxElevation != null) compWhere.baseElevation.lte = filters.maxElevation;
+    }
+
+    // Filtros sobre el evento (país) + búsqueda por nombre de comp/evento
+    const eventWhere: any = {};
+    if (filters.country) eventWhere.country = filters.country;
+
+    if (filters.search) {
+      compWhere.OR = [
+        { name: { contains: filters.search, mode: 'insensitive' } },
+        { event: { name: { contains: filters.search, mode: 'insensitive' } } },
+      ];
+    }
+
+    if (Object.keys(eventWhere).length > 0) compWhere.event = eventWhere;
+    if (Object.keys(compWhere).length > 0) where.competition = compWhere;
+
+    const editions = await prisma.edition.findMany({
+      where,
+      take: Number(filters.limit) || 1000,
+      orderBy: { startDate: 'asc' },
+      select: {
+        id: true,
+        slug: true,
+        year: true,
+        startDate: true,
+        endDate: true,
+        distance: true,
+        elevation: true,
+        featured: true,
+        status: true,
+        registrationUrl: true,
+        competition: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            type: true,
+            baseDistance: true,
+            baseElevation: true,
+            event: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                country: true,
+                city: true,
+                logoUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return editions;
+  }
+
+  /**
    * Obtener todas las ediciones de una competición
    */
   static async findByCompetition(competitionId: string, options: any = {}) {

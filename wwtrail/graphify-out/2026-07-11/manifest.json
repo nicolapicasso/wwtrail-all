@@ -325,8 +325,8 @@
     "semantic_hash": ""
   },
   "app/[locale]/organizer/translations/page.tsx": {
-    "mtime": 1783752630.7547169,
-    "ast_hash": "6de9eeb8204f7ae420c3d19306b18eab",
+    "mtime": 1783785715.0849676,
+    "ast_hash": "3947011a2f03572a918befaba7c47059",
     "semantic_hash": ""
   },
   "app/[locale]/organizer/users/[id]/edit/page.tsx": {
@@ -2085,8 +2085,8 @@
     "semantic_hash": ""
   },
   "lib/services/translation.service.ts": {
-    "mtime": 1783752630.849274,
-    "ast_hash": "66e77f4f6b157fbaea0dfba8ad51181a",
+    "mtime": 1783785675.3489685,
+    "ast_hash": "d54fb127a046b012f2b8767ead67bfaf",
     "semantic_hash": ""
   },
   "lib/services/user-competition.service.ts": {
@@ -2417,6 +2417,16 @@
   "app/api/v2/users/profile/[username]/route.ts": {
     "mtime": 1783785221.484979,
     "ast_hash": "56567e2ef34f707339b615e6a7c9a70f",
+    "semantic_hash": ""
+  },
+  "app/api/v2/translations/bulk/generate/route.ts": {
+    "mtime": 1783785690.864968,
+    "ast_hash": "5ed91f84cd264fe1c7dbb56bf05b43e6",
+    "semantic_hash": ""
+  },
+  "app/api/v2/translations/bulk/status/route.ts": {
+    "mtime": 1783785685.0369682,
+    "ast_hash": "c80c24cef984d99f201d0b530c8b34f6",
     "semantic_hash": ""
   }
 }
