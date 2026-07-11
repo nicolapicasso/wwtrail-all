@@ -44,39 +44,36 @@ export default function SpecialSeriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      {/* Header */}
-      <div className="container mx-auto px-4 mb-8">
-        <h1 className="text-4xl font-bold mb-2">Special Series</h1>
-        <p className="text-muted-foreground">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-content px-6 py-12 sm:px-8 lg:px-10">
+        {/* Header */}
+        <h1 className="text-[36px] font-black tracking-[-0.02em] text-ink-2">Special Series</h1>
+        <p className="mt-2 text-[15px] text-text-muted">
           Descubre los circuitos y series especiales de trail running
+          {!loading && !error && (
+            <> · <span className="font-semibold text-ink-2">{specialSeries.length}</span></>
+          )}
         </p>
-      </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-4">
         {/* Search Bar */}
-        <div className="mb-8">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <div className="mt-6 max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-faint" />
             <input
               type="text"
               placeholder="Buscar por nombre..."
               value={search}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full rounded-md border border-border bg-surface py-2 pl-10 pr-4 text-[15px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
             />
           </div>
         </div>
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800">❌ {error}</p>
-            <button
-              onClick={loadSpecialSeries}
-              className="mt-2 text-red-600 hover:text-red-800 underline"
-            >
+          <div className="mt-6 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+            <p className="text-destructive">{error}</p>
+            <button onClick={loadSpecialSeries} className="mt-2 text-[14px] font-semibold text-destructive underline">
               Reintentar
             </button>
           </div>
@@ -84,16 +81,13 @@ export default function SpecialSeriesPage() {
 
         {/* Loading State */}
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                  <div className="h-48 bg-gray-200"></div>
-                  <div className="p-4 space-y-3">
-                    <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                  </div>
+              <div key={i} className="overflow-hidden rounded-lg border border-border bg-surface">
+                <div className="h-32 animate-pulse bg-surface-alt" />
+                <div className="space-y-3 p-4">
+                  <div className="h-5 w-3/4 animate-pulse rounded bg-surface-alt" />
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-surface-alt" />
                 </div>
               </div>
             ))}
@@ -102,15 +96,12 @@ export default function SpecialSeriesPage() {
 
         {/* Success State */}
         {!loading && !error && (
-          <>
-            <div className="mb-4 text-sm text-muted-foreground">
-              {specialSeries.length} special series encontradas
-            </div>
+          <div className="mt-8">
             <SpecialSeriesGrid
               specialSeries={specialSeries}
               emptyMessage="No se encontraron special series"
             />
-          </>
+          </div>
         )}
       </div>
     </div>
