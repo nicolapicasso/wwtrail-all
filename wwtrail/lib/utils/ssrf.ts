@@ -79,7 +79,7 @@ export async function assertSafeUrl(rawUrl: string): Promise<URL> {
   }
 
   // Otherwise resolve DNS and check every returned address.
-  let addresses: dns.LookupAddress[];
+  let addresses: Array<{ address: string; family: number }>;
   try {
     addresses = await dns.lookup(hostname, { all: true });
   } catch {

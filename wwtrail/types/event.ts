@@ -172,7 +172,7 @@ export interface EventWithCreator extends Event {
  * so the management views compile honestly; they will only ever be populated
  * once/if a moderation feature is added on the backend.
  */
-export interface ManagedEvent extends Event {
+export interface ManagedEvent extends Omit<Event, 'status'> {
   status: EventStatus | 'REJECTED';
   isFeatured?: boolean;
   adminNotes?: string | null;
