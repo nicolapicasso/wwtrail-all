@@ -98,6 +98,9 @@ export interface CompetitionFilters {
   search?: string;
   minDistance?: number;
   maxDistance?: number;
+  isFeatured?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 /**

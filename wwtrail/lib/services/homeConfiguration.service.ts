@@ -97,7 +97,7 @@ export class HomeConfigurationService {
       });
     }
 
-    const config = await prisma.homeConfiguration.update({
+    const config = await (prisma.homeConfiguration.update as any)({
       where: { id },
       data,
       include: {

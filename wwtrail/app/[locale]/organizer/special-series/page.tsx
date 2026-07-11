@@ -50,7 +50,7 @@ export default function SpecialSeriesListPage() {
       const response = await specialSeriesService.getAll(filters);
 
       setSpecialSeriesList(response.data);
-      setTotalPages(response.pagination.pages);
+      setTotalPages(response.pagination.pages || 0);
     } catch (error: any) {
       console.error('Error fetching special series:', error);
       alert(error.response?.data?.message || 'Error al cargar series especiales');

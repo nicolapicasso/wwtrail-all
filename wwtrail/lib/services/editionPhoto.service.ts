@@ -70,7 +70,7 @@ export class EditionPhotoService {
    */
   static async upload(
     editionId: string,
-    file: Express.Multer.File,
+    file: any,
     metadata: {
       caption?: string;
       photographer?: string;
