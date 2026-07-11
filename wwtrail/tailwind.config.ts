@@ -56,21 +56,53 @@ const config: Config = {
           'danger': 'var(--site-color-danger)',
         },
 
+        // ===== WWTRAIL redesign palette (structural, fixed tokens) =====
+        ink: { DEFAULT: '#0f1315', 2: '#14181a' },
+        paper: '#f4f3ee',
+        surface: { DEFAULT: '#ffffff', alt: '#f4f3ee' },
+        hairline: '#eeece5',
+        'text-muted': '#6b6f70',
+        'text-faint': '#8b9295',
+        // Green scale — action color is configurable via --site-color-primary
+        green: {
+          brand: 'var(--site-color-primary)',
+          bright: '#2ea36a',
+          'tint-bg': '#e9f6ef',
+          'tint-border': '#bfe6d1',
+        },
+        // Orange — elevation / featured accents
+        orange: {
+          accent: '#f0a05a',
+          strong: '#d1631f',
+          text: '#c2733a',
+          'tint-bg': '#fdf1e7',
+        },
+
         hover: "var(--site-color-accent)",
       },
       fontFamily: {
-        sans: ['Montserrat', 'sans-serif'],
+        sans: ['var(--font-archivo)', 'Archivo', 'system-ui', 'sans-serif'],
+        stat: ['var(--font-barlow)', 'Barlow Semi Condensed', 'sans-serif'],
+      },
+      maxWidth: {
+        content: '1360px',
+        'content-wide': '1600px',
       },
       borderRadius: {
-        lg: "0px",
-        md: "0px",
-        sm: "0px",
-        DEFAULT: "0px",
-        none: "0px",
+        none: '0px',
+        sm: '10px',
+        md: '12px',
+        DEFAULT: '14px',
+        lg: '16px',
+        xl: '18px',
+        pill: '999px',
       },
       boxShadow: {
-        sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        sm: '0 1px 2px rgba(20,24,26,.04)',
+        card: '0 1px 2px rgba(20,24,26,.04)',
+        DEFAULT: '0 1px 2px rgba(20,24,26,.04)',
+        elevated: '0 12px 40px rgba(0,0,0,.35)',
+        floating: '0 4px 18px rgba(0,0,0,.22)',
       },
       keyframes: {
         twinkle: {

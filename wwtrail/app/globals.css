@@ -1,96 +1,112 @@
-/* Import Montserrat font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Site-level CSS variables (defaults before SiteStylesProvider loads) */
-    --site-color-primary: #B5751A;
-    --site-color-secondary: #16A34A;
-    --site-color-accent: #B66916;
-    --site-color-bg: #FFFFFF;
-    --site-color-text: #000000;
-    --site-color-success: #28A745;
-    --site-color-danger: #DC3545;
-    --site-border-radius: 0px;
-    --site-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    --site-font-primary: 'Montserrat', sans-serif;
-    --site-font-secondary: 'Montserrat', sans-serif;
+    /* ============================================================
+       Configurable brand colors (overridden at runtime by
+       SiteStylesProvider from /api/v2/site-config). Defaults below
+       are the "WWTRAIL Moderno" redesign values.
+       ============================================================ */
+    --site-color-primary: #1f7a4d;    /* brand-green — primary action */
+    --site-color-secondary: #2ea36a;  /* brand-green-bright — accents */
+    --site-color-accent: #f0a05a;      /* accent-orange */
+    --site-color-bg: #f4f3ee;          /* paper */
+    --site-color-text: #14181a;        /* ink-2 */
+    --site-color-success: #1f7a4d;
+    --site-color-danger: #dc3545;
+    --site-border-radius: 16px;
+    --site-shadow: 0 1px 2px rgba(20,24,26,.04);
+    --site-font-primary: var(--font-archivo), 'Archivo', sans-serif;
+    --site-font-secondary: var(--font-barlow), 'Barlow Semi Condensed', sans-serif;
 
-    /* WW Trail Running Brand Colors - Guía de Estilo */
-    /* Convertidos a HSL para compatibilidad con shadcn/ui */
-    --background: 0 0% 100%;           /* #FFFFFF - Blanco puro */
-    --foreground: 0 0% 0%;             /* #000000 - Negro puro */
-    --card: 0 0% 100%;                 /* #FFFFFF - Blanco */
-    --card-foreground: 0 0% 0%;        /* #000000 - Negro */
-    --popover: 0 0% 100%;              /* #FFFFFF - Blanco */
-    --popover-foreground: 0 0% 0%;     /* #000000 - Negro */
+    /* ============================================================
+       Structural design tokens (fixed — not admin-configurable).
+       ============================================================ */
+    --ww-ink: #0f1315;
+    --ww-ink-2: #14181a;
+    --ww-paper: #f4f3ee;
+    --ww-surface: #ffffff;
+    --ww-surface-alt: #f4f3ee;
+    --ww-border: #e6e4dd;
+    --ww-hairline: #eeece5;
+    --ww-text-muted: #6b6f70;
+    --ww-text-faint: #8b9295;
+    --ww-placeholder: #9a9e9f;
+    --ww-green: #1f7a4d;
+    --ww-green-bright: #2ea36a;
+    --ww-green-tint-bg: #e9f6ef;
+    --ww-green-tint-border: #bfe6d1;
+    --ww-orange: #f0a05a;
+    --ww-orange-strong: #d1631f;
+    --ww-orange-text: #c2733a;
+    --ww-orange-tint-bg: #fdf1e7;
 
-    /* Primary = Acento Oro/Tierra #B5751A */
-    --primary: 31 78% 40%;             /* #B5751A */
-    --primary-foreground: 0 0% 100%;   /* Blanco sobre primary */
+    /* ============================================================
+       shadcn/ui system colors — remapped to the redesign palette so
+       existing components pick up the new look automatically.
+       ============================================================ */
+    --background: 48 21% 95%;          /* paper #f4f3ee */
+    --foreground: 200 12% 9%;          /* ink-2 #14181a */
+    --card: 0 0% 100%;                 /* surface #ffffff */
+    --card-foreground: 200 12% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 12% 9%;
 
-    /* Secondary = Gris claro para fondos */
-    --secondary: 0 0% 96%;             /* #F5F5F5 - Gris claro */
-    --secondary-foreground: 0 0% 20%;  /* #333333 - Gris profundo */
+    --primary: 152 59% 30%;            /* brand-green #1f7a4d */
+    --primary-foreground: 0 0% 100%;
 
-    /* Muted = Grises intermedios */
-    --muted: 0 0% 96%;                 /* #F5F5F5 */
-    --muted-foreground: 0 0% 20%;      /* #333333 */
+    --secondary: 48 21% 95%;           /* surface-alt / paper */
+    --secondary-foreground: 200 12% 9%;
 
-    /* Accent = Acento oro/tierra (igual que primary) */
-    --accent: 31 78% 40%;              /* #B5751A */
-    --accent-foreground: 0 0% 100%;    /* Blanco */
+    --muted: 48 21% 95%;
+    --muted-foreground: 190 3% 43%;    /* text-muted #6b6f70 */
 
-    /* Destructive = Rojo para errores #DC3545 */
-    --destructive: 354 70% 54%;        /* #DC3545 */
+    --accent: 28 82% 65%;              /* accent-orange #f0a05a */
+    --accent-foreground: 200 12% 9%;
+
+    --destructive: 354 70% 54%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border e Input = Gris claro */
-    --border: 0 0% 90%;                /* Gris claro */
-    --input: 0 0% 90%;
-    --ring: 31 78% 40%;                /* #B5751A - Focus ring */
+    --border: 45 16% 88%;              /* border #e6e4dd */
+    --input: 45 16% 88%;
+    --ring: 152 59% 30%;               /* brand-green focus ring */
 
-    /* Border radius = 0px (Ángulos rectos) */
-    --radius: 0px;
+    --radius: 16px;
 
-    /* Chart colors (mantenemos para compatibilidad) */
-    --chart-1: 31 78% 40%;             /* Oro/tierra */
-    --chart-2: 142 71% 45%;            /* Verde éxito */
-    --chart-3: 354 70% 54%;            /* Rojo error */
-    --chart-4: 0 0% 20%;               /* Gris profundo */
-    --chart-5: 0 0% 50%;               /* Gris medio */
+    --chart-1: 152 59% 30%;
+    --chart-2: 152 56% 41%;
+    --chart-3: 26 74% 47%;
+    --chart-4: 200 12% 9%;
+    --chart-5: 190 3% 43%;
   }
 
   .dark {
-    /* Mantenemos dark mode por compatibilidad pero con la nueva paleta */
-    --background: 0 0% 0%;             /* Negro */
-    --foreground: 0 0% 100%;           /* Blanco */
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 31 78% 40%;             /* #B5751A */
+    --background: 200 14% 7%;
+    --foreground: 48 21% 95%;
+    --card: 200 13% 10%;
+    --card-foreground: 48 21% 95%;
+    --popover: 200 13% 10%;
+    --popover-foreground: 48 21% 95%;
+    --primary: 152 56% 41%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 80%;
-    --accent: 31 78% 40%;
-    --accent-foreground: 0 0% 100%;
+    --secondary: 200 10% 15%;
+    --secondary-foreground: 48 21% 95%;
+    --muted: 200 10% 15%;
+    --muted-foreground: 190 6% 65%;
+    --accent: 28 82% 65%;
+    --accent-foreground: 200 14% 7%;
     --destructive: 354 70% 54%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 31 78% 40%;
-    --chart-1: 31 78% 50%;
-    --chart-2: 142 71% 55%;
-    --chart-3: 354 70% 64%;
-    --chart-4: 0 0% 70%;
-    --chart-5: 0 0% 60%;
+    --border: 200 10% 20%;
+    --input: 200 10% 20%;
+    --ring: 152 56% 41%;
+    --chart-1: 152 56% 41%;
+    --chart-2: 152 56% 51%;
+    --chart-3: 26 74% 57%;
+    --chart-4: 48 21% 85%;
+    --chart-5: 190 6% 60%;
   }
 }
 
@@ -106,64 +122,89 @@
 
   body {
     @apply text-foreground;
-    font-family: 'Montserrat', sans-serif;
+    background-color: var(--ww-paper);
+    font-family: var(--font-archivo), 'Archivo', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-osx-font-smoothing: grayscale;
   }
 
-  /* Tipografía según guía de estilo */
-  h1 {
-    @apply text-4xl font-bold tracking-tight;
-    font-weight: 700;
+  h1, h2, h3, h4 {
+    font-family: var(--font-archivo), 'Archivo', system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 
-  h2 {
-    @apply text-3xl font-semibold tracking-tight;
-    font-weight: 600;
-  }
-
-  h3 {
-    @apply text-2xl font-medium tracking-tight;
-    font-weight: 500;
-  }
-
-  /* Texto de párrafos con gris profundo para mejor legibilidad */
-  p {
-    color: #333333;
-  }
-
-  /* Focus states con acento oro/tierra */
+  /* Focus states use the brand green */
   button:focus-visible,
   a:focus-visible,
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 2px solid #B5751A;
+    outline: 2px solid var(--ww-green);
     outline-offset: 2px;
   }
+}
 
-  /* Leaflet Popup Styles - Ángulos rectos y borde negro */
+@layer components {
+  /* ------------------------------------------------------------
+     Topographic contour motif — stacked horizontal contour lines
+     for dark heroes. Apply to an absolutely-positioned element.
+     ------------------------------------------------------------ */
+  .ww-topo {
+    background-image: repeating-radial-gradient(
+      circle at 50% 120%,
+      transparent 0,
+      transparent 38px,
+      rgba(46, 163, 106, 0.11) 39px,
+      rgba(46, 163, 106, 0.11) 40px
+    );
+    pointer-events: none;
+  }
+  .ww-topo--light {
+    background-image: repeating-radial-gradient(
+      circle at 50% 120%,
+      transparent 0,
+      transparent 38px,
+      rgba(255, 255, 255, 0.15) 39px,
+      rgba(255, 255, 255, 0.15) 40px
+    );
+  }
+  /* Diagonal hatch used behind dark heroes */
+  .ww-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+    pointer-events: none;
+  }
+}
+
+@layer base {
+  /* Leaflet Popup Styles — aligned with the redesign card look */
   .leaflet-popup-content-wrapper {
-    border-radius: 0px !important;
-    border: 2px solid #000 !important;
+    border-radius: 14px !important;
+    border: 1px solid var(--ww-border) !important;
     padding: 0 !important;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
   }
 
   .leaflet-popup-tip-container {
-    display: none !important; /* Ocultar la flecha para evitar problemas de estilo */
+    display: none !important;
   }
 
   .leaflet-popup-content {
     margin: 0 !important;
   }
 
-  /* Cerrar botón del popup */
   .leaflet-popup-close-button {
-    color: #000 !important;
+    color: var(--ww-ink) !important;
     font-size: 20px !important;
     padding: 4px 8px !important;
   }
 
   .leaflet-popup-close-button:hover {
-    color: #B66916 !important;
+    color: var(--ww-green) !important;
   }
 }
