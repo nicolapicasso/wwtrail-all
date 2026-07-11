@@ -3,6 +3,7 @@
 
 import axios from 'axios';
 import logger from '@/lib/utils/logger';
+import { assertSafeUrl } from '@/lib/utils/ssrf';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
@@ -63,6 +64,9 @@ export interface SuggestedImage {
  */
 async function fetchPageContent(url: string): Promise<string> {
   try {
+    // SSRF guard: block internal/reserved hosts before fetching.
+    await assertSafeUrl(url);
+
     const response = await axios.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; WWTRAIL/1.0; +https://wwtrail.com)',
@@ -70,7 +74,7 @@ async function fetchPageContent(url: string): Promise<string> {
         'Accept-Language': 'es,en;q=0.9',
       },
       timeout: 15000,
-      maxRedirects: 5,
+      maxRedirects: 0,
     });
 
     const html = response.data as string;

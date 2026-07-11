@@ -4,6 +4,7 @@ import prisma from '@/lib/db';
 import path from 'path';
 import { uploadToSpaces, isSpacesConfigured } from '@/lib/services/spaces.client';
 import { writeFile, mkdir } from 'fs/promises';
+import { assertSafeUrl } from '@/lib/utils/ssrf';
 import axios from 'axios';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -23,11 +24,19 @@ export async function POST(request: NextRequest) {
       throw new ApiError('URL is required', 400);
     }
 
+    // SSRF guard: reject internal/reserved hosts before making any request.
+    try {
+      await assertSafeUrl(url);
+    } catch (e: any) {
+      throw new ApiError(e?.message || 'URL is not allowed', 400);
+    }
+
     // Download the image
     const response = await axios.get(url, {
       responseType: 'arraybuffer',
       timeout: 15000,
       maxContentLength: MAX_FILE_SIZE,
+      maxRedirects: 0, // prevent redirect-based SSRF bypass
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; WWTRAIL/1.0)',
         'Accept': 'image/*',

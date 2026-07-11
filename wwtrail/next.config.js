@@ -20,10 +20,6 @@ const nextConfig = {
         hostname: '**.digitalocean.app',
       },
       {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
         protocol: 'http',
         hostname: 'localhost',
       },

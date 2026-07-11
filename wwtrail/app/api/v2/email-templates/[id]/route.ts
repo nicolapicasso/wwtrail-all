@@ -4,6 +4,7 @@ import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    await requireRole(request, 'ADMIN');
     const template = await EmailTemplateService.getById(params.id);
     return apiSuccess(template);
   } catch (error) { return apiError(error); }
