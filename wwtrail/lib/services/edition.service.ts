@@ -319,6 +319,8 @@ export class EditionService {
                 logoUrl: true,
               },
             },
+            terrainType: true,
+            specialSeries: true,
           },
         },
         _count: {
@@ -386,6 +388,8 @@ export class EditionService {
                 logoUrl: true,
               },
             },
+            terrainType: true,
+            specialSeries: true,
           },
         },
         _count: {

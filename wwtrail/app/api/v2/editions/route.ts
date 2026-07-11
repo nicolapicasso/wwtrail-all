@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
-    const edition = await EditionService.create(data, user.id, user.role);
+    // create(competitionId, data, userId) — competitionId comes from the body.
+    const edition = await EditionService.create(data.competitionId, data, user.id);
     return apiSuccess(edition, 201);
   } catch (error) {
     return apiError(error);
