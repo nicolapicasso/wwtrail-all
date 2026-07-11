@@ -12,6 +12,8 @@ interface CountrySelectProps {
   placeholder?: string; // Texto cuando no hay selección
   countryCounts?: Record<string, number>; // Conteo de items por país (código: cantidad)
   showOnlyWithCounts?: boolean; // Si true, solo muestra países con conteo > 0
+  required?: boolean; // Passthrough form flag (not enforced internally)
+  showAllOption?: boolean; // Filters: include an "all countries" entry
 }
 
 /**

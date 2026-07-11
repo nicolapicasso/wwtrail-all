@@ -13,6 +13,7 @@ interface FileUploadProps {
   onUpload?: (url: string) => void;
   onUploadMultiple?: (urls: string[]) => void;
   currentUrl?: string;
+  initialPreview?: string;  // Alias for currentUrl (initial single-image preview)
   currentUrls?: string[];  // ✅ Para cargar galería existente
   multiple?: boolean;
   accept?: string;
@@ -27,6 +28,7 @@ export default function FileUpload({
   onUpload,
   onUploadMultiple,
   currentUrl,
+  initialPreview,
   currentUrls,
   multiple = false,
   accept = 'image/*',
@@ -37,7 +39,7 @@ export default function FileUpload({
   fieldname = 'file',
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || initialPreview || null);
   const [previewUrls, setPreviewUrls] = useState<string[]>(currentUrls || []);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);

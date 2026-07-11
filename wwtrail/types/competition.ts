@@ -1,4 +1,4 @@
-import { CompetitionType, Language, EventOrganizerRef } from './event';
+import { CompetitionType, Language, EventOrganizerRef, EventStatus } from './event';
 import { TerrainType } from './terrainType';
 import { SpecialSeries } from './specialSeries';
 
@@ -28,6 +28,11 @@ export interface Competition {
   baseMaxParticipants?: number;
   isActive: boolean;
   displayOrder: number;
+  // Prisma scalars used by forms/listings
+  language?: Language;
+  status?: EventStatus;
+  featured?: boolean;
+  viewCount?: number;
   createdAt: string;
   updatedAt: string;
 
