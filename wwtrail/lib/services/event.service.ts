@@ -56,7 +56,7 @@ interface EventFilters {
   search?: string;
   country?: string;
   city?: string;
-  featured?: boolean;
+  featured?: boolean | string;
   status?: EventStatus;
   typicalMonth?: number | string;  // Filtro por mes típico del evento
   organizerId?: string;  // Filtro por entidad organizadora

@@ -304,7 +304,7 @@ export class CompetitionService {
     }
 
     // ✅ NUEVO: Apply translations AFTER extracting coordinates
-    const translatedCompetitions = applyTranslationsToList(competitions, requestedLanguage);
+    const translatedCompetitions = applyTranslationsToList(competitions as any[], requestedLanguage);
 
     // Ordenar según el campo (only if not featured query - featured gets shuffled)
     if (!isFeatured) {
@@ -317,7 +317,7 @@ export class CompetitionService {
         });
       } else if (sortBy === 'name') {
         // Ordenar por nombre
-        translatedCompetitions.sort((a, b) => a.name.localeCompare(b.name));
+        translatedCompetitions.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       }
     }
 

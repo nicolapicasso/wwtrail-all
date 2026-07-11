@@ -433,7 +433,7 @@ export class AdminService {
         })),
         byCategory: servicesByCategory.map(item => ({
           categoryId: item.categoryId,
-          categoryName: categoryMap.get(item.categoryId) || 'Sin categoría',
+          categoryName: categoryMap.get(item.categoryId || '') || 'Sin categoría',
           count: item._count.id,
         })),
       },
@@ -570,64 +570,6 @@ export class AdminService {
     };
   }
 
-  /**
-   * Obtener un usuario por ID con información detallada
-   */
-  async getUserById(userId: string) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        firstName: true,
-        lastName: true,
-        bio: true,
-        avatar: true,
-        phone: true,
-        city: true,
-        country: true,
-        language: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            userCompetitions: true,
-            reviews: true,
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    return {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
-      bio: user.bio,
-      avatar: user.avatar,
-      phone: user.phone,
-      city: user.city,
-      country: user.country,
-      language: user.language,
-      role: user.role,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      stats: {
-        competitions: user._count.userCompetitions,
-        reviews: user._count.reviews,
-      },
-    };
-  }
 
   /**
    * Cambiar el rol de un usuario
