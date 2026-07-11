@@ -14,9 +14,6 @@ const BACKOFFICE_ROUTES = ['/organizer', '/dashboard', '/admin'];
 // Routes that should show Navbar but NOT Footer (full-screen pages)
 const NO_FOOTER_ROUTES = ['/directory'];
 
-// Footer height for reveal effect
-const FOOTER_HEIGHT = 360;
-
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
@@ -55,27 +52,12 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     );
   }
 
-  // Public pages: show Navbar and Footer with reveal effect
-  // The content slides over the fixed footer when scrolling
+  // Public pages: Navbar + content + Footer in normal document flow
   return (
-    <>
+    <div className="flex min-h-screen flex-col bg-paper">
       <Navbar />
-      {/* Main content wrapper - sits above footer with negative margin for reveal */}
-      <div
-        className="page-content relative z-10"
-        style={{ marginBottom: `-${FOOTER_HEIGHT}px` }}
-      >
-        {/* Content with white background - ends before spacer */}
-        <div className="bg-white min-h-screen">
-          <main className="flex-1">
-            {children}
-          </main>
-        </div>
-        {/* Transparent spacer - allows fixed footer behind to be revealed */}
-        <div style={{ height: `${FOOTER_HEIGHT}px` }} />
-      </div>
-      {/* Footer - fixed behind content */}
+      <main className="flex-1">{children}</main>
       <Footer />
-    </>
+    </div>
   );
 }

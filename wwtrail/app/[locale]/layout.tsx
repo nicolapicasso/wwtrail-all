@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Archivo, Barlow_Semi_Condensed } from "next/font/google";
 import "../globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { InsiderProvider } from "@/contexts/InsiderContext";
@@ -10,7 +10,21 @@ import { SiteStylesProvider } from "@/components/providers/SiteStylesProvider";
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 
-const inter = Inter({ subsets: ["latin"] });
+// UI / headings font
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+
+// Sport-figure numerals font (used only for large stats)
+const barlow = Barlow_Semi_Condensed({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-barlow",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "WWTRAIL - Trail Running Competitions",
@@ -38,8 +52,8 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale}>
-      <body className={inter.className}>
+    <html lang={locale} className={`${archivo.variable} ${barlow.variable}`}>
+      <body className="font-sans">
         <IntlProvider locale={locale} messages={messages}>
           <SiteStylesProvider>
           <AuthProvider>
