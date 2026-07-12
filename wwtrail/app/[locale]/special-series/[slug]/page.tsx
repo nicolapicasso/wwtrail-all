@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { competitionsService } from '@/lib/api';
 import { SpecialSeries } from '@/types/v2';
@@ -26,36 +26,37 @@ interface FilterState {
   maxElevation: string;
 }
 
-const COMPETITION_TYPES = [
-  { value: '', label: 'Todos los tipos' },
-  { value: 'TRAIL', label: 'Trail' },
-  { value: 'ULTRA', label: 'Ultra' },
-  { value: 'VERTICAL', label: 'Vertical' },
-  { value: 'SKYRUNNING', label: 'Skyrunning' },
-  { value: 'CANICROSS', label: 'Canicross' },
-  { value: 'OTHER', label: 'Otros' },
-];
-
-const COUNTRIES = [
-  { value: '', label: 'Todos los países' },
-  { value: 'ES', label: 'España' },
-  { value: 'FR', label: 'Francia' },
-  { value: 'IT', label: 'Italia' },
-  { value: 'PT', label: 'Portugal' },
-  { value: 'CH', label: 'Suiza' },
-];
-
-const SORT_OPTIONS = [
-  { value: 'startDate', label: 'Fecha (próximas primero)' },
-  { value: 'name', label: 'Nombre (A-Z)' },
-  { value: 'distance', label: 'Distancia' },
-];
-
 export default function SpecialSeriesDetailPage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('pgCatalog');
   const slug = params.slug as string;
+
+  const COMPETITION_TYPES = [
+    { value: '', label: t('allTypes') },
+    { value: 'TRAIL', label: 'Trail' },
+    { value: 'ULTRA', label: 'Ultra' },
+    { value: 'VERTICAL', label: 'Vertical' },
+    { value: 'SKYRUNNING', label: 'Skyrunning' },
+    { value: 'CANICROSS', label: 'Canicross' },
+    { value: 'OTHER', label: t('otherType') },
+  ];
+
+  const COUNTRIES = [
+    { value: '', label: t('allCountries') },
+    { value: 'ES', label: t('countrySpain') },
+    { value: 'FR', label: t('countryFrance') },
+    { value: 'IT', label: t('countryItaly') },
+    { value: 'PT', label: t('countryPortugal') },
+    { value: 'CH', label: t('countrySwitzerland') },
+  ];
+
+  const SORT_OPTIONS = [
+    { value: 'startDate', label: t('sortByDate') },
+    { value: 'name', label: t('sortByName') },
+    { value: 'distance', label: t('sortByDistance') },
+  ];
 
   // Special series data
   const [specialSeries, setSpecialSeries] = useState<SpecialSeries | null>(null);
@@ -111,7 +112,7 @@ export default function SpecialSeriesDetailPage() {
       setSpecialSeries(series);
     } catch (err: any) {
       console.error('Error loading special series:', err);
-      setSeriesError(err.message || 'Error al cargar la special series');
+      setSeriesError(err.message || t('errorLoadingSpecialSeries'));
     } finally {
       setLoadingSeries(false);
     }
@@ -143,7 +144,7 @@ export default function SpecialSeriesDetailPage() {
       setCompetitions(response.data || []);
     } catch (err: any) {
       console.error('Error loading competitions:', err);
-      setCompetitionsError(err.message || 'Error al cargar las competiciones');
+      setCompetitionsError(err.message || t('errorLoadingCompetitions'));
     } finally {
       setLoadingCompetitions(false);
     }
@@ -195,10 +196,10 @@ export default function SpecialSeriesDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">{seriesError || 'Special Series no encontrada'}</h1>
+          <h1 className="text-2xl font-bold mb-4">{seriesError || t('specialSeriesNotFound')}</h1>
           <Button onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            {t('back')}
           </Button>
         </div>
       </div>
@@ -235,7 +236,7 @@ export default function SpecialSeriesDetailPage() {
                 className="inline-flex items-center text-white/80 hover:text-white mb-3 transition-colors text-sm"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver a Special Series
+                {t('backToSpecialSeries')}
               </Link>
               <h1 className="text-3xl md:text-4xl font-bold mb-3">{specialSeries.name}</h1>
 
@@ -250,7 +251,7 @@ export default function SpecialSeriesDetailPage() {
                   <div className="flex items-center gap-2">
                     <Trophy className="h-4 w-4" />
                     <span>
-                      {specialSeries._count.competitions} competicion{specialSeries._count.competitions !== 1 ? 'es' : ''}
+                      {t('competitionsCount', { count: specialSeries._count.competitions })}
                     </span>
                   </div>
                 )}
@@ -267,7 +268,7 @@ export default function SpecialSeriesDetailPage() {
                       className="flex items-center gap-1 px-3 py-1 bg-white/10 rounded-full hover:bg-white/20 transition-colors text-sm"
                     >
                       <Globe className="h-4 w-4" />
-                      Web
+                      {t('web')}
                     </a>
                   )}
                   {specialSeries.instagramUrl && (
@@ -326,14 +327,14 @@ export default function SpecialSeriesDetailPage() {
         {/* Description */}
         {specialSeries.description && (
           <div className="bg-white rounded-lg border p-6 mb-8">
-            <h2 className="text-xl font-bold mb-3">Sobre la Serie</h2>
+            <h2 className="text-xl font-bold mb-3">{t('aboutSeries')}</h2>
             <p className="text-muted-foreground whitespace-pre-line">{specialSeries.description}</p>
           </div>
         )}
 
         {/* Competitions Section */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold">Competiciones</h2>
+          <h2 className="text-2xl font-bold">{t('competitions')}</h2>
 
           {/* Filters */}
           <div className="space-y-4">
@@ -343,7 +344,7 @@ export default function SpecialSeriesDetailPage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   type="text"
-                  placeholder="Buscar competiciones..."
+                  placeholder={t('searchCompetitionsPlaceholder')}
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
                   className="pl-10"
@@ -355,7 +356,7 @@ export default function SpecialSeriesDetailPage() {
                 className="flex items-center gap-2"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                Filtros
+                {t('filters')}
                 {hasActiveFilters && (
                   <span className="ml-1 bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center">
                     !
@@ -368,7 +369,7 @@ export default function SpecialSeriesDetailPage() {
             {showFilters && (
               <div className="bg-white border rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">Filtros Avanzados</h3>
+                  <h3 className="font-semibold">{t('advancedFilters')}</h3>
                   {hasActiveFilters && (
                     <Button
                       variant="ghost"
@@ -377,7 +378,7 @@ export default function SpecialSeriesDetailPage() {
                       className="text-muted-foreground"
                     >
                       <X className="w-4 h-4 mr-1" />
-                      Limpiar
+                      {t('clear')}
                     </Button>
                   )}
                 </div>
@@ -385,7 +386,7 @@ export default function SpecialSeriesDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Type Filter */}
                   <div className="space-y-2">
-                    <Label htmlFor="type">Tipo de Competición</Label>
+                    <Label htmlFor="type">{t('competitionType')}</Label>
                     <select
                       id="type"
                       value={filters.type}
@@ -402,7 +403,7 @@ export default function SpecialSeriesDetailPage() {
 
                   {/* Country Filter */}
                   <div className="space-y-2">
-                    <Label htmlFor="country">País</Label>
+                    <Label htmlFor="country">{t('country')}</Label>
                     <select
                       id="country"
                       value={filters.country}
@@ -419,7 +420,7 @@ export default function SpecialSeriesDetailPage() {
 
                   {/* Sort Filter */}
                   <div className="space-y-2">
-                    <Label htmlFor="sortBy">Ordenar por</Label>
+                    <Label htmlFor="sortBy">{t('sortBy')}</Label>
                     <select
                       id="sortBy"
                       value={filters.sortBy}
@@ -439,11 +440,11 @@ export default function SpecialSeriesDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Distance Range */}
                   <div className="space-y-2">
-                    <Label>Distancia (km)</Label>
+                    <Label>{t('distanceKm')}</Label>
                     <div className="flex gap-2 items-center">
                       <Input
                         type="number"
-                        placeholder="Desde"
+                        placeholder={t('from')}
                         value={filters.minDistance}
                         onChange={(e) => handleFilterChange('minDistance', e.target.value)}
                         min="0"
@@ -452,7 +453,7 @@ export default function SpecialSeriesDetailPage() {
                       <span className="text-muted-foreground">-</span>
                       <Input
                         type="number"
-                        placeholder="Hasta"
+                        placeholder={t('to')}
                         value={filters.maxDistance}
                         onChange={(e) => handleFilterChange('maxDistance', e.target.value)}
                         min="0"
@@ -463,11 +464,11 @@ export default function SpecialSeriesDetailPage() {
 
                   {/* Elevation Range */}
                   <div className="space-y-2">
-                    <Label>Desnivel (m)</Label>
+                    <Label>{t('elevationM')}</Label>
                     <div className="flex gap-2 items-center">
                       <Input
                         type="number"
-                        placeholder="Desde"
+                        placeholder={t('from')}
                         value={filters.minElevation}
                         onChange={(e) => handleFilterChange('minElevation', e.target.value)}
                         min="0"
@@ -476,7 +477,7 @@ export default function SpecialSeriesDetailPage() {
                       <span className="text-muted-foreground">-</span>
                       <Input
                         type="number"
-                        placeholder="Hasta"
+                        placeholder={t('to')}
                         value={filters.maxElevation}
                         onChange={(e) => handleFilterChange('maxElevation', e.target.value)}
                         min="0"
@@ -497,7 +498,7 @@ export default function SpecialSeriesDetailPage() {
                 onClick={loadCompetitions}
                 className="mt-2 text-red-600 hover:text-red-800 underline"
               >
-                Reintentar
+                {t('retry')}
               </button>
             </div>
           )}
@@ -509,11 +510,11 @@ export default function SpecialSeriesDetailPage() {
           {!loadingCompetitions && !competitionsError && (
             <>
               <p className="text-muted-foreground">
-                {competitions.length} {competitions.length === 1 ? 'competición encontrada' : 'competiciones encontradas'}
+                {t('competitionsFound', { count: competitions.length })}
               </p>
               <CompetitionGrid
                 competitions={competitions}
-                emptyMessage="No se encontraron competiciones con estos filtros."
+                emptyMessage={t('noCompetitionsWithFilters')}
               />
             </>
           )}

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -31,6 +31,7 @@ export default function UserProfilePage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('pgAccount');
   const username = params.username as string;
   const { badgeUrl } = useInsiderBadge();
 
@@ -48,11 +49,11 @@ export default function UserProfilePage() {
       } catch (err: any) {
         console.error('Error fetching profile:', err);
         if (err.response?.status === 404) {
-          setError('Usuario no encontrado');
+          setError(t('errorUserNotFound'));
         } else if (err.response?.status === 403) {
-          setError('Este perfil es privado');
+          setError(t('errorProfilePrivate'));
         } else {
-          setError('Error al cargar el perfil');
+          setError(t('errorLoadingProfile'));
         }
       } finally {
         setLoading(false);
@@ -66,11 +67,11 @@ export default function UserProfilePage() {
 
   const genderLabel =
     profile?.gender === 'MALE'
-      ? 'Hombre'
+      ? t('genderMale')
       : profile?.gender === 'FEMALE'
-      ? 'Mujer'
+      ? t('genderFemale')
       : profile?.gender === 'NON_BINARY'
-      ? 'No binario'
+      ? t('genderNonBinary')
       : null;
 
   if (loading) {
@@ -91,7 +92,7 @@ export default function UserProfilePage() {
             onClick={() => router.back()}
             className="mt-4 rounded-md bg-green-brand px-4 py-2 font-semibold text-white hover:brightness-95"
           >
-            Volver
+            {t('back')}
           </button>
         </div>
       </div>
@@ -124,7 +125,7 @@ export default function UserProfilePage() {
             onClick={() => router.back()}
             className="absolute left-6 top-6 flex items-center gap-2 text-[14px] font-bold opacity-90 hover:opacity-100 sm:left-8 lg:left-10"
           >
-            <ArrowLeft className="h-4 w-4" /> Volver
+            <ArrowLeft className="h-4 w-4" /> {t('back')}
           </button>
 
           <div className="flex flex-col items-center gap-7 md:flex-row md:items-center">
@@ -148,7 +149,7 @@ export default function UserProfilePage() {
                 <h1 className="text-[36px] font-black leading-none tracking-[-0.02em] sm:text-[46px]">{profile.fullName}</h1>
                 {isInsider && (
                   <span className="rounded-pill bg-orange-accent px-3.5 py-1.5 text-[13px] font-extrabold text-[#241202]">
-                    ⭐ WWTrail Insider
+                    ⭐ {t('insiderBadge')}
                   </span>
                 )}
               </div>
@@ -175,9 +176,9 @@ export default function UserProfilePage() {
 
             {/* Stats */}
             <div className="flex gap-9 self-center">
-              <HeroStat value={profile.stats.totalFinishes} label="Finishes" />
-              <HeroStat value={profile.stats.totalParticipations} label="Carreras" />
-              <HeroStat value={profile.stats.totalDNF} label="DNF" />
+              <HeroStat value={profile.stats.totalFinishes} label={t('statFinishes')} />
+              <HeroStat value={profile.stats.totalParticipations} label={t('statRaces')} />
+              <HeroStat value={profile.stats.totalDNF} label={t('statDNF')} />
             </div>
           </div>
         </div>
@@ -189,30 +190,30 @@ export default function UserProfilePage() {
         <div className="flex flex-col gap-5">
           {profile.bio && (
             <div className="rounded-[18px] border border-border bg-surface p-6 shadow-card">
-              <h2 className="mb-3 text-[20px] font-black text-ink-2">Sobre mí</h2>
+              <h2 className="mb-3 text-[20px] font-black text-ink-2">{t('aboutMe')}</h2>
               <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-text-muted">{profile.bio}</p>
             </div>
           )}
 
           <div className="rounded-[18px] border border-border bg-surface p-6 shadow-card">
-            <h2 className="mb-4 text-[20px] font-black text-ink-2">Información</h2>
+            <h2 className="mb-4 text-[20px] font-black text-ink-2">{t('information')}</h2>
             <div className="flex flex-col">
-              <InfoRow label="Miembro desde" value={new Date(profile.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'long' })} />
+              <InfoRow label={t('memberSince')} value={new Date(profile.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'long' })} />
               {profile.country && (
                 <InfoRow
-                  label="País"
+                  label={t('country')}
                   value={<span className="flex items-center gap-1.5">{getCountryFlag(profile.country)} {getCountryName(profile.country, locale)}</span>}
                 />
               )}
-              {profile.city && <InfoRow label="Ciudad" value={profile.city} last />}
+              {profile.city && <InfoRow label={t('city')} value={profile.city} last />}
             </div>
           </div>
 
           {isInsider && (
             <div className="rounded-[18px] p-6 text-white" style={{ background: 'linear-gradient(135deg,#e8961f,#d1631f)' }}>
-              <div className="mb-1.5 text-[17px] font-black">⭐ WWTrail Insider</div>
+              <div className="mb-1.5 text-[17px] font-black">⭐ {t('insiderBadge')}</div>
               <p className="text-[13.5px] leading-[1.55] text-[#ffeacf]">
-                Embajador verificado de la comunidad. Comparte experiencias, guías y recomendaciones de carreras.
+                {t('insiderDescription')}
               </p>
             </div>
           )}
@@ -221,19 +222,19 @@ export default function UserProfilePage() {
         {/* Right column */}
         <div className="min-h-[380px] rounded-[18px] border border-border bg-surface p-[30px] shadow-card">
           <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-[22px] font-black tracking-[-0.01em] text-ink-2">Historial de carreras</h2>
-            <span className="text-[14px] font-semibold text-text-faint">{profile.participations.length} carreras</span>
+            <h2 className="text-[22px] font-black tracking-[-0.01em] text-ink-2">{t('raceHistory')}</h2>
+            <span className="text-[14px] font-semibold text-text-faint">{t('racesCount', { count: profile.participations.length })}</span>
           </div>
 
           {profile.participations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-[70px] text-center">
               <div className="text-[56px] opacity-50">🏆</div>
-              <div className="mt-3 text-[15px] font-semibold text-text-faint">No hay participaciones registradas</div>
+              <div className="mt-3 text-[15px] font-semibold text-text-faint">{t('noParticipations')}</div>
               <Link
                 href="/events"
                 className="mt-5 rounded-md bg-green-brand px-[22px] py-3 text-[14px] font-extrabold text-white transition-[filter] hover:brightness-95"
               >
-                Explorar carreras →
+                {t('exploreRaces')} →
               </Link>
             </div>
           ) : (
@@ -295,6 +296,7 @@ function ParticipationCard({
   participation: UserParticipation;
   locale: string;
 }) {
+  const t = useTranslations('pgAccount');
   const isFinisher = participation.status === 'COMPLETED';
   const isDNF = participation.status === 'DNF';
 
@@ -314,7 +316,7 @@ function ParticipationCard({
                     : 'bg-surface-alt text-text-muted'
                 }`}
               >
-                {isFinisher ? 'Finisher' : isDNF ? 'DNF' : participation.status}
+                {isFinisher ? t('finisher') : isDNF ? t('statDNF') : participation.status}
               </span>
             </div>
             <p className="mb-2 text-[13.5px] text-text-muted">
@@ -343,14 +345,14 @@ function ParticipationCard({
               )}
               {participation.categoryPosition && participation.categoryType && (
                 <div className="mt-1 text-[12px] text-text-faint">
-                  Cat. #{participation.categoryPosition} (
+                  {t('categoryAbbr')} #{participation.categoryPosition} (
                   {participation.categoryType === 'CATEGORY'
                     ? participation.categoryName
                     : participation.categoryType === 'MALE'
-                    ? 'Masculina'
+                    ? t('categoryMale')
                     : participation.categoryType === 'FEMALE'
-                    ? 'Femenina'
-                    : 'General'}
+                    ? t('categoryFemale')
+                    : t('categoryGeneral')}
                   )
                 </div>
               )}

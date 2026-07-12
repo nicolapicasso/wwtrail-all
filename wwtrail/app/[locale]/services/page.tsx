@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { servicesService, serviceCategoriesService } from '@/lib/api/v2';
 import { Service, ServiceCategory, ServiceFilters } from '@/types/v2';
 import ServiceCard from '@/components/ServiceCard';
@@ -12,6 +12,7 @@ import CountrySelect from '@/components/CountrySelect';
 
 export default function ServicesPage() {
   const locale = useLocale();
+  const t = useTranslations('pgCatalog');
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -72,9 +73,9 @@ export default function ServicesPage() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Servicios</h1>
+          <h1 className="text-4xl font-bold mb-2">{t('servicesTitle')}</h1>
           <p className="text-muted-foreground">
-            Alojamientos, restaurantes, tiendas y más para tu próxima aventura
+            {t('servicesSubtitle')}
           </p>
         </div>
 
@@ -85,7 +86,7 @@ export default function ServicesPage() {
               {/* Search */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Buscar
+                  {t('search')}
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -93,7 +94,7 @@ export default function ServicesPage() {
                     type="text"
                     value={filters.search}
                     onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    placeholder="Buscar servicios..."
+                    placeholder={t('searchServicesPlaceholder')}
                     className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                   />
                 </div>
@@ -103,12 +104,12 @@ export default function ServicesPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">
                   <Globe className="inline h-4 w-4 mr-1" />
-                  País
+                  {t('country')}
                 </label>
                 <CountrySelect
                   value={filters.country || ''}
                   onChange={(country) => setFilters({ ...filters, country, page: 1 })}
-                  placeholder="Todos los países"
+                  placeholder={t('allCountries')}
                 />
               </div>
 
@@ -116,14 +117,14 @@ export default function ServicesPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">
                   <Tag className="inline h-4 w-4 mr-1" />
-                  Categoría
+                  {t('category')}
                 </label>
                 <select
                   value={filters.categoryId}
                   onChange={(e) => setFilters({ ...filters, categoryId: e.target.value, page: 1 })}
                   className="w-full px-3 py-2 border border-input rounded-md focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                 >
-                  <option value="">Todas las categorías</option>
+                  <option value="">{t('allCategories')}</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.icon} {cat.name}
@@ -135,16 +136,16 @@ export default function ServicesPage() {
               {/* Sort By */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Ordenar por
+                  {t('sortBy')}
                 </label>
                 <select
                   value={filters.sortBy}
                   onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as any, page: 1 })}
                   className="w-full px-3 py-2 border border-input rounded-md focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                 >
-                  <option value="createdAt">Más recientes</option>
-                  <option value="name">Nombre</option>
-                  <option value="viewCount">Más vistos</option>
+                  <option value="createdAt">{t('sortNewest')}</option>
+                  <option value="name">{t('sortName')}</option>
+                  <option value="viewCount">{t('sortMostViewed')}</option>
                 </select>
               </div>
 
@@ -158,7 +159,7 @@ export default function ServicesPage() {
                     className="w-4 h-4 text-[#B66916] border-gray-300 rounded focus:ring-[#B66916] accent-[#B66916]"
                   />
                   <span className="text-sm font-medium">
-                    Solo destacados
+                    {t('featuredOnly')}
                   </span>
                 </label>
               </div>
@@ -168,7 +169,7 @@ export default function ServicesPage() {
               type="submit"
               className="bg-[#16A34A] text-white px-6 py-2 rounded-md hover:bg-[#B66916] transition-colors"
             >
-              Buscar
+              {t('search')}
             </button>
           </form>
         </div>
@@ -181,7 +182,7 @@ export default function ServicesPage() {
         ) : services.length > 0 ? (
           <>
             <div className="mb-4 text-sm text-muted-foreground">
-              {total} {total === 1 ? 'servicio encontrado' : 'servicios encontrados'}
+              {t('servicesFound', { count: total })}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -198,17 +199,17 @@ export default function ServicesPage() {
                   disabled={filters.page === 1}
                   className="px-4 py-2 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent transition-colors"
                 >
-                  Anterior
+                  {t('previous')}
                 </button>
                 <span className="px-4 py-2">
-                  Página {filters.page} de {Math.ceil(total / filters.limit!)}
+                  {t('pageOf', { current: filters.page ?? 1, total: Math.ceil(total / filters.limit!) })}
                 </span>
                 <button
                   onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
                   disabled={filters.page! >= Math.ceil(total / filters.limit!)}
                   className="px-4 py-2 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent transition-colors"
                 >
-                  Siguiente
+                  {t('next')}
                 </button>
               </div>
             )}
@@ -216,9 +217,9 @@ export default function ServicesPage() {
         ) : (
           <div className="text-center py-12">
             <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No se encontraron servicios</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('noServicesFound')}</h3>
             <p className="text-muted-foreground">
-              Intenta ajustar los filtros de búsqueda
+              {t('adjustFilters')}
             </p>
           </div>
         )}

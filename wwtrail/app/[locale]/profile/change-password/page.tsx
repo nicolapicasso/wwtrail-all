@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Lock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function ChangePasswordPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const t = useTranslations('pgAccount');
 
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -26,7 +28,7 @@ export default function ChangePasswordPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Cargando...</div>
+        <div className="animate-pulse">{t('loading')}</div>
       </div>
     );
   }
@@ -50,17 +52,17 @@ export default function ChangePasswordPage() {
     
     // Validations
     if (formData.newPassword.length < 6) {
-      setError('La nueva contraseña debe tener al menos 6 caracteres');
+      setError(t('errorPasswordMinLength'));
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError(t('errorPasswordsDontMatch'));
       return;
     }
 
     if (formData.currentPassword === formData.newPassword) {
-      setError('La nueva contraseña debe ser diferente de la actual');
+      setError(t('errorPasswordSameAsCurrent'));
       return;
     }
 
@@ -85,7 +87,7 @@ export default function ChangePasswordPage() {
       }, 2000);
     } catch (err: any) {
       console.error('Error changing password:', err);
-      setError(err.message || 'Error al cambiar la contraseña');
+      setError(err.message || t('errorChangingPassword'));
     } finally {
       setSaving(false);
     }
@@ -102,11 +104,11 @@ export default function ChangePasswordPage() {
             className="mb-4 text-primary-foreground hover:text-primary-foreground/80"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            {t('back')}
           </Button>
-          <h1 className="text-4xl font-bold mb-2">Cambiar Contraseña</h1>
+          <h1 className="text-4xl font-bold mb-2">{t('changePassword')}</h1>
           <p className="text-lg opacity-90">
-            Actualiza tu contraseña de forma segura
+            {t('changePasswordSubtitle')}
           </p>
         </div>
       </div>
@@ -117,7 +119,7 @@ export default function ChangePasswordPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Lock className="w-5 h-5 mr-2" />
-              Seguridad
+              {t('security')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -125,8 +127,8 @@ export default function ChangePasswordPage() {
               {/* Success Message */}
               {success && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-green-800">✅ Contraseña actualizada correctamente</p>
-                  <p className="text-sm text-green-600 mt-1">Redirigiendo...</p>
+                  <p className="text-green-800">✅ {t('passwordUpdatedSuccess')}</p>
+                  <p className="text-sm text-green-600 mt-1">{t('redirecting')}</p>
                 </div>
               )}
 
@@ -139,7 +141,7 @@ export default function ChangePasswordPage() {
 
               {/* Current Password */}
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Contraseña Actual *</Label>
+                <Label htmlFor="currentPassword">{t('currentPassword')} *</Label>
                 <Input
                   id="currentPassword"
                   name="currentPassword"
@@ -147,13 +149,13 @@ export default function ChangePasswordPage() {
                   value={formData.currentPassword}
                   onChange={handleChange}
                   required
-                  placeholder="Tu contraseña actual"
+                  placeholder={t('currentPasswordPlaceholder')}
                 />
               </div>
 
               {/* New Password */}
               <div className="space-y-2">
-                <Label htmlFor="newPassword">Nueva Contraseña *</Label>
+                <Label htmlFor="newPassword">{t('newPassword')} *</Label>
                 <Input
                   id="newPassword"
                   name="newPassword"
@@ -161,17 +163,17 @@ export default function ChangePasswordPage() {
                   value={formData.newPassword}
                   onChange={handleChange}
                   required
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder={t('minSixChars')}
                   minLength={6}
                 />
                 <p className="text-xs text-muted-foreground">
-                  La contraseña debe tener al menos 6 caracteres
+                  {t('passwordMinLengthHint')}
                 </p>
               </div>
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña *</Label>
+                <Label htmlFor="confirmPassword">{t('confirmNewPassword')} *</Label>
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -179,22 +181,22 @@ export default function ChangePasswordPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  placeholder="Repite la nueva contraseña"
+                  placeholder={t('repeatNewPassword')}
                 />
               </div>
 
               {/* Password Requirements */}
               <div className="bg-muted rounded-lg p-4 text-sm">
-                <p className="font-semibold mb-2">Requisitos de contraseña:</p>
+                <p className="font-semibold mb-2">{t('passwordRequirements')}</p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li className={formData.newPassword.length >= 6 ? 'text-green-600' : ''}>
-                    • Mínimo 6 caracteres
+                    • {t('reqMinSixChars')}
                   </li>
                   <li className={formData.newPassword === formData.confirmPassword && formData.confirmPassword ? 'text-green-600' : ''}>
-                    • Las contraseñas deben coincidir
+                    • {t('reqPasswordsMatch')}
                   </li>
                   <li className={formData.currentPassword && formData.newPassword && formData.currentPassword !== formData.newPassword ? 'text-green-600' : ''}>
-                    • Debe ser diferente de la actual
+                    • {t('reqDifferentFromCurrent')}
                   </li>
                 </ul>
               </div>
@@ -208,14 +210,14 @@ export default function ChangePasswordPage() {
                   className="flex-1"
                   disabled={saving}
                 >
-                  Cancelar
+                  {t('cancel')}
                 </Button>
                 <Button
                   type="submit"
                   className="flex-1"
                   disabled={saving}
                 >
-                  {saving ? 'Actualizando...' : 'Actualizar Contraseña'}
+                  {saving ? t('updating') : t('updatePassword')}
                 </Button>
               </div>
             </form>
@@ -225,8 +227,7 @@ export default function ChangePasswordPage() {
         {/* Security Tip */}
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
-            💡 <strong>Consejo de seguridad:</strong> Usa una contraseña única que no uses en otros sitios. 
-            Considera usar un gestor de contraseñas.
+            💡 <strong>{t('securityTipLabel')}</strong> {t('securityTipText')}
           </p>
         </div>
       </div>

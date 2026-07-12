@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { organizersService } from '@/lib/api/v2';
@@ -16,6 +17,7 @@ import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 
 export default function OrganizerDetailPage() {
   const params = useParams();
+  const t = useTranslations('pgCatalog');
   const slug = params?.slug as string;
 
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
@@ -46,7 +48,7 @@ export default function OrganizerDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-green-brand mx-auto mb-4" />
-          <p className="text-text-muted">Cargando organizador...</p>
+          <p className="text-text-muted">{t('loadingOrganizer')}</p>
         </div>
       </div>
     );
@@ -57,14 +59,14 @@ export default function OrganizerDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Organizador no encontrado</h2>
-          <p className="text-text-muted mb-4">{error || 'Este organizador no existe'}</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('organizerNotFound')}</h2>
+          <p className="text-text-muted mb-4">{error || t('organizerDoesNotExist')}</p>
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-green-brand hover:text-green-brand"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver al inicio
+            {t('backToHome')}
           </Link>
         </div>
       </div>
@@ -102,7 +104,7 @@ export default function OrganizerDetailPage() {
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
               <span className="mb-3 inline-flex items-center gap-1.5 rounded-pill bg-white/15 px-3 py-1 text-[12px] font-bold uppercase tracking-wide text-white">
-                <Building2 className="h-3.5 w-3.5" /> Organizador
+                <Building2 className="h-3.5 w-3.5" /> {t('organizerBadge')}
               </span>
               <h1 className="text-[36px] font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-[48px]">
                 {organizer.name}
@@ -124,7 +126,7 @@ export default function OrganizerDetailPage() {
             {/* Description */}
             {organizer.description && (
               <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
-                <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">Sobre el Organizador</h2>
+                <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">{t('aboutOrganizer')}</h2>
                 <p className="text-text-muted leading-relaxed whitespace-pre-wrap">
                   {organizer.description}
                 </p>
@@ -136,7 +138,7 @@ export default function OrganizerDetailPage() {
               <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
                 <h2 className="mb-4 flex items-center gap-2 text-[22px] font-black tracking-[-0.01em] text-ink-2">
                   <Calendar className="h-6 w-6 text-green-brand" />
-                  Eventos Organizados ({organizer.events.length})
+                  {t('organizedEvents', { count: organizer.events.length })}
                 </h2>
 
                 <div className="space-y-6">
@@ -177,7 +179,7 @@ export default function OrganizerDetailPage() {
                         <div className="ml-20 mt-3 space-y-2">
                           <p className="text-sm font-medium text-text-muted flex items-center gap-2">
                             <Trophy className="h-4 w-4 text-green-600" />
-                            Competiciones ({event.competitions.length})
+                            {t('competitionsCount', { count: event.competitions.length })}
                           </p>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                             {event.competitions.map((competition) => (
@@ -211,7 +213,7 @@ export default function OrganizerDetailPage() {
               <div className="rounded-lg border border-dashed border-gray-300 bg-white p-12 text-center">
                 <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-text-muted">
-                  Este organizador aún no tiene eventos publicados
+                  {t('noPublishedEvents')}
                 </p>
               </div>
             )}
@@ -221,7 +223,7 @@ export default function OrganizerDetailPage() {
           <aside className="space-y-6 lg:sticky lg:top-[130px]">
             {/* Contact & Social Media */}
             <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
-              <h3 className="mb-4 text-[16px] font-black text-ink-2">Contacto y Redes</h3>
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">{t('contactAndSocial')}</h3>
               <div className="space-y-3">
                 {/* Website */}
                 {organizer.website && (
@@ -232,7 +234,7 @@ export default function OrganizerDetailPage() {
                     className="flex items-center gap-3 text-text-muted hover:text-green-brand transition-colors"
                   >
                     <Globe className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-sm truncate">Sitio Web</span>
+                    <span className="text-sm truncate">{t('website')}</span>
                   </a>
                 )}
 
@@ -292,7 +294,7 @@ export default function OrganizerDetailPage() {
                 {!organizer.website && !organizer.instagramUrl && !organizer.facebookUrl &&
                  !organizer.twitterUrl && !organizer.youtubeUrl && (
                   <p className="text-sm text-text-faint italic">
-                    No hay información de contacto disponible
+                    {t('noContactInfo')}
                   </p>
                 )}
               </div>
@@ -300,17 +302,17 @@ export default function OrganizerDetailPage() {
 
             {/* Statistics */}
             <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
-              <h3 className="mb-4 text-[16px] font-black text-ink-2">Estadísticas</h3>
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">{t('statistics')}</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-text-muted">Eventos organizados:</span>
+                  <span className="text-sm text-text-muted">{t('eventsOrganizedLabel')}</span>
                   <span className="font-semibold text-gray-900">
                     {organizer._count?.events || 0}
                   </span>
                 </div>
                 {organizer.events && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-text-muted">Competiciones totales:</span>
+                    <span className="text-sm text-text-muted">{t('totalCompetitionsLabel')}</span>
                     <span className="font-semibold text-gray-900">
                       {organizer.events.reduce((total, event) =>
                         total + (event.competitions?.length || 0), 0

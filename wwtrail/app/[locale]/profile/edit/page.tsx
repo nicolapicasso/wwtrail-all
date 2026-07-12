@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ export default function EditProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('pgAccount');
 
   const [profile, setProfile] = useState<OwnProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ export default function EditProfilePage() {
         });
       } catch (err: any) {
         console.error('Error fetching profile:', err);
-        setError('Error al cargar el perfil');
+        setError(t('errorLoadingProfile'));
       } finally {
         setLoading(false);
       }
@@ -151,7 +152,7 @@ export default function EditProfilePage() {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError('Error al actualizar el perfil');
+        setError(t('errorUpdatingProfile'));
       }
     } finally {
       setSaving(false);
@@ -169,10 +170,10 @@ export default function EditProfilePage() {
             className="mb-4 text-white hover:text-white/80 hover:bg-white/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            {t('back')}
           </Button>
-          <h1 className="text-4xl font-bold mb-2">Editar Perfil</h1>
-          <p className="text-lg opacity-90">Actualiza tu informaci&oacute;n personal</p>
+          <h1 className="text-4xl font-bold mb-2">{t('editProfile')}</h1>
+          <p className="text-lg opacity-90">{t('editProfileSubtitle')}</p>
         </div>
       </div>
 
@@ -182,7 +183,7 @@ export default function EditProfilePage() {
           {/* Success Message */}
           {success && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800">Perfil actualizado correctamente</p>
+              <p className="text-green-800">{t('profileUpdatedSuccess')}</p>
             </div>
           )}
 
@@ -202,21 +203,20 @@ export default function EditProfilePage() {
                 ) : (
                   <Lock className="w-5 h-5 text-gray-600" />
                 )}
-                Privacidad del Perfil
+                {t('profilePrivacy')}
               </CardTitle>
               <CardDescription>
-                Controla qui&eacute;n puede ver tu perfil y participaciones
+                {t('profilePrivacyDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="isPublic" className="text-base font-medium">
-                    Perfil p&uacute;blico
+                    {t('publicProfile')}
                   </Label>
                   <p className="text-sm text-gray-500">
-                    Si est&aacute; activado, tu perfil aparecer&aacute; en el listado de usuarios
-                    y tus participaciones ser&aacute;n visibles en las ediciones
+                    {t('publicProfileHint')}
                   </p>
                 </div>
                 <Switch
@@ -231,14 +231,14 @@ export default function EditProfilePage() {
           {/* Avatar & Basic Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Informaci&oacute;n B&aacute;sica</CardTitle>
+              <CardTitle>{t('basicInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Avatar with FileUpload */}
               <div className="space-y-4">
                 <Label className="flex items-center gap-2">
                   <Camera className="w-4 h-4" />
-                  Foto de perfil
+                  {t('profilePhoto')}
                 </Label>
                 <div className="flex items-start gap-6">
                   <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 shrink-0">
@@ -262,10 +262,10 @@ export default function EditProfilePage() {
                       }}
                       currentUrl={formData.avatar}
                       accept="image/*"
-                      buttonText="Subir foto"
+                      buttonText={t('uploadPhoto')}
                     />
                     <p className="text-xs text-gray-500 mt-2">
-                      Recomendado: imagen cuadrada de al menos 200x200 píxeles
+                      {t('photoRecommendation')}
                     </p>
                     {formData.avatar && (
                       <Button
@@ -275,7 +275,7 @@ export default function EditProfilePage() {
                         className="mt-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={() => setFormData((prev) => ({ ...prev, avatar: '' }))}
                       >
-                        Eliminar foto
+                        {t('removePhoto')}
                       </Button>
                     )}
                   </div>
@@ -284,7 +284,7 @@ export default function EditProfilePage() {
 
               {/* Username */}
               <div className="space-y-2">
-                <Label htmlFor="username">Nombre de usuario *</Label>
+                <Label htmlFor="username">{t('usernameLabel')} *</Label>
                 <Input
                   id="username"
                   name="username"
@@ -294,14 +294,14 @@ export default function EditProfilePage() {
                   placeholder="tu_usuario"
                 />
                 <p className="text-xs text-gray-500">
-                  Tu nombre de usuario es &uacute;nico y visible p&uacute;blicamente
+                  {t('usernameHint')}
                 </p>
               </div>
 
               {/* First Name & Last Name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">Nombre</Label>
+                  <Label htmlFor="firstName">{t('firstName')}</Label>
                   <Input
                     id="firstName"
                     name="firstName"
@@ -311,7 +311,7 @@ export default function EditProfilePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Apellidos</Label>
+                  <Label htmlFor="lastName">{t('lastNames')}</Label>
                   <Input
                     id="lastName"
                     name="lastName"
@@ -325,7 +325,7 @@ export default function EditProfilePage() {
               {/* Gender & Birth Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="gender">Sexo</Label>
+                  <Label htmlFor="gender">{t('gender')}</Label>
                   <select
                     id="gender"
                     name="gender"
@@ -333,14 +333,14 @@ export default function EditProfilePage() {
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="">Seleccionar...</option>
-                    <option value="MALE">Hombre</option>
-                    <option value="FEMALE">Mujer</option>
-                    <option value="NON_BINARY">No binario</option>
+                    <option value="">{t('select')}</option>
+                    <option value="MALE">{t('genderMale')}</option>
+                    <option value="FEMALE">{t('genderFemale')}</option>
+                    <option value="NON_BINARY">{t('genderNonBinary')}</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate">Fecha de nacimiento</Label>
+                  <Label htmlFor="birthDate">{t('birthDate')}</Label>
                   <Input
                     id="birthDate"
                     name="birthDate"
@@ -354,7 +354,7 @@ export default function EditProfilePage() {
 
               {/* Phone */}
               <div className="space-y-2">
-                <Label htmlFor="phone">Tel&eacute;fono</Label>
+                <Label htmlFor="phone">{t('phone')}</Label>
                 <Input
                   id="phone"
                   name="phone"
@@ -370,12 +370,12 @@ export default function EditProfilePage() {
           {/* Location */}
           <Card>
             <CardHeader>
-              <CardTitle>Ubicaci&oacute;n</CardTitle>
+              <CardTitle>{t('location')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="country">Pa&iacute;s</Label>
+                  <Label htmlFor="country">{t('country')}</Label>
                   <select
                     id="country"
                     name="country"
@@ -383,7 +383,7 @@ export default function EditProfilePage() {
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="">Seleccionar pa&iacute;s...</option>
+                    <option value="">{t('selectCountry')}</option>
                     {COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code}>
                         {c.name}
@@ -392,7 +392,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city">Ciudad</Label>
+                  <Label htmlFor="city">{t('city')}</Label>
                   <Input
                     id="city"
                     name="city"
@@ -408,23 +408,23 @@ export default function EditProfilePage() {
           {/* Bio */}
           <Card>
             <CardHeader>
-              <CardTitle>Sobre m&iacute;</CardTitle>
+              <CardTitle>{t('aboutMe')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="bio">Biograf&iacute;a</Label>
+                <Label htmlFor="bio">{t('biography')}</Label>
                 <textarea
                   id="bio"
                   name="bio"
                   value={formData.bio || ''}
                   onChange={handleChange}
                   rows={4}
-                  placeholder="Cu&eacute;ntanos sobre ti, tu experiencia en trail running..."
+                  placeholder={t('bioPlaceholder')}
                   className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   maxLength={500}
                 />
                 <p className="text-xs text-gray-500 text-right">
-                  {(formData.bio || '').length}/500 caracteres
+                  {t('charactersCount', { count: (formData.bio || '').length })}
                 </p>
               </div>
             </CardContent>
@@ -433,9 +433,9 @@ export default function EditProfilePage() {
           {/* Social Media */}
           <Card>
             <CardHeader>
-              <CardTitle>Redes Sociales</CardTitle>
+              <CardTitle>{t('socialMedia')}</CardTitle>
               <CardDescription>
-                A&ntilde;ade tus perfiles de redes sociales (opcional)
+                {t('socialMediaDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -510,15 +510,15 @@ export default function EditProfilePage() {
               className="flex-1"
               disabled={saving}
             >
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button type="submit" className="flex-1" disabled={saving}>
               {saving ? (
-                <>Guardando...</>
+                <>{t('saving')}</>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Guardar Cambios
+                  {t('saveChanges')}
                 </>
               )}
             </Button>

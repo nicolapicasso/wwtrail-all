@@ -11,9 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Mountain, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const t = useTranslations('pgAccount');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +34,7 @@ export default function LoginPage() {
     try {
       await login(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+      setError(err.response?.data?.message || t('errorLogin'));
     } finally {
       setIsLoading(false);
     }
@@ -48,9 +50,9 @@ export default function LoginPage() {
               <span className="text-2xl font-bold text-primary">WWTRAIL</span>
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
+          <CardTitle className="text-2xl text-center">{t('login')}</CardTitle>
           <CardDescription className="text-center">
-            Ingresa tus credenciales para acceder a tu cuenta
+            {t('loginSubtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -63,7 +65,7 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -77,7 +79,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -95,7 +97,7 @@ export default function LoginPage() {
                 href="/auth/forgot-password"
                 className="text-sm text-primary hover:underline"
               >
-                ¿Olvidaste tu contraseña?
+                {t('forgotPassword')}
               </Link>
             </div>
           </CardContent>
@@ -109,17 +111,17 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Iniciando sesión...
+                  {t('loggingIn')}
                 </>
               ) : (
-                'Iniciar Sesión'
+                t('login')
               )}
             </Button>
 
             <div className="text-sm text-center text-muted-foreground">
-              ¿No tienes cuenta?{' '}
+              {t('noAccount')}{' '}
               <Link href="/auth/register" className="text-primary hover:underline">
-                Regístrate
+                {t('signUp')}
               </Link>
             </div>
           </CardFooter>

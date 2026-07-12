@@ -2,9 +2,11 @@
 
 import { useUserCompetitions } from '@/hooks/useUserCompetitions';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function MyRegistrationsPage() {
   const { competitions, loading, error } = useUserCompetitions();
+  const t = useTranslations('pgAccount');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -12,10 +14,10 @@ export default function MyRegistrationsPage() {
       <div className="bg-green-600 text-white py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-2">
-            Competiciones de Trail Running
+            {t('trailRunningCompetitions')}
           </h1>
           <p className="text-green-100">
-            Descubre las mejores carreras de montaña
+            {t('trailRunningSubtitle')}
           </p>
         </div>
       </div>
@@ -25,28 +27,28 @@ export default function MyRegistrationsPage() {
         <div className="mb-6">
           <input 
             type="text"
-            placeholder="Buscar competiciones..."
+            placeholder={t('searchCompetitions')}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
 
         {/* Contador */}
         <p className="text-gray-600 mb-4">
-          {loading ? 'Cargando...' : `${competitions.length} competiciones encontradas`}
+          {loading ? t('loading') : t('competitionsFound', { count: competitions.length })}
         </p>
 
         {/* Loading */}
         {loading && (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-            <p className="text-gray-600 mt-4">Cargando tus competiciones...</p>
+            <p className="text-gray-600 mt-4">{t('loadingYourCompetitions')}</p>
           </div>
         )}
 
         {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-600">Error: {error}</p>
+            <p className="text-red-600">{t('errorLabel')}: {error}</p>
           </div>
         )}
 
@@ -54,13 +56,13 @@ export default function MyRegistrationsPage() {
         {!loading && !error && competitions.length === 0 && (
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <p className="text-gray-600 text-lg mb-4">
-              No se encontraron competiciones con estos filtros. Prueba con otros criterios.
+              {t('noCompetitionsFound')}
             </p>
-            <Link 
+            <Link
               href="/competitions"
               className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
             >
-              Explorar todas las competiciones
+              {t('exploreAllCompetitions')}
             </Link>
           </div>
         )}
@@ -122,12 +124,12 @@ export default function MyRegistrationsPage() {
                       ${uc.status === 'DNF' ? 'bg-orange-100 text-orange-800' : ''}
                       ${uc.status === 'DNS' ? 'bg-gray-100 text-gray-800' : ''}
                     `}>
-                      {uc.status === 'INTERESTED' && '⭐ Me interesa'}
-                      {uc.status === 'REGISTERED' && '✅ Inscrito'}
-                      {uc.status === 'CONFIRMED' && '✅ Confirmado'}
-                      {uc.status === 'COMPLETED' && '🏁 Completado'}
-                      {uc.status === 'DNF' && '⚠️ No terminé'}
-                      {uc.status === 'DNS' && '❌ No participé'}
+                      {uc.status === 'INTERESTED' && `⭐ ${t('statusInterested')}`}
+                      {uc.status === 'REGISTERED' && `✅ ${t('statusRegistered')}`}
+                      {uc.status === 'CONFIRMED' && `✅ ${t('statusConfirmed')}`}
+                      {uc.status === 'COMPLETED' && `🏁 ${t('statusCompleted')}`}
+                      {uc.status === 'DNF' && `⚠️ ${t('statusDNF')}`}
+                      {uc.status === 'DNS' && `❌ ${t('statusDNS')}`}
                     </span>
                   </div>
                 </div>
@@ -138,25 +140,25 @@ export default function MyRegistrationsPage() {
                     <div className="flex flex-wrap gap-6 text-sm">
                       {uc.finishTime && (
                         <div>
-                          <span className="text-gray-600">⏱️ Tiempo:</span>
+                          <span className="text-gray-600">⏱️ {t('timeLabel')}</span>
                           <span className="ml-2 font-semibold text-green-600">{uc.finishTime}</span>
                         </div>
                       )}
                       {uc.position && (
                         <div>
-                          <span className="text-gray-600">🏆 Posición:</span>
+                          <span className="text-gray-600">🏆 {t('positionLabel')}</span>
                           <span className="ml-2 font-semibold">#{uc.position}</span>
                         </div>
                       )}
                       {uc.categoryPosition && (
                         <div>
-                          <span className="text-gray-600">📊 En categoría:</span>
+                          <span className="text-gray-600">📊 {t('inCategoryLabel')}</span>
                           <span className="ml-2 font-semibold">#{uc.categoryPosition}</span>
                         </div>
                       )}
                       {uc.personalRating && (
                         <div>
-                          <span className="text-gray-600">⭐ Valoración:</span>
+                          <span className="text-gray-600">⭐ {t('ratingLabel')}</span>
                           <span className="ml-2">{'⭐'.repeat(uc.personalRating)}</span>
                         </div>
                       )}

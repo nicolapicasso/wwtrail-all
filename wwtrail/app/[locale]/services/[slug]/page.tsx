@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -27,6 +28,7 @@ const EventMap = dynamic(() => import('@/components/EventMap'), {
 
 export default function ServiceDetailPage() {
   const params = useParams();
+  const t = useTranslations('pgCatalog');
   const slug = params?.slug as string;
   const locale = params?.locale as string; // ✅ Get current locale
 
@@ -96,7 +98,7 @@ export default function ServiceDetailPage() {
         }
       } catch (err: any) {
         console.error('Error fetching service:', err);
-        setError(err.response?.data?.message || 'Error al cargar el servicio');
+        setError(err.response?.data?.message || t('errorLoadingService'));
       } finally {
         setLoading(false);
       }
@@ -117,14 +119,14 @@ export default function ServiceDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Servicio no encontrado</h2>
+          <h2 className="text-2xl font-bold mb-2">{t('serviceNotFound')}</h2>
           <p className="text-muted-foreground mb-4">{error}</p>
           <Link
             href="/services"
             className="inline-flex items-center gap-2 text-blue-600 hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver a Servicios
+            {t('backToServices')}
           </Link>
         </div>
       </div>
@@ -151,7 +153,7 @@ export default function ServiceDetailPage() {
             className="text-white hover:text-gray-200 flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver a Servicios
+            {t('backToServices')}
           </Link>
         </div>
 
@@ -179,7 +181,7 @@ export default function ServiceDetailPage() {
               {service.featured && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500 px-3 py-1 text-sm font-semibold text-white">
                   <Star className="h-4 w-4 fill-current" />
-                  Destacado
+                  {t('featured')}
                 </span>
               )}
             </div>
@@ -195,7 +197,7 @@ export default function ServiceDetailPage() {
             {/* Description */}
             {service.description && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-xl font-bold">Acerca de</h2>
+                <h2 className="mb-4 text-xl font-bold">{t('about')}</h2>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {service.description}
                 </p>
@@ -214,10 +216,10 @@ export default function ServiceDetailPage() {
 
             {/* Stats */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-xl font-bold">Estadísticas</h2>
+              <h2 className="mb-4 text-xl font-bold">{t('statistics')}</h2>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Eye className="h-5 w-5" />
-                <span>{service.viewCount || 0} visitas</span>
+                <span>{t('visits', { count: service.viewCount || 0 })}</span>
               </div>
             </div>
           </div>
@@ -245,7 +247,7 @@ export default function ServiceDetailPage() {
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <h3 className="mb-4 font-semibold flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-green-600" />
-                  Ubicación
+                  {t('location')}
                 </h3>
                 <EventMap
                   event={{
@@ -293,7 +295,7 @@ export default function ServiceDetailPage() {
                     className="text-sm text-blue-600 hover:underline flex items-center gap-2"
                   >
                     <MapPin className="h-4 w-4" />
-                    Ver en Google Maps
+                    {t('viewOnGoogleMaps')}
                   </a>
                 </div>
               </div>
@@ -302,7 +304,7 @@ export default function ServiceDetailPage() {
             {/* Category Info */}
             {service.category && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h3 className="mb-4 font-semibold">Categoría</h3>
+                <h3 className="mb-4 font-semibold">{t('category')}</h3>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{service.category.icon}</span>
                   <span className="font-medium">{service.category.name}</span>
@@ -313,7 +315,7 @@ export default function ServiceDetailPage() {
             {/* Website */}
             {service.website && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h3 className="mb-4 font-semibold">Sitio Web Oficial</h3>
+                <h3 className="mb-4 font-semibold">{t('officialWebsite')}</h3>
                 <a
                   href={service.website}
                   target="_blank"
@@ -321,7 +323,7 @@ export default function ServiceDetailPage() {
                   className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  Visitar sitio web
+                  {t('visitWebsite')}
                 </a>
               </div>
             )}

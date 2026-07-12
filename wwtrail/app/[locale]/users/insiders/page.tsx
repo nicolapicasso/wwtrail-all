@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star, MapPin, User, Globe } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { userService } from '@/lib/api/user.service';
 import { COUNTRIES } from '@/lib/utils/countries';
 
@@ -36,6 +37,7 @@ interface InsiderData {
 export default function InsidersPage() {
   const params = useParams();
   const locale = (params?.locale as string) || 'es';
+  const t = useTranslations('pgAccount');
 
   const [data, setData] = useState<InsiderData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,7 +51,7 @@ export default function InsidersPage() {
         setData(result);
       } catch (err: any) {
         console.error('Error fetching insiders:', err);
-        setError('Error al cargar los datos');
+        setError(t('errorLoadingData'));
       } finally {
         setLoading(false);
       }
@@ -93,7 +95,7 @@ export default function InsidersPage() {
         <div className="text-center">
           <p className="mb-4 text-destructive">{error}</p>
           <button onClick={() => window.location.reload()} className="font-semibold text-green-brand hover:underline">
-            Intentar de nuevo
+            {t('tryAgain')}
           </button>
         </div>
       </div>
@@ -127,8 +129,8 @@ export default function InsidersPage() {
           <div className="text-left">
             <h1 className="text-[36px] font-black leading-none tracking-[-0.02em] sm:text-[44px]">WWTrail Insiders</h1>
             <div className="mt-2.5 flex gap-6 text-[15px] font-bold opacity-95">
-              <span className="flex items-center gap-1.5"><User className="h-4 w-4" /> {data?.stats?.total || 0} Insiders</span>
-              <span className="flex items-center gap-1.5"><Globe className="h-4 w-4" /> {Object.keys(data?.stats?.byCountry || {}).length} Países</span>
+              <span className="flex items-center gap-1.5"><User className="h-4 w-4" /> {t('insidersCount', { count: data?.stats?.total || 0 })}</span>
+              <span className="flex items-center gap-1.5"><Globe className="h-4 w-4" /> {t('countriesCount', { count: Object.keys(data?.stats?.byCountry || {}).length })}</span>
             </div>
           </div>
         </div>
@@ -186,9 +188,9 @@ export default function InsidersPage() {
         ) : (
           <div className="py-16 text-center">
             <Star className="mx-auto mb-4 h-16 w-16 text-text-faint/40" />
-            <h2 className="mb-2 text-[20px] font-extrabold text-ink-2">Próximamente</h2>
+            <h2 className="mb-2 text-[20px] font-extrabold text-ink-2">{t('comingSoon')}</h2>
             <p className="text-[15px] text-text-muted">
-              Pronto conocerás a nuestros corresponsales especiales de trail running
+              {t('comingSoonDescription')}
             </p>
           </div>
         )}
@@ -196,7 +198,7 @@ export default function InsidersPage() {
         {/* Country Distribution */}
         {data?.stats?.byCountry && Object.keys(data.stats.byCountry).length > 0 && (
           <div className="mt-12">
-            <h2 className="mb-6 text-center text-[20px] font-black text-ink-2">Insiders por País</h2>
+            <h2 className="mb-6 text-center text-[20px] font-black text-ink-2">{t('insidersByCountry')}</h2>
             <div className="flex flex-wrap justify-center gap-3">
               {Object.entries(data.stats.byCountry)
                 .sort((a, b) => b[1] - a[1])
