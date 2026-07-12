@@ -741,6 +741,51 @@ export class EditionService {
   }
 
   /**
+   * Activar/desactivar una edición (ocultar sin borrar).
+   * Permisos: creador del evento, manager asignado o ADMIN.
+   */
+  static async toggleActive(id: string, userId: string) {
+    const existing = await prisma.edition.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        isActive: true,
+        competition: {
+          select: { event: { select: { id: true, userId: true } } },
+        },
+      },
+    });
+
+    if (!existing) {
+      throw new Error('Edition not found');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN') {
+      if (existing.competition.event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: existing.competition.event.id, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can toggle editions');
+        }
+      }
+    }
+
+    const edition = await prisma.edition.update({
+      where: { id },
+      data: { isActive: !existing.isActive },
+    });
+
+    logger.info(`Edition active toggled: ${id} → ${edition.isActive}`);
+    return edition;
+  }
+
+  /**
    * Eliminar edición
    * CUIDADO: También elimina participantes y resultados (cascade)
    */

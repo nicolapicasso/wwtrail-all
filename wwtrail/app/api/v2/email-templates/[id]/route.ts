@@ -18,3 +18,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return apiSuccess(template);
   } catch (error) { return apiError(error); }
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await requireRole(request, 'ADMIN');
+    await EmailTemplateService.delete(params.id);
+    return apiSuccess({ deleted: true });
+  } catch (error) { return apiError(error); }
+}

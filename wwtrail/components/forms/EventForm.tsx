@@ -340,9 +340,11 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         websiteUrl: formData.website.trim() || undefined,
         firstEditionYear: parseInt(formData.firstEditionYear),
         typicalMonth: formData.typicalMonth ? parseInt(formData.typicalMonth) : undefined,
-        logoUrl: formData.logoUrl || undefined,
-        coverImageUrl: formData.coverImage || undefined,
-        images: formData.gallery.length > 0 ? formData.gallery : undefined,
+        // Send null/[] when cleared so removals persist (undefined omits the key
+        // and Prisma leaves the previous value untouched).
+        logoUrl: formData.logoUrl || null,
+        coverImageUrl: formData.coverImage || null,
+        images: formData.gallery,
         featured: formData.featured,
         organizerId: formData.organizerId || undefined,
         // Redes Sociales

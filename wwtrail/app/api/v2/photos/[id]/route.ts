@@ -2,6 +2,13 @@ import { NextRequest } from 'next/server';
 import { EditionPhotoService } from '@/lib/services/editionPhoto.service';
 import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const photo = await EditionPhotoService.getById(params.id);
+    return apiSuccess(photo);
+  } catch (error) { return apiError(error); }
+}
+
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await requireRole(request, 'ORGANIZER', 'ADMIN');

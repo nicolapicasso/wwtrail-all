@@ -1,23 +1,22 @@
 // lib/utils/imageUrl.ts
 // Utilidades para normalizar URLs de imágenes.
 //
-// Importante: la reescritura de rutas /uploads/* hacia el CDN de Spaces solo
-// ocurre cuando el almacenamiento en Spaces está EXPLÍCITAMENTE activo, vía
-// NEXT_PUBLIC_STORAGE_TYPE === 'spaces'. Así el cliente coincide con el backend
-// (que sube a Spaces solo cuando isSpacesConfigured()). Si Spaces no está
-// activo, las rutas /uploads/* se sirven desde el mismo origen (disco de la
-// app), que es donde realmente están los archivos.
+// Importante: cuando una subida llega a Spaces, el backend (uploadToSpaces)
+// devuelve y almacena SIEMPRE una URL absoluta del CDN. Por tanto, una ruta
+// relativa /uploads/* en la base de datos significa SIEMPRE que el archivo
+// está en el disco local de la app (fallback), nunca en el CDN. Reescribir
+// esas rutas al CDN produciría 404 (el archivo no existe allí). Por eso las
+// rutas /uploads/* se sirven siempre desde el mismo origen de la app, igual
+// que las ve el backoffice.
 
-const SPACES_URL = process.env.NEXT_PUBLIC_SPACES_URL || 'https://wwtrail-uploads.fra1.cdn.digitaloceanspaces.com';
-const USE_SPACES = process.env.NEXT_PUBLIC_STORAGE_TYPE === 'spaces';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '';
 
 const LOCALHOST_PATTERNS = ['http://localhost:3001', 'http://localhost:3000'];
 
-/** Resuelve una ruta /uploads/... al backend correcto (Spaces o mismo origen). */
+/** Resuelve una ruta /uploads/... contra el mismo origen (disco de la app). */
 function resolveUploadPath(path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`;
-  return USE_SPACES ? `${SPACES_URL}${p}` : `${APP_URL}${p}`;
+  return `${APP_URL}${p}`;
 }
 
 /**

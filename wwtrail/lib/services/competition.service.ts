@@ -838,6 +838,65 @@ export class CompetitionService {
   }
 
   /**
+   * Reordenar las competiciones de un evento (drag & drop en backoffice).
+   * Recibe la lista ordenada de IDs y asigna displayOrder según su posición.
+   * Permisos: creador del evento, manager asignado o ADMIN.
+   */
+  static async reorderWithinEvent(eventId: string, orderedIds: string[], userId: string) {
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { id: true, userId: true },
+    });
+
+    if (!event) {
+      throw new Error('Event not found');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role !== 'ADMIN') {
+      if (event.userId !== userId) {
+        const manager = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId, userId } },
+        });
+        if (!manager) {
+          throw new Error('Unauthorized: Only event creator, assigned manager, or admin can reorder competitions');
+        }
+      }
+    }
+
+    // Validar que todos los IDs pertenecen al evento
+    const owned = await prisma.competition.findMany({
+      where: { eventId, id: { in: orderedIds } },
+      select: { id: true },
+    });
+    const ownedSet = new Set(owned.map((c) => c.id));
+    const invalid = orderedIds.filter((id) => !ownedSet.has(id));
+    if (invalid.length > 0) {
+      throw new Error(`Some competitions do not belong to this event: ${invalid.join(', ')}`);
+    }
+
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.competition.update({
+          where: { id },
+          data: { displayOrder: index },
+        })
+      )
+    );
+
+    logger.info(`Competitions reordered for event ${eventId}: ${orderedIds.length} items`);
+    return prisma.competition.findMany({
+      where: { eventId },
+      orderBy: [{ displayOrder: 'asc' }, { createdAt: 'asc' }],
+      select: { id: true, name: true, displayOrder: true },
+    });
+  }
+
+  /**
    * Generar slug único
    */
   private static async generateUniqueSlug(baseSlug: string): Promise<string> {

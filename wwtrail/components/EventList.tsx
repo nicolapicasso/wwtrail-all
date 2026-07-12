@@ -35,6 +35,7 @@ interface EventListProps {
   limit?: number;
   simplified?: boolean;  // Para modo simplificado (solo imagen + logo)
   locale?: string;  // ✅ NUEVO: Idioma actual
+  initialSearch?: string;  // ✅ Búsqueda inicial (p.ej. desde ?search= de la URL)
 }
 
 // ============================================================================
@@ -49,16 +50,17 @@ export function EventList({
   featuredOnly = false,
   limit: customLimit,
   simplified = false,
-  locale = 'es'  // ✅ NUEVO: Default locale
+  locale = 'es',  // ✅ NUEVO: Default locale
+  initialSearch = ''
 }: EventListProps) {
   const [page, setPage] = useState(initialPage);
   const [limitState] = useState(customLimit || initialLimit);
   const [view, setView] = useState<'grid' | 'list'>(viewMode);
 
   // ✅ SOLUCIÓN: Separar searchQuery (input) de filters (API query)
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [filters, setFilters] = useState<EventFilters>({
-    search: '',
+    search: initialSearch,
     country: '',
     city: '',  // Filtro de ciudad
     month: '',  // ✅ CAMBIO: month en lugar de status

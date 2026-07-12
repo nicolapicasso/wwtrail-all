@@ -413,6 +413,9 @@ model Competition {
   viewCount Int     @default(0)
   featured  Boolean @default(false)
 
+  // Orden de visualización dentro del evento (drag & drop en backoffice)
+  displayOrder Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -421,6 +424,7 @@ model Competition {
   @@index([type])
   @@index([organizerId])
   @@index([terrainTypeId])
+  @@index([displayOrder])
   @@map("competitions")
 }
 
@@ -491,6 +495,9 @@ model Edition {
   viewCount Int     @default(0)
   featured  Boolean @default(false)
 
+  // Activa/inactiva (permite ocultar una edición sin borrarla)
+  isActive Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -500,6 +507,7 @@ model Edition {
   @@index([status])
   @@index([startDate])
   @@index([avgRating])
+  @@index([isActive])
   @@map("editions")
 }
 

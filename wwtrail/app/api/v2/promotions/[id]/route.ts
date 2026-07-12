@@ -40,3 +40,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return apiSuccess({ message: 'Promotion deleted' });
   } catch (error) { return apiError(error); }
 }
+
+// Alias: some clients use PATCH for partial updates.
+export const PATCH = PUT;
