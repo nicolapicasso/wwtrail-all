@@ -337,6 +337,61 @@ export class EditionRatingService {
   }
 
   /**
+   * Obtener resumen de valoraciones de una edición (promedios por criterio)
+   */
+  static async getSummary(editionId: string) {
+    const edition = await prisma.edition.findUnique({
+      where: { id: editionId },
+      select: { id: true, avgRating: true, totalRatings: true },
+    });
+
+    if (!edition) {
+      throw new AppError('Edition not found', 404);
+    }
+
+    const ratings = await prisma.editionRating.findMany({
+      where: { editionId },
+      select: {
+        ratingInfoBriefing: true,
+        ratingRacePack: true,
+        ratingVillage: true,
+        ratingMarking: true,
+        ratingAid: true,
+        ratingFinisher: true,
+        ratingEco: true,
+      },
+    });
+
+    const total = ratings.length;
+    const keys = [
+      'ratingInfoBriefing',
+      'ratingRacePack',
+      'ratingVillage',
+      'ratingMarking',
+      'ratingAid',
+      'ratingFinisher',
+      'ratingEco',
+    ] as const;
+
+    const criteria: Record<string, number | null> = {};
+    for (const key of keys) {
+      if (total === 0) {
+        criteria[key] = null;
+      } else {
+        const sum = ratings.reduce((acc, r) => acc + (r[key] || 0), 0);
+        criteria[key] = Math.round((sum / total) * 100) / 100;
+      }
+    }
+
+    return {
+      editionId,
+      avgRating: edition.avgRating,
+      totalRatings: edition.totalRatings,
+      criteria,
+    };
+  }
+
+  /**
    * Recalcular avgRating y totalRatings de una edición
    */
   static async recalculateEditionRating(editionId: string) {

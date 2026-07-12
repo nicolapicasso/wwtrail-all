@@ -1980,8 +1980,8 @@
     "semantic_hash": ""
   },
   "lib/services/editionRating.service.ts": {
-    "mtime": 1783752630.845274,
-    "ast_hash": "ed14d804778d153b591de3cdc4998de8",
+    "mtime": 1783842925.6047025,
+    "ast_hash": "a0100b9cc42a625a124a42651b098f3f",
     "semantic_hash": ""
   },
   "lib/services/email-template.service.ts": {
@@ -2100,8 +2100,8 @@
     "semantic_hash": ""
   },
   "lib/services/userEdition.service.ts": {
-    "mtime": 1783752630.849274,
-    "ast_hash": "35547df6d8a2da6f7f66c46d42cfdcca",
+    "mtime": 1783842917.2367024,
+    "ast_hash": "e27b6c8828bb82bb411b3afcfd4c179a",
     "semantic_hash": ""
   },
   "lib/services/weather.service.ts": {
@@ -2110,8 +2110,8 @@
     "semantic_hash": ""
   },
   "lib/services/zancadas.service.ts": {
-    "mtime": 1783752630.849274,
-    "ast_hash": "75fde30559abcba4653374b3ae019517",
+    "mtime": 1783842932.2767026,
+    "ast_hash": "9e5695866198ba682ea290d32b054559",
     "semantic_hash": ""
   },
   "lib/types.ts": {
@@ -2827,6 +2827,26 @@
   "app/api/v2/terrain-types/[id]/route.ts": {
     "mtime": 1783842438.6527016,
     "ast_hash": "df0996a18271b55806d919605e53606a",
+    "semantic_hash": ""
+  },
+  "app/api/v2/editions/[id]/participants/route.ts": {
+    "mtime": 1783842942.8607025,
+    "ast_hash": "616dfda02fb272be2d3489f4f128c9fc",
+    "semantic_hash": ""
+  },
+  "app/api/v2/editions/[id]/ratings/summary/route.ts": {
+    "mtime": 1783842946.4407027,
+    "ast_hash": "e68de7e0187ef0259b14aedde71fa64f",
+    "semantic_hash": ""
+  },
+  "app/api/v2/users/me/participations/[id]/route.ts": {
+    "mtime": 1783842938.8407025,
+    "ast_hash": "55f35036c06df784245ed9d4fc0cbd31",
+    "semantic_hash": ""
+  },
+  "app/api/v2/zancadas/admin/test-connection/route.ts": {
+    "mtime": 1783842951.5087025,
+    "ast_hash": "1555b9c2f276065d3975079b1ce5a1e6",
     "semantic_hash": ""
   }
 }

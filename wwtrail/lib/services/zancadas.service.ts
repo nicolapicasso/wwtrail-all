@@ -531,6 +531,13 @@ class ZancadasService {
   /**
    * Obtiene estadísticas generales de Zancadas
    */
+  /**
+   * Probar la conexión con Omniwallet (para panel de admin)
+   */
+  async testConnection(): Promise<{ success: boolean; error?: string }> {
+    return omniwalletService.testConnection();
+  }
+
   async getStats(): Promise<{
     totalTransactions: number;
     totalPointsAwarded: number;

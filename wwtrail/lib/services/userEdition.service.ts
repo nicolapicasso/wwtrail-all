@@ -249,6 +249,44 @@ class UserEditionService {
   }
 
   /**
+   * Obtener todas las participaciones de una edición (para organizadores/admin)
+   */
+  async getEditionParticipants(editionId: string) {
+    const participants = await prisma.userEdition.findMany({
+      where: { editionId },
+      orderBy: [
+        { position: 'asc' },
+        { finishTimeSeconds: 'asc' },
+        { createdAt: 'desc' },
+      ],
+      select: {
+        id: true,
+        status: true,
+        finishTime: true,
+        finishTimeSeconds: true,
+        position: true,
+        categoryPosition: true,
+        categoryType: true,
+        categoryName: true,
+        bibNumber: true,
+        personalRating: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return { participants, total: participants.length };
+  }
+
+  /**
    * Buscar ediciones para selector (con buscador)
    */
   async searchEditions(query: SearchEditionsQuery) {

@@ -2788,5 +2788,45 @@
     "mtime": 1783842375.2487013,
     "ast_hash": "8dd17886a782cb7d5e4b8cdf21ed9d7a",
     "semantic_hash": ""
+  },
+  "app/api/v2/admin/competition-types/[id]/route.ts": {
+    "mtime": 1783842414.4487016,
+    "ast_hash": "584941d98d6fe90eee4527192dcd4f7e",
+    "semantic_hash": ""
+  },
+  "app/api/v2/admin/competition-types/route.ts": {
+    "mtime": 1783842409.9407015,
+    "ast_hash": "540a59f90aee246a00f8c3f57a65a69c",
+    "semantic_hash": ""
+  },
+  "app/api/v2/admin/special-series/[id]/route.ts": {
+    "mtime": 1783842434.3207016,
+    "ast_hash": "ea212266c90151cdb75635384ce06c6e",
+    "semantic_hash": ""
+  },
+  "app/api/v2/admin/special-series/route.ts": {
+    "mtime": 1783842429.8167017,
+    "ast_hash": "ff87e4e8943eb82aa379c11a558a2b61",
+    "semantic_hash": ""
+  },
+  "app/api/v2/admin/terrain-types/[id]/route.ts": {
+    "mtime": 1783842421.9367015,
+    "ast_hash": "6207658e86b10b9ac78ddd03c552e7d1",
+    "semantic_hash": ""
+  },
+  "app/api/v2/admin/terrain-types/route.ts": {
+    "mtime": 1783842418.0007014,
+    "ast_hash": "8e8e25036d62a82ca296386629c8a8aa",
+    "semantic_hash": ""
+  },
+  "app/api/v2/competition-types/[id]/route.ts": {
+    "mtime": 1783842436.8367016,
+    "ast_hash": "8b756f9e88d40f3c2622981f0bf99bdf",
+    "semantic_hash": ""
+  },
+  "app/api/v2/terrain-types/[id]/route.ts": {
+    "mtime": 1783842438.6527016,
+    "ast_hash": "df0996a18271b55806d919605e53606a",
+    "semantic_hash": ""
   }
 }
