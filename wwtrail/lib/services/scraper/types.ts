@@ -30,12 +30,20 @@ export interface ScrapedCompetition {
   type?: string | null; // e.g. TRAIL, ULTRA, VERTICAL... (free text, mapped as-is)
   baseDistance?: number | null; // km
   baseElevation?: number | null; // m+
+  baseMaxParticipants?: number | null;
   itraPoints?: number | null; // 0-6
+  utmbIndex?: string | null; // INDEX_20K | INDEX_50K | INDEX_100K | INDEX_100M
   editions: ScrapedEdition[];
   // Set during dedup: a confident match (auto-reused on import).
   existing?: { id: string; slug: string } | null;
   // A softer candidate the admin can confirm (medium confidence).
   suggestion?: MatchInfo | null;
+}
+
+export interface SuggestedImage {
+  url: string;
+  alt?: string;
+  type: 'logo' | 'cover' | 'gallery' | 'unknown';
 }
 
 export interface ScrapedEvent {
@@ -46,6 +54,20 @@ export interface ScrapedEvent {
   description?: string | null;
   typicalMonth?: number | null; // 1-12
   firstEditionYear?: number | null;
+  // Contact / social
+  email?: string | null;
+  phone?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  twitterUrl?: string | null;
+  youtubeUrl?: string | null;
+  // Organizer (entity) name — resolved to an Organizer on import.
+  organizerName?: string | null;
+  // Images chosen for the event (external URLs from the source page).
+  logoUrl?: string | null;
+  coverImage?: string | null;
+  // All images found on the page, for the admin to pick from.
+  suggestedImages?: SuggestedImage[];
   // Set during dedup: a confident match (auto-reused on import).
   existing?: { id: string; slug: string; name: string } | null;
   // A softer candidate the admin can confirm (medium confidence).

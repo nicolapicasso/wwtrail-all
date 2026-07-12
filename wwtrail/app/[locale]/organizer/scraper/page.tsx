@@ -33,6 +33,7 @@ interface Competition {
   suggestion?: MatchInfo | null;
   _include?: boolean; // client-only
 }
+interface SuggestedImage { url: string; alt?: string; type: string }
 interface EventNode {
   name: string;
   country?: string | null;
@@ -41,6 +42,16 @@ interface EventNode {
   description?: string | null;
   typicalMonth?: number | null;
   firstEditionYear?: number | null;
+  email?: string | null;
+  phone?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  twitterUrl?: string | null;
+  youtubeUrl?: string | null;
+  organizerName?: string | null;
+  logoUrl?: string | null;
+  coverImage?: string | null;
+  suggestedImages?: SuggestedImage[];
   existing?: { id: string; slug: string; name: string } | null;
   suggestion?: MatchInfo | null;
 }
@@ -254,7 +265,24 @@ export default function ScraperPage() {
               <Field label="Web"><input value={graph.event.website || ''} onChange={(e) => setEvent({ website: e.target.value })} className={inputCls} /></Field>
               <Field label="Primera edición (año)"><input type="number" value={graph.event.firstEditionYear ?? ''} onChange={(e) => setEvent({ firstEditionYear: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
               <Field label="Mes habitual (1-12)"><input type="number" min="1" max="12" value={graph.event.typicalMonth ?? ''} onChange={(e) => setEvent({ typicalMonth: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
+              <Field label="Organizador"><input value={graph.event.organizerName || ''} onChange={(e) => setEvent({ organizerName: e.target.value })} placeholder="Club / entidad organizadora" className={inputCls} /></Field>
+              <Field label="Email"><input value={graph.event.email || ''} onChange={(e) => setEvent({ email: e.target.value })} className={inputCls} /></Field>
             </div>
+
+            {graph.event.description && (
+              <div className="mt-3">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-400">Descripción</span>
+                <textarea value={graph.event.description} onChange={(e) => setEvent({ description: e.target.value })} rows={3} className={inputCls} />
+              </div>
+            )}
+
+            {/* Images */}
+            {(graph.event.logoUrl || graph.event.coverImage || (graph.event.suggestedImages?.length || 0) > 0) && (
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <ImageSlot label="Logo" url={graph.event.logoUrl} images={graph.event.suggestedImages} onPick={(u) => setEvent({ logoUrl: u })} />
+                <ImageSlot label="Portada" url={graph.event.coverImage} images={graph.event.suggestedImages} onPick={(u) => setEvent({ coverImage: u })} />
+              </div>
+            )}
           </div>
 
           {/* Competitions */}
@@ -335,5 +363,46 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-400">{label}</span>
       {children}
     </label>
+  );
+}
+
+function ImageSlot({
+  label, url, images, onPick,
+}: {
+  label: string;
+  url?: string | null;
+  images?: { url: string; alt?: string; type: string }[];
+  onPick: (url: string | null) => void;
+}) {
+  const opts = images || [];
+  return (
+    <div>
+      <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-400">{label}</span>
+      <div className="flex items-center gap-2">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded border border-gray-200 bg-gray-50">
+          {url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={url} alt={label} className="h-full w-full object-contain" />
+          ) : (
+            <span className="text-[10px] text-gray-400">sin imagen</span>
+          )}
+        </div>
+        <div className="flex-1">
+          <select
+            value={url || ''}
+            onChange={(e) => onPick(e.target.value || null)}
+            className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+          >
+            <option value="">— ninguna —</option>
+            {url && !opts.some((o) => o.url === url) && <option value={url}>{url.split('/').pop()}</option>}
+            {opts.map((o, i) => (
+              <option key={i} value={o.url}>
+                [{o.type}] {o.url.split('/').pop()}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
   );
 }
