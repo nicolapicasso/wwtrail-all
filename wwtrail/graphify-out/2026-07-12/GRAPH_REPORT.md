@@ -1,7 +1,7 @@
 # Graph Report - wwtrail  (2026-07-12)
 
 ## Corpus Check
-- 573 files · ~278,656 words
+- 573 files · ~278,946 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `13c87f5e`
+- Built from commit: `5e454d47`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -280,8 +280,8 @@ Cohesion: 0.15
 Nodes (15): Skeleton(), ZancadasBalance(), ZancadasBalanceProps, ACTION_ICONS, ACTION_LABELS, ZancadasHistory(), ZancadasHistoryProps, CompetitionMarker (+7 more)
 
 ### Community 11 - "user.service.ts"
-Cohesion: 0.06
-Nodes (35): autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), GET(), POST(), typeMap (+27 more)
+Cohesion: 0.29
+Nodes (4): GET(), POST(), GET(), POST()
 
 ### Community 12 - "edition.ts"
 Cohesion: 0.09
@@ -296,8 +296,8 @@ Cohesion: 0.11
 Nodes (21): FullImport, FullImportResult, fullImportSchema, ImportCompetition, importCompetitionSchema, ImportEvent, importEventSchema, ImportOrganizer (+13 more)
 
 ### Community 16 - "EventService"
-Cohesion: 0.19
-Nodes (11): loginSchema, POST(), POST(), POST(), registerSchema, POST(), comparePassword(), generateTokens() (+3 more)
+Cohesion: 0.07
+Nodes (27): loginSchema, POST(), POST(), POST(), registerSchema, POST(), GET(), entityAliases (+19 more)
 
 ### Community 17 - "post.ts"
 Cohesion: 0.08
@@ -308,8 +308,8 @@ Cohesion: 0.10
 Nodes (22): CreateEventInput, EventFilters, UpdateEventInput, CreatePostInput, PostFilters, UpdatePostInput, GenerateSEOInput, TODO: Implementar cuando exista CompetitionService (+14 more)
 
 ### Community 20 - "CompetitionService"
-Cohesion: 0.06
-Nodes (40): POST(), GET(), GET(), GET(), GET(), POST(), GET(), POST() (+32 more)
+Cohesion: 0.04
+Nodes (59): POST(), GET(), GET(), GET(), GET(), GET(), POST(), GET() (+51 more)
 
 ### Community 21 - "rating.ts"
 Cohesion: 0.12
@@ -393,7 +393,7 @@ Nodes (8): AgendaRow(), CalEdition, CalView, editionHref(), effDistance(), effEl
 
 ### Community 42 - "serviceCategories.service.ts"
 Cohesion: 0.10
-Nodes (11): POST(), POST(), DELETE(), GET(), PATCH(), PUT(), POST(), POST() (+3 more)
+Nodes (12): POST(), POST(), DELETE(), GET(), PATCH(), PUT(), POST(), GET() (+4 more)
 
 ### Community 43 - "home.ts"
 Cohesion: 0.20
@@ -480,8 +480,8 @@ Cohesion: 0.16
 Nodes (15): LanguageSelector(), Navbar(), DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioItem, DropdownMenuShortcut() (+7 more)
 
 ### Community 67 - "Event"
-Cohesion: 0.08
-Nodes (13): GET(), POST(), PATCH(), POST(), DELETE(), PUT(), PATCH(), GET() (+5 more)
+Cohesion: 0.07
+Nodes (16): GET(), POST(), PATCH(), POST(), DELETE(), GET(), PUT(), PATCH() (+8 more)
 
 ### Community 68 - "services.service.ts"
 Cohesion: 0.12
@@ -545,7 +545,7 @@ Nodes (7): EditionGalleryProps, photosService, EditionPhoto, PHOTO_UPLOAD_CONFIG
 
 ### Community 89 - "devDependencies"
 Cohesion: 0.15
-Nodes (13): autoprefixer, eslint, devDependencies, autoprefixer, eslint, @types/node, @types/react, @types/uuid (+5 more)
+Nodes (13): eslint, devDependencies, eslint, @types/js-cookie, @types/nodemailer, @types/react, @types/uuid, typescript (+5 more)
 
 ### Community 90 - "error-handler.ts"
 Cohesion: 0.17
@@ -564,8 +564,8 @@ Cohesion: 0.16
 Nodes (7): DELETE(), GET(), PUT(), GET(), POST(), GET(), ServiceCategoryService
 
 ### Community 94 - ".deleteAllImportedData"
-Cohesion: 0.18
-Nodes (11): DashboardLayout(), DashboardLayoutProps, OrganizerLayout(), CollapsibleUserInfo(), CollapsibleUserInfoProps, DashboardNav(), NavItem, navItems (+3 more)
+Cohesion: 0.24
+Nodes (8): DashboardLayoutProps, OrganizerLayout(), CollapsibleUserInfo(), CollapsibleUserInfoProps, DashboardNav(), NavItem, navItems, PendingContentCounts
 
 ### Community 96 - "edition.schema.ts"
 Cohesion: 0.17
@@ -641,11 +641,11 @@ Nodes (5): DELETE(), GET(), PUT(), GET(), ServiceService
 
 ### Community 140 - "clsx"
 Cohesion: 0.18
-Nodes (11): @aws-sdk/client-s3, js-cookie, jsonwebtoken, dependencies, @aws-sdk/client-s3, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
+Nodes (11): axios, js-cookie, jsonwebtoken, dependencies, axios, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
 
 ### Community 143 - "eslint-config-next"
-Cohesion: 0.03
-Nodes (85): DELETE(), PUT(), GET(), POST(), GET(), entityAliases, GET(), GET() (+77 more)
+Cohesion: 0.04
+Nodes (80): DELETE(), PUT(), GET(), POST(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET() (+72 more)
 
 ### Community 179 - "omniwallet.service.ts"
 Cohesion: 0.22
@@ -653,7 +653,7 @@ Nodes (8): AddPointsData, CreateCustomerData, CustomerAttributes, CustomerLinks,
 
 ### Community 182 - "route.ts"
 Cohesion: 0.67
-Nodes (3): POST(), SUPPORTED, SupportedType
+Nodes (3): DashboardLayout(), react, react
 
 ### Community 185 - "footer.service.ts"
 Cohesion: 0.19

@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "app/api/v2/events/[id]/competitions/route.ts": {
-    "mtime": 1783752630.7819247,
-    "ast_hash": "e4dbb67053851c0544c3c4e339901227",
+    "mtime": 1783848354.4503536,
+    "ast_hash": "8dfaa5bfffe08188a29100b68e0740e0",
     "semantic_hash": ""
   },
   "app/api/v2/events/[id]/managers/route.ts": {
@@ -1960,8 +1960,8 @@
     "semantic_hash": ""
   },
   "lib/services/competition.service.ts": {
-    "mtime": 1783843765.0908918,
-    "ast_hash": "99cea69b0614c3045367458d71d66a20",
+    "mtime": 1783848396.7743528,
+    "ast_hash": "a6f07a3c8d163028419c329673eb5501",
     "semantic_hash": ""
   },
   "lib/services/edition.service.ts": {

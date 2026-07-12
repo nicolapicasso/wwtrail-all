@@ -368,12 +368,15 @@ export class CompetitionService {
       ? { connect: data.specialSeriesIds.map((id: string) => ({ id })) }
       : undefined;
 
+    const status: EventStatus = data.status ?? EventStatus.PUBLISHED;
+
     const competition = await prisma.competition.create({
       data: {
         eventId,
         name: data.name,
         slug,
         description: data.description,
+        language: data.language ?? undefined,
         type: data.type,
         baseDistance: data.baseDistance,
         baseElevation: data.baseElevation,
@@ -382,8 +385,14 @@ export class CompetitionService {
         specialSeries: specialSeriesConnect,
         itraPoints: data.itraPoints,
         utmbIndex: data.utmbIndex,
+        // Media (persistir lo subido al crear)
+        logoUrl: data.logoUrl ?? null,
+        coverImage: data.coverImage ?? null,
+        gallery: data.gallery ?? [],
+        displayOrder: typeof data.displayOrder === 'number' ? data.displayOrder : 0,
+        featured: data.featured ?? false,
         organizerId: userId,
-        status: EventStatus.PUBLISHED,
+        status,
       },
       include: {
         event: {
@@ -421,10 +430,10 @@ export class CompetitionService {
     logger.info(`Competition created: ${competition.id} - ${competition.name}`);
 
     // Disparar traducciones automáticas
-    this.triggerAutoTranslation(competition.id, EventStatus.PUBLISHED);
+    this.triggerAutoTranslation(competition.id, status);
 
     // Disparar generación de SEO automática
-    await this.triggerAutoSEO(competition.id, competition, competition.event, EventStatus.PUBLISHED);
+    await this.triggerAutoSEO(competition.id, competition, competition.event, status);
 
     return competition;
   }
