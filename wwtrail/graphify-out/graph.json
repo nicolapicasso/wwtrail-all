@@ -2960,7 +2960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_auth_logout_route",
-      "community": 20,
+      "community": 143,
       "norm_label": "route.ts"
     },
     {
@@ -2970,7 +2970,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_api_auth_logout_route_post",
-      "community": 20,
+      "community": 143,
       "norm_label": "post()"
     },
     {
@@ -5190,7 +5190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_v2_email_templates_route",
-      "community": 143,
+      "community": 20,
       "norm_label": "route.ts"
     },
     {
@@ -5200,7 +5200,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_api_v2_email_templates_route_get",
-      "community": 143,
+      "community": 20,
       "norm_label": "get()"
     },
     {
@@ -5710,7 +5710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_v2_footer_route",
-      "community": 143,
+      "community": 20,
       "norm_label": "route.ts"
     },
     {
@@ -5720,7 +5720,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_api_v2_footer_route_get",
-      "community": 143,
+      "community": 20,
       "norm_label": "get()"
     },
     {
@@ -5730,7 +5730,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "app_api_v2_footer_route_put",
-      "community": 143,
+      "community": 20,
       "norm_label": "put()"
     },
     {
@@ -6010,7 +6010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_v2_landings_route",
-      "community": 20,
+      "community": 143,
       "norm_label": "route.ts"
     },
     {
@@ -6020,7 +6020,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_api_v2_landings_route_get",
-      "community": 20,
+      "community": 143,
       "norm_label": "get()"
     },
     {
@@ -6030,7 +6030,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "app_api_v2_landings_route_post",
-      "community": 20,
+      "community": 143,
       "norm_label": "post()"
     },
     {
@@ -7500,7 +7500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_v2_users_profile_username_route",
-      "community": 143,
+      "community": 20,
       "norm_label": "route.ts"
     },
     {
@@ -7510,7 +7510,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_api_v2_users_profile_username_route_userservice",
-      "community": 143,
+      "community": 20,
       "norm_label": "userservice"
     },
     {
@@ -7520,7 +7520,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_api_v2_users_profile_username_route_get",
-      "community": 143,
+      "community": 20,
       "norm_label": "get()"
     },
     {
@@ -7750,7 +7750,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_v2_zancadas_equivalent_competitions_route",
-      "community": 20,
+      "community": 143,
       "norm_label": "route.ts"
     },
     {
@@ -7760,7 +7760,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_api_v2_zancadas_equivalent_competitions_route_get",
-      "community": 20,
+      "community": 143,
       "norm_label": "get()"
     },
     {
@@ -8340,7 +8340,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_competitionfilters",
-      "community": 21,
+      "community": 56,
       "norm_label": "competitionfilters.tsx"
     },
     {
@@ -8350,7 +8350,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "components_competitionfilters_competitionfiltersprops",
-      "community": 21,
+      "community": 56,
       "norm_label": "competitionfiltersprops"
     },
     {
@@ -8360,7 +8360,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "components_competitionfilters_filterstate",
-      "community": 124,
+      "community": 56,
       "norm_label": "filterstate"
     },
     {
@@ -8370,7 +8370,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "components_competitionfilters_competition_types",
-      "community": 21,
+      "community": 56,
       "norm_label": "competition_types"
     },
     {
@@ -8380,7 +8380,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "components_competitionfilters_countries",
-      "community": 21,
+      "community": 56,
       "norm_label": "countries"
     },
     {
@@ -8390,7 +8390,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "components_competitionfilters_sort_options",
-      "community": 21,
+      "community": 56,
       "norm_label": "sort_options"
     },
     {
@@ -8400,7 +8400,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "components_competitionfilters_competitionfilters",
-      "community": 124,
+      "community": 56,
       "norm_label": "competitionfilters()"
     },
     {
@@ -14528,7 +14528,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "lib_api_auth_service_authservice_refreshtoken",
-      "community": 17,
+      "community": 73,
       "norm_label": ".refreshtoken()"
     },
     {
@@ -14578,7 +14578,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "lib_api_catalogs_service_catalogservice",
-      "community": 56,
+      "community": 21,
       "norm_label": "catalogservice"
     },
     {
@@ -14588,7 +14588,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "lib_api_catalogs_service_catalogservice_constructor",
-      "community": 56,
+      "community": 21,
       "norm_label": ".constructor()"
     },
     {
@@ -14598,7 +14598,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "lib_api_catalogs_service_catalogservice_getall",
-      "community": 56,
+      "community": 21,
       "norm_label": ".getall()"
     },
     {
@@ -14608,7 +14608,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "lib_api_catalogs_service_catalogservice_getbyid",
-      "community": 56,
+      "community": 21,
       "norm_label": ".getbyid()"
     },
     {
@@ -14638,7 +14638,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "lib_api_catalogs_service_catalogservice_delete",
-      "community": 56,
+      "community": 21,
       "norm_label": ".delete()"
     },
     {
@@ -14648,7 +14648,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "lib_api_catalogs_service_catalogservice_getalladmin",
-      "community": 56,
+      "community": 21,
       "norm_label": ".getalladmin()"
     },
     {
@@ -14678,7 +14678,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "lib_api_catalogs_service_specialseriesservice",
-      "community": 21,
+      "community": 56,
       "norm_label": "specialseriesservice"
     },
     {
@@ -14708,7 +14708,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_api_client",
-      "community": 17,
+      "community": 73,
       "norm_label": "client.ts"
     },
     {
@@ -14718,7 +14718,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "lib_api_client_apiclientv1",
-      "community": 17,
+      "community": 73,
       "norm_label": "apiclientv1"
     },
     {
@@ -14738,7 +14738,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "lib_api_client_addauthtoken",
-      "community": 17,
+      "community": 73,
       "norm_label": "addauthtoken()"
     },
     {
@@ -14748,7 +14748,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "lib_api_client_createresponseinterceptor",
-      "community": 17,
+      "community": 73,
       "norm_label": "createresponseinterceptor()"
     },
     {
@@ -22185,7 +22185,7 @@
       "label": ".delete()",
       "file_type": "code",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L935",
+      "source_location": "L952",
       "_origin": "ast",
       "id": "lib_services_event_service_eventservice_delete",
       "community": 67,
@@ -22195,7 +22195,7 @@
       "label": ".search()",
       "file_type": "code",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L983",
+      "source_location": "L1000",
       "_origin": "ast",
       "id": "lib_services_event_service_eventservice_search",
       "community": 67,
@@ -22205,7 +22205,7 @@
       "label": ".findNearby()",
       "file_type": "code",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1028",
+      "source_location": "L1045",
       "_origin": "ast",
       "id": "lib_services_event_service_eventservice_findnearby",
       "community": 67,
@@ -22215,7 +22215,7 @@
       "label": ".getFeatured()",
       "file_type": "code",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1064",
+      "source_location": "L1081",
       "_origin": "ast",
       "id": "lib_services_event_service_eventservice_getfeatured",
       "community": 67,
@@ -22225,7 +22225,7 @@
       "label": ".getByCountry()",
       "file_type": "code",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1108",
+      "source_location": "L1125",
       "_origin": "ast",
       "id": "lib_services_event_service_eventservice_getbycountry",
       "community": 67,
@@ -22235,7 +22235,7 @@
       "label": ".getStats()",
       "file_type": "code",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1176",
+      "source_location": "L1193",
       "_origin": "ast",
       "id": "lib_services_event_service_eventservice_getstats",
       "community": 67,
@@ -27428,7 +27428,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "package_dependencies_aws_sdk_client_s3",
-      "community": 140,
+      "community": 178,
       "norm_label": "@aws-sdk/client-s3"
     },
     {
@@ -27438,7 +27438,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "aws_sdk_client_s3",
-      "community": 140,
+      "community": 178,
       "norm_label": "@aws-sdk/client-s3"
     },
     {
@@ -27848,7 +27848,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "package_dependencies_axios",
-      "community": 73,
+      "community": 140,
       "norm_label": "axios"
     },
     {
@@ -27858,7 +27858,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "axios",
-      "community": 73,
+      "community": 140,
       "norm_label": "axios"
     },
     {
@@ -97775,7 +97775,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L935",
+      "source_location": "L952",
       "weight": 1.0,
       "source": "lib_services_event_service_eventservice",
       "target": "lib_services_event_service_eventservice_delete",
@@ -97825,7 +97825,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1028",
+      "source_location": "L1045",
       "weight": 1.0,
       "source": "lib_services_event_service_eventservice",
       "target": "lib_services_event_service_eventservice_findnearby",
@@ -97835,7 +97835,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1108",
+      "source_location": "L1125",
       "weight": 1.0,
       "source": "lib_services_event_service_eventservice",
       "target": "lib_services_event_service_eventservice_getbycountry",
@@ -97845,7 +97845,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1064",
+      "source_location": "L1081",
       "weight": 1.0,
       "source": "lib_services_event_service_eventservice",
       "target": "lib_services_event_service_eventservice_getfeatured",
@@ -97865,7 +97865,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1176",
+      "source_location": "L1193",
       "weight": 1.0,
       "source": "lib_services_event_service_eventservice",
       "target": "lib_services_event_service_eventservice_getstats",
@@ -97895,7 +97895,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L983",
+      "source_location": "L1000",
       "weight": 1.0,
       "source": "lib_services_event_service_eventservice",
       "target": "lib_services_event_service_eventservice_search",
@@ -98067,7 +98067,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "lib/services/event.service.ts",
-      "source_location": "L1155",
+      "source_location": "L1172",
       "weight": 1.0,
       "source": "lib_services_event_service_eventservice_getbycountry",
       "target": "lib_services_event_service_eventservice_enrichwithcoordinates",
@@ -112064,5 +112064,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "079fba8a5af5fe725cfe8a944af9d2879940df5e"
+  "built_at_commit": "9057e65b045eb86a3e577fbd0545fd328e054dd2"
 }

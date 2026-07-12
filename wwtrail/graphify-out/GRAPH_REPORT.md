@@ -1,16 +1,16 @@
 # Graph Report - wwtrail  (2026-07-12)
 
 ## Corpus Check
-- 573 files · ~278,500 words
+- 573 files · ~278,600 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3147 nodes · 7551 edges · 191 communities (104 shown, 87 thin omitted)
+- 3147 nodes · 7551 edges · 192 communities (105 shown, 87 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.55)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `079fba8a`
+- Built from commit: `9057e65b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -190,6 +190,7 @@
 - yet-another-react-lightbox
 - zod
 - PATCH
+- @aws-sdk/client-s3
 - footer.service.ts
 - tailwind.config.ts
 - apiClient
@@ -229,7 +230,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (191 total, 87 thin omitted)
+## Communities (192 total, 87 thin omitted)
 
 ### Community 1 - "requireRole"
 Cohesion: 0.04
@@ -288,8 +289,8 @@ Cohesion: 0.12
 Nodes (20): loginSchema, POST(), POST(), POST(), registerSchema, POST(), POST(), toSpacesCdn() (+12 more)
 
 ### Community 17 - "post.ts"
-Cohesion: 0.15
-Nodes (11): AuthContextType, AuthContextValue, AuthService, apiClientV1, createResponseInterceptor(), AuthResponse, LoginCredentials, RefreshTokenResponse (+3 more)
+Cohesion: 0.20
+Nodes (9): AuthContextType, AuthContextValue, AuthService, AuthResponse, LoginCredentials, RefreshTokenResponse, RegisterData, User (+1 more)
 
 ### Community 18 - "event.service.ts"
 Cohesion: 0.13
@@ -297,11 +298,11 @@ Nodes (22): prisma, CreateEventInput, EventFilters, UpdateEventInput, CreatePost
 
 ### Community 20 - "CompetitionService"
 Cohesion: 0.04
-Nodes (64): POST(), GET(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), GET() (+56 more)
+Nodes (65): GET(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), GET(), GET() (+57 more)
 
 ### Community 21 - "rating.ts"
-Cohesion: 0.18
-Nodes (15): COMPETITION_TYPES, CompetitionFiltersProps, COUNTRIES, SORT_OPTIONS, catalogsService, competitionTypesService, specialSeriesService, CatalogType (+7 more)
+Cohesion: 0.17
+Nodes (11): CatalogService, catalogsService, competitionTypesService, CatalogType, CompetitionType, CreateCatalogDTO, CreateSpecialSeriesDTO, SpecialSeries (+3 more)
 
 ### Community 22 - "page.tsx"
 Cohesion: 0.11
@@ -418,6 +419,10 @@ Nodes (18): aliases, components, hooks, lib, ui, utils, iconLibrary, registries 
 ### Community 55 - "HomeBlockRenderer.tsx"
 Cohesion: 0.17
 Nodes (7): AddManagerResponse, AvailableOrganizer, AvailableOrganizersResponse, EventManager, EventManagersService, ManagersResponse, RemoveManagerResponse
+
+### Community 56 - "useAuth.ts"
+Cohesion: 0.25
+Nodes (7): COMPETITION_TYPES, CompetitionFilters(), CompetitionFiltersProps, COUNTRIES, FilterState, SORT_OPTIONS, specialSeriesService
 
 ### Community 57 - "bulk-edit.service.ts"
 Cohesion: 0.15
@@ -584,8 +589,8 @@ Cohesion: 0.40
 Nodes (3): EditionStatsCompactProps, EditionStatsProps, EditionStats
 
 ### Community 124 - "FooterService"
-Cohesion: 0.13
-Nodes (14): COMPETITION_TYPES, COUNTRIES, FilterState, SORT_OPTIONS, CompetitionCard(), CompetitionCardCompactProps, CompetitionCardProps, COUNTRY_FLAGS (+6 more)
+Cohesion: 0.15
+Nodes (12): COMPETITION_TYPES, COUNTRIES, FilterState, SORT_OPTIONS, CompetitionCard(), CompetitionCardCompactProps, CompetitionCardProps, COUNTRY_FLAGS (+4 more)
 
 ### Community 125 - "export-local.ts"
 Cohesion: 0.67
@@ -605,11 +610,11 @@ Nodes (4): DELETE(), GET(), PUT(), ServiceService
 
 ### Community 140 - "clsx"
 Cohesion: 0.18
-Nodes (11): @aws-sdk/client-s3, js-cookie, jsonwebtoken, dependencies, @aws-sdk/client-s3, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
+Nodes (11): axios, js-cookie, jsonwebtoken, dependencies, axios, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
 
 ### Community 143 - "eslint-config-next"
 Cohesion: 0.03
-Nodes (88): POST(), POST(), GET(), POST(), POST(), GET(), DELETE(), PUT() (+80 more)
+Nodes (87): POST(), POST(), POST(), GET(), POST(), POST(), GET(), DELETE() (+79 more)
 
 ### Community 185 - "footer.service.ts"
 Cohesion: 0.19
@@ -635,7 +640,7 @@ Nodes (3): ImpersonationBar(), getImpersonatedName(), stopImpersonation()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `apiClientV2` connect `requireAuth` to `admin.service.ts`, `@types/node`, `button.tsx`, `useAuth`, `index.ts`, `layout.tsx`, `edition.ts`, `post.ts`, `rating.ts`, `page.tsx`, `page.tsx`, `promotion.ts`, `generateUniqueSlug`, `PromotionForm.tsx`, `organizers.service.ts`, `events.service.ts`, `ZancadasBalance.tsx`, `home.ts`, `email-templates.service.ts`, `page.tsx`, `HomeBlockRenderer.tsx`, `impersonation.ts`, `SpecialSeries`, `photos.service.ts`, `dependencies`, `EventMap.tsx`?**
+- **Why does `apiClientV2` connect `requireAuth` to `admin.service.ts`, `@types/node`, `button.tsx`, `useAuth`, `index.ts`, `layout.tsx`, `edition.ts`, `rating.ts`, `page.tsx`, `page.tsx`, `promotion.ts`, `generateUniqueSlug`, `PromotionForm.tsx`, `organizers.service.ts`, `events.service.ts`, `ZancadasBalance.tsx`, `home.ts`, `email-templates.service.ts`, `page.tsx`, `HomeBlockRenderer.tsx`, `impersonation.ts`, `event.ts`, `SpecialSeries`, `photos.service.ts`, `dependencies`, `EventMap.tsx`?**
   _High betweenness centrality (0.247) - this node is a cross-community bridge._
 - **What connects `CalView`, `CalEdition`, `MONTHS_ES` to the rest of the system?**
   _768 weakly-connected nodes found - possible documentation gaps or missing edges._
