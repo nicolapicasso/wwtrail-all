@@ -1265,8 +1265,8 @@
     "semantic_hash": ""
   },
   "components/events/FeaturedEvents.tsx": {
-    "mtime": 1783764282.2713246,
-    "ast_hash": "e60ab5c9e26933aa33e864816342babd",
+    "mtime": 1783869989.5083194,
+    "ast_hash": "81576239581735d7b525367d5cd27ca1",
     "semantic_hash": ""
   },
   "components/events/SaveEventButton.tsx": {
