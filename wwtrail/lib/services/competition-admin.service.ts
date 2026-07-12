@@ -383,11 +383,16 @@ class CompetitionAdminService {
     // Construir where clause
     const where: any = {};
 
-    // Si es ORGANIZER, solo ve sus competiciones
-    // Si es ADMIN, ve todas
+    // Si es ORGANIZER, ve las competiciones de los eventos que creó O que
+    // gestiona (eventManager). ADMIN ve todas.
+    // Nota: el creador del evento es event.userId (organizerId es la entidad
+    // Organizer, no el usuario).
     if (userRole !== 'ADMIN') {
       where.event = {
-        organizerId: userId,
+        OR: [
+          { userId },
+          { managers: { some: { userId } } },
+        ],
       };
     }
 
