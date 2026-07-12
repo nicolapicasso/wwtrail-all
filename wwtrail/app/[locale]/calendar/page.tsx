@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
@@ -56,6 +57,7 @@ const MONTHS_ES = [
 ];
 
 export default function CalendarPage() {
+  const t = useTranslations('pgContent');
   const [editions, setEditions] = useState<CalEdition[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<CalView>('month');
@@ -144,22 +146,22 @@ export default function CalendarPage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <span className="mb-2 inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.14em] text-orange-strong">
-                <CalendarIcon className="h-3.5 w-3.5" /> Calendario
+                <CalendarIcon className="h-3.5 w-3.5" /> {t('calendar')}
               </span>
               <h1 className="text-[34px] font-black leading-none tracking-[-0.02em] text-ink-2 sm:text-[40px]">
-                Próximas carreras
+                {t('upcomingRaces')}
               </h1>
               <p className="mt-2 text-[15px] text-text-muted">
-                Todas las ediciones con fecha confirmada · {editions.length} en total
+                {t('editionsWithConfirmedDate', { count: editions.length })}
               </p>
             </div>
 
             {/* View switch */}
             <div className="inline-flex rounded-md border border-border bg-surface p-1 shadow-card">
               {([
-                { k: 'month', label: 'Mes', icon: LayoutGrid },
-                { k: 'agenda', label: 'Agenda', icon: List },
-                { k: 'year', label: 'Año', icon: CalendarDays },
+                { k: 'month', label: t('viewMonth'), icon: LayoutGrid },
+                { k: 'agenda', label: t('viewAgenda'), icon: List },
+                { k: 'year', label: t('viewYear'), icon: CalendarDays },
               ] as { k: CalView; label: string; icon: any }[]).map(({ k, label, icon: Icon }) => (
                 <button
                   key={k}
@@ -185,17 +187,17 @@ export default function CalendarPage() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar carrera o evento..."
+                placeholder={t('searchRaceOrEvent')}
                 className="w-full rounded-md border border-border py-2 pl-10 pr-3 text-[14px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
               />
             </div>
-            <CountrySelect value={country} onChange={setCountry} placeholder="Todos los países" />
+            <CountrySelect value={country} onChange={setCountry} placeholder={t('allCountries')} />
             <select
               value={competitionType}
               onChange={(e) => setCompetitionType(e.target.value)}
               className="rounded-md border border-border bg-surface px-3 py-2 text-[14px] outline-none focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
             >
-              <option value="">Todos los tipos</option>
+              <option value="">{t('allTypes')}</option>
               {competitionTypes.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
             <select
@@ -203,20 +205,20 @@ export default function CalendarPage() {
               onChange={(e) => setSpecialSeriesId(e.target.value)}
               className="rounded-md border border-border bg-surface px-3 py-2 text-[14px] outline-none focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
             >
-              <option value="">Todas las series</option>
+              <option value="">{t('allSeries')}</option>
               {specialSeriesList.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <div className="flex items-center gap-2">
               <input
                 type="number" min="0" value={minDistance}
                 onChange={(e) => setMinDistance(e.target.value)}
-                placeholder="Dist. min (km)"
+                placeholder={t('distMin')}
                 className="w-full rounded-md border border-border px-3 py-2 text-[14px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
               />
               <input
                 type="number" min="0" value={maxDistance}
                 onChange={(e) => setMaxDistance(e.target.value)}
-                placeholder="Dist. max (km)"
+                placeholder={t('distMax')}
                 className="w-full rounded-md border border-border px-3 py-2 text-[14px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
               />
             </div>
@@ -225,7 +227,7 @@ export default function CalendarPage() {
                 onClick={clearFilters}
                 className="justify-self-start text-[13px] font-semibold text-green-brand hover:underline"
               >
-                Limpiar filtros
+                {t('clearFilters')}
               </button>
             )}
           </div>
@@ -263,6 +265,7 @@ function MonthView({
   setCursor: (d: Date) => void;
   byDay: Map<string, CalEdition[]>;
 }) {
+  const t = useTranslations('pgContent');
   const gridStart = startOfWeek(startOfMonth(cursor), { weekStartsOn: 1 });
   const gridEnd = endOfWeek(endOfMonth(cursor), { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
@@ -319,7 +322,7 @@ function MonthView({
                   ))}
                   {items.length > 3 && (
                     <span className="block px-1.5 text-[11px] font-semibold text-text-faint">
-                      +{items.length - 3} más
+                      {t('moreCount', { count: items.length - 3 })}
                     </span>
                   )}
                 </div>
@@ -333,6 +336,7 @@ function MonthView({
 }
 
 function MonthNav({ cursor, setCursor }: { cursor: Date; setCursor: (d: Date) => void }) {
+  const t = useTranslations('pgContent');
   return (
     <div className="mb-4 flex items-center justify-between">
       <h2 className="text-[22px] font-black capitalize tracking-[-0.01em] text-ink-2">
@@ -343,19 +347,19 @@ function MonthNav({ cursor, setCursor }: { cursor: Date; setCursor: (d: Date) =>
           onClick={() => setCursor(startOfMonth(new Date()))}
           className="rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] font-semibold text-ink-2 hover:border-green-brand"
         >
-          Hoy
+          {t('today')}
         </button>
         <button
           onClick={() => setCursor(subMonths(cursor, 1))}
           className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-ink-2 hover:border-green-brand"
-          aria-label="Mes anterior"
+          aria-label={t('previousMonth')}
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
         <button
           onClick={() => setCursor(addMonths(cursor, 1))}
           className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-ink-2 hover:border-green-brand"
-          aria-label="Mes siguiente"
+          aria-label={t('nextMonth')}
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -478,6 +482,7 @@ function YearView({
   editions: CalEdition[];
   onPickMonth: (d: Date) => void;
 }) {
+  const t = useTranslations('pgContent');
   const year = cursor.getFullYear();
   const counts = useMemo(() => {
     const arr = new Array(12).fill(0);
@@ -498,14 +503,14 @@ function YearView({
           <button
             onClick={() => setCursor(new Date(year - 1, 0, 1))}
             className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-ink-2 hover:border-green-brand"
-            aria-label="Año anterior"
+            aria-label={t('previousYear')}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             onClick={() => setCursor(new Date(year + 1, 0, 1))}
             className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-ink-2 hover:border-green-brand"
-            aria-label="Año siguiente"
+            aria-label={t('nextYear')}
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -537,11 +542,12 @@ function YearView({
 }
 
 function EmptyState() {
+  const t = useTranslations('pgContent');
   return (
     <div className="rounded-lg border border-border bg-surface p-16 text-center shadow-card">
       <CalendarIcon className="mx-auto mb-4 h-14 w-14 text-text-faint/50" />
-      <h3 className="mb-1 text-[18px] font-extrabold text-ink-2">No hay carreras próximas</h3>
-      <p className="text-[14px] text-text-muted">Prueba a ajustar los filtros o cambia de mes.</p>
+      <h3 className="mb-1 text-[18px] font-extrabold text-ink-2">{t('noUpcomingRaces')}</h3>
+      <p className="text-[14px] text-text-muted">{t('noUpcomingRacesHint')}</p>
     </div>
   );
 }

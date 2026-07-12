@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import StarRating from './StarRating';
 import ratingsService from '@/lib/api/ratings.service';
@@ -24,6 +25,7 @@ export default function RatingForm({
   onSuccess,
   onCancel,
 }: RatingFormProps) {
+  const t = useTranslations('cmpLayout');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +47,7 @@ export default function RatingForm({
     e.preventDefault();
 
     if (!isValid) {
-      toast.error('Por favor, valora todos los criterios (1-4 estrellas)');
+      toast.error(t('ratingFormValidateAll'));
       return;
     }
 
@@ -59,10 +61,10 @@ export default function RatingForm({
 
       if (existingRating) {
         await ratingsService.update(existingRating.id, data);
-        toast.success('Valoración actualizada correctamente');
+        toast.success(t('ratingUpdated'));
       } else {
         await ratingsService.create(editionId, data);
-        toast.success('Valoración creada correctamente');
+        toast.success(t('ratingCreated'));
       }
 
       if (onSuccess) {
@@ -73,8 +75,7 @@ export default function RatingForm({
     } catch (error: any) {
       console.error('Error saving rating:', error);
       toast.error(
-        error.response?.data?.message ||
-          'Error al guardar la valoración. Inténtalo de nuevo.'
+        error.response?.data?.message || t('ratingSaveError')
       );
     } finally {
       setLoading(false);
@@ -86,10 +87,10 @@ export default function RatingForm({
       {/* Título */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900">
-          {existingRating ? 'Editar Valoración' : 'Valorar Edición'}
+          {existingRating ? t('ratingFormEditTitle') : t('ratingFormCreateTitle')}
         </h3>
         <p className="text-sm text-gray-600 mt-1">
-          Valora cada aspecto del evento de 1 a 4 estrellas
+          {t('ratingFormSubtitle')}
         </p>
       </div>
 
@@ -116,7 +117,7 @@ export default function RatingForm({
           htmlFor="comment"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Comentario (opcional)
+          {t('commentOptional')}
         </label>
         <textarea
           id="comment"
@@ -124,11 +125,11 @@ export default function RatingForm({
           onChange={(e) => setComment(e.target.value)}
           maxLength={2000}
           rows={6}
-          placeholder="Comparte tu experiencia en este evento..."
+          placeholder={t('commentPlaceholder')}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
         />
         <p className="text-xs text-gray-500 mt-1">
-          {comment.length}/2000 caracteres
+          {t('charCount', { count: comment.length })}
         </p>
       </div>
 
@@ -141,7 +142,7 @@ export default function RatingForm({
             disabled={loading}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {t('cancel')}
           </button>
         )}
 
@@ -151,7 +152,7 @@ export default function RatingForm({
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          {existingRating ? 'Actualizar Valoración' : 'Enviar Valoración'}
+          {existingRating ? t('ratingFormUpdateBtn') : t('ratingFormSubmitBtn')}
         </button>
       </div>
     </form>

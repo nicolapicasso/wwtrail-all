@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Instagram, Facebook, Youtube } from 'lucide-react';
 
 // Routes where the footer should NOT be shown (segment match)
@@ -11,22 +12,22 @@ const FOOTER_EXCLUDED_ROUTES = ['organizer', 'dashboard', 'directory', 'admin'];
 const LOGO_SRC =
   'https://wwtrail-uploads.fra1.digitaloceanspaces.com/uploads/others/logo_cabecera.webp';
 
-type FooterLink = { label: string; href: string };
+type FooterLink = { labelKey: string; href: string };
 
 const EXPLORE: FooterLink[] = [
-  { label: 'Eventos', href: '/events' },
-  { label: 'Competiciones', href: '/competitions' },
-  { label: 'Special Series', href: '/special-series' },
-  { label: 'Servicios', href: '/services' },
-  { label: 'Mapa', href: '/directory' },
+  { labelKey: 'navEventos', href: '/events' },
+  { labelKey: 'navCompeticiones', href: '/competitions' },
+  { labelKey: 'navSpecialSeries', href: '/special-series' },
+  { labelKey: 'navServicios', href: '/services' },
+  { labelKey: 'navMapa', href: '/directory' },
 ];
 
 const COMMUNITY: FooterLink[] = [
-  { label: 'Organizadores', href: '/organizers' },
-  { label: 'Directorio de usuarios', href: '/users' },
-  { label: 'Insiders', href: '/users/insiders' },
-  { label: 'Ventajas', href: '/promotions' },
-  { label: 'Revista', href: '/magazine' },
+  { labelKey: 'navOrganizadores', href: '/organizers' },
+  { labelKey: 'navDirectorioUsuarios', href: '/users' },
+  { labelKey: 'navInsiders', href: '/users/insiders' },
+  { labelKey: 'navVentajas', href: '/promotions' },
+  { labelKey: 'navRevista', href: '/magazine' },
 ];
 
 const SOCIAL = [
@@ -36,6 +37,7 @@ const SOCIAL = [
 ];
 
 function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
+  const t = useTranslations('cmpLayout');
   return (
     <div>
       <h4 className="mb-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white/50">
@@ -48,7 +50,7 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
               href={l.href}
               className="text-[14px] text-white/75 transition-colors hover:text-white"
             >
-              {l.label}
+              {t(l.labelKey)}
             </Link>
           </li>
         ))}
@@ -58,6 +60,7 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
 }
 
 export default function Footer() {
+  const t = useTranslations('cmpLayout');
   const pathname = usePathname();
   const segments = pathname?.split('/').filter(Boolean) || [];
   const shouldHide = FOOTER_EXCLUDED_ROUTES.some((r) => segments.includes(r));
@@ -77,19 +80,18 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/60">
-              Toda carrera de montaña del mundo, en un solo lugar. Descubre eventos,
-              competiciones y circuitos de trail running.
+              {t('footerTagline')}
             </p>
           </div>
 
           {/* Link columns */}
-          <FooterColumn title="Explorar" links={EXPLORE} />
-          <FooterColumn title="Comunidad" links={COMMUNITY} />
+          <FooterColumn title={t('footerExplorar')} links={EXPLORE} />
+          <FooterColumn title={t('footerComunidad')} links={COMMUNITY} />
 
           {/* Social */}
           <div>
             <h4 className="mb-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white/50">
-              Síguenos
+              {t('footerSiguenos')}
             </h4>
             <div className="flex gap-3">
               {SOCIAL.map(({ label, href, Icon }) => (
@@ -112,13 +114,13 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-content flex-col items-center justify-between gap-2 px-6 py-5 text-[13px] text-white/50 sm:flex-row sm:px-8 lg:px-10">
-          <span>© {year} WWTRAIL. Todos los derechos reservados.</span>
+          <span>{t('footerCopyright', { year })}</span>
           <div className="flex gap-5">
             <Link href="/legal/privacy" className="hover:text-white/80">
-              Privacidad
+              {t('footerPrivacidad')}
             </Link>
             <Link href="/legal/terms" className="hover:text-white/80">
-              Términos
+              {t('footerTerminos')}
             </Link>
           </div>
         </div>

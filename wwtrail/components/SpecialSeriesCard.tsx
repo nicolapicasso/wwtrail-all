@@ -3,6 +3,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { SpecialSeriesListItem } from '@/types/v2';
 import { Trophy, Globe, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,7 @@ function abbreviate(name: string): string {
 }
 
 export function SpecialSeriesCard({ specialSeries, onClick, className = '' }: SpecialSeriesCardProps) {
+  const t = useTranslations('cmp');
   const bg = colorFor(specialSeries.slug || specialSeries.name);
   const count = specialSeries._count?.competitions;
 
@@ -71,12 +73,12 @@ export function SpecialSeriesCard({ specialSeries, onClick, className = '' }: Sp
           {count !== undefined && (
             <>
               <span className="text-text-faint">·</span>
-              <span>{count} competiciones</span>
+              <span>{t('competitionsCount', { count })}</span>
             </>
           )}
         </div>
         <div className="mt-4 flex items-center gap-1 pt-1 text-[13px] font-extrabold text-green-brand opacity-0 transition-opacity group-hover:opacity-100">
-          Ver serie <ArrowRight className="h-4 w-4" />
+          {t('viewSeries')} <ArrowRight className="h-4 w-4" />
         </div>
       </div>
     </div>

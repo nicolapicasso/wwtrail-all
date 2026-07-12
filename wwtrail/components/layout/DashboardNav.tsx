@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
@@ -48,212 +49,213 @@ interface NavItem {
   children?: NavItem[];
 }
 
+// `label` holds a stable cmpLayout translation key; rendered via t(label).
 const navItems: NavItem[] = [
   {
-    label: 'Dashboard',
+    label: 'navDashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    label: 'Contenido Pendiente',
+    label: 'navContenidoPendiente',
     href: '/organizer/pending',
     icon: AlertCircle,
     adminOnly: true,
     dynamicBadge: true,
   },
   {
-    label: 'Administración Web',
+    label: 'navAdministracionWeb',
     icon: Globe,
     adminOnly: true,
     children: [
       {
-        label: 'Configuración Home',
+        label: 'navConfiguracionHome',
         href: '/dashboard/home-config',
         icon: Home,
       },
       {
-        label: 'Footer',
+        label: 'navFooter',
         href: '/organizer/footer',
         icon: Layout,
       },
       {
-        label: 'Landings',
+        label: 'navLandings',
         href: '/organizer/landings',
         icon: FileText,
       },
       {
-        label: 'Ajustes del Sitio',
+        label: 'navAjustesSitio',
         href: '/dashboard/site-config',
         icon: Settings,
       },
     ],
   },
   {
-    label: 'Gestión de eventos',
+    label: 'navGestionEventos',
     href: '/organizer',
     icon: Award,
     children: [
       {
-        label: 'Eventos',
+        label: 'navEventos',
         href: '/organizer/events',
         icon: MapPin,
       },
       {
-        label: 'Competiciones',
+        label: 'navCompeticiones',
         href: '/organizer/competitions',
         icon: Flag,
       },
       {
-        label: 'Ediciones',
+        label: 'navEdiciones',
         href: '/organizer/editions',
         icon: Calendar,
       },
       {
-        label: 'Organizadores',
+        label: 'navOrganizadores',
         href: '/organizer/organizers',
         icon: Briefcase,
       },
     ],
   },
   {
-    label: 'Series Especiales',
+    label: 'navSeriesEspeciales',
     href: '/organizer/special-series',
     icon: Sparkles,
     adminOnly: true,
   },
   {
-    label: 'Servicios',
+    label: 'navServicios',
     icon: Building2,
     children: [
       {
-        label: 'Gestionar servicios',
+        label: 'navGestionarServicios',
         href: '/organizer/services',
         icon: Building2,
       },
     ],
   },
   {
-    label: 'Categorías de Servicios',
+    label: 'navCategoriasServicios',
     href: '/organizer/services/categories',
     icon: Tag,
     adminOnly: true,
   },
   {
-    label: 'Blog y Artículos',
+    label: 'navBlogArticulos',
     href: '/organizer/posts',
     icon: BookOpen,
   },
   {
-    label: 'Promociones',
+    label: 'navPromociones',
     icon: Ticket,
     adminOnly: true,
     children: [
       {
-        label: 'Gestionar promociones',
+        label: 'navGestionarPromociones',
         href: '/organizer/promotions',
         icon: Ticket,
       },
       {
-        label: 'Categorías',
+        label: 'navCategorias',
         href: '/organizer/promotions/categories',
         icon: Tag,
       },
       {
-        label: 'Configurar Email',
+        label: 'navConfigurarEmail',
         href: '/organizer/promotions/settings/email-templates',
         icon: FileText,
       },
       {
-        label: 'Analítica',
+        label: 'navAnalitica',
         href: '/organizer/promotions/analytics',
         icon: BarChart3,
       },
     ],
   },
   {
-    label: 'SEO',
+    label: 'navSeo',
     icon: Search,
     adminOnly: true,
     children: [
       {
-        label: 'SEO',
+        label: 'navSeo',
         href: '/organizer/seo',
         icon: Search,
       },
       {
-        label: 'Configuración',
+        label: 'navConfiguracion',
         href: '/organizer/seo/config',
         icon: Settings,
       },
     ],
   },
   {
-    label: 'Usuarios',
+    label: 'navUsuarios',
     icon: Users,
     adminOnly: true,
     children: [
       {
-        label: 'Gestión de usuarios',
+        label: 'navGestionUsuarios',
         href: '/organizer/users',
         icon: UserCog,
       },
       {
-        label: 'Insiders',
+        label: 'navInsiders',
         href: '/organizer/insiders',
         icon: Star,
       },
     ],
   },
   {
-    label: 'Estadísticas',
+    label: 'navEstadisticas',
     href: '/organizer/stats',
     icon: BarChart3,
     adminOnly: true,
   },
   {
-    label: 'Datos',
+    label: 'navDatos',
     icon: Database,
     adminOnly: true,
     children: [
       {
-        label: 'Importación',
+        label: 'navImportacion',
         href: '/organizer/import',
         icon: Upload,
       },
       {
-        label: 'Importador IA',
+        label: 'navImportadorIA',
         href: '/organizer/scraper',
         icon: Sparkles,
       },
       {
-        label: 'Exportación',
+        label: 'navExportacion',
         href: '/organizer/export',
         icon: Download,
       },
       {
-        label: 'Editor Masivo',
+        label: 'navEditorMasivo',
         href: '/organizer/bulk-edit',
         icon: PenSquare,
       },
       {
-        label: 'Traducciones',
+        label: 'navTraducciones',
         href: '/organizer/translations',
         icon: Languages,
       },
     ],
   },
   {
-    label: 'Omniwallet',
+    label: 'navOmniwallet',
     icon: Wallet,
     adminOnly: true,
     children: [
       {
-        label: 'Configuración',
+        label: 'navConfiguracion',
         href: '/organizer/omniwallet',
         icon: Settings,
       },
       {
-        label: 'Acciones y Puntos',
+        label: 'navAccionesPuntos',
         href: '/organizer/omniwallet/actions',
         icon: Footprints,
       },
@@ -263,8 +265,9 @@ const navItems: NavItem[] = [
 
 export function DashboardNav() {
   const pathname = usePathname();
+  const t = useTranslations('cmpLayout');
   const { user, isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Administración Web', 'Gestión de eventos', 'Servicios', 'Promociones', 'SEO', 'Usuarios', 'Datos', 'Omniwallet']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['navAdministracionWeb', 'navGestionEventos', 'navServicios', 'navPromociones', 'navSeo', 'navUsuarios', 'navDatos', 'navOmniwallet']);
   const [pendingCounts, setPendingCounts] = useState<PendingContentCounts | null>(null);
 
   // Fetch pending content counts for admins
@@ -334,7 +337,7 @@ export function DashboardNav() {
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <span>{t(item.label)}</span>
                 </div>
                 {item.badge && (
                   <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-medium">
@@ -359,7 +362,7 @@ export function DashboardNav() {
               >
                 <div className="flex items-center gap-3">
                   <Icon className={`w-5 h-5 ${pendingCounts && pendingCounts.total > 0 ? 'text-red-500' : ''}`} />
-                  <span>{item.label}</span>
+                  <span>{t(item.label)}</span>
                 </div>
                 {pendingCounts && pendingCounts.total > 0 && (
                   <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">
@@ -382,7 +385,7 @@ export function DashboardNav() {
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <span>{t(item.label)}</span>
                 </div>
                 {isExpanded ? (
                   <ChevronDown className="w-4 h-4" />
@@ -405,7 +408,7 @@ export function DashboardNav() {
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <span>{t(item.label)}</span>
                 </div>
                 {item.badge && (
                   <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-medium">
@@ -437,7 +440,7 @@ export function DashboardNav() {
                       `}
                     >
                       <ChildIcon className="w-4 h-4" />
-                      <span>{child.label}</span>
+                      <span>{t(child.label)}</span>
                     </Link>
                   );
                 })}

@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MessageSquare, ChevronRight } from 'lucide-react';
@@ -16,6 +17,7 @@ interface RecentRatingsWidgetProps {
 }
 
 export default function RecentRatingsWidget({ limit = 10 }: RecentRatingsWidgetProps) {
+  const t = useTranslations('cmpLayout');
   const [ratings, setRatings] = useState<EditionRating[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,10 +56,10 @@ export default function RecentRatingsWidget({ limit = 10 }: RecentRatingsWidgetP
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
           <MessageSquare className="w-5 h-5" />
-          Últimos Comentarios
+          {t('recentCommentsTitle')}
         </h2>
         <p className="text-gray-600 text-sm">
-          Aún no hay comentarios recientes
+          {t('noRecentComments')}
         </p>
       </div>
     );
@@ -67,7 +69,7 @@ export default function RecentRatingsWidget({ limit = 10 }: RecentRatingsWidgetP
     <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
       <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
         <MessageSquare className="w-5 h-5" />
-        Últimos Comentarios
+        {t('recentCommentsTitle')}
       </h2>
 
       <div className="space-y-6">
@@ -95,7 +97,7 @@ export default function RecentRatingsWidget({ limit = 10 }: RecentRatingsWidgetP
               {/* Usuario */}
               <div className="flex items-center gap-2 mb-2">
                 <p className="font-semibold text-sm text-gray-900">
-                  {rating.user?.username || 'Usuario'}
+                  {rating.user?.username || t('userFallback')}
                 </p>
                 <span className="text-gray-300">•</span>
                 <p className="text-xs text-gray-500">{timeAgo}</p>
@@ -141,7 +143,7 @@ export default function RecentRatingsWidget({ limit = 10 }: RecentRatingsWidgetP
             href="/ratings"
             className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 justify-center"
           >
-            Ver todos los comentarios
+            {t('viewAllComments')}
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

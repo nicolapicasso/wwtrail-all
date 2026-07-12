@@ -1,11 +1,11 @@
 # Graph Report - wwtrail  (2026-07-12)
 
 ## Corpus Check
-- 573 files · ~278,803 words
+- 573 files · ~288,676 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3144 nodes · 7554 edges · 222 communities (127 shown, 95 thin omitted)
+- 3144 nodes · 7554 edges · 223 communities (127 shown, 96 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.55)
 - Token cost: 0 input · 0 output
 
@@ -232,6 +232,7 @@
 - page.tsx
 - useMyStats.ts
 - date-fns
+- @types/node
 
 ## God Nodes (most connected - your core abstractions)
 1. `apiError` - 450 edges
@@ -260,15 +261,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (222 total, 95 thin omitted)
+## Communities (223 total, 96 thin omitted)
 
 ### Community 0 - "apiSuccess"
 Cohesion: 0.10
 Nodes (26): EditionCardProps, EditionsGridProps, EditionStatsCompactProps, EditionStatsProps, EditionFormProps, EditionBackendResponse, editionsService, EditionStatus (+18 more)
 
 ### Community 1 - "requireRole"
-Cohesion: 0.04
-Nodes (33): adminService, GET(), adminService, GET(), adminService, GET(), PUT(), adminService (+25 more)
+Cohesion: 0.05
+Nodes (30): adminService, GET(), adminService, GET(), adminService, GET(), adminService, GET() (+22 more)
 
 ### Community 2 - "admin.service.ts"
 Cohesion: 0.04
@@ -286,10 +287,6 @@ Nodes (6): OrganizersService, CreateOrganizerInput, Organizer, OrganizerFilters,
 Cohesion: 0.06
 Nodes (42): LoginPage(), RegisterPage(), DashboardPage(), FooterAdminPage(), ALL_LANGUAGES, EditLandingPage(), NewLandingPage(), LandingsAdminPage() (+34 more)
 
-### Community 7 - "homeConfiguration.schema.ts"
-Cohesion: 0.05
-Nodes (38): POST(), POST(), DELETE(), PUT(), GET(), GET(), POST(), GET() (+30 more)
-
 ### Community 8 - "page.tsx"
 Cohesion: 0.07
 Nodes (48): GroupedSEO, AdminUsersPage(), ROLE_OPTIONS, CategoryType, initialFormData, ParticipationFormData, ParticipationStatus, AddParticipationButton() (+40 more)
@@ -304,7 +301,7 @@ Nodes (15): Skeleton(), ZancadasBalance(), ZancadasBalanceProps, ACTION_ICONS, A
 
 ### Community 11 - "user.service.ts"
 Cohesion: 0.05
-Nodes (42): GET(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), POST(), toSpacesCdn() (+34 more)
+Nodes (38): POST(), autoFixEncoding(), fixCatalogEncoding(), fixCorruptedFaqs(), GET(), POST(), GET(), GET() (+30 more)
 
 ### Community 12 - "edition.ts"
 Cohesion: 0.11
@@ -319,8 +316,8 @@ Cohesion: 0.17
 Nodes (12): FullImport, FullImportResult, fullImportSchema, ImportCompetition, importCompetitionSchema, ImportEvent, importEventSchema, ImportOrganizer (+4 more)
 
 ### Community 16 - "EventService"
-Cohesion: 0.19
-Nodes (11): loginSchema, POST(), POST(), POST(), registerSchema, POST(), comparePassword(), generateTokens() (+3 more)
+Cohesion: 0.08
+Nodes (26): loginSchema, POST(), POST(), POST(), registerSchema, POST(), GET(), POST() (+18 more)
 
 ### Community 17 - "post.ts"
 Cohesion: 0.19
@@ -332,7 +329,7 @@ Nodes (26): prisma, CreateEventInput, EventFilters, UpdateEventInput, CreatePost
 
 ### Community 20 - "CompetitionService"
 Cohesion: 0.05
-Nodes (43): POST(), GET(), GET(), POST(), GET(), GET(), POST(), GET() (+35 more)
+Nodes (34): GET(), GET(), GET(), POST(), GET(), POST(), GET(), GET() (+26 more)
 
 ### Community 21 - "rating.ts"
 Cohesion: 0.08
@@ -383,8 +380,8 @@ Cohesion: 0.08
 Nodes (13): POST(), GET(), POST(), GET(), DELETE(), GET(), PUT(), GET() (+5 more)
 
 ### Community 33 - "catalog.service.ts"
-Cohesion: 0.17
-Nodes (13): CreateCatalogInput, createCatalogSchema, CreateSpecialSeriesInput, createSpecialSeriesSchema, GetCatalogQuery, getCatalogQuerySchema, UpdateCatalogInput, updateCatalogSchema (+5 more)
+Cohesion: 0.13
+Nodes (14): CreateCatalogInput, createCatalogSchema, CreateSpecialSeriesInput, createSpecialSeriesSchema, GetCatalogQuery, getCatalogQuerySchema, UpdateCatalogInput, updateCatalogSchema (+6 more)
 
 ### Community 34 - "PromotionForm.tsx"
 Cohesion: 0.15
@@ -560,7 +557,7 @@ Nodes (7): EditionGalleryProps, photosService, EditionPhoto, PHOTO_UPLOAD_CONFIG
 
 ### Community 89 - "devDependencies"
 Cohesion: 0.15
-Nodes (13): autoprefixer, eslint, devDependencies, autoprefixer, eslint, @types/node, @types/react, @types/uuid (+5 more)
+Nodes (13): eslint, devDependencies, eslint, @types/js-cookie, @types/nodemailer, @types/react, @types/uuid, typescript (+5 more)
 
 ### Community 90 - "error-handler.ts"
 Cohesion: 0.17
@@ -656,11 +653,11 @@ Nodes (5): DELETE(), GET(), PUT(), ServiceService, generateUniqueSlug()
 
 ### Community 140 - "clsx"
 Cohesion: 0.18
-Nodes (11): js-cookie, jsonwebtoken, dependencies, js-cookie, jsonwebtoken, @radix-ui/react-alert-dialog, @radix-ui/react-tabs, @tiptap/react (+3 more)
+Nodes (11): bcryptjs, js-cookie, jsonwebtoken, dependencies, bcryptjs, js-cookie, jsonwebtoken, @radix-ui/react-tabs (+3 more)
 
 ### Community 143 - "eslint-config-next"
 Cohesion: 0.03
-Nodes (63): POST(), POST(), GET(), GET(), POST(), GET(), entityAliases, GET() (+55 more)
+Nodes (97): POST(), POST(), GET(), POST(), POST(), GET(), DELETE(), PUT() (+89 more)
 
 ### Community 152 - "@radix-ui/react-alert-dialog"
 Cohesion: 0.20
@@ -689,6 +686,10 @@ Nodes (6): PostForm(), PostFormProps, PostsService, CreatePostInput, Post, Updat
 ### Community 185 - "footer.service.ts"
 Cohesion: 0.29
 Nodes (6): COMMUNITY, EXPLORE, Footer(), FOOTER_EXCLUDED_ROUTES, FooterLink, SOCIAL
+
+### Community 193 - "@types/nodemailer"
+Cohesion: 0.67
+Nodes (3): POST(), SUPPORTED, SupportedType
 
 ### Community 195 - "WeatherCard.tsx"
 Cohesion: 0.22
@@ -753,7 +754,7 @@ Nodes (4): ORG_COLORS, OrganizersPublicPage(), orgColor(), orgInitials()
 ## Knowledge Gaps
 - **756 isolated node(s):** `CalView`, `CalEdition`, `MONTHS_ES`, `EventMap`, `DashboardLayoutProps` (+751 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **95 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **96 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -765,7 +766,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `apiSuccess` be split into smaller, more focused modules?**
   _Cohesion score 0.09759759759759759 - nodes in this community are weakly interconnected._
 - **Should `requireRole` be split into smaller, more focused modules?**
-  _Cohesion score 0.041666666666666664 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected._
 - **Should `admin.service.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.043010752688172046 - nodes in this community are weakly interconnected._
 - **Should `button.tsx` be split into smaller, more focused modules?**

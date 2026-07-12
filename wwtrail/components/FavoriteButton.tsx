@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Heart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { favoritesService } from '@/lib/api/favorites.service';
@@ -18,6 +19,7 @@ export function FavoriteButton({
   size = 'md',
   showLabel = false,
 }: FavoriteButtonProps) {
+  const t = useTranslations('cmpLayout');
   const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +49,7 @@ export function FavoriteButton({
   const handleToggle = async () => {
     if (!user) {
       // Redirect to login or show message
-      alert('Inicia sesión para guardar favoritos');
+      alert(t('loginToSaveFavorites'));
       return;
     }
 
@@ -100,7 +102,7 @@ export function FavoriteButton({
         ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${className}
       `}
-      title={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+      title={isFavorite ? t('removeFromFavorites') : t('addToFavorites')}
     >
       <div className="flex items-center gap-1.5">
         <Heart
@@ -115,7 +117,7 @@ export function FavoriteButton({
         />
         {showLabel && (
           <span className={`text-sm font-medium ${isFavorite ? 'text-red-600' : 'text-gray-600'}`}>
-            {isFavorite ? 'Guardado' : 'Guardar'}
+            {isFavorite ? t('saved') : t('save')}
           </span>
         )}
       </div>

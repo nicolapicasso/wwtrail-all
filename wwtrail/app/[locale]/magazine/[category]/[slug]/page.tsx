@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Calendar, User, Eye, Globe, Share2 } from 'lucide-react';
@@ -13,6 +14,7 @@ import { SEOFaqSchema } from '@/components/SEOFaqSchema';
 export default function ArticleDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('pgContent');
   const slug = params.slug as string;
   const category = params.category as string;
   const locale = params.locale as string; // ✅ Get current locale
@@ -66,7 +68,7 @@ export default function ArticleDetailPage() {
       setArticle(post);
     } catch (err: any) {
       console.error('Error loading article:', err);
-      setError(err.message || 'Error al cargar el artículo');
+      setError(err.message || t('errorLoadingArticle'));
     } finally {
       setLoading(false);
     }
@@ -92,11 +94,11 @@ export default function ArticleDetailPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">❌ {error || 'Artículo no encontrado'}</h1>
+          <h1 className="text-2xl font-bold mb-4">❌ {error || t('articleNotFound')}</h1>
           <Link href={`/magazine/${category}`}>
             <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               <ArrowLeft className="w-4 h-4 inline mr-2" />
-              Volver a {category}
+              {t('backTo', { target: category })}
             </button>
           </Link>
         </div>
@@ -124,7 +126,7 @@ export default function ArticleDetailPage() {
     ? article.author.firstName && article.author.lastName
       ? `${article.author.firstName} ${article.author.lastName}`
       : article.author.username
-    : 'Anónimo';
+    : t('anonymous');
 
   return (
     <div className="min-h-screen bg-background">
@@ -152,7 +154,7 @@ export default function ArticleDetailPage() {
             className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver a {POST_CATEGORY_LABELS[article.category]}
+            {t('backTo', { target: POST_CATEGORY_LABELS[article.category] })}
           </Link>
 
           {/* Article Header */}
@@ -168,7 +170,7 @@ export default function ArticleDetailPage() {
               </span>
               {article.status === 'DRAFT' && (
                 <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-3 py-1 text-xs font-semibold">
-                  Borrador
+                  {t('draft')}
                 </span>
               )}
             </div>
@@ -198,7 +200,7 @@ export default function ArticleDetailPage() {
               {article.viewCount > 0 && (
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
-                  <span>{article.viewCount.toLocaleString()} vistas</span>
+                  <span>{t('views', { count: article.viewCount })}</span>
                 </div>
               )}
               <button
@@ -214,7 +216,7 @@ export default function ArticleDetailPage() {
                 className="flex items-center gap-2 ml-auto text-green-600 hover:text-green-700"
               >
                 <Share2 className="h-4 w-4" />
-                <span>Compartir</span>
+                <span>{t('share')}</span>
               </button>
             </div>
 
@@ -227,13 +229,13 @@ export default function ArticleDetailPage() {
             {/* Gallery */}
             {article.images && article.images.length > 0 && (
               <div className="mt-12 mb-8">
-                <h3 className="text-2xl font-bold mb-6">Galería</h3>
+                <h3 className="text-2xl font-bold mb-6">{t('gallery')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {article.images.map((image, index) => (
                     <div key={image.id} className="relative group overflow-hidden rounded-lg">
                       <Image
                         src={image.imageUrl}
-                        alt={image.caption || `Imagen ${index + 1}`}
+                        alt={image.caption || t('imageAlt', { number: index + 1 })}
                         width={400}
                         height={300}
                         className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
@@ -252,7 +254,7 @@ export default function ArticleDetailPage() {
             {/* Related Event/Competition/Edition */}
             {(article.event || article.competition || article.edition) && (
               <div className="mt-8 p-4 bg-gray-50 rounded-lg border">
-                <h3 className="text-lg font-semibold mb-3">Relacionado con:</h3>
+                <h3 className="text-lg font-semibold mb-3">{t('relatedTo')}</h3>
                 {article.event && (
                   <div className="mb-2">
                     <Link
@@ -279,7 +281,7 @@ export default function ArticleDetailPage() {
                       href={`/editions/${article.edition.slug}`}
                       className="text-green-600 hover:text-green-700 hover:underline font-medium"
                     >
-                      📅 Edición {article.edition.year} - {new Date(article.edition.startDate).toLocaleDateString('es-ES')}
+                      📅 {t('editionLabel', { year: article.edition.year })} - {new Date(article.edition.startDate).toLocaleDateString('es-ES')}
                     </Link>
                   </div>
                 )}

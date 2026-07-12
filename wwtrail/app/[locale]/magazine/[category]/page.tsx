@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Search, ArrowLeft } from 'lucide-react';
 import { postsService } from '@/lib/api/v2';
@@ -11,6 +12,7 @@ import { PostListItem, PostCategory, POST_CATEGORY_LABELS } from '@/types/v2';
 export default function MagazineCategoryPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('pgContent');
   const category = (params.category as string).toUpperCase() as PostCategory;
 
   const [articles, setArticles] = useState<PostListItem[]>([]);
@@ -20,11 +22,11 @@ export default function MagazineCategoryPage() {
 
   // Validate category
   const isValidCategory = Object.keys(PostCategory).includes(category);
-  const categoryLabel = isValidCategory ? POST_CATEGORY_LABELS[category] : 'Categoría';
+  const categoryLabel = isValidCategory ? POST_CATEGORY_LABELS[category] : t('category');
 
   useEffect(() => {
     if (!isValidCategory) {
-      setError('Categoría no válida');
+      setError(t('invalidCategory'));
       setLoading(false);
       return;
     }
@@ -50,7 +52,7 @@ export default function MagazineCategoryPage() {
       setArticles(response.data || []);
     } catch (err: any) {
       console.error('Error loading articles:', err);
-      setError(err.message || 'Error al cargar los artículos');
+      setError(err.message || t('errorLoadingArticles'));
     } finally {
       setLoading(false);
     }
@@ -64,11 +66,11 @@ export default function MagazineCategoryPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">❌ Categoría no encontrada</h1>
+          <h1 className="text-2xl font-bold mb-4">❌ {t('categoryNotFound')}</h1>
           <Link href="/magazine">
             <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               <ArrowLeft className="w-4 h-4 inline mr-2" />
-              Volver al Magazine
+              {t('backToMagazine')}
             </button>
           </Link>
         </div>
@@ -85,11 +87,11 @@ export default function MagazineCategoryPage() {
           className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver al Magazine
+          {t('backToMagazine')}
         </Link>
         <h1 className="text-4xl font-bold mb-2">{categoryLabel}</h1>
         <p className="text-muted-foreground">
-          Artículos de la categoría {categoryLabel}
+          {t('articlesInCategory', { category: categoryLabel })}
         </p>
       </div>
 
@@ -101,7 +103,7 @@ export default function MagazineCategoryPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar en esta categoría..."
+              placeholder={t('searchInCategory')}
               value={search}
               onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -117,7 +119,7 @@ export default function MagazineCategoryPage() {
               onClick={loadArticles}
               className="mt-2 text-red-600 hover:text-red-800 underline"
             >
-              Reintentar
+              {t('retry')}
             </button>
           </div>
         )}
@@ -145,11 +147,11 @@ export default function MagazineCategoryPage() {
         {!loading && !error && (
           <>
             <div className="mb-4 text-sm text-muted-foreground">
-              {articles.length} artículo{articles.length !== 1 ? 's' : ''} encontrado{articles.length !== 1 ? 's' : ''}
+              {t('articlesFound', { count: articles.length })}
             </div>
             <ArticleGrid
               articles={articles}
-              emptyMessage={`No se encontraron artículos en la categoría ${categoryLabel}`}
+              emptyMessage={t('noArticlesFoundInCategory', { category: categoryLabel })}
             />
           </>
         )}

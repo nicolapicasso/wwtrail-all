@@ -2,10 +2,12 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useUserStats } from '@/hooks/useUserCompetitions';
 import { TrendingUp, Mountain, Award, Heart } from 'lucide-react';
 
 export function UserStatsCards() {
+  const t = useTranslations('cmp');
   const { stats, loading } = useUserStats();
 
   if (loading) {
@@ -29,7 +31,7 @@ export function UserStatsCards() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Estadísticas</h2>
+      <h2 className="text-2xl font-bold">{t('statistics')}</h2>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Carreras Completadas */}
@@ -40,7 +42,7 @@ export function UserStatsCards() {
           <div className="text-3xl font-bold text-green-600">
             {completedStats.totalCompleted}
           </div>
-          <div className="text-sm text-gray-600 mt-1">Carreras</div>
+          <div className="text-sm text-gray-600 mt-1">{t('races')}</div>
         </div>
 
         {/* Kilómetros Totales */}
@@ -62,7 +64,7 @@ export function UserStatsCards() {
           <div className="text-3xl font-bold text-green-600">
             {completedStats.totalElevation.toLocaleString()}
           </div>
-          <div className="text-sm text-gray-600 mt-1">Desnivel+</div>
+          <div className="text-sm text-gray-600 mt-1">{t('elevationGain')}</div>
         </div>
 
         {/* Favoritos (total de competiciones marcadas) */}
@@ -73,7 +75,7 @@ export function UserStatsCards() {
           <div className="text-3xl font-bold text-green-600">
             {stats.totalCompetitions}
           </div>
-          <div className="text-sm text-gray-600 mt-1">Favoritos</div>
+          <div className="text-sm text-gray-600 mt-1">{t('favorites')}</div>
         </div>
       </div>
 
@@ -82,14 +84,14 @@ export function UserStatsCards() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Tiempo promedio</p>
+              <p className="text-sm text-gray-600">{t('averageTime')}</p>
               <p className="text-xl font-semibold text-green-600">
                 {completedStats.averageTime}
               </p>
             </div>
             {completedStats.fastestRace && (
               <div className="text-right">
-                <p className="text-sm text-gray-600">Carrera más rápida</p>
+                <p className="text-sm text-gray-600">{t('fastestRace')}</p>
                 <p className="text-sm font-medium">{completedStats.fastestRace.name}</p>
                 <p className="text-lg font-semibold text-green-600">
                   {completedStats.fastestRace.time}
@@ -101,7 +103,7 @@ export function UserStatsCards() {
       )}
 
       <p className="text-sm text-gray-500 text-center">
-        Las estadísticas se actualizan cuando participas en carreras
+        {t('statsUpdateNote')}
       </p>
     </div>
   );

@@ -3,6 +3,7 @@
 'use client';
 
 import { Edit2, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { PODIUM_TYPE_LABELS, MEDAL_EMOJIS } from '@/types/podium';
 import type { EditionPodium } from '@/types/podium';
 
@@ -21,6 +22,7 @@ export default function PodiumCard({
   onDelete,
   variant = 'default',
 }: PodiumCardProps) {
+  const t = useTranslations('cmpLayout');
   const title =
     podium.type === 'CATEGORY'
       ? podium.categoryName
@@ -40,7 +42,7 @@ export default function PodiumCard({
               <button
                 onClick={onEdit}
                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                aria-label="Editar podio"
+                aria-label={t('editPodium')}
               >
                 <Edit2 className="w-4 h-4" />
               </button>
@@ -50,7 +52,7 @@ export default function PodiumCard({
               <button
                 onClick={onDelete}
                 className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                aria-label="Eliminar podio"
+                aria-label={t('deletePodium')}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

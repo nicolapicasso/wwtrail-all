@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Edition, EditionFull } from '@/types/v2';
 import { Calendar, MapPin, Users, TrendingUp, Mountain, Info } from 'lucide-react';
 import { RegistrationStatus } from '@/types/competition';
@@ -18,6 +19,7 @@ interface EditionCardProps {
 }
 
 export function EditionCard({ edition, showInheritance = false, linkTo, onClick }: EditionCardProps) {
+  const t = useTranslations('cmp');
   const [imageError, setImageError] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
@@ -125,7 +127,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
           </h3>
           {eventName && (
             <p className="text-sm text-gray-500">
-              Parte de: {eventName}
+              {t('partOf', { name: eventName })}
             </p>
           )}
         </div>
@@ -138,7 +140,7 @@ export function EditionCard({ edition, showInheritance = false, linkTo, onClick 
                 month: 'long',
                 day: 'numeric',
               })
-            : 'Fecha por confirmar'}
+            : t('dateToBeConfirmed')}
         </p>
 
         {/* Stats Grid */}

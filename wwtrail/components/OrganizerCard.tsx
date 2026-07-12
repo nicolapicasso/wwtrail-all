@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Building2 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { normalizeImageUrl } from '@/lib/utils/imageUrl';
 import type { EventOrganizerRef } from '@/types/event';
 
@@ -12,12 +13,13 @@ interface OrganizerCardProps {
   className?: string;
 }
 
-export default function OrganizerCard({ organizer, className = '' }: OrganizerCardProps) {
+export default async function OrganizerCard({ organizer, className = '' }: OrganizerCardProps) {
+  const t = await getTranslations('cmp');
   return (
     <div className={`rounded-lg border bg-white p-6 shadow-sm ${className}`}>
       <h3 className="mb-4 font-semibold flex items-center gap-2">
         <Building2 className="h-5 w-5 text-[#B66916]" />
-        Organizador
+        {t('organizer')}
       </h3>
 
       <Link
@@ -42,7 +44,7 @@ export default function OrganizerCard({ organizer, className = '' }: OrganizerCa
         </p>
 
         <p className="text-center text-xs text-gray-500 mt-1 group-hover:text-[#B66916] transition-colors">
-          Ver perfil del organizador →
+          {t('viewOrganizerProfile')} →
         </p>
       </Link>
     </div>

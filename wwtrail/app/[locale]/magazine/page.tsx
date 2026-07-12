@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Search, Filter } from 'lucide-react';
 import { postsService, eventsService, competitionsService, editionsService } from '@/lib/api/v2';
 import { ArticleGrid } from '@/components/ArticleGrid';
@@ -9,6 +9,7 @@ import { PostListItem, PostCategory, POST_CATEGORY_LABELS } from '@/types/v2';
 
 export default function MagazinePage() {
   const locale = useLocale();
+  const t = useTranslations('pgContent');
   const [articles, setArticles] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +71,7 @@ export default function MagazinePage() {
       setArticles(response.data || []);
     } catch (err: any) {
       console.error('Error loading articles:', err);
-      setError(err.message || 'Error al cargar los artículos');
+      setError(err.message || t('errorLoadingArticles'));
     } finally {
       setLoading(false);
     }
@@ -92,9 +93,9 @@ export default function MagazinePage() {
     <div className="min-h-screen bg-gray-50 py-8">
       {/* Header */}
       <div className="container mx-auto px-4 mb-8">
-        <h1 className="text-4xl font-bold mb-2">Magazine</h1>
+        <h1 className="text-4xl font-bold mb-2">{t('magazineTitle')}</h1>
         <p className="text-muted-foreground">
-          Artículos, noticias y guías sobre trail running
+          {t('magazineSubtitle')}
         </p>
       </div>
 
@@ -106,13 +107,13 @@ export default function MagazinePage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Filter className="h-5 w-5" />
-                Filtros
+                {t('filters')}
               </h2>
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="text-sm text-green-600 hover:text-green-700 font-medium"
               >
-                {showFilters ? 'Ocultar' : 'Mostrar'}
+                {showFilters ? t('hide') : t('show')}
               </button>
             </div>
 
@@ -123,7 +124,7 @@ export default function MagazinePage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Buscar artículos..."
+                    placeholder={t('searchArticles')}
                     value={search}
                     onChange={handleSearchChange}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -134,14 +135,14 @@ export default function MagazinePage() {
                   {/* Category Filter */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Categoría
+                      {t('category')}
                     </label>
                     <select
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value as PostCategory | '')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
-                      <option value="">Todas las categorías</option>
+                      <option value="">{t('allCategories')}</option>
                       {Object.entries(POST_CATEGORY_LABELS).map(([key, label]) => (
                         <option key={key} value={key}>
                           {label}
@@ -153,14 +154,14 @@ export default function MagazinePage() {
                   {/* Event Filter */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Evento
+                      {t('event')}
                     </label>
                     <select
                       value={selectedEventId}
                       onChange={(e) => setSelectedEventId(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
-                      <option value="">Todos los eventos</option>
+                      <option value="">{t('allEvents')}</option>
                       {events.map((event) => (
                         <option key={event.id} value={event.id}>
                           {event.name}
@@ -172,14 +173,14 @@ export default function MagazinePage() {
                   {/* Competition Filter */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Competición
+                      {t('competition')}
                     </label>
                     <select
                       value={selectedCompetitionId}
                       onChange={(e) => setSelectedCompetitionId(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
-                      <option value="">Todas las competiciones</option>
+                      <option value="">{t('allCompetitions')}</option>
                       {competitions.map((comp) => (
                         <option key={comp.id} value={comp.id}>
                           {comp.name}
@@ -191,14 +192,14 @@ export default function MagazinePage() {
                   {/* Edition Filter */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Edición
+                      {t('edition')}
                     </label>
                     <select
                       value={selectedEditionId}
                       onChange={(e) => setSelectedEditionId(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
-                      <option value="">Todas las ediciones</option>
+                      <option value="">{t('allEditions')}</option>
                       {editions.map((edition: any) => (
                         <option key={edition.id} value={edition.id}>
                           {edition.competition?.name} - {edition.year}
@@ -215,7 +216,7 @@ export default function MagazinePage() {
                       onClick={handleResetFilters}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                      Limpiar filtros
+                      {t('clearFilters')}
                     </button>
                   </div>
                 )}
@@ -232,7 +233,7 @@ export default function MagazinePage() {
               onClick={loadArticles}
               className="mt-2 text-red-600 hover:text-red-800 underline"
             >
-              Reintentar
+              {t('retry')}
             </button>
           </div>
         )}
@@ -260,11 +261,11 @@ export default function MagazinePage() {
         {!loading && !error && (
           <>
             <div className="mb-4 text-sm text-muted-foreground">
-              {articles.length} artículo{articles.length !== 1 ? 's' : ''} encontrado{articles.length !== 1 ? 's' : ''}
+              {t('articlesFound', { count: articles.length })}
             </div>
             <ArticleGrid
               articles={articles}
-              emptyMessage="No se encontraron artículos"
+              emptyMessage={t('noArticlesFound')}
             />
           </>
         )}

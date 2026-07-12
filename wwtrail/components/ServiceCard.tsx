@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Service } from '@/types/v2';
 import {
   MapPin, Eye, Edit, Trash2, Star,
@@ -41,6 +42,7 @@ export default function ServiceCard({
   onDelete,
   onToggleFeatured,
 }: ServiceCardProps) {
+  const t = useTranslations('cmp');
 
   const [imageError, setImageError] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -115,7 +117,7 @@ export default function ServiceCard({
           {service.featured && (
             <span className="inline-flex items-center gap-1 rounded-none bg-[#B66916] px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
               <Star className="h-3 w-3 fill-current" />
-              Destacado
+              {t('featuredBadge')}
             </span>
           )}
 
@@ -126,8 +128,8 @@ export default function ServiceCard({
               service.status === 'DRAFT' ? 'bg-gray-800' :
               'bg-gray-800'
             }`}>
-              {service.status === 'PUBLISHED' ? 'Publicado' :
-               service.status === 'DRAFT' ? 'Borrador' :
+              {service.status === 'PUBLISHED' ? t('statusPublished') :
+               service.status === 'DRAFT' ? t('statusDraft') :
                service.status}
             </span>
           )}
@@ -194,7 +196,7 @@ export default function ServiceCard({
               className="flex items-center text-sm text-blue-600 hover:text-blue-800"
             >
               <ExternalLink className="mr-1 h-4 w-4" />
-              <span>Sitio web</span>
+              <span>{t('website')}</span>
             </a>
           )}
 
@@ -221,7 +223,7 @@ export default function ServiceCard({
                   className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
                 >
                   <Edit className="h-4 w-4" />
-                  Editar
+                  {t('edit')}
                 </button>
               )}
 
@@ -235,7 +237,7 @@ export default function ServiceCard({
                   className="flex items-center gap-1 text-sm text-yellow-600 hover:text-yellow-800 transition-colors"
                 >
                   <Star className="h-4 w-4" />
-                  {service.featured ? 'Quitar destacado' : 'Destacar'}
+                  {service.featured ? t('unfeatureService') : t('feature')}
                 </button>
               )}
 
@@ -244,14 +246,14 @@ export default function ServiceCard({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (confirm('¿Estás seguro de que quieres eliminar este servicio?')) {
+                    if (confirm(t('confirmDeleteService'))) {
                       onDelete(service.id);
                     }
                   }}
                   className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 transition-colors ml-auto"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Eliminar
+                  {t('delete')}
                 </button>
               )}
             </div>

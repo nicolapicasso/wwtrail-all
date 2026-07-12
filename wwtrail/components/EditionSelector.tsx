@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAvailableYears, useEditionByYear } from '@/hooks/useEditions';
 import { Edition } from '@/types/v2';
 import { Calendar, ChevronDown, CheckCircle2 } from 'lucide-react';
@@ -22,6 +23,7 @@ export function EditionSelector({
   onYearChange,
   className = '',
 }: EditionSelectorProps) {
+  const t = useTranslations('cmp');
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(initialYear || currentYear);
   const [isOpen, setIsOpen] = useState(false);
@@ -166,7 +168,7 @@ export function EditionSelector({
                       month: 'long',
                       day: 'numeric',
                     })
-                  : 'Fecha por confirmar'}
+                  : t('dateToBeConfirmed')}
               </p>
             </div>
             <div className="flex flex-col items-end gap-1">

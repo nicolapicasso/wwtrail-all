@@ -2,6 +2,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { RefreshCw, CloudOff, Loader2 } from 'lucide-react';
 import { WEATHER_ICONS, WEATHER_COLORS } from '@/types/weather';
 import type { EditionWeather } from '@/types/weather';
@@ -23,13 +24,14 @@ export default function WeatherCard({
   canFetch = false,
   onFetch,
 }: WeatherCardProps) {
+  const t = useTranslations('cmp');
   // Loading state
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
         <div className="flex items-center justify-center gap-3 text-gray-500">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Cargando datos meteorológicos...</span>
+          <span>{t('weatherLoading')}</span>
         </div>
       </div>
     );
@@ -42,10 +44,10 @@ export default function WeatherCard({
         <div className="text-center">
           <CloudOff className="w-16 h-16 text-blue-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Datos meteorológicos no disponibles
+            {t('weatherUnavailable')}
           </h3>
           <p className="text-gray-600">
-            Esta edición aún no tiene datos climáticos históricos registrados.
+            {t('weatherNoHistorical')}
           </p>
 
           {canFetch && onFetch && (
@@ -57,12 +59,12 @@ export default function WeatherCard({
               {fetching ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Obteniendo datos...
+                  {t('weatherFetching')}
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-5 h-5" />
-                  Obtener datos meteorológicos
+                  {t('weatherFetch')}
                 </>
               )}
             </button>
@@ -78,7 +80,7 @@ export default function WeatherCard({
       <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-8">
         <div className="text-center">
           <p className="text-yellow-800 mb-4">
-            Los datos meteorológicos no pudieron cargarse correctamente
+            {t('weatherLoadError')}
           </p>
           {canFetch && onFetch && (
             <button
@@ -87,7 +89,7 @@ export default function WeatherCard({
               className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2 mx-auto"
             >
               <RefreshCw className="w-4 h-4" />
-              Reintentar
+              {t('retry')}
             </button>
           )}
         </div>
@@ -102,15 +104,15 @@ export default function WeatherCard({
     <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-gray-900">Condiciones Meteorológicas</h3>
+        <h3 className="text-lg font-bold text-gray-900">{t('weatherConditions')}</h3>
 
         {canFetch && onFetch && (
           <button
             onClick={() => onFetch(true)}
             disabled={fetching}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Actualizar datos meteorológicos"
-            title="Actualizar datos meteorológicos"
+            aria-label={t('weatherRefresh')}
+            title={t('weatherRefresh')}
           >
             <RefreshCw className={`w-4 h-4 ${fetching ? 'animate-spin' : ''}`} />
           </button>
@@ -140,31 +142,33 @@ export default function WeatherCard({
       <div className="grid grid-cols-2 gap-4">
         <WeatherDetail
           icon="💧"
-          label="Precipitación"
+          label={t('precipitation')}
           value={`${precipitation} mm`}
         />
 
         <WeatherDetail
           icon="💨"
-          label="Viento"
+          label={t('wind')}
           value={`${wind.speed} km/h ${wind.directionText}`}
         />
 
-        <WeatherDetail icon="💦" label="Humedad" value={`${humidity}%`} />
+        <WeatherDetail icon="💦" label={t('humidity')} value={`${humidity}%`} />
 
-        <WeatherDetail icon="🔽" label="Presión" value={`${pressure} hPa`} />
+        <WeatherDetail icon="🔽" label={t('pressure')} value={`${pressure} hPa`} />
 
         <WeatherDetail
           icon="☁️"
-          label="Nubosidad"
+          label={t('cloudCover')}
           value={`${cloudCover}%`}
         />
 
         <div className="text-xs text-gray-500 col-span-2 pt-2 border-t">
-          Datos del {new Date(weather.date).toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
+          {t('weatherDataFrom', {
+            date: new Date(weather.date).toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            }),
           })}
         </div>
       </div>

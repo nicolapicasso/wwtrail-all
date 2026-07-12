@@ -3,6 +3,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Info, Trophy, Star, Cloud } from 'lucide-react';
 import RatingSummary from './RatingSummary';
 import RatingForm from './RatingForm';
@@ -22,6 +23,7 @@ interface EditionDetailTabsProps {
 type TabKey = 'info' | 'regulations' | 'podiums' | 'ratings' | 'weather';
 
 export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
+  const t = useTranslations('cmp');
   const [activeTab, setActiveTab] = useState<TabKey>('info');
   const { user } = useAuth();
 
@@ -56,28 +58,28 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
   const canRate = !!user && !myRating;
 
   const tabs = [
-    { key: 'info' as TabKey, label: 'Información', icon: Info },
+    { key: 'info' as TabKey, label: t('tabInfo'), icon: Info },
     {
       key: 'regulations' as TabKey,
-      label: 'Reglamento',
+      label: t('tabRegulations'),
       icon: Info,
       show: !!edition.regulations,
     },
     {
       key: 'podiums' as TabKey,
-      label: 'Clasificaciones',
+      label: t('tabRankings'),
       icon: Trophy,
       count: edition.podiums?.length,
     },
     {
       key: 'ratings' as TabKey,
-      label: 'Valoraciones',
+      label: t('tabRatings'),
       icon: Star,
       count: edition.totalRatings,
     },
     {
       key: 'weather' as TabKey,
-      label: 'Meteo',
+      label: t('tabWeather'),
       icon: Cloud,
       show: true, // Always show weather tab
     },
@@ -134,12 +136,12 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
         {/* Información */}
         {activeTab === 'info' && (
           <div className="prose max-w-none">
-            <h2>Información de la Edición</h2>
+            <h2>{t('editionInfo')}</h2>
             {edition.chronicle ? (
               <div className="whitespace-pre-wrap">{edition.chronicle}</div>
             ) : (
               <p className="text-gray-600">
-                Esta edición aún no tiene información detallada.
+                {t('noDetailedInfo')}
               </p>
             )}
           </div>
@@ -148,12 +150,12 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
         {/* Reglamento */}
         {activeTab === 'regulations' && (
           <div className="prose max-w-none">
-            <h2>Reglamento</h2>
+            <h2>{t('tabRegulations')}</h2>
             {edition.regulations ? (
               <div className="whitespace-pre-wrap">{edition.regulations}</div>
             ) : (
               <p className="text-gray-600">
-                Esta edición aún no tiene reglamento publicado.
+                {t('noRegulations')}
               </p>
             )}
           </div>
@@ -162,7 +164,7 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
         {/* Clasificaciones / Podios */}
         {activeTab === 'podiums' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Clasificaciones</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t('tabRankings')}</h2>
 
             {podiumsLoading ? (
               <div className="space-y-4">
@@ -194,7 +196,7 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
                 {podiumsByType.categories.length > 0 && (
                   <>
                     <h3 className="text-xl font-bold text-gray-900 mt-8">
-                      Clasificaciones por Categoría
+                      {t('rankingsByCategory')}
                     </h3>
 
                     <div className="grid md:grid-cols-2 gap-4">
@@ -214,7 +216,7 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
                   !podiumsByType.female &&
                   podiumsByType.categories.length === 0 && (
                     <p className="text-gray-600 text-center py-12">
-                      Esta edición aún no tiene clasificaciones publicadas
+                      {t('noRankings')}
                     </p>
                   )}
               </>
@@ -225,7 +227,7 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
         {/* Valoraciones */}
         {activeTab === 'ratings' && (
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-gray-900">Valoraciones</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t('tabRatings')}</h2>
 
             {/* Resumen */}
             {edition.avgRating && edition.totalRatings && edition.totalRatings > 0 && (
@@ -277,7 +279,7 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
               </div>
             ) : (
               <p className="text-gray-600 text-center py-12">
-                Esta edición aún no tiene valoraciones
+                {t('noRatings')}
               </p>
             )}
           </div>
@@ -287,7 +289,7 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
         {activeTab === 'weather' && (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              Condiciones Meteorológicas
+              {t('weatherConditions')}
             </h2>
 
             <WeatherCard

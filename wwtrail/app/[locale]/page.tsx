@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { homeService } from '@/lib/api/home.service';
 import { HeroSection } from '@/components/home/HeroSection';
 import { HomeBlockRenderer } from '@/components/home/HomeBlockRenderer';
@@ -11,6 +12,7 @@ import { MapBand } from '@/components/home/MapBand';
 import type { HomeConfiguration } from '@/types/home';
 
 export default function HomePage() {
+  const t = useTranslations('pgContent');
   const [config, setConfig] = useState<HomeConfiguration | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export default function HomePage() {
         setConfig(data);
       } catch (err) {
         console.error('Error fetching home configuration:', err);
-        setError('Error al cargar la configuración de la home');
+        setError(t('errorLoadingHome'));
       } finally {
         setLoading(false);
       }
@@ -36,7 +38,7 @@ export default function HomePage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-brand border-t-transparent" />
-          <p className="text-text-muted">Cargando...</p>
+          <p className="text-text-muted">{t('loading')}</p>
         </div>
       </div>
     );
@@ -46,8 +48,8 @@ export default function HomePage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="max-w-md px-4 text-center">
-          <h1 className="mb-2 text-2xl font-bold text-destructive">Error</h1>
-          <p className="text-text-muted">{error || 'No se pudo cargar la configuración'}</p>
+          <h1 className="mb-2 text-2xl font-bold text-destructive">{t('error')}</h1>
+          <p className="text-text-muted">{error || t('couldNotLoadConfig')}</p>
         </div>
       </div>
     );
@@ -85,7 +87,7 @@ export default function HomePage() {
       {sortedBlocks.length === 0 && (
         <div className="mx-auto max-w-content px-6 py-16 text-center sm:px-8">
           <p className="text-text-muted">
-            La home está en configuración. Pronto habrá contenido aquí.
+            {t('homeInConfiguration')}
           </p>
         </div>
       )}

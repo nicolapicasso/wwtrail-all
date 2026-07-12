@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { LogOut, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface CollapsibleUserInfoProps {
@@ -21,6 +22,7 @@ export function CollapsibleUserInfo({
   isAdmin,
   onLogout,
 }: CollapsibleUserInfoProps) {
+  const t = useTranslations('cmpLayout');
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (isExpanded) {
@@ -33,7 +35,7 @@ export function CollapsibleUserInfo({
             <button
               onClick={() => setIsExpanded(false)}
               className="p-1 hover:bg-gray-200 rounded transition-colors"
-              title="Contraer"
+              title={t('collapse')}
             >
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </button>
@@ -41,7 +43,7 @@ export function CollapsibleUserInfo({
           <p className="text-xs text-gray-500">{email}</p>
           {isAdmin && (
             <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-              Administrador
+              {t('adminBadge')}
             </span>
           )}
         </div>
@@ -50,7 +52,7 @@ export function CollapsibleUserInfo({
           className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
         >
           <LogOut className="h-4 w-4" />
-          Cerrar Sesión
+          {t('logout')}
         </button>
       </div>
     );
@@ -64,7 +66,7 @@ export function CollapsibleUserInfo({
         <button
           onClick={() => setIsExpanded(true)}
           className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-          title="Expandir"
+          title={t('expand')}
         >
           <ChevronUp className="h-4 w-4 text-gray-500" />
         </button>

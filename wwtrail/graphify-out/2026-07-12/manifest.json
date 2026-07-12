@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "app/[locale]/profile/participations/page.tsx": {
-    "mtime": 1783872252.2144625,
-    "ast_hash": "13fa0ed357015ca9301fca8cc05cab59",
+    "mtime": 1783872375.8984582,
+    "ast_hash": "0d043facde46f7e588341c5b296a1795",
     "semantic_hash": ""
   },
   "app/[locale]/promotions/[slug]/page.tsx": {
@@ -395,8 +395,8 @@
     "semantic_hash": ""
   },
   "app/[locale]/services/page.tsx": {
-    "mtime": 1783871926.8504732,
-    "ast_hash": "81584dc99ddb94f8ce44e8e50a8fc90b",
+    "mtime": 1783872816.7184436,
+    "ast_hash": "8138bf0c488a14bb340a2878e18fb96b",
     "semantic_hash": ""
   },
   "app/[locale]/special-series/[slug]/page.tsx": {
@@ -2175,33 +2175,33 @@
     "semantic_hash": ""
   },
   "messages/ca.json": {
-    "mtime": 1783871404.8704906,
-    "ast_hash": "aa37fd9f048dc3f1bd21b21771936eeb",
+    "mtime": 1783872783.306445,
+    "ast_hash": "5d4d3b04fd0c44483031dcd61c12d8dc",
     "semantic_hash": ""
   },
   "messages/de.json": {
-    "mtime": 1783871404.8744905,
-    "ast_hash": "547313b298c2f281560bf171cc4665e0",
+    "mtime": 1783872783.306445,
+    "ast_hash": "a63e488eda46a7f299c7c3e3b2d639ce",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1783871404.8704906,
-    "ast_hash": "f9f5793500b0ef256d6393ecde92f907",
+    "mtime": 1783872783.306445,
+    "ast_hash": "9a36b7a62279d939cde71e3d9062af4e",
     "semantic_hash": ""
   },
   "messages/es.json": {
-    "mtime": 1783871404.8624904,
-    "ast_hash": "6b2cb53952529ab8416572f0ee6bf4e7",
+    "mtime": 1783872783.306445,
+    "ast_hash": "41c18af5c3cb2225b4bc569ed3e08200",
     "semantic_hash": ""
   },
   "messages/fr.json": {
-    "mtime": 1783871404.8744905,
-    "ast_hash": "edcfdb4ea358556785584a4d6e7379c8",
+    "mtime": 1783872783.306445,
+    "ast_hash": "eafdf5e9d2037d3e3d779a79e79c4588",
     "semantic_hash": ""
   },
   "messages/it.json": {
-    "mtime": 1783871404.8704906,
-    "ast_hash": "e972001afa4b2d735bcd1bef0abcc825",
+    "mtime": 1783872783.306445,
+    "ast_hash": "b722c5ba730b8742c4b472a59885f114",
     "semantic_hash": ""
   },
   "middleware.ts": {
