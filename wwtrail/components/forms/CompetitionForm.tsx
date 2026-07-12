@@ -213,10 +213,11 @@ export default function CompetitionForm({
           : undefined,
         displayOrder: parseInt(formData.displayOrder) || 0,
         isActive: formData.isActive,
-        // Media fields
-        logoUrl: formData.logoUrl.trim() || undefined,
-        coverImage: formData.coverImage.trim() || undefined,
-        gallery: formData.gallery.length > 0 ? formData.gallery : undefined,
+        // Media fields — send null/[] when cleared so removals persist (undefined
+        // would omit the key and Prisma would leave the old value untouched).
+        logoUrl: formData.logoUrl.trim() || null,
+        coverImage: formData.coverImage.trim() || null,
+        gallery: formData.gallery,
         status: formData.status,
         featured: formData.featured,
         // Classification fields
