@@ -2,6 +2,13 @@ import { NextRequest } from 'next/server';
 import { EditionPodiumService } from '@/lib/services/editionPodium.service';
 import { requireRole, apiSuccess, apiError } from '@/lib/auth';
 
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const podium = await EditionPodiumService.getById(params.id);
+    return apiSuccess(podium);
+  } catch (error) { return apiError(error); }
+}
+
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await requireRole(request, 'ORGANIZER', 'ADMIN');
