@@ -4,6 +4,7 @@ import prisma from '@/lib/db';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { uploadToSpaces, isSpacesConfigured } from '@/lib/services/spaces.client';
+import logger from '@/lib/utils/logger';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_FILES = 20;
@@ -41,6 +42,12 @@ export async function POST(request: NextRequest) {
     }
 
     const useSpaces = isSpacesConfigured();
+    if (!useSpaces) {
+      logger.warn(
+        '[upload-multiple] Spaces NO configurado (falta DO_SPACES_KEY/SECRET o STORAGE_TYPE=local). ' +
+          'Guardando en local (efímero).'
+      );
+    }
     const results = [];
 
     for (const { file, fieldName } of files) {

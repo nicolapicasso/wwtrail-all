@@ -5,11 +5,45 @@
 import { EventService } from '@/lib/services/event.service';
 import { CompetitionService } from '@/lib/services/competition.service';
 import { EditionService } from '@/lib/services/edition.service';
+import { OrganizerService } from '@/lib/services/organizer.service';
+import prisma from '@/lib/db';
 import logger from '@/lib/utils/logger';
 import { fetchContent } from './fetcher';
 import { extractGraph } from './extractor';
 import { annotateExisting } from './dedup';
 import type { ScanInput, ScanResult, ScrapedGraph } from './types';
+
+// Find an existing Organizer by (fuzzy-normalized) name, or create one.
+async function resolveOrganizerId(
+  name: string | null | undefined,
+  country: string | null | undefined,
+  userId: string,
+  userRole: string
+): Promise<string | null> {
+  const trimmed = (name || '').trim();
+  if (!trimmed) return null;
+  const norm = (s: string) =>
+    s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+
+  const candidates = await prisma.organizer.findMany({
+    where: { name: { contains: trimmed.split(/\s+/)[0], mode: 'insensitive' } },
+    select: { id: true, name: true },
+    take: 25,
+  });
+  const hit = candidates.find((c) => norm(c.name) === norm(trimmed));
+  if (hit) return hit.id;
+
+  try {
+    const created = await OrganizerService.create(
+      { name: trimmed, country: country || 'ES', createdById: userId },
+      userRole
+    );
+    return created.id;
+  } catch (err: any) {
+    logger.warn(`Scraper: no se pudo crear el organizador "${trimmed}": ${err.message}`);
+    return null;
+  }
+}
 
 export interface ImportGraphResult {
   event: { id: string; slug: string; created: boolean };
@@ -28,7 +62,7 @@ export class ScraperService {
       );
     }
 
-    const graph = await extractGraph(fetched.text, fetched.sourceUrl);
+    const graph = await extractGraph(fetched.text, fetched.sourceUrl, fetched.images);
 
     if (!graph.event.name) {
       return {
@@ -77,6 +111,14 @@ export class ScraperService {
         graph.event.firstEditionYear ||
         (editionYears.length ? Math.min(...editionYears) : new Date().getFullYear());
 
+      // Resolve organizer entity by name (find existing or create).
+      const organizerId = await resolveOrganizerId(
+        graph.event.organizerName,
+        graph.event.country,
+        userId,
+        userRole
+      );
+
       const created = await EventService.create(
         {
           name: graph.event.name,
@@ -86,6 +128,15 @@ export class ScraperService {
           typicalMonth: graph.event.typicalMonth || undefined,
           firstEditionYear,
           description: graph.event.description || undefined,
+          email: graph.event.email || undefined,
+          phone: graph.event.phone || undefined,
+          instagramUrl: graph.event.instagramUrl || undefined,
+          facebookUrl: graph.event.facebookUrl || undefined,
+          twitterUrl: graph.event.twitterUrl || undefined,
+          youtubeUrl: graph.event.youtubeUrl || undefined,
+          logoUrl: graph.event.logoUrl || undefined,
+          coverImage: graph.event.coverImage || undefined,
+          organizerId: organizerId || undefined,
         },
         userId,
         userRole
@@ -111,7 +162,9 @@ export class ScraperService {
               type: comp.type || undefined,
               baseDistance: comp.baseDistance ?? undefined,
               baseElevation: comp.baseElevation ?? undefined,
+              baseMaxParticipants: comp.baseMaxParticipants ?? undefined,
               itraPoints: comp.itraPoints ?? undefined,
+              utmbIndex: comp.utmbIndex ?? undefined,
             },
             userId
           );

@@ -37,7 +37,9 @@ const competitionSchema = z.object({
   type: z.string().nullish(),
   baseDistance: z.number().nullish(),
   baseElevation: z.number().nullish(),
+  baseMaxParticipants: z.number().nullish(),
   itraPoints: z.number().nullish(),
+  utmbIndex: z.string().nullish(),
   editions: z.array(editionSchema).default([]),
 });
 
@@ -50,6 +52,15 @@ const graphSchema = z.object({
     description: z.string().nullish(),
     typicalMonth: z.number().int().min(1).max(12).nullish(),
     firstEditionYear: z.number().int().nullish(),
+    email: z.string().nullish(),
+    phone: z.string().nullish(),
+    instagramUrl: z.string().nullish(),
+    facebookUrl: z.string().nullish(),
+    twitterUrl: z.string().nullish(),
+    youtubeUrl: z.string().nullish(),
+    organizerName: z.string().nullish(),
+    logoUrl: z.string().nullish(),
+    coverImage: z.string().nullish(),
   }),
   competitions: z.array(competitionSchema).default([]),
 });
@@ -64,9 +75,18 @@ Devuelve EXCLUSIVAMENTE un objeto JSON válido con esta forma exacta:
     "country": string|null,               // código ISO-2 en mayúsculas (ES, IT, FR, ...). Dedúcelo de la ubicación.
     "city": string|null,
     "website": string|null,
-    "description": string|null,           // 1-3 frases
+    "description": string|null,           // descripción atractiva de 2-3 frases en español
     "typicalMonth": number|null,          // 1-12, mes habitual de celebración
-    "firstEditionYear": number|null
+    "firstEditionYear": number|null,
+    "email": string|null,                 // email de contacto
+    "phone": string|null,                 // teléfono de contacto
+    "instagramUrl": string|null,          // URL completa
+    "facebookUrl": string|null,
+    "twitterUrl": string|null,
+    "youtubeUrl": string|null,
+    "organizerName": string|null,         // nombre de la entidad/club organizador (no la carrera)
+    "logoUrl": string|null,               // URL del logo, ELEGIDA de la lista [IMAGES FOUND ON PAGE]
+    "coverImage": string|null             // URL de imagen de portada/hero, ELEGIDA de [IMAGES FOUND ON PAGE]
   },
   "competitions": [
     {
@@ -75,7 +95,9 @@ Devuelve EXCLUSIVAMENTE un objeto JSON válido con esta forma exacta:
       "type": string|null,                // TRAIL, ULTRA, MARATHON, VERTICAL, KV, SKY, etc. (o null)
       "baseDistance": number|null,        // km (número, sin unidad)
       "baseElevation": number|null,       // desnivel positivo en metros (número)
+      "baseMaxParticipants": number|null, // plazas/dorsales máximos si se menciona
       "itraPoints": number|null,          // 0-6 si se menciona
+      "utmbIndex": string|null,           // INDEX_20K | INDEX_50K | INDEX_100K | INDEX_100M según la distancia, si aplica
       "editions": [
         { "year": number, "startDate": "YYYY-MM-DD"|null, "endDate": "YYYY-MM-DD"|null, "distance": number|null, "elevation": number|null, "registrationUrl": string|null }
       ]
@@ -86,10 +108,17 @@ Devuelve EXCLUSIVAMENTE un objeto JSON válido con esta forma exacta:
 Reglas:
 - No inventes datos: usa null cuando no haya información. No rellenes distancias/desniveles a ojo.
 - Distancias en km y desniveles en metros como NÚMEROS.
+- "logoUrl" y "coverImage": elige SOLO URLs presentes en la sección [IMAGES FOUND ON PAGE]. El logo suele tener type=logo; la portada type=cover. Si no hay imágenes adecuadas, null.
+- "organizerName": la ENTIDAD organizadora (club/empresa), no el nombre de la carrera.
+- "utmbIndex": ~20km→INDEX_20K, ~50km→INDEX_50K, ~100km→INDEX_100K, ~100 millas/160km+→INDEX_100M.
 - Si el texto no describe ninguna carrera de trail, devuelve { "event": { "name": "" }, "competitions": [] }.
 - Responde SOLO con el JSON, sin explicaciones ni markdown.`;
 
-export async function extractGraph(text: string, sourceUrl?: string | null): Promise<ScrapedGraph> {
+export async function extractGraph(
+  text: string,
+  sourceUrl?: string | null,
+  images?: import('./types').SuggestedImage[]
+): Promise<ScrapedGraph> {
   const apiKey = await getOpenAIKey();
   const clipped = text.slice(0, MAX_INPUT_CHARS);
 
@@ -143,6 +172,16 @@ export async function extractGraph(text: string, sourceUrl?: string | null): Pro
       description: data.event.description ?? null,
       typicalMonth: data.event.typicalMonth ?? null,
       firstEditionYear: data.event.firstEditionYear ?? null,
+      email: data.event.email ?? null,
+      phone: data.event.phone ?? null,
+      instagramUrl: data.event.instagramUrl ?? null,
+      facebookUrl: data.event.facebookUrl ?? null,
+      twitterUrl: data.event.twitterUrl ?? null,
+      youtubeUrl: data.event.youtubeUrl ?? null,
+      organizerName: data.event.organizerName ?? null,
+      logoUrl: data.event.logoUrl ?? null,
+      coverImage: data.event.coverImage ?? null,
+      suggestedImages: images ?? [],
     },
     competitions: data.competitions.map((c) => ({
       name: c.name.trim(),
@@ -150,7 +189,9 @@ export async function extractGraph(text: string, sourceUrl?: string | null): Pro
       type: c.type ?? null,
       baseDistance: c.baseDistance ?? null,
       baseElevation: c.baseElevation ?? null,
+      baseMaxParticipants: c.baseMaxParticipants ?? null,
       itraPoints: c.itraPoints ?? null,
+      utmbIndex: c.utmbIndex ?? null,
       editions: (c.editions || []).map((e) => ({
         year: e.year,
         startDate: e.startDate ?? null,

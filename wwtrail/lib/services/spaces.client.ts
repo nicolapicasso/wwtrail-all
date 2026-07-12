@@ -95,4 +95,23 @@ export function isSpacesConfigured(): boolean {
   return !!(process.env.DO_SPACES_KEY && process.env.DO_SPACES_SECRET);
 }
 
+/**
+ * Non-sensitive snapshot of the storage configuration, for diagnostics. Never
+ * exposes secret values — only whether they are present.
+ */
+export function getSpacesStatus() {
+  return {
+    configured: isSpacesConfigured(),
+    storageType: process.env.STORAGE_TYPE || null,
+    hasKey: !!process.env.DO_SPACES_KEY,
+    hasSecret: !!process.env.DO_SPACES_SECRET,
+    region,
+    bucket,
+    endpoint,
+    cdnUrl,
+    publicStorageType: process.env.NEXT_PUBLIC_STORAGE_TYPE || null,
+    publicSpacesUrl: process.env.NEXT_PUBLIC_SPACES_URL || null,
+  };
+}
+
 export { s3Client, bucket, cdnUrl };

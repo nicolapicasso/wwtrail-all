@@ -4,6 +4,7 @@ import prisma from '@/lib/db';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { uploadToSpaces, isSpacesConfigured } from '@/lib/services/spaces.client';
+import logger from '@/lib/utils/logger';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
@@ -54,6 +55,10 @@ export async function POST(request: NextRequest) {
       // Upload to DigitalOcean Spaces
       url = await uploadToSpaces(buffer, spacesKey, file.type);
     } else {
+      logger.warn(
+        `[upload] Spaces NO configurado (falta DO_SPACES_KEY/SECRET o STORAGE_TYPE=local). ` +
+          `Guardando en local (efímero): ${spacesKey}`
+      );
       // Fallback: save to local filesystem (dev mode)
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', fieldName);
       await mkdir(uploadDir, { recursive: true });

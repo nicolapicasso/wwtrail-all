@@ -39,18 +39,27 @@ const USER_AGENT =
 // SPA shell and we should try rendering.
 const THIN_TEXT_THRESHOLD = 600;
 
+import type { SuggestedImage } from './types';
+
 export interface FetchedContent {
   sourceUrl: string | null;
   usedMode: FetchMode;
   title: string | null;
   text: string;
+  images: SuggestedImage[];
   warnings: string[];
 }
 
-/** Strip a full HTML document down to readable text + <title>. */
-export function htmlToText(html: string): { title: string | null; text: string } {
+/**
+ * Strip a full HTML document down to readable text + <title>, and extract image
+ * candidates. The text gets an "[IMAGES FOUND ON PAGE]" appendix so the AI can
+ * pick a logo/cover from real URLs on the page.
+ */
+export function htmlToText(html: string, baseUrl?: string): { title: string | null; text: string; images: SuggestedImage[] } {
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const title = titleMatch ? decodeEntities(titleMatch[1]).trim() : null;
+
+  const images = extractImages(html, baseUrl || '');
 
   let body = html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
@@ -65,7 +74,7 @@ export function htmlToText(html: string): { title: string | null; text: string }
     .replace(/<li[^>]*>/gi, '• ')
     .replace(/<[^>]+>/g, ' ');
 
-  const text = decodeEntities(body)
+  let text = decodeEntities(body)
     .replace(/[ \t\f\v]+/g, ' ')
     .replace(/\n\s*\n\s*\n+/g, '\n\n')
     .split('\n')
@@ -74,7 +83,67 @@ export function htmlToText(html: string): { title: string | null; text: string }
     .join('\n')
     .trim();
 
-  return { title, text };
+  if (images.length > 0) {
+    text +=
+      '\n\n[IMAGES FOUND ON PAGE]:\n' +
+      images.slice(0, 30).map((img) => `- ${img.url} (alt: ${img.alt || 'none'}, type: ${img.type})`).join('\n');
+  }
+
+  return { title, text, images };
+}
+
+// --- Image extraction (ported from ai-autofill.service) ---
+function extractImages(html: string, baseUrl: string): SuggestedImage[] {
+  const images: SuggestedImage[] = [];
+  const seen = new Set<string>();
+  const push = (rawSrc: string, alt: string, forced?: SuggestedImage['type']) => {
+    const src = resolveImageUrl(rawSrc, baseUrl);
+    if (src && !seen.has(src) && isValidImageUrl(src)) {
+      seen.add(src);
+      images.push({ url: src, alt, type: forced || classifyImage(src, alt) });
+    }
+  };
+
+  let m: RegExpExecArray | null;
+  const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*(?:alt=["']([^"']*)["'])?[^>]*>/gi;
+  while ((m = imgRegex.exec(html)) !== null) push(m[1], m[2] || '');
+
+  const metaRegex = /<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]+content=["']([^"']+)["'][^>]*>/gi;
+  while ((m = metaRegex.exec(html)) !== null) push(m[1], 'Open Graph image', 'cover');
+
+  const bgRegex = /background-image:\s*url\(["']?([^"')]+)["']?\)/gi;
+  while ((m = bgRegex.exec(html)) !== null) push(m[1], '', 'cover');
+
+  return images;
+}
+
+function resolveImageUrl(src: string, baseUrl: string): string | null {
+  try {
+    if (src.startsWith('data:')) return null;
+    if (src.startsWith('//')) return 'https:' + src;
+    if (src.startsWith('http')) return src;
+    if (!baseUrl) return null;
+    return new URL(src, new URL(baseUrl)).href;
+  } catch {
+    return null;
+  }
+}
+
+function isValidImageUrl(url: string): boolean {
+  const lower = url.toLowerCase();
+  if (lower.includes('favicon')) return false;
+  if (lower.includes('pixel') || lower.includes('tracking')) return false;
+  if (lower.includes('1x1') || lower.includes('spacer')) return false;
+  if (lower.endsWith('.svg') && lower.includes('icon')) return false;
+  return true;
+}
+
+function classifyImage(url: string, alt: string): SuggestedImage['type'] {
+  const lower = (url + ' ' + alt).toLowerCase();
+  if (lower.includes('logo')) return 'logo';
+  if (lower.includes('banner') || lower.includes('hero') || lower.includes('cover') || lower.includes('header')) return 'cover';
+  if (lower.includes('gallery') || lower.includes('foto') || lower.includes('photo')) return 'gallery';
+  return 'unknown';
 }
 
 function decodeEntities(s: string): string {
@@ -150,8 +219,8 @@ export async function fetchContent(input: {
   // Paste mode: caller provided HTML directly.
   if (mode === 'paste' || (input.html && !input.url)) {
     if (!input.html) throw new Error('No se ha proporcionado HTML para el modo pegar.');
-    const { title, text } = htmlToText(input.html);
-    return { sourceUrl: input.url || null, usedMode: 'paste', title, text, warnings };
+    const { title, text, images } = htmlToText(input.html, input.url || '');
+    return { sourceUrl: input.url || null, usedMode: 'paste', title, text, images, warnings };
   }
 
   if (!input.url) throw new Error('Falta la URL a escanear.');
@@ -160,8 +229,8 @@ export async function fetchContent(input: {
 
   if (mode === 'render') {
     const html = await fetchRendered(url);
-    const { title, text } = htmlToText(html);
-    return { sourceUrl: url, usedMode: 'render', title, text, warnings };
+    const { title, text, images } = htmlToText(html, url);
+    return { sourceUrl: url, usedMode: 'render', title, text, images, warnings };
   }
 
   // static or auto
@@ -173,17 +242,20 @@ export async function fetchContent(input: {
     warnings.push(`Fetch estático falló (${err.message}); intentando renderizado…`);
   }
 
-  let { title, text } = html ? htmlToText(html) : { title: null, text: '' };
+  let { title, text, images } = html
+    ? htmlToText(html, url)
+    : { title: null as string | null, text: '', images: [] as SuggestedImage[] };
 
   if (mode === 'auto' && text.length < THIN_TEXT_THRESHOLD) {
     // Likely an SPA shell — try rendering.
     try {
       const rendered = await fetchRendered(url);
-      const r = htmlToText(rendered);
+      const r = htmlToText(rendered, url);
       if (r.text.length > text.length) {
         title = r.title || title;
         text = r.text;
-        return { sourceUrl: url, usedMode: 'render', title, text, warnings };
+        images = r.images;
+        return { sourceUrl: url, usedMode: 'render', title, text, images, warnings };
       }
     } catch (err: any) {
       warnings.push(
@@ -194,5 +266,5 @@ export async function fetchContent(input: {
     }
   }
 
-  return { sourceUrl: url, usedMode: html ? 'static' : 'render', title, text, warnings };
+  return { sourceUrl: url, usedMode: html ? 'static' : 'render', title, text, images, warnings };
 }
