@@ -861,6 +861,23 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       delete transformedData.images;
     }
 
+    // ✅ SINCRONIZAR campos duplicados/legacy de imágenes.
+    // El modelo Event tiene columnas duplicadas (coverImage/coverImageUrl y
+    // logo/logoUrl). El cliente envía coverImageUrl/logoUrl, pero varias vistas
+    // (front público, formulario) leen coverImage/logo. Si solo se actualiza una,
+    // la otra queda con el valor antiguo → la imagen "se queda enganchada" al
+    // eliminarla o reemplazarla. Mantenemos ambas en sincronía en cada sentido.
+    if ('coverImageUrl' in transformedData) {
+      transformedData.coverImage = transformedData.coverImageUrl;
+    } else if ('coverImage' in transformedData) {
+      transformedData.coverImageUrl = transformedData.coverImage;
+    }
+    if ('logoUrl' in transformedData) {
+      transformedData.logo = transformedData.logoUrl;
+    } else if ('logo' in transformedData) {
+      transformedData.logoUrl = transformedData.logo;
+    }
+
     // ✅ EXTRAER latitude y longitude ANTES de actualizar
     const { latitude, longitude, ...updateData } = transformedData;
 

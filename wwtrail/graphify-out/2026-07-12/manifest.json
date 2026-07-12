@@ -1960,13 +1960,13 @@
     "semantic_hash": ""
   },
   "lib/services/competition.service.ts": {
-    "mtime": 1783758803.233641,
-    "ast_hash": "1923bb539eb9c3c77fc4556a0aca5f17",
+    "mtime": 1783843765.0908918,
+    "ast_hash": "99cea69b0614c3045367458d71d66a20",
     "semantic_hash": ""
   },
   "lib/services/edition.service.ts": {
-    "mtime": 1783786863.8269157,
-    "ast_hash": "7ec795dded965604fcb101222356b1cd",
+    "mtime": 1783843754.3748918,
+    "ast_hash": "597c0e0906dea6c8f36e1c9c6e757503",
     "semantic_hash": ""
   },
   "lib/services/editionPhoto.service.ts": {
@@ -2140,8 +2140,8 @@
     "semantic_hash": ""
   },
   "lib/utils/imageUrl.ts": {
-    "mtime": 1783796402.7718155,
-    "ast_hash": "83f8e288949b8c704b1abdd71a958304",
+    "mtime": 1783843669.8588917,
+    "ast_hash": "ab856bbc8486932b717aebff5b149f79",
     "semantic_hash": ""
   },
   "lib/utils/logger.ts": {
@@ -2847,6 +2847,21 @@
   "app/api/v2/zancadas/admin/test-connection/route.ts": {
     "mtime": 1783842951.5087025,
     "ast_hash": "1555b9c2f276065d3975079b1ce5a1e6",
+    "semantic_hash": ""
+  },
+  "app/api/v2/editions/[id]/toggle-active/route.ts": {
+    "mtime": 1783843777.670892,
+    "ast_hash": "4fb31a01b5d959fded67a2e34ecfd7ee",
+    "semantic_hash": ""
+  },
+  "app/api/v2/events/[id]/competitions/reorder/route.ts": {
+    "mtime": 1783843773.170892,
+    "ast_hash": "f6e1345c2290517d16b4a9cec1fbec2f",
+    "semantic_hash": ""
+  },
+  "prisma/migrations/20260712120000_add_competition_order_and_edition_active/migration.sql": {
+    "mtime": 1783843717.5468917,
+    "ast_hash": "3448c15fc80258a171570a919c7fcaa9",
     "semantic_hash": ""
   }
 }

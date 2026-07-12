@@ -177,6 +177,7 @@
   "175": "yet-another-react-lightbox",
   "176": "zod",
   "177": "PATCH",
+  "178": "@aws-sdk/client-s3",
   "185": "footer.service.ts",
   "186": "import-remote.ts",
   "187": "tailwind.config.ts",
