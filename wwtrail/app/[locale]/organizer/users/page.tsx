@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,16 +67,17 @@ import {
 import { adminService, AdminUser } from '@/lib/api/admin.service';
 import { COUNTRIES } from '@/lib/utils/countries';
 
-const ROLE_OPTIONS = [
-  { value: 'ADMIN', label: 'Administrador', icon: Crown, color: 'text-red-600 bg-red-100' },
-  { value: 'ORGANIZER', label: 'Organizador', icon: ShieldCheck, color: 'text-blue-600 bg-blue-100' },
-  { value: 'ATHLETE', label: 'Atleta', icon: UserCheck, color: 'text-green-600 bg-green-100' },
-  { value: 'VIEWER', label: 'Visitante', icon: User, color: 'text-gray-600 bg-gray-100' },
-];
-
 export default function AdminUsersPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('boMisc');
+
+  const ROLE_OPTIONS = [
+    { value: 'ADMIN', label: t('usersRoleAdmin'), icon: Crown, color: 'text-red-600 bg-red-100' },
+    { value: 'ORGANIZER', label: t('usersRoleOrganizer'), icon: ShieldCheck, color: 'text-blue-600 bg-blue-100' },
+    { value: 'ATHLETE', label: t('usersRoleAthlete'), icon: UserCheck, color: 'text-green-600 bg-green-100' },
+    { value: 'VIEWER', label: t('usersRoleViewer'), icon: User, color: 'text-gray-600 bg-gray-100' },
+  ];
 
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [pagination, setPagination] = useState({
@@ -152,7 +153,7 @@ export default function AdminUsersPage() {
       });
     } catch (err: any) {
       console.error('Error fetching users:', err);
-      setError('Error al cargar los usuarios');
+      setError(t('usersLoadError'));
     } finally {
       setLoading(false);
     }
@@ -226,7 +227,7 @@ export default function AdminUsersPage() {
       handleCloseEditDialog();
     } catch (err: any) {
       console.error('Error updating user:', err);
-      setError(err.response?.data?.message || 'Error al actualizar el usuario');
+      setError(err.response?.data?.message || t('usersUpdateError'));
     } finally {
       setActionLoading(false);
     }
@@ -248,7 +249,7 @@ export default function AdminUsersPage() {
       setRegeneratedPassword(result.generatedPassword);
     } catch (err: any) {
       console.error('Error regenerating password:', err);
-      setError(err.response?.data?.message || 'Error al regenerar la contraseña');
+      setError(err.response?.data?.message || t('usersRegeneratePasswordError'));
     } finally {
       setActionLoading(false);
     }
@@ -284,7 +285,7 @@ export default function AdminUsersPage() {
       setSelectedUser(null);
     } catch (err: any) {
       console.error('Error updating role:', err);
-      setError(err.response?.data?.message || 'Error al actualizar el rol');
+      setError(err.response?.data?.message || t('usersUpdateRoleError'));
     } finally {
       setActionLoading(false);
     }
@@ -297,7 +298,7 @@ export default function AdminUsersPage() {
       await fetchUsers(pagination.currentPage);
     } catch (err: any) {
       console.error('Error toggling status:', err);
-      setError(err.response?.data?.message || 'Error al cambiar el estado');
+      setError(err.response?.data?.message || t('usersToggleStatusError'));
     } finally {
       setActionLoading(false);
     }
@@ -314,7 +315,7 @@ export default function AdminUsersPage() {
       setSelectedUser(null);
     } catch (err: any) {
       console.error('Error deleting user:', err);
-      setError(err.response?.data?.message || 'Error al eliminar el usuario');
+      setError(err.response?.data?.message || t('usersDeleteError'));
     } finally {
       setActionLoading(false);
     }
@@ -322,7 +323,7 @@ export default function AdminUsersPage() {
 
   const handleCreateUser = async () => {
     if (!createUserForm.email || !createUserForm.username || !createUserForm.firstName || !createUserForm.role) {
-      setError('Por favor completa los campos obligatorios: email, username, nombre y rol');
+      setError(t('usersRequiredFieldsError'));
       return;
     }
 
@@ -333,7 +334,7 @@ export default function AdminUsersPage() {
       await fetchUsers(1);
     } catch (err: any) {
       console.error('Error creating user:', err);
-      setError(err.response?.data?.message || 'Error al crear el usuario');
+      setError(err.response?.data?.message || t('usersCreateError'));
       setIsCreateDialogOpen(false);
     } finally {
       setActionLoading(false);
@@ -370,7 +371,7 @@ export default function AdminUsersPage() {
       await fetchUsers(pagination.currentPage);
     } catch (err: any) {
       console.error('Error toggling insider status:', err);
-      setError(err.response?.data?.message || 'Error al cambiar el estado de Insider');
+      setError(err.response?.data?.message || t('usersToggleInsiderError'));
     } finally {
       setActionLoading(false);
     }
@@ -383,7 +384,7 @@ export default function AdminUsersPage() {
       await fetchUsers(pagination.currentPage);
     } catch (err: any) {
       console.error('Error toggling public status:', err);
-      setError(err.response?.data?.message || 'Error al cambiar la visibilidad del perfil');
+      setError(err.response?.data?.message || t('usersTogglePublicError'));
     } finally {
       setActionLoading(false);
     }
@@ -417,20 +418,20 @@ export default function AdminUsersPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Users className="w-8 h-8 text-blue-600" />
-            Gestión de Usuarios
+            {t('usersPageTitle')}
           </h1>
           <p className="text-gray-600 mt-1">
-            Administra los usuarios de la plataforma
+            {t('usersPageSubtitle')}
           </p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => fetchUsers(pagination.currentPage)} disabled={loading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Actualizar
+            {t('usersRefresh')}
           </Button>
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Crear Usuario
+            {t('usersCreateUser')}
           </Button>
         </div>
       </div>
@@ -440,7 +441,7 @@ export default function AdminUsersPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-800">{error}</p>
           <button onClick={() => setError(null)} className="text-red-600 text-sm underline mt-1">
-            Cerrar
+            {t('usersClose')}
           </button>
         </div>
       )}
@@ -453,7 +454,7 @@ export default function AdminUsersPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Buscar por nombre, email o username..."
+                  placeholder={t('usersSearchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -466,7 +467,7 @@ export default function AdminUsersPage() {
                 onChange={(e) => setRoleFilter(e.target.value)}
                 className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <option value="">Todos los roles</option>
+                <option value="">{t('usersAllRoles')}</option>
                 {ROLE_OPTIONS.map((role) => (
                   <option key={role.value} value={role.value}>
                     {role.label}
@@ -480,9 +481,9 @@ export default function AdminUsersPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <option value="">Todos los estados</option>
-                <option value="active">Activos</option>
-                <option value="inactive">Inactivos</option>
+                <option value="">{t('usersAllStatuses')}</option>
+                <option value="active">{t('usersActivePlural')}</option>
+                <option value="inactive">{t('usersInactivePlural')}</option>
               </select>
             </div>
             <label className="flex items-center gap-2 px-3 py-2 border border-input bg-background rounded-md cursor-pointer hover:bg-gray-50">
@@ -493,11 +494,11 @@ export default function AdminUsersPage() {
                 className="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
               />
               <Star className={`w-4 h-4 ${insiderFilter ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
-              <span className="text-sm">Solo Insiders</span>
+              <span className="text-sm">{t('usersOnlyInsiders')}</span>
             </label>
             <Button type="submit" variant="outline">
               <Filter className="w-4 h-4 mr-2" />
-              Filtrar
+              {t('usersFilter')}
             </Button>
           </form>
         </CardContent>
@@ -510,7 +511,7 @@ export default function AdminUsersPage() {
             <div className="text-center">
               <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
               <p className="text-2xl font-bold">{pagination.totalUsers}</p>
-              <p className="text-sm text-gray-500">Total usuarios</p>
+              <p className="text-sm text-gray-500">{t('usersTotalUsers')}</p>
             </div>
           </CardContent>
         </Card>
@@ -521,7 +522,7 @@ export default function AdminUsersPage() {
               <p className="text-2xl font-bold">
                 {(users || []).filter((u) => u.role === 'ADMIN').length}
               </p>
-              <p className="text-sm text-gray-500">Administradores</p>
+              <p className="text-sm text-gray-500">{t('usersAdministrators')}</p>
             </div>
           </CardContent>
         </Card>
@@ -532,7 +533,7 @@ export default function AdminUsersPage() {
               <p className="text-2xl font-bold">
                 {(users || []).filter((u) => u.role === 'ORGANIZER').length}
               </p>
-              <p className="text-sm text-gray-500">Organizadores</p>
+              <p className="text-sm text-gray-500">{t('usersOrganizers')}</p>
             </div>
           </CardContent>
         </Card>
@@ -543,7 +544,7 @@ export default function AdminUsersPage() {
               <p className="text-2xl font-bold">
                 {(users || []).filter((u) => u.role === 'ATHLETE').length}
               </p>
-              <p className="text-sm text-gray-500">Atletas</p>
+              <p className="text-sm text-gray-500">{t('usersAthletes')}</p>
             </div>
           </CardContent>
         </Card>
@@ -552,9 +553,9 @@ export default function AdminUsersPage() {
       {/* Users Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios ({pagination.totalUsers})</CardTitle>
+          <CardTitle>{t('usersTableTitle', { count: pagination.totalUsers })}</CardTitle>
           <CardDescription>
-            Página {pagination.currentPage} de {pagination.totalPages}
+            {t('usersPageOf', { current: pagination.currentPage, total: pagination.totalPages })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -565,7 +566,7 @@ export default function AdminUsersPage() {
           ) : (users || []).length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-gray-500">No se encontraron usuarios</p>
+              <p className="text-gray-500">{t('usersNoUsersFound')}</p>
             </div>
           ) : (
             <>
@@ -573,12 +574,12 @@ export default function AdminUsersPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Usuario</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Email</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Rol</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Estado</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Registro</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-600">Acciones</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">{t('usersColUser')}</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">{t('usersColEmail')}</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">{t('usersColRole')}</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">{t('usersColStatus')}</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">{t('usersColRegistered')}</th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-600">{t('usersColActions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -623,12 +624,12 @@ export default function AdminUsersPage() {
                             {user.isActive ? (
                               <>
                                 <Activity className="w-3 h-3" />
-                                Activo
+                                {t('usersActive')}
                               </>
                             ) : (
                               <>
                                 <UserX className="w-3 h-3" />
-                                Inactivo
+                                {t('usersInactive')}
                               </>
                             )}
                           </span>
@@ -646,46 +647,46 @@ export default function AdminUsersPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                              <DropdownMenuLabel>{t('usersColActions')}</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => startImpersonation(user.id).catch((e) => setError(e?.response?.data?.error || 'Error al suplantar'))}
+                                onClick={() => startImpersonation(user.id).catch((e) => setError(e?.response?.data?.error || t('usersImpersonateError')))}
                                 className="text-amber-700"
                               >
                                 <Eye className="w-4 h-4 mr-2" />
-                                Ver panel como este usuario
+                                {t('usersViewAsUser')}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handleOpenEditDialog(user)}>
                                 <Edit className="w-4 h-4 mr-2" />
-                                Editar datos básicos
+                                {t('usersEditBasicData')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleEditFullProfile(user)}>
                                 <UserCog className="w-4 h-4 mr-2" />
-                                Editar perfil completo
+                                {t('usersEditFullProfile')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleOpenRoleDialog(user)}>
                                 <Shield className="w-4 h-4 mr-2" />
-                                Cambiar rol
+                                {t('usersChangeRole')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleOpenRegeneratePasswordDialog(user)}>
                                 <KeyRound className="w-4 h-4 mr-2" />
-                                Regenerar contraseña
+                                {t('usersRegeneratePassword')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleInsider(user)}>
                                 <Star className={`w-4 h-4 mr-2 ${user.isInsider ? 'fill-yellow-400 text-yellow-400' : ''}`} />
-                                {user.isInsider ? 'Quitar Insider' : 'Hacer Insider'}
+                                {user.isInsider ? t('usersRemoveInsider') : t('usersMakeInsider')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleTogglePublic(user)}>
                                 {user.isPublic ? (
                                   <>
                                     <Lock className="w-4 h-4 mr-2" />
-                                    Hacer privado
+                                    {t('usersMakePrivate')}
                                   </>
                                 ) : (
                                   <>
                                     <Globe className="w-4 h-4 mr-2 text-green-600" />
-                                    Hacer público
+                                    {t('usersMakePublic')}
                                   </>
                                 )}
                               </DropdownMenuItem>
@@ -693,12 +694,12 @@ export default function AdminUsersPage() {
                                 {user.isActive ? (
                                   <>
                                     <UserX className="w-4 h-4 mr-2" />
-                                    Desactivar
+                                    {t('usersDeactivate')}
                                   </>
                                 ) : (
                                   <>
                                     <UserCheck className="w-4 h-4 mr-2" />
-                                    Activar
+                                    {t('usersActivate')}
                                   </>
                                 )}
                               </DropdownMenuItem>
@@ -708,7 +709,7 @@ export default function AdminUsersPage() {
                                 className="text-red-600"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Eliminar
+                                {t('eliminar')}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -722,9 +723,11 @@ export default function AdminUsersPage() {
               {/* Pagination */}
               <div className="flex items-center justify-between mt-6 pt-4 border-t">
                 <p className="text-sm text-gray-600">
-                  Mostrando {(pagination.currentPage - 1) * 20 + 1} -{' '}
-                  {Math.min(pagination.currentPage * 20, pagination.totalUsers)} de{' '}
-                  {pagination.totalUsers} usuarios
+                  {t('usersShowingRange', {
+                    from: (pagination.currentPage - 1) * 20 + 1,
+                    to: Math.min(pagination.currentPage * 20, pagination.totalUsers),
+                    total: pagination.totalUsers,
+                  })}
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -754,15 +757,15 @@ export default function AdminUsersPage() {
       <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cambiar rol de usuario</DialogTitle>
+            <DialogTitle>{t('usersChangeRoleTitle')}</DialogTitle>
             <DialogDescription>
               {selectedUser && (
-                <>Cambiando el rol de <strong>{selectedUser.fullName || selectedUser.username}</strong></>
+                <>{t('usersChangingRoleOf')} <strong>{selectedUser.fullName || selectedUser.username}</strong></>
               )}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label htmlFor="role">Nuevo rol</Label>
+            <Label htmlFor="role">{t('usersNewRole')}</Label>
             <select
               id="role"
               value={newRole}
@@ -782,10 +785,10 @@ export default function AdminUsersPage() {
               onClick={() => setIsRoleDialogOpen(false)}
               disabled={actionLoading}
             >
-              Cancelar
+              {t('cancelar')}
             </Button>
             <Button onClick={handleUpdateRole} disabled={actionLoading}>
-              {actionLoading ? 'Guardando...' : 'Guardar cambios'}
+              {actionLoading ? t('guardando') : t('usersSaveChanges')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -795,23 +798,23 @@ export default function AdminUsersPage() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
+            <AlertDialogTitle>{t('usersDeleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de que deseas eliminar a{' '}
+              {t('usersDeleteConfirm')}{' '}
               <strong>{selectedUser?.fullName || selectedUser?.username}</strong>?
               <br />
               <br />
-              Esta acción no se puede deshacer. Se eliminarán todos los datos asociados al usuario.
+              {t('usersDeleteWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={actionLoading}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={actionLoading}>{t('cancelar')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteUser}
               disabled={actionLoading}
               className="bg-red-600 hover:bg-red-700"
             >
-              {actionLoading ? 'Eliminando...' : 'Eliminar'}
+              {actionLoading ? t('usersDeleting') : t('eliminar')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -821,20 +824,20 @@ export default function AdminUsersPage() {
       <Dialog open={isRegeneratePasswordDialogOpen} onOpenChange={(open) => !open && handleCloseRegeneratePasswordDialog()}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Regenerar contraseña</DialogTitle>
+            <DialogTitle>{t('usersRegeneratePassword')}</DialogTitle>
             <DialogDescription>
               {regeneratedPassword
-                ? 'Contraseña regenerada exitosamente. Guárdala antes de cerrar.'
-                : `¿Regenerar contraseña para ${selectedUser?.firstName || selectedUser?.username}?`}
+                ? t('usersPasswordRegeneratedDesc')
+                : t('usersRegeneratePasswordFor', { name: selectedUser?.firstName || selectedUser?.username || '' })}
             </DialogDescription>
           </DialogHeader>
 
           {regeneratedPassword ? (
             <div className="py-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800 font-medium mb-2">Nueva contraseña generada</p>
+                <p className="text-green-800 font-medium mb-2">{t('usersNewPasswordGenerated')}</p>
                 <p className="text-sm text-green-700">
-                  Copia esta contraseña antes de cerrar:
+                  {t('usersCopyPasswordBeforeClose')}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <code className="flex-1 px-3 py-2 bg-white border rounded text-sm font-mono">
@@ -853,22 +856,22 @@ export default function AdminUsersPage() {
           ) : (
             <div className="py-4">
               <p className="text-sm text-gray-600">
-                Se generará una nueva contraseña aleatoria para el usuario{' '}
+                {t('usersWillGeneratePassword')}{' '}
                 <strong>{selectedUser?.email}</strong>.
               </p>
               <p className="text-sm text-amber-600 mt-2">
-                ⚠️ La contraseña actual del usuario será reemplazada.
+                {t('usersPasswordWillBeReplaced')}
               </p>
             </div>
           )}
 
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseRegeneratePasswordDialog}>
-              {regeneratedPassword ? 'Cerrar' : 'Cancelar'}
+              {regeneratedPassword ? t('usersClose') : t('cancelar')}
             </Button>
             {!regeneratedPassword && (
               <Button onClick={handleRegeneratePassword} disabled={actionLoading}>
-                {actionLoading ? 'Regenerando...' : 'Regenerar contraseña'}
+                {actionLoading ? t('usersRegenerating') : t('usersRegeneratePassword')}
               </Button>
             )}
           </DialogFooter>
@@ -879,20 +882,20 @@ export default function AdminUsersPage() {
       <Dialog open={isCreateDialogOpen} onOpenChange={(open) => !open && handleCloseCreateDialog()}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Crear nuevo usuario</DialogTitle>
+            <DialogTitle>{t('usersCreateNewUser')}</DialogTitle>
             <DialogDescription>
               {createdUserPassword
-                ? 'Usuario creado exitosamente. Guarda la contraseña generada.'
-                : 'Completa los datos del nuevo usuario'}
+                ? t('usersCreatedSuccessDesc')
+                : t('usersFillNewUserData')}
             </DialogDescription>
           </DialogHeader>
 
           {createdUserPassword ? (
             <div className="py-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                <p className="text-green-800 font-medium mb-2">Usuario creado correctamente</p>
+                <p className="text-green-800 font-medium mb-2">{t('usersCreatedCorrectly')}</p>
                 <p className="text-sm text-green-700">
-                  Contraseña generada (cópiala antes de cerrar):
+                  {t('usersGeneratedPasswordCopy')}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <code className="flex-1 px-3 py-2 bg-white border rounded text-sm font-mono">
@@ -908,7 +911,7 @@ export default function AdminUsersPage() {
                 </div>
               </div>
               <Button className="w-full" onClick={handleCloseCreateDialog}>
-                Cerrar
+                {t('usersClose')}
               </Button>
             </div>
           ) : (
@@ -916,48 +919,48 @@ export default function AdminUsersPage() {
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">Nombre *</Label>
+                    <Label htmlFor="firstName">{t('usersFirstNameRequired')}</Label>
                     <Input
                       id="firstName"
                       value={createUserForm.firstName}
                       onChange={(e) => setCreateUserForm({ ...createUserForm, firstName: e.target.value })}
-                      placeholder="Juan"
+                      placeholder={t('usersFirstNamePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Apellidos</Label>
+                    <Label htmlFor="lastName">{t('usersLastName')}</Label>
                     <Input
                       id="lastName"
                       value={createUserForm.lastName}
                       onChange={(e) => setCreateUserForm({ ...createUserForm, lastName: e.target.value })}
-                      placeholder="García"
+                      placeholder={t('usersLastNamePlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">{t('usersEmailRequired')}</Label>
                   <Input
                     id="email"
                     type="email"
                     value={createUserForm.email}
                     onChange={(e) => setCreateUserForm({ ...createUserForm, email: e.target.value })}
-                    placeholder="usuario@ejemplo.com"
+                    placeholder={t('usersEmailPlaceholder')}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="username">Nombre de usuario *</Label>
+                  <Label htmlFor="username">{t('usersUsernameRequired')}</Label>
                   <Input
                     id="username"
                     value={createUserForm.username}
                     onChange={(e) => setCreateUserForm({ ...createUserForm, username: e.target.value })}
-                    placeholder="juangarcia"
+                    placeholder={t('usersUsernamePlaceholder')}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role">Rol *</Label>
+                  <Label htmlFor="role">{t('usersRoleRequired')}</Label>
                   <select
                     id="role"
                     value={createUserForm.role}
@@ -974,14 +977,14 @@ export default function AdminUsersPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="country">País</Label>
+                    <Label htmlFor="country">{t('usersCountry')}</Label>
                     <select
                       id="country"
                       value={createUserForm.country}
                       onChange={(e) => setCreateUserForm({ ...createUserForm, country: e.target.value })}
                       className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option value="">Seleccionar...</option>
+                      <option value="">{t('usersSelect')}</option>
                       {COUNTRIES.map((c) => (
                         <option key={c.code} value={c.code}>
                           {c.name}
@@ -990,31 +993,31 @@ export default function AdminUsersPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="gender">Género</Label>
+                    <Label htmlFor="gender">{t('usersGender')}</Label>
                     <select
                       id="gender"
                       value={createUserForm.gender}
                       onChange={(e) => setCreateUserForm({ ...createUserForm, gender: e.target.value })}
                       className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option value="">Seleccionar...</option>
-                      <option value="MALE">Hombre</option>
-                      <option value="FEMALE">Mujer</option>
-                      <option value="NON_BINARY">No binario</option>
+                      <option value="">{t('usersSelect')}</option>
+                      <option value="MALE">{t('usersMale')}</option>
+                      <option value="FEMALE">{t('usersFemale')}</option>
+                      <option value="NON_BINARY">{t('usersNonBinary')}</option>
                     </select>
                   </div>
                 </div>
 
                 <p className="text-xs text-gray-500">
-                  * Campos obligatorios. Se generará una contraseña aleatoria que podrás enviar al usuario.
+                  {t('usersRequiredFieldsHint')}
                 </p>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={handleCloseCreateDialog} disabled={actionLoading}>
-                  Cancelar
+                  {t('cancelar')}
                 </Button>
                 <Button onClick={handleCreateUser} disabled={actionLoading}>
-                  {actionLoading ? 'Creando...' : 'Crear Usuario'}
+                  {actionLoading ? t('usersCreating') : t('usersCreateUser')}
                 </Button>
               </DialogFooter>
             </>
@@ -1026,64 +1029,64 @@ export default function AdminUsersPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={(open) => !open && handleCloseEditDialog()}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar usuario</DialogTitle>
+            <DialogTitle>{t('usersEditUser')}</DialogTitle>
             <DialogDescription>
-              Modificando los datos de <strong>{selectedUser?.fullName || selectedUser?.username}</strong>
+              {t('usersModifyingDataOf')} <strong>{selectedUser?.fullName || selectedUser?.username}</strong>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="editFirstName">Nombre</Label>
+                <Label htmlFor="editFirstName">{t('usersFirstName')}</Label>
                 <Input
                   id="editFirstName"
                   value={editUserForm.firstName}
                   onChange={(e) => setEditUserForm({ ...editUserForm, firstName: e.target.value })}
-                  placeholder="Juan"
+                  placeholder={t('usersFirstNamePlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="editLastName">Apellidos</Label>
+                <Label htmlFor="editLastName">{t('usersLastName')}</Label>
                 <Input
                   id="editLastName"
                   value={editUserForm.lastName}
                   onChange={(e) => setEditUserForm({ ...editUserForm, lastName: e.target.value })}
-                  placeholder="García"
+                  placeholder={t('usersLastNamePlaceholder')}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="editEmail">Email</Label>
+              <Label htmlFor="editEmail">{t('usersColEmail')}</Label>
               <Input
                 id="editEmail"
                 type="email"
                 value={editUserForm.email}
                 onChange={(e) => setEditUserForm({ ...editUserForm, email: e.target.value })}
-                placeholder="usuario@ejemplo.com"
+                placeholder={t('usersEmailPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="editUsername">Nombre de usuario</Label>
+              <Label htmlFor="editUsername">{t('usersUsername')}</Label>
               <Input
                 id="editUsername"
                 value={editUserForm.username}
                 onChange={(e) => setEditUserForm({ ...editUserForm, username: e.target.value })}
-                placeholder="juangarcia"
+                placeholder={t('usersUsernamePlaceholder')}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="editCountry">País</Label>
+                <Label htmlFor="editCountry">{t('usersCountry')}</Label>
                 <select
                   id="editCountry"
                   value={editUserForm.country}
                   onChange={(e) => setEditUserForm({ ...editUserForm, country: e.target.value })}
                   className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="">Seleccionar...</option>
+                  <option value="">{t('usersSelect')}</option>
                   {COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>
                       {c.name}
@@ -1092,27 +1095,27 @@ export default function AdminUsersPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="editGender">Género</Label>
+                <Label htmlFor="editGender">{t('usersGender')}</Label>
                 <select
                   id="editGender"
                   value={editUserForm.gender}
                   onChange={(e) => setEditUserForm({ ...editUserForm, gender: e.target.value })}
                   className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="">Seleccionar...</option>
-                  <option value="MALE">Hombre</option>
-                  <option value="FEMALE">Mujer</option>
-                  <option value="NON_BINARY">No binario</option>
+                  <option value="">{t('usersSelect')}</option>
+                  <option value="MALE">{t('usersMale')}</option>
+                  <option value="FEMALE">{t('usersFemale')}</option>
+                  <option value="NON_BINARY">{t('usersNonBinary')}</option>
                 </select>
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseEditDialog} disabled={actionLoading}>
-              Cancelar
+              {t('cancelar')}
             </Button>
             <Button onClick={handleEditUser} disabled={actionLoading}>
-              {actionLoading ? 'Guardando...' : 'Guardar cambios'}
+              {actionLoading ? t('guardando') : t('usersSaveChanges')}
             </Button>
           </DialogFooter>
         </DialogContent>

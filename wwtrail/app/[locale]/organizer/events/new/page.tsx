@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslations } from 'next-intl';
 import eventsService from '@/lib/api/v2/events.service';
 import { ArrowLeft, MapPin, Calendar, Save, Loader2, Check, X, AlertCircle, Image, Share2, Globe } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
@@ -15,6 +16,7 @@ import { LANGUAGE_LABELS } from '@/types/post';
 
 export default function NewEventPage() {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
@@ -107,7 +109,7 @@ export default function NewEventPage() {
         setSlugValidation({
           isChecking: false,
           isAvailable: null,
-          error: 'Error al validar slug',
+          error: t('errorValidatingSlug'),
         });
         return;
       }
@@ -124,7 +126,7 @@ export default function NewEventPage() {
       setSlugValidation({
         isChecking: false,
         isAvailable: null,
-        error: 'Error al verificar disponibilidad',
+        error: t('errorCheckingAvailability'),
       });
     }
   };
@@ -139,7 +141,7 @@ export default function NewEventPage() {
   // Geocoding con Nominatim
   const handleGeocoding = async () => {
     if (!formData.city.trim() || !formData.country.trim()) {
-      setError('Por favor, rellena ciudad y país antes de buscar coordenadas');
+      setError(t('errorGeocodingCityCountry'));
       return;
     }
 
@@ -161,13 +163,13 @@ export default function NewEventPage() {
       );
 
       if (!response.ok) {
-        throw new Error('Error al buscar coordenadas');
+        throw new Error(t('errorSearchingCoordinates'));
       }
 
       const data = await response.json();
 
       if (data.length === 0) {
-        setError(`No se encontraron coordenadas para "${query}". Por favor, ingrésalas manualmente.`);
+        setError(t('noCoordinatesFound', { query }));
         return;
       }
 
@@ -177,10 +179,10 @@ export default function NewEventPage() {
         longitude: parseFloat(data[0].lon).toFixed(6),
       });
 
-      alert(`✓ Coordenadas encontradas:\n${data[0].display_name}`);
+      alert(t('coordinatesFound', { name: data[0].display_name }));
     } catch (err: any) {
       console.error('Geocoding error:', err);
-      setError('Error al buscar coordenadas. Ingrésalas manualmente.');
+      setError(t('errorGeocoding'));
     } finally {
       setGeocoding(false);
     }
@@ -188,32 +190,32 @@ export default function NewEventPage() {
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setError('El nombre del evento es obligatorio');
+      setError(t('nameRequired'));
       return false;
     }
     if (!formData.city.trim()) {
-      setError('La ciudad es obligatoria');
+      setError(t('cityRequired'));
       return false;
     }
     if (!formData.country.trim()) {
-      setError('El país es obligatorio');
+      setError(t('countryRequired'));
       return false;
     }
     if (!formData.firstEditionYear || parseInt(formData.firstEditionYear) < 1900) {
-      setError('El año de primera edición debe ser válido (mayor a 1900)');
+      setError(t('firstEditionYearInvalid'));
       return false;
     }
     if (formData.latitude && (parseFloat(formData.latitude) < -90 || parseFloat(formData.latitude) > 90)) {
-      setError('La latitud debe estar entre -90 y 90');
+      setError(t('latitudeInvalid'));
       return false;
     }
     if (formData.longitude && (parseFloat(formData.longitude) < -180 || parseFloat(formData.longitude) > 180)) {
-      setError('La longitud debe estar entre -180 y 180');
+      setError(t('longitudeInvalid'));
       return false;
     }
-    
+
     if (formData.slug.length >= 3 && slugValidation.isAvailable === false) {
-      setError('El slug ya está en uso. Por favor, modifica el nombre del evento.');
+      setError(t('slugInUseError'));
       return false;
     }
     
@@ -270,11 +272,11 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     console.log('✅ Respuesta del backend:', response);
 
-    alert('✓ Evento creado exitosamente');
+    alert(t('eventCreatedSuccess'));
     router.push('/organizer/events');
   } catch (err: any) {
     console.error('❌ Error al crear evento:', err);
-    setError(err.message || 'Error al crear el evento');
+    setError(err.message || t('errorCreatingEvent'));
   } finally {
     setLoading(false);
   }
@@ -290,11 +292,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            Volver
+            {t('back')}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Crear Nuevo Evento</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('createNewEvent')}</h1>
           <p className="mt-2 text-gray-600">
-            Completa la información del evento que deseas crear
+            {t('createEventSubtitle')}
           </p>
         </div>
 
@@ -320,19 +322,19 @@ const handleSubmit = async (e: React.FormEvent) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Card: Información Básica */}
           <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Información Básica</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('basicInfo')}</h2>
 
             <div className="space-y-4">
               {/* Nombre */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre del Evento *
+                  {t('eventNameLabel')} *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="Ej: Ultra Trail Mont Blanc"
+                  placeholder={t('eventNamePlaceholder')}
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
@@ -341,7 +343,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               {/* Slug (auto-generado) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Slug (URL amigable)
+                  {t('slugLabel')}
                 </label>
                 <div className="relative">
                   <input
@@ -364,12 +366,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
                 {formData.slug.length >= 3 && slugValidation.isAvailable === false && (
                   <p className="mt-1 text-sm text-red-600">
-                    Este slug ya está en uso
+                    {t('slugInUse')}
                   </p>
                 )}
                 {formData.slug.length >= 3 && slugValidation.isAvailable === true && (
                   <p className="mt-1 text-sm text-green-600">
-                    Slug disponible
+                    {t('slugAvailable')}
                   </p>
                 )}
               </div>
@@ -377,13 +379,13 @@ const handleSubmit = async (e: React.FormEvent) => {
               {/* Descripción */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descripción
+                  {t('descriptionLabel')}
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   rows={4}
-                  placeholder="Describe el evento, su historia, características principales..."
+                  placeholder={t('descriptionPlaceholder')}
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
@@ -393,7 +395,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    Idioma del Contenido *
+                    {t('contentLanguageLabel')} *
                   </span>
                 </label>
                 <select
@@ -409,7 +411,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   ))}
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+                  {t('languageHelp')}
                 </p>
               </div>
             </div>
@@ -419,7 +421,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
             <div className="flex items-center gap-2 mb-4">
               <Image className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Imágenes</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('images')}</h2>
             </div>
 
             {/* Grid horizontal para 3 uploads */}
@@ -427,19 +429,19 @@ const handleSubmit = async (e: React.FormEvent) => {
               {/* Logo */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Logotipo
+                  {t('logo')}
                 </label>
                 <FileUpload
                   fieldname="logo"
                   onUpload={(url) => handleChange('logoUrl', url)}
-                  buttonText="Subir logo"
+                  buttonText={t('uploadLogo')}
                   maxSizeMB={2}
                   accept="image/*"
                   showPreview={true}
                 />
                 {formData.logoUrl && (
                   <p className="text-xs text-green-600 font-medium mt-2">
-                    ✓ Logo subido
+                    {t('logoUploaded')}
                   </p>
                 )}
               </div>
@@ -447,19 +449,19 @@ const handleSubmit = async (e: React.FormEvent) => {
               {/* Cover */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Imagen de Portada
+                  {t('coverImage')}
                 </label>
                 <FileUpload
                   fieldname="cover"
                   onUpload={(url) => handleChange('coverImage', url)}
-                  buttonText="Subir portada"
+                  buttonText={t('uploadCover')}
                   maxSizeMB={5}
                   accept="image/*"
                   showPreview={true}
                 />
                 {formData.coverImage && (
                   <p className="text-xs text-green-600 font-medium mt-2">
-                    ✓ Portada subida
+                    {t('coverUploaded')}
                   </p>
                 )}
               </div>
@@ -467,20 +469,20 @@ const handleSubmit = async (e: React.FormEvent) => {
               {/* Galería */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Galería de Fotos
+                  {t('photoGallery')}
                 </label>
                 <FileUpload
-                  fieldname="gallery" 
+                  fieldname="gallery"
                   multiple={true}
                   onUploadMultiple={(urls) => handleChange('gallery', urls)}
-                  buttonText="Subir fotos"
+                  buttonText={t('uploadPhotos')}
                   maxSizeMB={3}
                   accept="image/*"
                   showPreview={true}
                 />
                 {formData.gallery.length > 0 && (
                   <p className="text-xs text-green-600 font-medium mt-2">
-                    ✓ {formData.gallery.length} fotos
+                    {t('photosCount', { count: formData.gallery.length })}
                   </p>
                 )}
               </div>
@@ -488,7 +490,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
             {/* Info compacta */}
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-              💡 Las imágenes se optimizan automáticamente. Máximo 5MB por archivo.
+              {t('imagesInfo')}
             </div>
           </div>
 
@@ -496,20 +498,20 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Ubicación</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('location')}</h2>
             </div>
 
             <div className="space-y-4">
               {/* Ciudad */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ciudad *
+                  {t('cityLabel')} *
                 </label>
                 <input
                   type="text"
                   value={formData.city}
                   onChange={(e) => handleChange('city', e.target.value)}
-                  placeholder="Ej: Chamonix"
+                  placeholder={t('cityPlaceholder')}
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
@@ -518,12 +520,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               {/* País */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  País *
+                  {t('countryLabel')} *
                 </label>
                 <CountrySelect
                   value={formData.country}
                   onChange={(code) => handleChange('country', code)}
-                  error={!formData.country && error ? 'Selecciona un país' : undefined}
+                  error={!formData.country && error ? t('selectCountry') : undefined}
                 />
               </div>
 
@@ -538,17 +540,17 @@ const handleSubmit = async (e: React.FormEvent) => {
                   {geocoding ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Buscando coordenadas...
+                      {t('searchingCoordinates')}
                     </>
                   ) : (
                     <>
                       <MapPin className="h-4 w-4" />
-                      Buscar Coordenadas Automáticamente
+                      {t('searchCoordinatesAuto')}
                     </>
                   )}
                 </button>
                 <p className="mt-2 text-xs text-gray-500 text-center">
-                  O ingrésalas manualmente abajo
+                  {t('orEnterManually')}
                 </p>
               </div>
 
@@ -556,7 +558,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Latitud
+                    {t('latitude')}
                   </label>
                   <input
                     type="number"
@@ -569,7 +571,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Longitud
+                    {t('longitude')}
                   </label>
                   <input
                     type="number"
@@ -588,7 +590,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Información Adicional</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('additionalInfo')}</h2>
             </div>
 
             <div className="space-y-4">
@@ -598,36 +600,36 @@ const handleSubmit = async (e: React.FormEvent) => {
                 {/* Mes Típico */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mes Típico del Evento
+                    {t('typicalMonthLabel')}
                   </label>
                   <select
                     value={formData.typicalMonth}
                     onChange={(e) => handleChange('typicalMonth', e.target.value)}
                     className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   >
-                    <option value="">Selecciona un mes</option>
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
+                    <option value="">{t('selectMonth')}</option>
+                    <option value="1">{t('monthJanuary')}</option>
+                    <option value="2">{t('monthFebruary')}</option>
+                    <option value="3">{t('monthMarch')}</option>
+                    <option value="4">{t('monthApril')}</option>
+                    <option value="5">{t('monthMay')}</option>
+                    <option value="6">{t('monthJune')}</option>
+                    <option value="7">{t('monthJuly')}</option>
+                    <option value="8">{t('monthAugust')}</option>
+                    <option value="9">{t('monthSeptember')}</option>
+                    <option value="10">{t('monthOctober')}</option>
+                    <option value="11">{t('monthNovember')}</option>
+                    <option value="12">{t('monthDecember')}</option>
                   </select>
                   <p className="mt-1 text-xs text-gray-500">
-                    Mes habitual del evento
+                    {t('typicalMonthHelp')}
                   </p>
                 </div>
 
                 {/* Año Primera Edición */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Año Primera Edición *
+                    {t('firstEditionYearLabel')} *
                   </label>
                   <input
                     type="number"
@@ -644,7 +646,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               {/* Website */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sitio Web Oficial
+                  {t('officialWebsite')}
                 </label>
                 <input
                   type="url"
@@ -661,7 +663,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
             <div className="flex items-center gap-2 mb-4">
               <Share2 className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Redes Sociales</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('socialMedia')}</h2>
             </div>
 
             <div className="space-y-4">
@@ -744,7 +746,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
             {/* Info */}
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-              💡 Todos los campos de redes sociales son opcionales
+              {t('socialMediaInfo')}
             </div>
           </div>
 
@@ -755,7 +757,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               onClick={() => router.back()}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -768,12 +770,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               {loading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Creando...
+                  {t('creating')}
                 </>
               ) : (
                 <>
                   <Save className="h-5 w-5" />
-                  Crear Evento
+                  {t('createEvent')}
                 </>
               )}
             </button>

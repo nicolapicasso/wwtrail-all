@@ -6,10 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import LandingForm from '@/components/forms/LandingForm';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 export default function NewLandingPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const t = useTranslations('boCatalog');
 
   useEffect(() => {
     if (!authLoading && user?.role !== 'ADMIN') {
@@ -39,11 +41,11 @@ export default function NewLandingPage() {
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver
+          {t('back')}
         </Button>
-        <h1 className="text-3xl font-bold">📄 Nueva Landing Page</h1>
+        <h1 className="text-3xl font-bold">📄 {t('newLandingPageTitle')}</h1>
         <p className="text-muted-foreground mt-1">
-          Crea una nueva página landing personalizada
+          {t('newLandingPageSubtitle')}
         </p>
       </div>
 

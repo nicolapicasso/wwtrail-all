@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ interface InsiderStats {
 }
 
 export default function InsidersAdminPage() {
+  const t = useTranslations('boMisc');
   const [insiders, setInsiders] = useState<AdminUser[]>([]);
   const [stats, setStats] = useState<InsiderStats | null>(null);
   const [config, setConfig] = useState<InsiderConfig | null>(null);
@@ -80,7 +82,7 @@ export default function InsidersAdminPage() {
       });
     } catch (err: any) {
       console.error('Error fetching data:', err);
-      setError('Error al cargar los datos');
+      setError(t('insidersErrorLoading'));
     } finally {
       setLoading(false);
     }
@@ -101,24 +103,24 @@ export default function InsidersAdminPage() {
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       console.error('Error saving config:', err);
-      setError(err.response?.data?.message || 'Error al guardar la configuración');
+      setError(err.response?.data?.message || t('insidersErrorSaving'));
     } finally {
       setSaving(false);
     }
   };
 
   const getCountryName = (code: string) => {
-    if (code === 'unknown') return 'Sin país';
+    if (code === 'unknown') return t('insidersNoCountry');
     const country = COUNTRIES.find((c) => c.code === code);
     return country?.name || code;
   };
 
   const getGenderLabel = (gender: string) => {
     const labels: Record<string, string> = {
-      MALE: 'Hombres',
-      FEMALE: 'Mujeres',
-      NON_BINARY: 'No binario',
-      unknown: 'Sin especificar',
+      MALE: t('insidersGenderMale'),
+      FEMALE: t('insidersGenderFemale'),
+      NON_BINARY: t('insidersGenderNonBinary'),
+      unknown: t('insidersGenderUnknown'),
     };
     return labels[gender] || gender;
   };
@@ -141,12 +143,12 @@ export default function InsidersAdminPage() {
             WWTrail Insiders
           </h1>
           <p className="text-gray-600 mt-1">
-            Gestiona los corresponsales especiales de WWTrail
+            {t('insidersSubtitle')}
           </p>
         </div>
         <Button variant="outline" onClick={fetchData} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
+          {t('insidersRefresh')}
         </Button>
       </div>
 
@@ -158,7 +160,7 @@ export default function InsidersAdminPage() {
       )}
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <p className="text-green-800">Configuración guardada correctamente</p>
+          <p className="text-green-800">{t('insidersConfigSaved')}</p>
         </div>
       )}
 
@@ -172,7 +174,7 @@ export default function InsidersAdminPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.total || 0}</p>
-                <p className="text-sm text-gray-600">Total Insiders</p>
+                <p className="text-sm text-gray-600">{t('insidersTotalInsiders')}</p>
               </div>
             </div>
           </CardContent>
@@ -188,7 +190,7 @@ export default function InsidersAdminPage() {
                 <p className="text-2xl font-bold">
                   {Object.keys(stats?.byCountry || {}).filter((k) => k !== 'unknown').length}
                 </p>
-                <p className="text-sm text-gray-600">Países</p>
+                <p className="text-sm text-gray-600">{t('insidersCountries')}</p>
               </div>
             </div>
           </CardContent>
@@ -202,7 +204,7 @@ export default function InsidersAdminPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.byGender?.MALE || 0}</p>
-                <p className="text-sm text-gray-600">Hombres</p>
+                <p className="text-sm text-gray-600">{t('insidersGenderMale')}</p>
               </div>
             </div>
           </CardContent>
@@ -216,7 +218,7 @@ export default function InsidersAdminPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.byGender?.FEMALE || 0}</p>
-                <p className="text-sm text-gray-600">Mujeres</p>
+                <p className="text-sm text-gray-600">{t('insidersGenderFemale')}</p>
               </div>
             </div>
           </CardContent>
@@ -228,9 +230,9 @@ export default function InsidersAdminPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Configuración de Insiders</CardTitle>
+              <CardTitle>{t('insidersConfigTitle')}</CardTitle>
               <CardDescription>
-                Configura el distintivo y los textos introductorios para la página de Insiders
+                {t('insidersConfigDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -238,7 +240,7 @@ export default function InsidersAdminPage() {
               <div className="space-y-4">
                 <Label className="flex items-center gap-2">
                   <Star className="w-4 h-4" />
-                  Distintivo (Badge)
+                  {t('insidersBadgeLabel')}
                 </Label>
                 <div className="flex items-start gap-6">
                   <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
@@ -259,10 +261,10 @@ export default function InsidersAdminPage() {
                       onUpload={(url) => setFormConfig({ ...formConfig, badgeUrl: url })}
                       currentUrl={formConfig.badgeUrl}
                       accept="image/*"
-                      buttonText="Subir distintivo"
+                      buttonText={t('insidersUploadBadge')}
                     />
                     <p className="text-xs text-gray-500 mt-2">
-                      Recomendado: imagen PNG con fondo transparente, 100x100px
+                      {t('insidersBadgeHint')}
                     </p>
                   </div>
                 </div>
@@ -270,7 +272,7 @@ export default function InsidersAdminPage() {
 
               {/* Intro Texts by Language */}
               <div className="space-y-4">
-                <Label>Textos introductorios por idioma</Label>
+                <Label>{t('insidersIntroTextsLabel')}</Label>
                 <Tabs defaultValue="ES" className="w-full">
                   <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="ES">ES</TabsTrigger>
@@ -286,7 +288,7 @@ export default function InsidersAdminPage() {
                       value={formConfig.introTextES}
                       onChange={(e) => setFormConfig({ ...formConfig, introTextES: e.target.value })}
                       className="w-full h-32 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                      placeholder="Texto introductorio en español..."
+                      placeholder={t('insidersIntroPlaceholderES')}
                     />
                   </TabsContent>
                   <TabsContent value="EN" className="mt-4">
@@ -294,7 +296,7 @@ export default function InsidersAdminPage() {
                       value={formConfig.introTextEN}
                       onChange={(e) => setFormConfig({ ...formConfig, introTextEN: e.target.value })}
                       className="w-full h-32 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                      placeholder="Intro text in English..."
+                      placeholder={t('insidersIntroPlaceholderEN')}
                     />
                   </TabsContent>
                   <TabsContent value="IT" className="mt-4">
@@ -302,7 +304,7 @@ export default function InsidersAdminPage() {
                       value={formConfig.introTextIT}
                       onChange={(e) => setFormConfig({ ...formConfig, introTextIT: e.target.value })}
                       className="w-full h-32 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                      placeholder="Testo introduttivo in italiano..."
+                      placeholder={t('insidersIntroPlaceholderIT')}
                     />
                   </TabsContent>
                   <TabsContent value="CA" className="mt-4">
@@ -310,7 +312,7 @@ export default function InsidersAdminPage() {
                       value={formConfig.introTextCA}
                       onChange={(e) => setFormConfig({ ...formConfig, introTextCA: e.target.value })}
                       className="w-full h-32 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                      placeholder="Text introductori en català..."
+                      placeholder={t('insidersIntroPlaceholderCA')}
                     />
                   </TabsContent>
                   <TabsContent value="FR" className="mt-4">
@@ -318,7 +320,7 @@ export default function InsidersAdminPage() {
                       value={formConfig.introTextFR}
                       onChange={(e) => setFormConfig({ ...formConfig, introTextFR: e.target.value })}
                       className="w-full h-32 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                      placeholder="Texte d'introduction en français..."
+                      placeholder={t('insidersIntroPlaceholderFR')}
                     />
                   </TabsContent>
                   <TabsContent value="DE" className="mt-4">
@@ -326,7 +328,7 @@ export default function InsidersAdminPage() {
                       value={formConfig.introTextDE}
                       onChange={(e) => setFormConfig({ ...formConfig, introTextDE: e.target.value })}
                       className="w-full h-32 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                      placeholder="Einleitungstext auf Deutsch..."
+                      placeholder={t('insidersIntroPlaceholderDE')}
                     />
                   </TabsContent>
                 </Tabs>
@@ -334,11 +336,11 @@ export default function InsidersAdminPage() {
 
               <Button onClick={handleSaveConfig} disabled={saving} className="w-full">
                 {saving ? (
-                  <>Guardando...</>
+                  <>{t('insidersSaving')}</>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Guardar Configuración
+                    {t('insidersSaveConfig')}
                   </>
                 )}
               </Button>
@@ -352,19 +354,19 @@ export default function InsidersAdminPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                Lista de Insiders
+                {t('insidersListTitle')}
               </CardTitle>
               <CardDescription>
-                {insiders.length} insider{insiders.length !== 1 ? 's' : ''} activo{insiders.length !== 1 ? 's' : ''}
+                {t('insidersActiveCount', { count: insiders.length })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {insiders.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Star className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No hay Insiders aún</p>
+                  <p>{t('insidersEmptyTitle')}</p>
                   <p className="text-sm mt-1">
-                    Marca usuarios como Insider desde la gestión de usuarios
+                    {t('insidersEmptyHint')}
                   </p>
                 </div>
               ) : (
@@ -419,7 +421,7 @@ export default function InsidersAdminPage() {
               {/* Stats by Country */}
               {stats && Object.keys(stats.byCountry).length > 0 && (
                 <div className="mt-6 pt-4 border-t">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Por país</p>
+                  <p className="text-sm font-medium text-gray-700 mb-3">{t('insidersByCountry')}</p>
                   <div className="space-y-2">
                     {Object.entries(stats.byCountry)
                       .sort((a, b) => b[1] - a[1])

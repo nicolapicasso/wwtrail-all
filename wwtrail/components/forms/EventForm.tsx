@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import eventsService from '@/lib/api/v2/events.service';
 import { organizersService } from '@/lib/api/v2';
@@ -23,6 +24,7 @@ interface EventFormProps {
 
 export default function EventForm({ mode, initialData, eventId }: EventFormProps) {
   const router = useRouter();
+  const t = useTranslations('boForms');
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
@@ -63,7 +65,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
   // AI auto-fill handler
   const handleAiAutofill = async () => {
     if (!aiUrl.trim()) {
-      setError('Introduce la URL del evento para usar el auto-relleno con IA');
+      setError(t('aiUrlRequiredEvent'));
       return;
     }
 
@@ -105,10 +107,19 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         setShowImageSuggestions(true);
       }
 
-      alert(`Auto-relleno completado. Se encontraron ${Object.keys(result).filter(k => result[k as keyof EventAutoFillResult]).length} campos${result.competitions?.length ? ` y ${result.competitions.length} competiciones` : ''}.`);
+      alert(
+        result.competitions?.length
+          ? t('aiAutofillDoneWithComps', {
+              fields: Object.keys(result).filter(k => result[k as keyof EventAutoFillResult]).length,
+              comps: result.competitions.length,
+            })
+          : t('aiAutofillDoneFields', {
+              fields: Object.keys(result).filter(k => result[k as keyof EventAutoFillResult]).length,
+            })
+      );
     } catch (err: any) {
       console.error('AI autofill error:', err);
-      setError(err.response?.data?.error || err.message || 'Error al analizar la URL con IA');
+      setError(err.response?.data?.error || err.message || t('aiUrlError'));
     } finally {
       setAiLoading(false);
     }
@@ -203,7 +214,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         setSlugValidation({
           isChecking: false,
           isAvailable: null,
-          error: 'Error al validar slug',
+          error: t('slugValidateError'),
         });
         return;
       }
@@ -220,7 +231,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
       setSlugValidation({
         isChecking: false,
         isAvailable: null,
-        error: 'Error al verificar disponibilidad',
+        error: t('slugAvailabilityError'),
       });
     }
   };
@@ -235,7 +246,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
   // Geocoding con Nominatim
   const handleGeocoding = async () => {
     if (!formData.city.trim() || !formData.country.trim()) {
-      setError('Por favor, rellena ciudad y país antes de buscar coordenadas');
+      setError(t('geocodeCityCountryRequired'));
       return;
     }
 
@@ -257,13 +268,13 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
       );
 
       if (!response.ok) {
-        throw new Error('Error al buscar coordenadas');
+        throw new Error(t('geocodeSearchError'));
       }
 
       const data = await response.json();
 
       if (data.length === 0) {
-        setError(`No se encontraron coordenadas para "${query}". Por favor, ingrésalas manualmente.`);
+        setError(t('geocodeNotFound', { query }));
         return;
       }
 
@@ -273,10 +284,10 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         longitude: parseFloat(data[0].lon).toFixed(6),
       });
 
-      alert(`✓ Coordenadas encontradas:\n${data[0].display_name}`);
+      alert(t('geocodeFound', { location: data[0].display_name }));
     } catch (err: any) {
       console.error('Geocoding error:', err);
-      setError('Error al buscar coordenadas. Ingrésalas manualmente.');
+      setError(t('geocodeErrorManual'));
     } finally {
       setGeocoding(false);
     }
@@ -284,32 +295,32 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setError('El nombre del evento es obligatorio');
+      setError(t('eventNameRequired'));
       return false;
     }
     if (!formData.city.trim()) {
-      setError('La ciudad es obligatoria');
+      setError(t('cityRequired'));
       return false;
     }
     if (!formData.country.trim()) {
-      setError('El país es obligatorio');
+      setError(t('countryRequired'));
       return false;
     }
     if (!formData.firstEditionYear || parseInt(formData.firstEditionYear) < 1900) {
-      setError('El año de primera edición debe ser válido (mayor a 1900)');
+      setError(t('firstEditionYearInvalid'));
       return false;
     }
     if (formData.latitude && (parseFloat(formData.latitude) < -90 || parseFloat(formData.latitude) > 90)) {
-      setError('La latitud debe estar entre -90 y 90');
+      setError(t('latitudeRange'));
       return false;
     }
     if (formData.longitude && (parseFloat(formData.longitude) < -180 || parseFloat(formData.longitude) > 180)) {
-      setError('La longitud debe estar entre -180 y 180');
+      setError(t('longitudeRange'));
       return false;
     }
-    
+
     if (formData.slug.length >= 3 && slugValidation.isAvailable === false) {
-      setError('El slug ya está en uso. Por favor, modifica el nombre del evento.');
+      setError(t('slugInUseEvent'));
       return false;
     }
     
@@ -364,10 +375,10 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
       let response;
       if (mode === 'create') {
         response = await eventsService.create(cleanEventData);
-        alert('✓ Evento creado exitosamente');
+        alert(t('eventCreatedSuccess'));
       } else {
         response = await eventsService.update(eventId!, cleanEventData);
-        alert('✓ Evento actualizado exitosamente');
+        alert(t('eventUpdatedSuccess'));
       }
 
       console.log('✅ Respuesta del backend:', response);
@@ -375,7 +386,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
       router.push('/organizer/events');
     } catch (err: any) {
       console.error(`❌ Error al ${mode === 'create' ? 'crear' : 'actualizar'} evento:`, err);
-      setError(err.message || `Error al ${mode === 'create' ? 'crear' : 'actualizar'} el evento`);
+      setError(err.message || (mode === 'create' ? t('eventCreateError') : t('eventUpdateError')));
     } finally {
       setLoading(false);
     }
@@ -407,10 +418,10 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         <div className="rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 p-6 shadow-sm border border-purple-200">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="h-5 w-5 text-purple-600" />
-            <h2 className="text-lg font-semibold text-purple-900">Auto-relleno con IA</h2>
+            <h2 className="text-lg font-semibold text-purple-900">{t('aiAutofillTitle')}</h2>
           </div>
           <p className="text-sm text-purple-700 mb-4">
-            Introduce la URL de la web del evento y la IA rellenará automáticamente los campos posibles.
+            {t('aiAutofillEventDesc')}
           </p>
 
           <div className="flex gap-2">
@@ -430,12 +441,12 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               {aiLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Analizando...
+                  {t('analyzing')}
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  Analizar con IA
+                  {t('analyzeWithAi')}
                 </>
               )}
             </button>
@@ -445,7 +456,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             <div className="mt-3 p-3 bg-purple-100 border border-purple-200 rounded-lg">
               <p className="text-sm text-purple-800 flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                La IA está analizando la web del evento. Esto puede tardar unos segundos...
+                {t('aiAnalyzingEvent')}
               </p>
             </div>
           )}
@@ -453,11 +464,11 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           {aiResult && !aiLoading && (
             <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-sm text-green-800 font-medium">
-                Auto-relleno completado. Revisa los campos y ajusta lo que necesites.
+                {t('aiAutofillReview')}
               </p>
               {aiResult.competitions && aiResult.competitions.length > 0 && (
                 <p className="text-sm text-green-700 mt-1">
-                  Se detectaron {aiResult.competitions.length} competiciones. Podrás crearlas después de guardar el evento.
+                  {t('aiCompsDetectedNote', { count: aiResult.competitions.length })}
                 </p>
               )}
             </div>
@@ -486,10 +497,10 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           <div className="rounded-lg bg-blue-50 p-6 shadow-sm border border-blue-200">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-blue-900">Competiciones detectadas</h2>
+              <h2 className="text-lg font-semibold text-blue-900">{t('compsDetectedTitle')}</h2>
             </div>
             <p className="text-sm text-blue-700 mb-4">
-              La IA ha detectado estas competiciones en la web del evento. Podrás crearlas después de guardar el evento.
+              {t('compsDetectedDesc')}
             </p>
 
             <div className="space-y-3">
@@ -504,7 +515,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
                   <div className="flex gap-4 mt-2 text-sm text-gray-600">
                     {comp.baseDistance && <span>{comp.baseDistance} km</span>}
                     {comp.baseElevation && <span>{comp.baseElevation} m D+</span>}
-                    {comp.baseMaxParticipants && <span>Max: {comp.baseMaxParticipants}</span>}
+                    {comp.baseMaxParticipants && <span>{t('maxLabel', { value: comp.baseMaxParticipants })}</span>}
                     {comp.itraPoints !== undefined && <span>ITRA: {comp.itraPoints}</span>}
                   </div>
                   {comp.description && (
@@ -518,19 +529,19 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
 
         {/* Card: Información Básica */}
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Información Básica</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('basicInfo')}</h2>
 
           <div className="space-y-4">
             {/* Nombre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre del Evento *
+                {t('eventNameLabel')}
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="Ej: Ultra Trail Mont Blanc"
+                placeholder={t('eventNamePlaceholder')}
                 required
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
@@ -539,7 +550,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             {/* Slug (auto-generado) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Slug (URL amigable)
+                {t('slugLabel')}
               </label>
               <div className="relative">
                 <input
@@ -562,12 +573,12 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               </div>
               {formData.slug.length >= 3 && slugValidation.isAvailable === false && (
                 <p className="mt-1 text-sm text-red-600">
-                  Este slug ya está en uso
+                  {t('slugInUse')}
                 </p>
               )}
               {formData.slug.length >= 3 && slugValidation.isAvailable === true && (
                 <p className="mt-1 text-sm text-green-600">
-                  Slug disponible
+                  {t('slugAvailable')}
                 </p>
               )}
             </div>
@@ -575,13 +586,13 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             {/* Descripción */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción
+                {t('description')}
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 rows={4}
-                placeholder="Describe el evento, su historia, características principales..."
+                placeholder={t('eventDescriptionPlaceholder')}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
@@ -592,19 +603,19 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <ImageIcon className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Imágenes</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('images')}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Logo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Logotipo
+                {t('logo')}
               </label>
               <FileUpload
                 fieldname="logo"
                 onUpload={(url) => handleChange('logoUrl', url)}
-                buttonText="Subir logo"
+                buttonText={t('uploadLogo')}
                 maxSizeMB={2}
                 accept="image/*"
                 showPreview={true}
@@ -612,7 +623,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               />
               {formData.logoUrl && (
                 <p className="text-xs text-green-600 font-medium mt-2">
-                  ✓ Logo subido
+                  {t('logoUploaded')}
                 </p>
               )}
             </div>
@@ -620,12 +631,12 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             {/* Cover */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Imagen de Portada
+                {t('coverImage')}
               </label>
               <FileUpload
                 fieldname="cover"
                 onUpload={(url) => handleChange('coverImage', url)}
-                buttonText="Subir portada"
+                buttonText={t('uploadCover')}
                 maxSizeMB={5}
                 accept="image/*"
                 showPreview={true}
@@ -633,7 +644,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               />
               {formData.coverImage && (
                 <p className="text-xs text-green-600 font-medium mt-2">
-                  ✓ Portada subida
+                  {t('coverUploaded')}
                 </p>
               )}
             </div>
@@ -641,28 +652,28 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             {/* Galería */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Galería de Fotos
+                {t('photoGallery')}
               </label>
               <FileUpload
                 fieldname="gallery"
                 multiple={true}
                 onUploadMultiple={(urls) => handleChange('gallery', urls)}
                 currentUrls={formData.gallery}
-                buttonText="Subir fotos"
+                buttonText={t('uploadPhotos')}
                 maxSizeMB={3}
                 accept="image/*"
                 showPreview={true}
               />
               {formData.gallery.length > 0 && (
                 <p className="text-xs text-green-600 font-medium mt-2">
-                  ✓ {formData.gallery.length} fotos
+                  {t('photosCount', { count: formData.gallery.length })}
                 </p>
               )}
             </div>
           </div>
 
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-            💡 Las imágenes se optimizan automáticamente. Máximo 5MB por archivo.
+            {t('imagesOptimizedNote')}
           </div>
         </div>
 
@@ -670,20 +681,20 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Ubicación</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('location')}</h2>
           </div>
 
           <div className="space-y-4">
             {/* Ciudad */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ciudad *
+                {t('cityLabel')}
               </label>
               <input
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleChange('city', e.target.value)}
-                placeholder="Ej: Chamonix"
+                placeholder={t('cityPlaceholder')}
                 required
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
@@ -692,12 +703,12 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             {/* País */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                País *
+                {t('countryLabel')}
               </label>
               <CountrySelect
                 value={formData.country}
                 onChange={(code) => handleChange('country', code)}
-                error={!formData.country && error ? 'Selecciona un país' : undefined}
+                error={!formData.country && error ? t('selectCountry') : undefined}
               />
             </div>
 
@@ -712,17 +723,17 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
                 {geocoding ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Buscando coordenadas...
+                    {t('searchingCoordinates')}
                   </>
                 ) : (
                   <>
                     <MapPin className="h-4 w-4" />
-                    Buscar Coordenadas Automáticamente
+                    {t('searchCoordinatesAuto')}
                   </>
                 )}
               </button>
               <p className="mt-2 text-xs text-gray-500 text-center">
-                O ingrésalas manualmente abajo
+                {t('orEnterManually')}
               </p>
             </div>
 
@@ -730,7 +741,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Latitud
+                  {t('latitude')}
                 </label>
                 <input
                   type="number"
@@ -743,7 +754,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Longitud
+                  {t('longitude')}
                 </label>
                 <input
                   type="number"
@@ -762,7 +773,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Información Adicional</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('additionalInfo')}</h2>
           </div>
 
           <div className="space-y-4">
@@ -770,33 +781,33 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               {/* Mes Típico */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mes Típico del Evento
+                  {t('typicalMonth')}
                 </label>
                 <select
                   value={formData.typicalMonth}
                   onChange={(e) => handleChange('typicalMonth', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 >
-                  <option value="">Selecciona un mes</option>
-                  <option value="1">Enero</option>
-                  <option value="2">Febrero</option>
-                  <option value="3">Marzo</option>
-                  <option value="4">Abril</option>
-                  <option value="5">Mayo</option>
-                  <option value="6">Junio</option>
-                  <option value="7">Julio</option>
-                  <option value="8">Agosto</option>
-                  <option value="9">Septiembre</option>
-                  <option value="10">Octubre</option>
-                  <option value="11">Noviembre</option>
-                  <option value="12">Diciembre</option>
+                  <option value="">{t('selectMonth')}</option>
+                  <option value="1">{t('monthJanuary')}</option>
+                  <option value="2">{t('monthFebruary')}</option>
+                  <option value="3">{t('monthMarch')}</option>
+                  <option value="4">{t('monthApril')}</option>
+                  <option value="5">{t('monthMay')}</option>
+                  <option value="6">{t('monthJune')}</option>
+                  <option value="7">{t('monthJuly')}</option>
+                  <option value="8">{t('monthAugust')}</option>
+                  <option value="9">{t('monthSeptember')}</option>
+                  <option value="10">{t('monthOctober')}</option>
+                  <option value="11">{t('monthNovember')}</option>
+                  <option value="12">{t('monthDecember')}</option>
                 </select>
               </div>
 
               {/* Año Primera Edición */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Año Primera Edición *
+                  {t('firstEditionYearLabel')}
                 </label>
                 <input
                   type="number"
@@ -813,7 +824,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             {/* Website */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sitio Web Oficial
+                {t('officialWebsite')}
               </label>
               <input
                 type="url"
@@ -829,7 +840,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <span className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
-                  Entidad Organizadora (opcional)
+                  {t('organizerEntity')}
                 </span>
               </label>
               <select
@@ -837,13 +848,13 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
                 onChange={(e) => handleChange('organizerId', e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
-                <option value="">Sin organizador</option>
+                <option value="">{t('noOrganizer')}</option>
                 {organizers.map((org) => (
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
               </select>
               <p className="mt-1 text-xs text-gray-500">
-                Selecciona la entidad organizadora de este evento (club, sociedad, etc.)
+                {t('organizerEntityHelp')}
               </p>
             </div>
           </div>
@@ -853,7 +864,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <Share2 className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Redes Sociales</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('socialMedia')}</h2>
           </div>
 
           <div className="space-y-4">
@@ -935,7 +946,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           </div>
 
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-            💡 Todos los campos de redes sociales son opcionales
+            {t('socialOptionalNote')}
           </div>
         </div>
 
@@ -946,7 +957,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             onClick={() => router.back()}
             className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancelar
+            {t('cancel')}
           </button>
           <button
             type="submit"
@@ -959,12 +970,12 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
             {loading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                {mode === 'create' ? 'Creando...' : 'Guardando...'}
+                {mode === 'create' ? t('creating') : t('saving')}
               </>
             ) : (
               <>
                 <Save className="h-5 w-5" />
-                {mode === 'create' ? 'Crear Evento' : 'Guardar Cambios'}
+                {mode === 'create' ? t('createEvent') : t('saveChanges')}
               </>
             )}
           </button>

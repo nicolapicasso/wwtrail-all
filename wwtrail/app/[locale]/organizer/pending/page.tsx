@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ import { adminService, PendingContentCounts, PendingContentItem } from '@/lib/ap
 export default function PendingContentPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('boEvents');
 
   const [counts, setCounts] = useState<PendingContentCounts | null>(null);
   const [items, setItems] = useState<PendingContentItem[]>([]);
@@ -37,7 +38,7 @@ export default function PendingContentPage() {
   const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   const handleApprove = async (item: PendingContentItem) => {
-    if (!confirm(`¿Estás seguro de aprobar "${item.name}"?`)) return;
+    if (!confirm(t('confirmApprove', { name: item.name }))) return;
 
     setApprovingId(item.id);
     try {
@@ -46,14 +47,14 @@ export default function PendingContentPage() {
       await fetchData();
     } catch (err: any) {
       console.error('Error approving content:', err);
-      alert(`Error al aprobar: ${err.message || 'Error desconocido'}`);
+      alert(t('errorApprove', { message: err.message || t('unknownError') }));
     } finally {
       setApprovingId(null);
     }
   };
 
   const handleReject = async (item: PendingContentItem) => {
-    if (!confirm(`¿Estás seguro de RECHAZAR y ELIMINAR "${item.name}"? Esta acción no se puede deshacer.`)) return;
+    if (!confirm(t('confirmReject', { name: item.name }))) return;
 
     setRejectingId(item.id);
     try {
@@ -62,7 +63,7 @@ export default function PendingContentPage() {
       await fetchData();
     } catch (err: any) {
       console.error('Error rejecting content:', err);
-      alert(`Error al rechazar: ${err.message || 'Error desconocido'}`);
+      alert(t('errorReject', { message: err.message || t('unknownError') }));
     } finally {
       setRejectingId(null);
     }
@@ -80,7 +81,7 @@ export default function PendingContentPage() {
       setItems(itemsData);
     } catch (err: any) {
       console.error('Error fetching pending content:', err);
-      setError('Error al cargar el contenido pendiente');
+      setError(t('errorLoadingPending'));
     } finally {
       setLoading(false);
     }
@@ -112,17 +113,17 @@ export default function PendingContentPage() {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'competition':
-        return 'Competición';
+        return t('competitionLabel');
       case 'edition':
-        return 'Edición';
+        return t('editionLabel');
       case 'event':
-        return 'Evento';
+        return t('eventLabel');
       case 'service':
-        return 'Servicio';
+        return t('serviceLabel');
       case 'specialSeries':
-        return 'Serie Especial';
+        return t('specialSeriesLabel');
       case 'magazine':
-        return 'Artículo';
+        return t('articleLabel');
       default:
         return type;
     }
@@ -174,15 +175,15 @@ export default function PendingContentPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <AlertCircle className="w-8 h-8 text-red-500" />
-            Contenido Pendiente de Revisión
+            {t('pendingTitle')}
           </h1>
           <p className="text-gray-600 mt-1">
-            Revisa y aprueba el contenido enviado por los organizadores
+            {t('pendingSubtitle')}
           </p>
         </div>
         <Button variant="outline" onClick={fetchData} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
+          {t('refresh')}
         </Button>
       </div>
 
@@ -203,7 +204,7 @@ export default function PendingContentPage() {
                 <p className={`text-2xl font-bold ${counts.total > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                   {counts.total}
                 </p>
-                <p className="text-sm text-gray-500">Total</p>
+                <p className="text-sm text-gray-500">{t('total')}</p>
               </div>
             </CardContent>
           </Card>
@@ -212,7 +213,7 @@ export default function PendingContentPage() {
               <div className="text-center">
                 <Flag className="w-8 h-8 mx-auto mb-2 text-blue-500" />
                 <p className="text-2xl font-bold">{counts.competitions}</p>
-                <p className="text-sm text-gray-500">Competiciones</p>
+                <p className="text-sm text-gray-500">{t('sectionCompetitions')}</p>
               </div>
             </CardContent>
           </Card>
@@ -221,7 +222,7 @@ export default function PendingContentPage() {
               <div className="text-center">
                 <MapPin className="w-8 h-8 mx-auto mb-2 text-green-500" />
                 <p className="text-2xl font-bold">{counts.events}</p>
-                <p className="text-sm text-gray-500">Eventos</p>
+                <p className="text-sm text-gray-500">{t('sectionEvents')}</p>
               </div>
             </CardContent>
           </Card>
@@ -230,7 +231,7 @@ export default function PendingContentPage() {
               <div className="text-center">
                 <Building2 className="w-8 h-8 mx-auto mb-2 text-orange-500" />
                 <p className="text-2xl font-bold">{counts.services}</p>
-                <p className="text-sm text-gray-500">Servicios</p>
+                <p className="text-sm text-gray-500">{t('sectionServices')}</p>
               </div>
             </CardContent>
           </Card>
@@ -239,7 +240,7 @@ export default function PendingContentPage() {
               <div className="text-center">
                 <Layers className="w-8 h-8 mx-auto mb-2 text-indigo-500" />
                 <p className="text-2xl font-bold">{counts.specialSeries}</p>
-                <p className="text-sm text-gray-500">Series</p>
+                <p className="text-sm text-gray-500">{t('series')}</p>
               </div>
             </CardContent>
           </Card>
@@ -248,7 +249,7 @@ export default function PendingContentPage() {
               <div className="text-center">
                 <FileText className="w-8 h-8 mx-auto mb-2 text-pink-500" />
                 <p className="text-2xl font-bold">{counts.magazines}</p>
-                <p className="text-sm text-gray-500">Artículos</p>
+                <p className="text-sm text-gray-500">{t('sectionArticles')}</p>
               </div>
             </CardContent>
           </Card>
@@ -261,19 +262,19 @@ export default function PendingContentPage() {
           <CardContent className="py-12 text-center">
             <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              Todo al día
+              {t('allDone')}
             </h3>
             <p className="text-gray-500">
-              No hay contenido pendiente de revisión
+              {t('noPendingContent')}
             </p>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Elementos Pendientes ({items.length})</CardTitle>
+            <CardTitle>{t('pendingItems', { count: items.length })}</CardTitle>
             <CardDescription>
-              Haz clic en un elemento para revisarlo y aprobarlo o rechazarlo
+              {t('pendingItemsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -321,7 +322,7 @@ export default function PendingContentPage() {
                       ) : (
                         <Check className="w-4 h-4 mr-2" />
                       )}
-                      Aprobar
+                      {t('approve')}
                     </Button>
                     <Button
                       variant="destructive"
@@ -334,11 +335,11 @@ export default function PendingContentPage() {
                       ) : (
                         <X className="w-4 h-4 mr-2" />
                       )}
-                      Rechazar
+                      {t('reject')}
                     </Button>
                     <Link href={getReviewLink(item)}>
                       <Button variant="outline" size="sm">
-                        Revisar
+                        {t('review')}
                         <ExternalLink className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>

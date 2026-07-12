@@ -18,12 +18,14 @@ import {
   Eye
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export default function LandingsAdminPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('boCatalog');
 
   const [landings, setLandings] = useState<Landing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,8 +55,8 @@ export default function LandingsAdminPage() {
       setTotalPages(response.pagination.totalPages);
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al cargar las landings',
+        title: t('error'),
+        description: error.message || t('errorLoadingLandings'),
         variant: 'destructive',
       });
     } finally {
@@ -63,21 +65,21 @@ export default function LandingsAdminPage() {
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`¿Estás seguro de eliminar "${title}"?`)) {
+    if (!confirm(t('confirmDeleteLanding', { title }))) {
       return;
     }
 
     try {
       await landingService.delete(id);
       toast({
-        title: '✅ Eliminado',
-        description: 'Landing eliminada correctamente',
+        title: `✅ ${t('deleted')}`,
+        description: t('landingDeletedSuccess'),
       });
       loadLandings();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al eliminar',
+        title: t('error'),
+        description: error.message || t('errorDeleting'),
         variant: 'destructive',
       });
     }
@@ -100,15 +102,15 @@ export default function LandingsAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">📄 Landings</h1>
+          <h1 className="text-3xl font-bold">📄 {t('landingsTitle')}</h1>
           <p className="text-muted-foreground mt-1">
-            Gestiona las páginas landing personalizadas
+            {t('landingsSubtitle')}
           </p>
         </div>
         <Link href="/organizer/landings/new">
           <Button size="lg">
             <Plus className="mr-2 h-4 w-4" />
-            Nueva Landing
+            {t('newLanding')}
           </Button>
         </Link>
       </div>
@@ -123,7 +125,7 @@ export default function LandingsAdminPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder="Buscar por título..."
+            placeholder={t('searchByTitle')}
             className="pl-10"
           />
         </div>
@@ -138,12 +140,12 @@ export default function LandingsAdminPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <p className="text-muted-foreground mb-4">
-              {search ? 'No se encontraron resultados' : 'No hay landings creadas'}
+              {search ? t('noResultsFound') : t('noLandingsCreated')}
             </p>
             <Link href="/organizer/landings/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Crear primera landing
+                {t('createFirstLanding')}
               </Button>
             </Link>
           </CardContent>
@@ -173,7 +175,7 @@ export default function LandingsAdminPage() {
                       </div>
                       {landing.translations && landing.translations.length > 0 && (
                         <span className="text-green-600">
-                          {landing.translations.length} traducción(es)
+                          {t('translationsCount', { count: landing.translations.length })}
                         </span>
                       )}
                     </div>
@@ -219,17 +221,17 @@ export default function LandingsAdminPage() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
-            Anterior
+            {t('previous')}
           </Button>
           <span className="text-sm text-muted-foreground">
-            Página {page} de {totalPages}
+            {t('pageOf', { page, totalPages })}
           </span>
           <Button
             variant="outline"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
           >
-            Siguiente
+            {t('next')}
           </Button>
         </div>
       )}

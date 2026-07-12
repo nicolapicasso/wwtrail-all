@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { EventStatusBadge } from './EventStatusBadge';
 import { Event, EventWithCounts } from '@/types/event';
 
@@ -19,6 +20,7 @@ export function EventCard({
   onDelete,
   showActions = true,
 }: EventCardProps) {
+  const t = useTranslations('boAdmin');
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
       {/* Imagen */}
@@ -57,7 +59,7 @@ export function EventCard({
         {event.featured && (
           <div className="absolute top-3 left-3">
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 text-yellow-900 text-xs font-medium rounded">
-              ⭐ Destacado
+              ⭐ {t('featured')}
             </span>
           </div>
         )}
@@ -117,7 +119,7 @@ export function EventCard({
                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
               />
             </svg>
-            {event.viewCount || 0} vistas
+            {t('views', { count: event.viewCount || 0 })}
           </span>
           
           {event._count?.competitions !== undefined && (
@@ -135,7 +137,7 @@ export function EventCard({
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                 />
               </svg>
-              {event._count.competitions} carreras
+              {t('races', { count: event._count.competitions })}
             </span>
           )}
         </div>
@@ -147,7 +149,7 @@ export function EventCard({
               href={`/events/${event.slug || event.id}`}
               className="flex-1 text-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
             >
-              Ver detalles
+              {t('viewDetails')}
             </Link>
             
             {onEdit && (
@@ -155,7 +157,7 @@ export function EventCard({
                 onClick={() => onEdit(event)}
                 className="px-4 py-2 text-sm font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-md transition-colors"
               >
-                Editar
+                {t('edit')}
               </button>
             )}
           </div>

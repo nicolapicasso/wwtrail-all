@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
   Home,
@@ -22,6 +23,7 @@ import { BlockConfigModal } from '@/components/admin/home/BlockConfigModal';
 import { HeroConfigForm } from '@/components/admin/home/HeroConfigForm';
 
 export default function HomeConfigPage() {
+  const t = useTranslations('boMisc');
   const router = useRouter();
   const [config, setConfig] = useState<HomeConfiguration | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,11 +67,11 @@ export default function HomeConfigPage() {
         heroTitle,
         heroSubtitle,
       });
-      alert('Hero actualizado correctamente');
+      alert(t('homeConfigHeroSaved'));
       await loadConfig();
     } catch (error) {
       console.error('Error saving hero:', error);
-      alert('Error al guardar el hero');
+      alert(t('homeConfigHeroSaveError'));
     } finally {
       setSaving(false);
     }
@@ -81,19 +83,19 @@ export default function HomeConfigPage() {
       await loadConfig();
     } catch (error) {
       console.error('Error toggling visibility:', error);
-      alert('Error al cambiar visibilidad');
+      alert(t('homeConfigVisibilityError'));
     }
   };
 
   const handleDeleteBlock = async (blockId: string) => {
-    if (!confirm('¿Estás seguro de eliminar este bloque?')) return;
+    if (!confirm(t('homeConfigDeleteBlockConfirm'))) return;
 
     try {
       await homeService.deleteBlock(blockId);
       await loadConfig();
     } catch (error) {
       console.error('Error deleting block:', error);
-      alert('Error al eliminar el bloque');
+      alert(t('homeConfigDeleteBlockError'));
     }
   };
 
@@ -122,7 +124,7 @@ export default function HomeConfigPage() {
       await loadConfig();
     } catch (error) {
       console.error('Error reordering blocks:', error);
-      alert('Error al reordenar bloques');
+      alert(t('homeConfigReorderError'));
     }
   };
 
@@ -134,14 +136,14 @@ export default function HomeConfigPage() {
 
   const getBlockTypeLabel = (type: HomeBlockType): string => {
     const labels: Record<HomeBlockType, string> = {
-      EVENTS: 'Eventos',
-      COMPETITIONS: 'Competiciones',
-      EDITIONS: 'Ediciones',
-      SERVICES: 'Servicios',
-      POSTS: 'Artículos',
-      TEXT: 'Texto',
-      LINKS: 'Enlaces',
-      MAP: 'Mapa',
+      EVENTS: t('dashEvents'),
+      COMPETITIONS: t('dashCompetitions'),
+      EDITIONS: t('dashEditions'),
+      SERVICES: t('dashServices'),
+      POSTS: t('homeConfigBlockPosts'),
+      TEXT: t('homeConfigBlockText'),
+      LINKS: t('homeConfigBlockLinks'),
+      MAP: t('homeConfigBlockMap'),
     };
     return labels[type] || type;
   };
@@ -174,7 +176,7 @@ export default function HomeConfigPage() {
     return (
       <div className="p-8">
         <div className="text-center py-12">
-          <p className="text-red-600">Error al cargar la configuración</p>
+          <p className="text-red-600">{t('homeConfigLoadError')}</p>
         </div>
       </div>
     );
@@ -189,17 +191,17 @@ export default function HomeConfigPage() {
         <div className="flex items-center gap-3 mb-2">
           <Home className="w-8 h-8 text-blue-600" />
           <h1 className="text-3xl font-bold text-gray-900">
-            Configuración de la Home
+            {t('homeConfigTitle')}
           </h1>
         </div>
         <p className="text-gray-600">
-          Configura el hero y los bloques de contenido de la página principal
+          {t('homeConfigSubtitle')}
         </p>
       </div>
 
       {/* Hero Configuration */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Hero Section (Slider)</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">{t('homeConfigHeroSection')}</h2>
         <HeroConfigForm
           heroImages={heroImages}
           heroTitle={heroTitle}
@@ -215,19 +217,19 @@ export default function HomeConfigPage() {
       {/* Blocks Management */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Bloques de Contenido</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('homeConfigContentBlocks')}</h2>
           <button
             onClick={() => setShowBlockModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
-            Agregar Bloque
+            {t('homeConfigAddBlock')}
           </button>
         </div>
 
         {sortedBlocks.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            No hay bloques configurados. Agrega tu primer bloque.
+            {t('homeConfigNoBlocks')}
           </div>
         ) : (
           <div className="space-y-3">
@@ -267,7 +269,7 @@ export default function HomeConfigPage() {
                       >
                         {getBlockTypeLabel(block.type)}
                       </span>
-                      <span className="text-sm text-gray-500">Orden: {block.order}</span>
+                      <span className="text-sm text-gray-500">{t('homeConfigOrder')}: {block.order}</span>
                     </div>
                     <div className="text-sm text-gray-600">
                       {block.config && JSON.stringify(block.config, null, 2).substring(0, 100)}...
@@ -279,7 +281,7 @@ export default function HomeConfigPage() {
                     <button
                       onClick={() => handleToggleVisibility(block.id)}
                       className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                      title={block.visible ? 'Ocultar' : 'Mostrar'}
+                      title={block.visible ? t('homeConfigHide') : t('homeConfigShow')}
                     >
                       {block.visible ? (
                         <Eye className="w-5 h-5" />
@@ -290,14 +292,14 @@ export default function HomeConfigPage() {
                     <button
                       onClick={() => setEditingBlock(block)}
                       className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md"
-                      title="Editar"
+                      title={t('editar')}
                     >
                       <Edit2 className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDeleteBlock(block.id)}
                       className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md"
-                      title="Eliminar"
+                      title={t('eliminar')}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>

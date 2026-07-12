@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -129,6 +130,7 @@ function FileUpload({
   onFileSelect: (data: any[]) => void;
   icon: React.ElementType;
 }) {
+  const t = useTranslations('boMisc');
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -139,7 +141,7 @@ function FileUpload({
       onFileSelect(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error parsing JSON:', error);
-      alert('Error al leer el archivo JSON');
+      alert(t('importErrorReadJson'));
     }
   };
 
@@ -161,12 +163,12 @@ function FileUpload({
         className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
       >
         <Upload className="w-4 h-4" />
-        <span className="text-sm">Seleccionar archivo</span>
+        <span className="text-sm">{t('importSelectFile')}</span>
       </label>
       {fileName && (
         <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
           <FileJson className="w-4 h-4" />
-          <span>{count?.toLocaleString()} registros</span>
+          <span>{t('importRecordsCount', { count: count ?? 0 })}</span>
         </div>
       )}
     </div>
@@ -175,6 +177,7 @@ function FileUpload({
 
 // Result Card Component
 function ResultCard({ title, result }: { title: string; result: ImportResult }) {
+  const t = useTranslations('boMisc');
   const hasErrors = result.errors.length > 0;
 
   return (
@@ -182,13 +185,13 @@ function ResultCard({ title, result }: { title: string; result: ImportResult }) 
       <h4 className="font-medium mb-2">{title}</h4>
       <div className="grid grid-cols-3 gap-2 text-sm">
         <div className="text-green-600">
-          <span className="font-bold">{result.created}</span> creados
+          <span className="font-bold">{result.created}</span> {t('importResultCreated')}
         </div>
         <div className="text-yellow-600">
-          <span className="font-bold">{result.skipped}</span> omitidos
+          <span className="font-bold">{result.skipped}</span> {t('importResultSkipped')}
         </div>
         <div className={hasErrors ? 'text-red-600' : 'text-gray-400'}>
-          <span className="font-bold">{result.errors.length}</span> errores
+          <span className="font-bold">{result.errors.length}</span> {t('importResultErrors')}
         </div>
       </div>
       {hasErrors && (
@@ -200,7 +203,7 @@ function ResultCard({ title, result }: { title: string; result: ImportResult }) 
           ))}
           {result.errors.length > 5 && (
             <div className="text-xs text-gray-500 mt-1">
-              ... y {result.errors.length - 5} errores mas
+              {t('importMoreErrors', { count: result.errors.length - 5 })}
             </div>
           )}
         </div>
@@ -214,6 +217,7 @@ function ResultCard({ title, result }: { title: string; result: ImportResult }) 
 // ============================================
 
 function MasterDataReference() {
+  const t = useTranslations('boMisc');
   const [terrainTypes, setTerrainTypes] = useState<TerrainType[]>([]);
   const [specialSeries, setSpecialSeries] = useState<SpecialSeries[]>([]);
   const [loading, setLoading] = useState(false);
@@ -261,10 +265,10 @@ function MasterDataReference() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="w-5 h-5" />
-          Datos Maestros de Referencia
+          {t('importMasterDataTitle')}
         </CardTitle>
         <CardDescription>
-          Consulta los valores validos para terrainType y specialSeries que debes usar en tus archivos de importacion
+          {t('importMasterDataDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -282,7 +286,7 @@ function MasterDataReference() {
               >
                 <div className="flex items-center gap-2">
                   <Mountain className="w-4 h-4 text-orange-600" />
-                  <span className="font-medium">Tipos de Terreno</span>
+                  <span className="font-medium">{t('importTerrainTypesTitle')}</span>
                   <span className="text-sm text-gray-500">({terrainTypes.length})</span>
                 </div>
                 <ChevronDown className={`w-4 h-4 transition-transform ${showTerrainTypes ? 'rotate-180' : ''}`} />
@@ -296,16 +300,16 @@ function MasterDataReference() {
                       onClick={() => downloadJson(formatForImport(terrainTypes), 'terrain_types.json')}
                     >
                       <Download className="w-3 h-3 mr-1" />
-                      Descargar JSON
+                      {t('importDownloadJson')}
                     </Button>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-100">
                         <tr>
-                          <th className="px-2 py-1 text-left">ID</th>
-                          <th className="px-2 py-1 text-left">Nombre</th>
-                          <th className="px-2 py-1 text-left">Slug</th>
+                          <th className="px-2 py-1 text-left">{t('importColId')}</th>
+                          <th className="px-2 py-1 text-left">{t('importColName')}</th>
+                          <th className="px-2 py-1 text-left">{t('importColSlug')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -320,7 +324,7 @@ function MasterDataReference() {
                     </table>
                   </div>
                   <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-800">
-                    <strong>Uso en JSON:</strong> <code className="bg-blue-100 px-1 rounded">{`"terrainType": { "id": "...", "name": "Alta montaña", "slug": "alta-montana" }`}</code>
+                    <strong>{t('importUsageJson')}</strong> <code className="bg-blue-100 px-1 rounded">{`"terrainType": { "id": "...", "name": "Alta montaña", "slug": "alta-montana" }`}</code>
                   </div>
                 </div>
               )}
@@ -334,7 +338,7 @@ function MasterDataReference() {
               >
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span className="font-medium">Series Especiales</span>
+                  <span className="font-medium">{t('importSpecialSeriesTitle')}</span>
                   <span className="text-sm text-gray-500">({specialSeries.length})</span>
                 </div>
                 <ChevronDown className={`w-4 h-4 transition-transform ${showSpecialSeries ? 'rotate-180' : ''}`} />
@@ -348,16 +352,16 @@ function MasterDataReference() {
                       onClick={() => downloadJson(formatForImport(specialSeries), 'special_series.json')}
                     >
                       <Download className="w-3 h-3 mr-1" />
-                      Descargar JSON
+                      {t('importDownloadJson')}
                     </Button>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-100">
                         <tr>
-                          <th className="px-2 py-1 text-left">ID</th>
-                          <th className="px-2 py-1 text-left">Nombre</th>
-                          <th className="px-2 py-1 text-left">Slug</th>
+                          <th className="px-2 py-1 text-left">{t('importColId')}</th>
+                          <th className="px-2 py-1 text-left">{t('importColName')}</th>
+                          <th className="px-2 py-1 text-left">{t('importColSlug')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -372,7 +376,7 @@ function MasterDataReference() {
                     </table>
                   </div>
                   <div className="mt-2 p-2 bg-purple-50 rounded text-xs text-purple-800">
-                    <strong>Uso en JSON:</strong> <code className="bg-purple-100 px-1 rounded">{`"specialSeries": [{ "id": "...", "name": "UTMB World Series", "slug": "utmb-world-series" }]`}</code>
+                    <strong>{t('importUsageJson')}</strong> <code className="bg-purple-100 px-1 rounded">{`"specialSeries": [{ "id": "...", "name": "UTMB World Series", "slug": "utmb-world-series" }]`}</code>
                   </div>
                 </div>
               )}
@@ -389,13 +393,13 @@ function MasterDataReference() {
 // ============================================
 
 const ENTITY_OPTIONS: { value: NativeImportEntityType; label: string; icon: React.ElementType }[] = [
-  { value: 'events', label: 'Eventos', icon: MapPin },
-  { value: 'competitions', label: 'Competiciones', icon: Trophy },
-  { value: 'editions', label: 'Ediciones', icon: Calendar },
-  { value: 'organizers', label: 'Organizadores', icon: Briefcase },
-  { value: 'specialSeries', label: 'Series Especiales', icon: Sparkles },
-  { value: 'services', label: 'Servicios', icon: Building2 },
-  { value: 'posts', label: 'Posts', icon: FileText },
+  { value: 'events', label: 'importEntityEvents', icon: MapPin },
+  { value: 'competitions', label: 'importEntityCompetitions', icon: Trophy },
+  { value: 'editions', label: 'importEntityEditions', icon: Calendar },
+  { value: 'organizers', label: 'importEntityOrganizers', icon: Briefcase },
+  { value: 'specialSeries', label: 'importEntitySpecialSeries', icon: Sparkles },
+  { value: 'services', label: 'importEntityServices', icon: Building2 },
+  { value: 'posts', label: 'importEntityPosts', icon: FileText },
 ];
 
 // Example JSON structures for each entity type
@@ -551,6 +555,7 @@ const EXAMPLE_JSON: Record<NativeImportEntityType, object> = {
 
 // Component to show example JSON and allow download
 function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType }) {
+  const t = useTranslations('boMisc');
   const [showExample, setShowExample] = useState(false);
   const example = EXAMPLE_JSON[entityType];
   const exampleArray = [example]; // Export format is an array
@@ -573,7 +578,7 @@ function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType
       <div className="flex items-center justify-between mb-3">
         <h4 className="font-medium text-sm flex items-center gap-2">
           <FileJson className="w-4 h-4 text-blue-600" />
-          Formato JSON Esperado
+          {t('importExpectedJsonFormat')}
         </h4>
         <div className="flex gap-2">
           <Button
@@ -582,7 +587,7 @@ function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType
             onClick={() => setShowExample(!showExample)}
           >
             <Eye className="w-3 h-3 mr-1" />
-            {showExample ? 'Ocultar' : 'Ver Ejemplo'}
+            {showExample ? t('importHide') : t('importViewExample')}
           </Button>
           <Button
             variant="outline"
@@ -590,7 +595,7 @@ function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType
             onClick={downloadExample}
           >
             <Download className="w-3 h-3 mr-1" />
-            Descargar
+            {t('importDownload')}
           </Button>
         </div>
       </div>
@@ -601,18 +606,18 @@ function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType
             {JSON.stringify(exampleArray, null, 2)}
           </pre>
           <div className="mt-2 text-xs text-gray-600 space-y-1">
-            <p><strong>Nota:</strong> El archivo debe ser un array de objetos con esta estructura.</p>
+            <p><strong>{t('importNote')}</strong> {t('importFileMustBeArray')}</p>
             {entityType === 'competitions' && (
               <>
-                <p><strong>utmbIndex:</strong> Valores validos: INDEX_20K, INDEX_50K, INDEX_100K, INDEX_100M (o 20K, 50K, 100K, 100M)</p>
-                <p><strong>specialSeries:</strong> Array de objetos con id, name y slug (no strings)</p>
+                <p><strong>utmbIndex:</strong> {t('importUtmbIndexNote')}</p>
+                <p><strong>specialSeries:</strong> {t('importSpecialSeriesNote')}</p>
               </>
             )}
             {entityType === 'events' && (
-              <p><strong>organizer:</strong> Objeto con id, name y slug para vincular al organizador existente</p>
+              <p><strong>organizer:</strong> {t('importOrganizerNote')}</p>
             )}
             {entityType === 'editions' && (
-              <p><strong>competition:</strong> Debe incluir el objeto competition con id y slug para vincular correctamente</p>
+              <p><strong>competition:</strong> {t('importCompetitionNote')}</p>
             )}
           </div>
         </div>
@@ -622,6 +627,7 @@ function ExampleJsonSection({ entityType }: { entityType: NativeImportEntityType
 }
 
 function NativeImportTab({ onImportComplete }: { onImportComplete: () => void }) {
+  const t = useTranslations('boMisc');
   const [entityType, setEntityType] = useState<NativeImportEntityType>('events');
   const [file, setFile] = useState<NativeImportFile | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -706,7 +712,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
 
   // Check if parent selector should be shown
   const needsParentSelector = entityType === 'competitions' || entityType === 'editions';
-  const parentLabel = entityType === 'competitions' ? 'Evento' : 'Competicion';
+  const parentLabel = entityType === 'competitions' ? t('importEvento') : t('importCompeticion');
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -736,7 +742,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
         // Single object - wrap in array
         setFile({ data: [data] });
       } else {
-        alert('Formato de archivo no reconocido. Debe ser un array, un objeto con propiedad "data", o un objeto con "id" y "name/title/slug".');
+        alert(t('importUnrecognizedFormat'));
         return;
       }
 
@@ -745,7 +751,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
       setImportResult(null);
     } catch (error) {
       console.error('Error parsing JSON:', error);
-      alert('Error al leer el archivo JSON');
+      alert(t('importErrorReadJson'));
     }
   };
 
@@ -760,7 +766,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
       setValidationResult(result);
     } catch (error: any) {
       console.error('Error validating:', error);
-      alert(`Error en la validacion: ${error.message || 'Error desconocido'}`);
+      alert(t('importValidationError', { error: error.message || t('importUnknownError') }));
     } finally {
       setValidating(false);
     }
@@ -785,7 +791,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
       }
     } catch (error: any) {
       console.error('Error importing:', error);
-      alert(`Error en la importacion: ${error.message || 'Error desconocido'}`);
+      alert(t('importImportError', { error: error.message || t('importUnknownError') }));
     } finally {
       setImporting(false);
     }
@@ -811,10 +817,10 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="w-5 h-5" />
-            Tipo de Entidad
+            {t('importEntityTypeTitle')}
           </CardTitle>
           <CardDescription>
-            Selecciona el tipo de datos que quieres importar
+            {t('importEntityTypeDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -829,7 +835,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   <SelectItem key={option.value} value={option.value}>
                     <div className="flex items-center gap-2">
                       <OptionIcon className="w-4 h-4" />
-                      {option.label}
+                      {t(option.label)}
                     </div>
                   </SelectItem>
                 );
@@ -841,23 +847,22 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
           {entityType === 'competitions' && (
             <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <label className="block text-sm font-medium text-blue-900 mb-2">
-                Evento Padre (opcional)
+                {t('importParentEventLabel')}
               </label>
               <p className="text-xs text-blue-700 mb-3">
-                Selecciona el evento al que asociar las competiciones.
-                Si no seleccionas ninguno, el JSON debe incluir el eventId.
+                {t('importParentEventHelp')}
               </p>
               <SearchableEntitySelect
                 value={parentId}
                 onChange={setParentId}
                 options={parentEntities}
-                placeholder="Seleccionar Evento"
-                emptyOptionLabel="Sin seleccionar (usar referencia del JSON)"
+                placeholder={t('importSelectEvent')}
+                emptyOptionLabel={t('importEmptyUseJsonRef')}
                 loading={loadingParents}
               />
               {parentId && (
                 <p className="mt-2 text-xs text-green-700">
-                  Todas las competiciones se asociaran a este evento.
+                  {t('importAllCompsToEvent')}
                 </p>
               )}
             </div>
@@ -868,17 +873,17 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
             <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-4">
               <div>
                 <label className="block text-sm font-medium text-blue-900 mb-2">
-                  1. Seleccionar Evento (opcional)
+                  {t('importStep1SelectEvent')}
                 </label>
                 <p className="text-xs text-blue-700 mb-3">
-                  Primero selecciona el evento para filtrar las competiciones disponibles.
+                  {t('importFilterCompsHelp')}
                 </p>
                 <SearchableEntitySelect
                   value={selectedEventId}
                   onChange={setSelectedEventId}
                   options={eventsList}
-                  placeholder="Seleccionar Evento"
-                  emptyOptionLabel="Sin seleccionar"
+                  placeholder={t('importSelectEvent')}
+                  emptyOptionLabel={t('importEmptyNoSelection')}
                   loading={loadingEvents}
                 />
               </div>
@@ -886,23 +891,22 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
               {selectedEventId && (
                 <div>
                   <label className="block text-sm font-medium text-blue-900 mb-2">
-                    2. Seleccionar Competicion (opcional)
+                    {t('importStep2SelectComp')}
                   </label>
                   <p className="text-xs text-blue-700 mb-3">
-                    Selecciona la competicion a la que asociar las ediciones.
-                    Si no seleccionas ninguna, el JSON debe incluir el competitionId.
+                    {t('importSelectCompHelp')}
                   </p>
                   <SearchableEntitySelect
                     value={parentId}
                     onChange={setParentId}
                     options={parentEntities}
-                    placeholder="Seleccionar Competicion"
-                    emptyOptionLabel="Sin seleccionar (usar referencia del JSON)"
+                    placeholder={t('importSelectComp')}
+                    emptyOptionLabel={t('importEmptyUseJsonRef')}
                     loading={loadingParents}
                   />
                   {parentId && (
                     <p className="mt-2 text-xs text-green-700">
-                      Todas las ediciones se asociaran a esta competicion.
+                      {t('importAllEditionsToComp')}
                     </p>
                   )}
                 </div>
@@ -910,7 +914,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
 
               {!selectedEventId && (
                 <p className="text-xs text-amber-700">
-                  Si no seleccionas evento, el JSON debe incluir el competitionId para cada edicion.
+                  {t('importNoEventJsonHelp')}
                 </p>
               )}
             </div>
@@ -928,10 +932,10 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="w-5 h-5" />
-            Archivo de Importacion
+            {t('importFileTitle')}
           </CardTitle>
           <CardDescription>
-            Sube un archivo JSON exportado desde el sistema
+            {t('importFileDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -950,9 +954,9 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
               >
                 <Upload className="w-8 h-8 text-gray-400" />
                 <div className="text-center">
-                  <span className="text-sm font-medium text-gray-700">Seleccionar archivo JSON</span>
+                  <span className="text-sm font-medium text-gray-700">{t('importSelectJsonFile')}</span>
                   <p className="text-xs text-gray-500 mt-1">
-                    Archivos exportados desde Exportacion de Datos
+                    {t('importFilesFromExport')}
                   </p>
                 </div>
               </label>
@@ -967,10 +971,10 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   <div>
                     <p className="font-medium text-green-900">{fileName}</p>
                     <p className="text-sm text-green-700">
-                      {file.data.length.toLocaleString()} registros
+                      {t('importRecordsCount', { count: file.data.length })}
                       {file.exportedAt && (
                         <span className="ml-2">
-                          (exportado: {new Date(file.exportedAt).toLocaleDateString()})
+                          {t('importExportedOn', { date: new Date(file.exportedAt).toLocaleDateString() })}
                         </span>
                       )}
                     </p>
@@ -991,10 +995,10 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Eye className="w-5 h-5" />
-              Validacion
+              {t('importValidationTitle')}
             </CardTitle>
             <CardDescription>
-              Valida el archivo y detecta posibles conflictos antes de importar
+              {t('importValidationDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -1003,12 +1007,12 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 {validating ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Validando...
+                    {t('importValidating')}
                   </>
                 ) : (
                   <>
                     <Eye className="w-4 h-4 mr-2" />
-                    Validar Archivo
+                    {t('importValidateFile')}
                   </>
                 )}
               </Button>
@@ -1026,20 +1030,20 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                       <AlertTriangle className="w-5 h-5 text-yellow-600" />
                     )}
                     <span className={`font-medium ${validationResult.isValid ? 'text-green-900' : 'text-yellow-900'}`}>
-                      {validationResult.isValid ? 'Archivo valido' : 'Archivo con conflictos'}
+                      {validationResult.isValid ? t('importFileValid') : t('importFileWithConflicts')}
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500">Total:</span>{' '}
+                      <span className="text-gray-500">{t('importTotalLabel')}</span>{' '}
                       <span className="font-medium">{validationResult.totalItems}</span>
                     </div>
                     <div>
-                      <span className="text-green-600">Nuevos:</span>{' '}
+                      <span className="text-green-600">{t('importNewLabel')}</span>{' '}
                       <span className="font-medium">{validationResult.preview.toCreate}</span>
                     </div>
                     <div>
-                      <span className="text-yellow-600">Conflictos:</span>{' '}
+                      <span className="text-yellow-600">{t('importConflictsLabel')}</span>{' '}
                       <span className="font-medium">{validationResult.conflicts?.length ?? 0}</span>
                     </div>
                   </div>
@@ -1050,23 +1054,23 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium mb-3 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-yellow-500" />
-                      Conflictos Detectados ({validationResult.conflicts.length})
+                      {t('importConflictsDetected', { count: validationResult.conflicts.length })}
                     </h4>
                     <div className="max-h-48 overflow-y-auto space-y-2">
                       {validationResult.conflicts.slice(0, 10).map((conflict, i) => (
                         <div key={i} className="text-sm p-2 bg-yellow-50 rounded">
                           <span className="font-medium">
-                            {conflict.name || conflict.slug || `Item ${conflict.index + 1}`}
+                            {conflict.name || conflict.slug || t('importItemN', { number: conflict.index + 1 })}
                           </span>
                           <span className="text-gray-500 ml-2">
-                            ({conflict.conflictType === 'id_exists' ? 'ID existe' :
-                              conflict.conflictType === 'slug_exists' ? 'Slug existe' : 'ID y Slug existen'})
+                            ({conflict.conflictType === 'id_exists' ? t('importIdExists') :
+                              conflict.conflictType === 'slug_exists' ? t('importSlugExists') : t('importIdAndSlugExist')})
                           </span>
                         </div>
                       ))}
                       {validationResult.conflicts.length > 10 && (
                         <div className="text-sm text-gray-500">
-                          ... y {validationResult.conflicts.length - 10} conflictos mas
+                          {t('importMoreConflicts', { count: validationResult.conflicts.length - 10 })}
                         </div>
                       )}
                     </div>
@@ -1078,7 +1082,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   <div className="border border-red-200 rounded-lg p-4 bg-red-50">
                     <h4 className="font-medium mb-2 text-red-800 flex items-center gap-2">
                       <XCircle className="w-4 h-4" />
-                      Errores ({validationResult.errors.length})
+                      {t('importErrorsCount', { count: validationResult.errors.length })}
                     </h4>
                     <div className="max-h-32 overflow-y-auto">
                       {validationResult.errors.map((error, i) => (
@@ -1093,7 +1097,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   <div className="border border-orange-200 rounded-lg p-4 bg-orange-50">
                     <h4 className="font-medium mb-2 text-orange-800 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4" />
-                      Advertencias ({validationResult.warnings.length})
+                      {t('importWarningsCount', { count: validationResult.warnings.length })}
                     </h4>
                     <div className="max-h-32 overflow-y-auto">
                       {validationResult.warnings.map((warning, i) => (
@@ -1114,16 +1118,16 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Play className="w-5 h-5" />
-              Ejecutar Importacion
+              {t('importExecuteImportTitle')}
             </CardTitle>
             <CardDescription>
-              Configura las opciones de importacion y ejecuta
+              {t('importExecuteDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Conflict Resolution */}
             <div className="flex items-center gap-4">
-              <label className="text-sm font-medium w-48">Resolucion de Conflictos:</label>
+              <label className="text-sm font-medium w-48">{t('importConflictResolutionLabel')}</label>
               <Select value={conflictResolution} onValueChange={(v) => setConflictResolution(v as ConflictResolution)}>
                 <SelectTrigger className="w-64">
                   <SelectValue />
@@ -1131,20 +1135,20 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 <SelectContent>
                   <SelectItem value="skip">
                     <div className="flex flex-col">
-                      <span>Omitir</span>
-                      <span className="text-xs text-gray-500">No importar registros con conflictos</span>
+                      <span>{t('importOptSkip')}</span>
+                      <span className="text-xs text-gray-500">{t('importOptSkipDesc')}</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="update">
                     <div className="flex flex-col">
-                      <span>Actualizar</span>
-                      <span className="text-xs text-gray-500">Sobrescribir registros existentes</span>
+                      <span>{t('importOptUpdate')}</span>
+                      <span className="text-xs text-gray-500">{t('importOptUpdateDesc')}</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="create_new">
                     <div className="flex flex-col">
-                      <span>Crear Nuevo</span>
-                      <span className="text-xs text-gray-500">Crear con nuevo ID/slug</span>
+                      <span>{t('importOptCreateNew')}</span>
+                      <span className="text-xs text-gray-500">{t('importOptCreateNewDesc')}</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -1153,7 +1157,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
 
             {/* Dry Run Toggle */}
             <div className="flex items-center gap-4">
-              <label className="text-sm font-medium w-48">Modo de Prueba:</label>
+              <label className="text-sm font-medium w-48">{t('importTestModeLabel')}</label>
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -1163,7 +1167,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   className="rounded border-gray-300"
                 />
                 <label htmlFor="dryRun" className="text-sm text-gray-600">
-                  Simular importacion sin guardar cambios
+                  {t('importTestModeCheckbox')}
                 </label>
               </div>
             </div>
@@ -1179,18 +1183,18 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 {importing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {dryRun ? 'Simulando...' : 'Importando...'}
+                    {dryRun ? t('importSimulating') : t('importImporting')}
                   </>
                 ) : (
                   <>
                     <Play className="w-4 h-4 mr-2" />
-                    {dryRun ? 'Simular Importacion' : 'Ejecutar Importacion'}
+                    {dryRun ? t('importSimulateImport') : t('importExecuteImport')}
                   </>
                 )}
               </Button>
               {!dryRun && (
                 <p className="text-xs text-orange-600 mt-2">
-                  Los cambios se guardaran permanentemente
+                  {t('importChangesPermanent')}
                 </p>
               )}
             </div>
@@ -1208,11 +1212,11 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
               ) : (
                 <AlertCircle className="w-5 h-5 text-red-600" />
               )}
-              {importResult.dryRun ? 'Resultado de Simulacion' : 'Resultado de Importacion'}
+              {importResult.dryRun ? t('importSimulationResult') : t('importImportResult')}
             </CardTitle>
             {importResult.dryRun && (
               <CardDescription className="text-blue-600">
-                Esto es solo una simulacion - no se han guardado cambios
+                {t('importSimulationNoChanges')}
               </CardDescription>
             )}
           </CardHeader>
@@ -1221,23 +1225,23 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
             <div className="grid grid-cols-5 gap-4 mb-4">
               <div className="text-center p-3 bg-gray-100 rounded-lg">
                 <p className="text-2xl font-bold">{importResult.summary?.total ?? 0}</p>
-                <p className="text-xs text-gray-500">Total</p>
+                <p className="text-xs text-gray-500">{t('importTotal')}</p>
               </div>
               <div className="text-center p-3 bg-green-100 rounded-lg">
                 <p className="text-2xl font-bold text-green-700">{importResult.summary?.created ?? 0}</p>
-                <p className="text-xs text-green-600">Creados</p>
+                <p className="text-xs text-green-600">{t('importCreatedCap')}</p>
               </div>
               <div className="text-center p-3 bg-blue-100 rounded-lg">
                 <p className="text-2xl font-bold text-blue-700">{importResult.summary?.updated ?? 0}</p>
-                <p className="text-xs text-blue-600">Actualizados</p>
+                <p className="text-xs text-blue-600">{t('importUpdated')}</p>
               </div>
               <div className="text-center p-3 bg-yellow-100 rounded-lg">
                 <p className="text-2xl font-bold text-yellow-700">{importResult.summary?.skipped ?? 0}</p>
-                <p className="text-xs text-yellow-600">Omitidos</p>
+                <p className="text-xs text-yellow-600">{t('importSkippedCap')}</p>
               </div>
               <div className="text-center p-3 bg-red-100 rounded-lg">
                 <p className="text-2xl font-bold text-red-700">{importResult.summary?.errors ?? 0}</p>
-                <p className="text-xs text-red-600">Errores</p>
+                <p className="text-xs text-red-600">{t('importErrorsCap')}</p>
               </div>
             </div>
 
@@ -1248,9 +1252,9 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
                       <th className="px-3 py-2 text-left">#</th>
-                      <th className="px-3 py-2 text-left">ID/Slug</th>
-                      <th className="px-3 py-2 text-left">Accion</th>
-                      <th className="px-3 py-2 text-left">Mensaje</th>
+                      <th className="px-3 py-2 text-left">{t('importColIdSlug')}</th>
+                      <th className="px-3 py-2 text-left">{t('importColAction')}</th>
+                      <th className="px-3 py-2 text-left">{t('importColMessage')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1278,7 +1282,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                 </table>
                 {importResult.results.length > 50 && (
                   <div className="text-center py-2 text-sm text-gray-500 border-t">
-                    ... y {importResult.results.length - 50} resultados mas
+                    {t('importMoreResults', { count: importResult.results.length - 50 })}
                   </div>
                 )}
               </div>
@@ -1288,7 +1292,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
             {importResult.dryRun && importResult.success && (
               <div className="mt-4 pt-4 border-t flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                  La simulacion fue exitosa. Puedes ejecutar la importacion real.
+                  {t('importSimulationSuccess')}
                 </p>
                 <Button
                   onClick={() => {
@@ -1298,7 +1302,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
                   className="bg-green-600 hover:bg-green-700"
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Ejecutar Importacion Real
+                  {t('importExecuteRealImport')}
                 </Button>
               </div>
             )}
@@ -1309,36 +1313,35 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
       {/* Instructions */}
       <Card>
         <CardHeader>
-          <CardTitle>Como Usar el Importador Nativo</CardTitle>
+          <CardTitle>{t('importHowToUseNative')}</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-sm max-w-none">
           <ol className="list-decimal list-inside space-y-2 text-gray-600">
             <li>
-              <strong>Exportar datos:</strong> Ve a "Exportacion de Datos" y descarga el JSON de la entidad que quieres importar.
+              <strong>{t('importInstr1Bold')}</strong> {t('importInstr1Text')}
             </li>
             <li>
-              <strong>Seleccionar tipo:</strong> Elige el tipo de entidad que corresponde al archivo.
+              <strong>{t('importInstr2Bold')}</strong> {t('importInstr2Text')}
             </li>
             <li>
-              <strong>Subir archivo:</strong> Sube el archivo JSON exportado.
+              <strong>{t('importInstr3Bold')}</strong> {t('importInstr3Text')}
             </li>
             <li>
-              <strong>Validar:</strong> Valida el archivo para detectar conflictos antes de importar.
+              <strong>{t('importInstr4Bold')}</strong> {t('importInstr4Text')}
             </li>
             <li>
-              <strong>Configurar:</strong> Elige como resolver conflictos (omitir, actualizar, crear nuevo).
+              <strong>{t('importInstr5Bold')}</strong> {t('importInstr5Text')}
             </li>
             <li>
-              <strong>Simular:</strong> Ejecuta primero en modo de prueba para ver que pasaria.
+              <strong>{t('importInstr6Bold')}</strong> {t('importInstr6Text')}
             </li>
             <li>
-              <strong>Importar:</strong> Si todo esta correcto, ejecuta la importacion real.
+              <strong>{t('importInstr7Bold')}</strong> {t('importInstr7Text')}
             </li>
           </ol>
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-blue-800 text-sm">
-              <strong>Orden recomendado:</strong> Para importar datos relacionados, primero importa las entidades padre:
-              Eventos → Competiciones → Ediciones
+              <strong>{t('importRecommendedOrderBold')}</strong> {t('importRecommendedOrderText')}
             </p>
           </div>
         </CardContent>
@@ -1352,6 +1355,7 @@ function NativeImportTab({ onImportComplete }: { onImportComplete: () => void })
 // ============================================
 
 export default function ImportPage() {
+  const t = useTranslations('boMisc');
   const [stats, setStats] = useState<ImportStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
@@ -1389,7 +1393,7 @@ export default function ImportPage() {
     if (importData.competitions) dataToImport.competitions = importData.competitions;
 
     if (Object.keys(dataToImport).length === 0) {
-      alert('No hay datos para importar. Selecciona al menos un archivo.');
+      alert(t('importNoDataToImport'));
       return;
     }
 
@@ -1403,7 +1407,7 @@ export default function ImportPage() {
       await fetchStats();
     } catch (error: any) {
       console.error('Error importing:', error);
-      alert(`Error en la importacion: ${error.message || 'Error desconocido'}`);
+      alert(t('importImportError', { error: error.message || t('importUnknownError') }));
     } finally {
       setImporting(false);
     }
@@ -1412,22 +1416,22 @@ export default function ImportPage() {
   const handleEnsureTerrainTypes = async () => {
     try {
       const result = await adminService.ensureTerrainTypes();
-      alert(`Tipos de terreno: ${result.created} creados, ${result.skipped} ya existian`);
+      alert(t('importTerrainResult', { created: result.created, skipped: result.skipped }));
       await fetchStats();
     } catch (error: any) {
       console.error('Error:', error);
-      alert(`Error: ${error.message || 'Error desconocido'}`);
+      alert(t('importGenericError', { error: error.message || t('importUnknownError') }));
     }
   };
 
   const handleDelete = async (type: 'competitions' | 'events' | 'series' | 'organizers' | 'editions' | 'all') => {
     const messages: Record<string, string> = {
-      competitions: 'Eliminar TODAS las competiciones? Esto tambien eliminara ediciones relacionadas.',
-      events: 'Eliminar TODOS los eventos? Esto tambien eliminara competiciones y ediciones.',
-      series: 'Eliminar TODAS las series especiales?',
-      organizers: 'Eliminar TODOS los organizadores?',
-      editions: 'Eliminar TODAS las ediciones?',
-      all: 'Eliminar TODOS los datos importados (organizadores, series, eventos, competiciones)?',
+      competitions: t('importDeleteCompetitionsConfirm'),
+      events: t('importDeleteEventsConfirm'),
+      series: t('importDeleteSeriesConfirm'),
+      organizers: t('importDeleteOrganizersConfirm'),
+      editions: t('importDeleteEditionsConfirm'),
+      all: t('importDeleteAllConfirm'),
     };
 
     if (!confirm(messages[type])) return;
@@ -1438,33 +1442,33 @@ export default function ImportPage() {
       switch (type) {
         case 'competitions':
           result = await adminService.deleteAllCompetitions();
-          alert(`${result.deleted} competiciones eliminadas`);
+          alert(t('importDeletedCompetitions', { count: result.deleted }));
           break;
         case 'events':
           result = await adminService.deleteAllEvents();
-          alert(`${result.deleted} eventos eliminados`);
+          alert(t('importDeletedEvents', { count: result.deleted }));
           break;
         case 'series':
           result = await adminService.deleteAllSeries();
-          alert(`${result.deleted} series eliminadas`);
+          alert(t('importDeletedSeries', { count: result.deleted }));
           break;
         case 'organizers':
           result = await adminService.deleteAllOrganizers();
-          alert(`${result.deleted} organizadores eliminados`);
+          alert(t('importDeletedOrganizers', { count: result.deleted }));
           break;
         case 'editions':
           result = await adminService.deleteAllEditions();
-          alert(`${result.deleted} ediciones eliminadas`);
+          alert(t('importDeletedEditions', { count: result.deleted }));
           break;
         case 'all':
           result = await adminService.deleteAllImportedData();
-          alert(`Eliminados: ${result.competitions} competiciones, ${result.events} eventos, ${result.series} series, ${result.organizers} organizadores`);
+          alert(t('importDeletedAll', { competitions: result.competitions, events: result.events, series: result.series, organizers: result.organizers }));
           break;
       }
       await fetchStats();
     } catch (error: any) {
       console.error('Error:', error);
-      alert(`Error: ${error.message || 'Error desconocido'}`);
+      alert(t('importGenericError', { error: error.message || t('importUnknownError') }));
     } finally {
       setDeleting(null);
     }
@@ -1488,12 +1492,12 @@ export default function ImportPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Importacion de Datos</h1>
-          <p className="text-gray-500">Importa datos desde diferentes fuentes</p>
+          <h1 className="text-2xl font-bold">{t('importPageTitle')}</h1>
+          <p className="text-gray-500">{t('importPageSubtitle')}</p>
         </div>
         <Button variant="outline" onClick={fetchStats} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
+          {t('importRefresh')}
         </Button>
       </div>
 
@@ -1502,9 +1506,9 @@ export default function ImportPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="w-5 h-5" />
-            Estado Actual de la Base de Datos
+            {t('importDbStatusTitle')}
           </CardTitle>
-          <CardDescription>Registros existentes en el sistema</CardDescription>
+          <CardDescription>{t('importDbStatusDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -1514,26 +1518,26 @@ export default function ImportPage() {
           ) : stats ? (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <StatCard
-                title="Organizadores"
+                title={t('importStatOrganizers')}
                 value={stats.organizers}
                 icon={Building2}
                 color="blue"
               />
               <StatCard
-                title="Series"
+                title={t('importStatSeries')}
                 value={stats.specialSeries}
                 icon={Award}
                 color="purple"
               />
-              <StatCard title="Eventos" value={stats.events} icon={MapPin} color="green" />
+              <StatCard title={t('importStatEvents')} value={stats.events} icon={MapPin} color="green" />
               <StatCard
-                title="Competiciones"
+                title={t('importStatCompetitions')}
                 value={stats.competitions}
                 icon={Trophy}
                 color="yellow"
               />
               <StatCard
-                title="Tipos Terreno"
+                title={t('importStatTerrainTypes')}
                 value={stats.terrainTypes}
                 icon={Mountain}
                 color="orange"
@@ -1543,8 +1547,8 @@ export default function ImportPage() {
             <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
               <AlertCircle className="w-5 h-5 text-red-600" />
               <div>
-                <p className="font-medium">Error</p>
-                <p className="text-sm">No se pudieron cargar las estadisticas</p>
+                <p className="font-medium">{t('importErrorLabel')}</p>
+                <p className="text-sm">{t('importStatsLoadError')}</p>
               </div>
             </div>
           )}
@@ -1556,11 +1560,11 @@ export default function ImportPage() {
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="native" className="flex items-center gap-2">
             <Download className="w-4 h-4" />
-            Importador Nativo
+            {t('importNativeTab')}
           </TabsTrigger>
           <TabsTrigger value="wordpress" className="flex items-center gap-2">
             <FileJson className="w-4 h-4" />
-            Importador WordPress
+            {t('importWordpressTab')}
           </TabsTrigger>
         </TabsList>
 
@@ -1576,16 +1580,16 @@ export default function ImportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mountain className="w-5 h-5" />
-                Tipos de Terreno
+                {t('importTerrainTypesTitle')}
               </CardTitle>
               <CardDescription>
-                Asegura que los tipos de terreno necesarios para la importacion existan
+                {t('importEnsureTerrainDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button onClick={handleEnsureTerrainTypes} variant="outline">
                 <Mountain className="w-4 h-4 mr-2" />
-                Crear Tipos de Terreno
+                {t('importCreateTerrainTypes')}
               </Button>
             </CardContent>
           </Card>
@@ -1595,37 +1599,37 @@ export default function ImportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="w-5 h-5" />
-                Archivos de Importacion
+                {t('importFilesTitle')}
               </CardTitle>
               <CardDescription>
-                Selecciona los archivos JSON exportados desde WordPress
+                {t('importFilesWpDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <FileUpload
-                  label="Organizadores"
+                  label={t('importStatOrganizers')}
                   fileName={importData.organizers ? 'organizers.json' : null}
                   count={importData.organizers?.length || null}
                   onFileSelect={(data) => setImportData((prev) => ({ ...prev, organizers: data }))}
                   icon={Building2}
                 />
                 <FileUpload
-                  label="Series"
+                  label={t('importStatSeries')}
                   fileName={importData.series ? 'series.json' : null}
                   count={importData.series?.length || null}
                   onFileSelect={(data) => setImportData((prev) => ({ ...prev, series: data }))}
                   icon={Award}
                 />
                 <FileUpload
-                  label="Eventos"
+                  label={t('importStatEvents')}
                   fileName={importData.events ? 'events.json' : null}
                   count={importData.events?.length || null}
                   onFileSelect={(data) => setImportData((prev) => ({ ...prev, events: data }))}
                   icon={MapPin}
                 />
                 <FileUpload
-                  label="Competiciones"
+                  label={t('importStatCompetitions')}
                   fileName={importData.competitions ? 'competitions.json' : null}
                   count={importData.competitions?.length || null}
                   onFileSelect={(data) =>
@@ -1641,12 +1645,15 @@ export default function ImportPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-blue-900">
-                        {totalToImport.toLocaleString()} registros listos para importar
+                        {t('importRecordsReady', { count: totalToImport })}
                       </p>
                       <p className="text-sm text-blue-700">
-                        {importData.organizers?.length || 0} organizadores,{' '}
-                        {importData.series?.length || 0} series, {importData.events?.length || 0}{' '}
-                        eventos, {importData.competitions?.length || 0} competiciones
+                        {t('importRecordsBreakdown', {
+                          organizers: importData.organizers?.length || 0,
+                          series: importData.series?.length || 0,
+                          events: importData.events?.length || 0,
+                          competitions: importData.competitions?.length || 0,
+                        })}
                       </p>
                     </div>
                     <Button
@@ -1658,12 +1665,12 @@ export default function ImportPage() {
                       {importing ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Importando...
+                          {t('importImporting')}
                         </>
                       ) : (
                         <>
                           <Play className="w-4 h-4 mr-2" />
-                          Iniciar Importacion
+                          {t('importStartImport')}
                         </>
                       )}
                     </Button>
@@ -1679,24 +1686,24 @@ export default function ImportPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
-                  Resultados de la Importacion
+                  {t('importResultsTitle')}
                 </CardTitle>
                 <CardDescription>
-                  {totalImported.toLocaleString()} registros importados correctamente
+                  {t('importRecordsImported', { count: totalImported })}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {importResult.terrainTypes && (
-                    <ResultCard title="Tipos de Terreno" result={importResult.terrainTypes} />
+                    <ResultCard title={t('importTerrainTypesTitle')} result={importResult.terrainTypes} />
                   )}
                   {importResult.organizers && (
-                    <ResultCard title="Organizadores" result={importResult.organizers} />
+                    <ResultCard title={t('importStatOrganizers')} result={importResult.organizers} />
                   )}
-                  {importResult.series && <ResultCard title="Series" result={importResult.series} />}
-                  {importResult.events && <ResultCard title="Eventos" result={importResult.events} />}
+                  {importResult.series && <ResultCard title={t('importStatSeries')} result={importResult.series} />}
+                  {importResult.events && <ResultCard title={t('importStatEvents')} result={importResult.events} />}
                   {importResult.competitions && (
-                    <ResultCard title="Competiciones" result={importResult.competitions} />
+                    <ResultCard title={t('importStatCompetitions')} result={importResult.competitions} />
                   )}
                 </div>
               </CardContent>
@@ -1706,32 +1713,26 @@ export default function ImportPage() {
           {/* Instructions */}
           <Card>
             <CardHeader>
-              <CardTitle>Instrucciones de Importacion WordPress</CardTitle>
+              <CardTitle>{t('importWpInstructionsTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-sm max-w-none">
               <ol className="list-decimal list-inside space-y-2 text-gray-600">
                 <li>
-                  <strong>Crear tipos de terreno:</strong> Primero, haz clic en "Crear Tipos de
-                  Terreno" para asegurar que existen todos los tipos necesarios.
+                  <strong>{t('importWpInstr1Bold')}</strong> {t('importWpInstr1Text')}
                 </li>
                 <li>
-                  <strong>Seleccionar archivos:</strong> Sube los archivos JSON en el orden correcto
-                  (organizadores, series, eventos, competiciones).
+                  <strong>{t('importWpInstr2Bold')}</strong> {t('importWpInstr2Text')}
                 </li>
                 <li>
-                  <strong>Iniciar importacion:</strong> Haz clic en "Iniciar Importacion" para
-                  procesar todos los archivos.
+                  <strong>{t('importWpInstr3Bold')}</strong> {t('importWpInstr3Text')}
                 </li>
                 <li>
-                  <strong>Revisar resultados:</strong> Verifica los resultados y revisa cualquier
-                  error reportado.
+                  <strong>{t('importWpInstr4Bold')}</strong> {t('importWpInstr4Text')}
                 </li>
               </ol>
               <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                 <p className="text-yellow-800 text-sm">
-                  <strong>Nota:</strong> Los registros que ya existen en la base de datos (por slug o
-                  ID) seran omitidos automaticamente. La importacion es segura de ejecutar multiples
-                  veces.
+                  <strong>{t('importWpNoteBold')}</strong> {t('importWpNoteText')}
                 </p>
               </div>
             </CardContent>
@@ -1748,7 +1749,7 @@ export default function ImportPage() {
         >
           <div className="flex items-center gap-2 text-red-600">
             <Trash2 className="w-5 h-5" />
-            <span className="font-medium">Zona de Peligro - Eliminar Datos</span>
+            <span className="font-medium">{t('importDangerZone')}</span>
           </div>
           <ChevronDown className={`w-5 h-5 text-red-400 transition-transform ${showDangerZone ? 'rotate-180' : ''}`} />
         </Button>
@@ -1758,10 +1759,10 @@ export default function ImportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-red-600">
                 <AlertTriangle className="w-5 h-5" />
-                Eliminar Datos Importados
+                {t('importDeleteImportedTitle')}
               </CardTitle>
               <CardDescription>
-                Elimina datos importados para poder reimportar con correcciones. Esta accion no se puede deshacer.
+                {t('importDeleteImportedDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1777,7 +1778,7 @@ export default function ImportPage() {
                   ) : (
                     <Calendar className="w-4 h-4 mr-2" />
                   )}
-                  Ediciones
+                  {t('importEditionsLabel')}
                 </Button>
                 <Button
                   variant="outline"
@@ -1790,7 +1791,7 @@ export default function ImportPage() {
                   ) : (
                     <Trophy className="w-4 h-4 mr-2" />
                   )}
-                  Competiciones
+                  {t('importStatCompetitions')}
                 </Button>
                 <Button
                   variant="outline"
@@ -1803,7 +1804,7 @@ export default function ImportPage() {
                   ) : (
                     <MapPin className="w-4 h-4 mr-2" />
                   )}
-                  Eventos
+                  {t('importStatEvents')}
                 </Button>
                 <Button
                   variant="outline"
@@ -1816,7 +1817,7 @@ export default function ImportPage() {
                   ) : (
                     <Award className="w-4 h-4 mr-2" />
                   )}
-                  Series
+                  {t('importStatSeries')}
                 </Button>
                 <Button
                   variant="outline"
@@ -1829,7 +1830,7 @@ export default function ImportPage() {
                   ) : (
                     <Building2 className="w-4 h-4 mr-2" />
                   )}
-                  Organizadores
+                  {t('importStatOrganizers')}
                 </Button>
                 <Button
                   variant="destructive"
@@ -1841,11 +1842,11 @@ export default function ImportPage() {
                   ) : (
                     <Trash2 className="w-4 h-4 mr-2" />
                   )}
-                  Eliminar Todo
+                  {t('importDeleteAll')}
                 </Button>
               </div>
               <p className="text-xs text-red-600 mt-3">
-                Nota: Eliminar eventos tambien elimina sus competiciones. Eliminar competiciones tambien elimina sus ediciones.
+                {t('importDangerNote')}
               </p>
             </CardContent>
           </Card>

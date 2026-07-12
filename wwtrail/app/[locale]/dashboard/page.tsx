@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -26,6 +27,7 @@ import {
 import { adminService } from '@/lib/api/admin.service';
 
 export default function DashboardPage() {
+  const t = useTranslations('boMisc');
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [pendingCount, setPendingCount] = useState(0);
@@ -71,22 +73,22 @@ export default function DashboardPage() {
   // Secciones disponibles para todos
   const mainSections = [
     {
-      title: 'Gestión de Eventos',
-      description: 'Administra eventos, competiciones y ediciones',
+      title: t('dashEventManagement'),
+      description: t('dashEventManagementDesc'),
       icon: Award,
       href: '/organizer',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
       subsections: [
-        { name: 'Eventos', href: '/organizer/events' },
-        { name: 'Competiciones', href: '/organizer/competitions' },
-        { name: 'Ediciones', href: '/organizer/editions' },
+        { name: t('dashEvents'), href: '/organizer/events' },
+        { name: t('dashCompetitions'), href: '/organizer/competitions' },
+        { name: t('dashEditions'), href: '/organizer/editions' },
       ],
     },
     {
-      title: 'Servicios',
-      description: 'Gestiona alojamientos, restaurantes, tiendas, etc.',
+      title: t('dashServices'),
+      description: t('dashServicesDesc'),
       icon: Building2,
       href: '/organizer/services',
       color: 'text-orange-600',
@@ -94,8 +96,8 @@ export default function DashboardPage() {
       borderColor: 'border-orange-200',
     },
     {
-      title: 'Blog y Artículos',
-      description: 'Gestiona contenido editorial y noticias',
+      title: t('dashBlogArticles'),
+      description: t('dashBlogArticlesDesc'),
       icon: BookOpen,
       href: '/organizer/posts',
       color: 'text-pink-600',
@@ -107,8 +109,8 @@ export default function DashboardPage() {
   // Secciones solo para admin
   const adminSections = isAdmin ? [
     {
-      title: 'Contenido Pendiente',
-      description: 'Revisa y aprueba contenido de organizadores',
+      title: t('dashPendingContent'),
+      description: t('dashPendingContentDesc'),
       icon: AlertCircle,
       href: '/organizer/pending',
       color: 'text-red-600',
@@ -118,22 +120,22 @@ export default function DashboardPage() {
       highlight: pendingCount > 0,
     },
     {
-      title: 'Administración Web',
-      description: 'Configura Home, Footer y Landings',
+      title: t('dashWebAdmin'),
+      description: t('dashWebAdminDesc'),
       icon: Globe,
       href: '/dashboard/home-config',
       color: 'text-cyan-600',
       bgColor: 'bg-cyan-50',
       borderColor: 'border-cyan-200',
       subsections: [
-        { name: 'Config Home', href: '/dashboard/home-config' },
+        { name: t('dashConfigHome'), href: '/dashboard/home-config' },
         { name: 'Footer', href: '/organizer/footer' },
         { name: 'Landings', href: '/organizer/landings' },
       ],
     },
     {
-      title: 'Series Especiales',
-      description: 'Gestiona circuitos y series de competiciones',
+      title: t('dashSpecialSeries'),
+      description: t('dashSpecialSeriesDesc'),
       icon: Layers,
       href: '/organizer/special-series',
       color: 'text-indigo-600',
@@ -141,8 +143,8 @@ export default function DashboardPage() {
       borderColor: 'border-indigo-200',
     },
     {
-      title: 'Promociones',
-      description: 'Gestiona ofertas, cupones y promociones',
+      title: t('dashPromotions'),
+      description: t('dashPromotionsDesc'),
       icon: Ticket,
       href: '/organizer/promotions',
       color: 'text-amber-600',
@@ -150,8 +152,8 @@ export default function DashboardPage() {
       borderColor: 'border-amber-200',
     },
     {
-      title: 'Usuarios',
-      description: 'Administra usuarios y permisos',
+      title: t('dashUsers'),
+      description: t('dashUsersDesc'),
       icon: Users,
       href: '/organizer/users',
       color: 'text-purple-600',
@@ -159,8 +161,8 @@ export default function DashboardPage() {
       borderColor: 'border-purple-200',
     },
     {
-      title: 'Estadísticas',
-      description: 'Ver métricas y analíticas del sistema',
+      title: t('dashStats'),
+      description: t('dashStatsDesc'),
       icon: BarChart3,
       href: '/organizer/stats',
       color: 'text-green-600',
@@ -172,28 +174,28 @@ export default function DashboardPage() {
   // Accesos rápidos
   const quickLinks = [
     {
-      title: 'Eventos',
+      title: t('dashEvents'),
       icon: MapPin,
       href: '/organizer/events',
       color: 'bg-blue-500',
       hoverColor: 'hover:bg-blue-600',
     },
     {
-      title: 'Competiciones',
+      title: t('dashCompetitions'),
       icon: Flag,
       href: '/organizer/competitions',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600',
     },
     {
-      title: 'Ediciones',
+      title: t('dashEditions'),
       icon: Calendar,
       href: '/organizer/editions',
       color: 'bg-gray-800',
       hoverColor: 'hover:bg-black',
     },
     {
-      title: 'Servicios',
+      title: t('dashServices'),
       icon: Building2,
       href: '/organizer/services',
       color: 'bg-orange-500',
@@ -207,10 +209,10 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Panel de {isAdmin ? 'Administración' : 'Organizador'}
+            {isAdmin ? t('dashPanelAdmin') : t('dashPanelOrganizer')}
           </h1>
           <p className="text-gray-600">
-            Bienvenido, {user.firstName || user.username}! Gestiona tu contenido desde aquí
+            {t('dashWelcome', { name: user.firstName || user.username })}
           </p>
         </div>
 
@@ -223,26 +225,26 @@ export default function DashboardPage() {
             <div>
               <p className="font-semibold text-gray-900">{user.email}</p>
               <p className="text-sm text-gray-600">
-                Rol: <span className={`uppercase font-medium ${isAdmin ? 'text-red-600' : 'text-blue-600'}`}>{user.role}</span>
+                {t('dashRole')}: <span className={`uppercase font-medium ${isAdmin ? 'text-red-600' : 'text-blue-600'}`}>{user.role}</span>
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-600">Miembro desde</p>
+            <p className="text-sm text-gray-600">{t('dashMemberSince')}</p>
             <p className="font-medium text-gray-900">
               {user.createdAt
                 ? new Date(user.createdAt).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
                   })
-                : 'N/A'}
+                : t('dashNotAvailable')}
             </p>
           </div>
         </div>
 
         {/* Quick Access Links */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Accesos Rápidos</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashQuickAccess')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {quickLinks.map((link) => (
               <Link
@@ -259,7 +261,7 @@ export default function DashboardPage() {
 
         {/* Main Sections */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión de Contenido</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashContentManagement')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mainSections.map((section) => (
               <Link
@@ -295,7 +297,7 @@ export default function DashboardPage() {
         {/* Admin Sections */}
         {isAdmin && adminSections.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Administración</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashAdministration')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {adminSections.map((section: any) => (
                 <Link
@@ -344,15 +346,15 @@ export default function DashboardPage() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Flujo de Trabajo
+                {t('dashWorkflow')}
               </h3>
               <p className="text-sm text-blue-700 mb-3">
-                El flujo típico para añadir contenido es:
+                {t('dashWorkflowIntro')}
               </p>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• <strong>Evento</strong>: Un evento deportivo (ej. "Ultra Trail del Mont Blanc")</li>
-                <li>• <strong>Competición</strong>: Una modalidad dentro del evento (ej. "UTMB 170K", "CCC 100K")</li>
-                <li>• <strong>Edición</strong>: Una edición anual de la competición (ej. "UTMB 170K 2024")</li>
+                <li>• <strong>{t('dashWorkflowEventLabel')}</strong>: {t('dashWorkflowEventDesc')}</li>
+                <li>• <strong>{t('dashWorkflowCompetitionLabel')}</strong>: {t('dashWorkflowCompetitionDesc')}</li>
+                <li>• <strong>{t('dashWorkflowEditionLabel')}</strong>: {t('dashWorkflowEditionDesc')}</li>
               </ul>
             </div>
           </div>

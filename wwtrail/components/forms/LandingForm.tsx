@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Landing, landingService, CreateLandingInput, UpdateLandingInput } from '@/lib/api/landing.service';
 import { Language } from '@/types/v2';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const LANGUAGES: { value: Language; label: string }[] = [
 
 export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
   const router = useRouter();
+  const t = useTranslations('boForms');
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(false);
@@ -49,10 +51,10 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
 
     try {
       if (!title.trim()) {
-        throw new Error('El título es obligatorio');
+        throw new Error(t('titleRequired'));
       }
       if (!content.trim()) {
-        throw new Error('El contenido es obligatorio');
+        throw new Error(t('contentRequired'));
       }
 
       const data: CreateLandingInput | UpdateLandingInput = {
@@ -73,8 +75,8 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
       }
 
       toast({
-        title: '✅ Guardado',
-        description: `Landing ${landing ? 'actualizada' : 'creada'} correctamente`,
+        title: t('savedToastTitle'),
+        description: landing ? t('landingUpdatedSuccess') : t('landingCreatedSuccess'),
       });
 
       if (onSuccess) {
@@ -85,8 +87,8 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
     } catch (error: any) {
       console.error('Error saving landing:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'Error al guardar la landing',
+        title: t('errorTitle'),
+        description: error.message || t('landingSaveError'),
         variant: 'destructive',
       });
     } finally {
@@ -107,8 +109,8 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
     } catch (error) {
       console.error('Error uploading image:', error);
       toast({
-        title: 'Error',
-        description: 'Error al subir la imagen',
+        title: t('errorTitle'),
+        description: t('imageUploadError'),
         variant: 'destructive',
       });
     } finally {
@@ -124,33 +126,33 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
       <div>
-        <Label htmlFor="title">Título *</Label>
+        <Label htmlFor="title">{t('titleLabel')}</Label>
         <Input
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Título de la landing page"
+          placeholder={t('landingTitlePlaceholder')}
           required
         />
       </div>
 
       {/* Slug */}
       <div>
-        <Label htmlFor="slug">Slug (URL)</Label>
+        <Label htmlFor="slug">{t('slugUrlLabel')}</Label>
         <Input
           id="slug"
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
-          placeholder="mi-landing-page (se genera automáticamente si se deja vacío)"
+          placeholder={t('landingSlugPlaceholder')}
         />
         <p className="text-xs text-muted-foreground mt-1">
-          URL final: /page/{slug || 'slug-generado'}
+          {t('finalUrl', { slug: slug || t('generatedSlug') })}
         </p>
       </div>
 
       {/* Language */}
       <div>
-        <Label htmlFor="language">Idioma *</Label>
+        <Label htmlFor="language">{t('languageLabel')}</Label>
         <select
           id="language"
           value={language}
@@ -169,10 +171,10 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
 
       {/* Cover Image */}
       <div>
-        <Label>Imagen de Portada</Label>
+        <Label>{t('coverImage')}</Label>
         {coverImage ? (
           <div className="relative w-full h-64 rounded-lg overflow-hidden mt-2">
-            <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+            <img src={coverImage} alt={t('coverImage')} className="w-full h-full object-cover" />
             <button
               type="button"
               onClick={() => setCoverImage('')}
@@ -184,7 +186,7 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
         ) : (
           <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 mt-2">
             <Upload className="h-12 w-12 text-gray-400 mb-2" />
-            <span className="text-sm text-gray-600">Click para subir imagen de portada</span>
+            <span className="text-sm text-gray-600">{t('clickToUploadCover')}</span>
             <input
               type="file"
               accept="image/*"
@@ -198,21 +200,21 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
 
       {/* Content (WYSIWYG) */}
       <div>
-        <Label>Contenido *</Label>
+        <Label>{t('contentLabel')}</Label>
         <RichTextEditor
           content={content}
           onChange={setContent}
-          placeholder="Escribe el contenido de tu landing page..."
+          placeholder={t('landingContentPlaceholder')}
         />
       </div>
 
       {/* Gallery */}
       <div>
-        <Label>Galería de Fotos</Label>
+        <Label>{t('photoGallery')}</Label>
         <div className="grid grid-cols-3 gap-4 mt-2">
           {gallery.map((img, index) => (
             <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-              <img src={img} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+              <img src={img} alt={t('galleryImageAlt', { index: index + 1 })} className="w-full h-full object-cover" />
               <button
                 type="button"
                 onClick={() => removeGalleryImage(index)}
@@ -224,7 +226,7 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
           ))}
           <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400">
             <Plus className="h-8 w-8 text-gray-400 mb-1" />
-            <span className="text-xs text-gray-600">Agregar</span>
+            <span className="text-xs text-gray-600">{t('add')}</span>
             <input
               type="file"
               accept="image/*"
@@ -238,33 +240,33 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
 
       {/* SEO Meta Title */}
       <div>
-        <Label htmlFor="metaTitle">Meta Title (SEO)</Label>
+        <Label htmlFor="metaTitle">{t('metaTitleLabel')}</Label>
         <Input
           id="metaTitle"
           value={metaTitle}
           onChange={(e) => setMetaTitle(e.target.value)}
-          placeholder="Título para SEO (máx 60 caracteres)"
+          placeholder={t('metaTitlePlaceholder')}
           maxLength={60}
         />
         <p className="text-xs text-muted-foreground mt-1">
-          {metaTitle.length}/60 caracteres
+          {t('charCount', { current: metaTitle.length, max: 60 })}
         </p>
       </div>
 
       {/* SEO Meta Description */}
       <div>
-        <Label htmlFor="metaDescription">Meta Description (SEO)</Label>
+        <Label htmlFor="metaDescription">{t('metaDescriptionLabel')}</Label>
         <textarea
           id="metaDescription"
           value={metaDescription}
           onChange={(e) => setMetaDescription(e.target.value)}
           rows={3}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Descripción para SEO (máx 155 caracteres)"
+          placeholder={t('metaDescriptionPlaceholder')}
           maxLength={155}
         />
         <p className="text-xs text-muted-foreground mt-1">
-          {metaDescription.length}/155 caracteres
+          {t('charCount', { current: metaDescription.length, max: 155 })}
         </p>
       </div>
 
@@ -277,18 +279,18 @@ export default function LandingForm({ landing, onSuccess }: LandingFormProps) {
           disabled={loading}
           className="flex-1"
         >
-          Cancelar
+          {t('cancel')}
         </Button>
         <Button type="submit" disabled={loading || uploadingImage} className="flex-1">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Guardando...
+              {t('saving')}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              {landing ? 'Actualizar' : 'Crear'} Landing
+              {landing ? t('updateLanding') : t('createLanding')}
             </>
           )}
         </Button>

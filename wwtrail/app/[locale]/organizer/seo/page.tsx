@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 // Grouped SEO structure
 interface GroupedSEO {
@@ -64,6 +65,7 @@ export default function SEOManagementPage() {
   const [editingSEO, setEditingSEO] = useState<SEO | null>(null);
   const [regenerating, setRegenerating] = useState<string | null>(null);
   const { toast } = useToast();
+  const t = useTranslations('boMisc');
 
   const [bulkGenerating, setBulkGenerating] = useState<string | null>(null);
   const [bulkResult, setBulkResult] = useState<any>(null);
@@ -81,14 +83,14 @@ export default function SEOManagementPage() {
       const result = json.data || json;
       setBulkResult(result);
       toast({
-        title: 'Generación completada',
-        description: `${result.generated || 0} SEOs generados para ${entityType}`,
+        title: t('seoGenerationCompleted'),
+        description: t('seoSeosGeneratedFor', { count: result.generated || 0, entityType }),
       });
       loadAllSEO();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al generar SEO',
+        title: t('seoError'),
+        description: error.message || t('seoErrorGenerating'),
         variant: 'destructive',
       });
     } finally {
@@ -120,8 +122,8 @@ export default function SEOManagementPage() {
       setAllSEO(allData);
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al cargar SEO',
+        title: t('seoError'),
+        description: error.message || t('seoErrorLoading'),
         variant: 'destructive',
       });
     } finally {
@@ -141,7 +143,7 @@ export default function SEOManagementPage() {
           entityType: seo.entityType,
           entityId: seo.entityId || '',
           slug: seo.slug ?? null,
-          entityName: seo.metaTitle?.split('|')[0]?.trim() || seo.slug || seo.entityId || 'Sin nombre',
+          entityName: seo.metaTitle?.split('|')[0]?.trim() || seo.slug || seo.entityId || t('seoNoName'),
           languages: [],
         });
       }
@@ -196,50 +198,50 @@ export default function SEOManagementPage() {
       });
 
       toast({
-        title: '✅ Guardado',
-        description: 'SEO actualizado correctamente',
+        title: t('seoSavedTitle'),
+        description: t('seoUpdatedSuccess'),
       });
 
       setEditingSEO(null);
       await loadAllSEO();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al guardar',
+        title: t('seoError'),
+        description: error.message || t('seoErrorSaving'),
         variant: 'destructive',
       });
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este SEO?')) return;
+    if (!confirm(t('seoConfirmDelete'))) return;
 
     try {
       await seoService.deleteSEO(id);
       toast({
-        title: '✅ Eliminado',
-        description: 'SEO eliminado correctamente',
+        title: t('seoDeletedTitle'),
+        description: t('seoDeletedSuccess'),
       });
       await loadAllSEO();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al eliminar',
+        title: t('seoError'),
+        description: error.message || t('seoErrorDeleting'),
         variant: 'destructive',
       });
     }
   };
 
   const handleRegenerate = async (seo: SEO) => {
-    if (!confirm('¿Regenerar SEO? Esto eliminará el contenido actual y generará uno nuevo con IA.'))
+    if (!confirm(t('seoConfirmRegenerate')))
       return;
 
     try {
       setRegenerating(seo.id);
 
       toast({
-        title: '⏳ Regenerando...',
-        description: 'El SEO se está regenerando con IA. Esto puede tardar unos segundos...',
+        title: t('seoRegeneratingTitle'),
+        description: t('seoRegeneratingDesc'),
       });
 
       await seoService.regenerateSEO({
@@ -249,16 +251,16 @@ export default function SEOManagementPage() {
       } as any);
 
       toast({
-        title: '✅ Regenerado',
-        description: 'El SEO ha sido regenerado exitosamente',
+        title: t('seoRegeneratedTitle'),
+        description: t('seoRegeneratedSuccess'),
       });
 
       await loadAllSEO();
       setRegenerating(null);
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al regenerar SEO',
+        title: t('seoError'),
+        description: error.message || t('seoErrorRegenerating'),
         variant: 'destructive',
       });
       setRegenerating(null);
@@ -307,11 +309,11 @@ export default function SEOManagementPage() {
   const getEntityLabel = (entityType: string) => {
     switch (entityType) {
       case 'event':
-        return 'Eventos';
+        return t('seoEventos');
       case 'competition':
-        return 'Competiciones';
+        return t('seoCompeticiones');
       case 'post':
-        return 'Posts';
+        return t('seoPosts');
       default:
         return entityType;
     }
@@ -333,9 +335,9 @@ export default function SEOManagementPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Gestión de SEO</h1>
+          <h1 className="text-3xl font-bold mb-2">{t('seoTitle')}</h1>
           <p className="text-muted-foreground">
-            Administra el SEO de eventos, competiciones y posts. Agrupado por entidad con todos los idiomas.
+            {t('seoSubtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -352,7 +354,7 @@ export default function SEOManagementPage() {
               ) : (
                 <RefreshCw className="h-4 w-4 mr-1" />
               )}
-              Generar {type === 'event' ? 'Eventos' : 'Competiciones'}
+              {t('seoGenerateEntity', { entity: type === 'event' ? t('seoEventos') : t('seoCompeticiones') })}
             </Button>
           ))}
         </div>
@@ -364,7 +366,7 @@ export default function SEOManagementPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nombre, slug o ID..."
+              placeholder={t('seoSearchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -380,19 +382,18 @@ export default function SEOManagementPage() {
       ) : allSEO.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No hay SEO generado aún</CardTitle>
+            <CardTitle>{t('seoNoSeoYet')}</CardTitle>
             <CardDescription>
-              Genera SEO automáticamente para todas las entidades publicadas usando IA.
-              Se crearán meta títulos, descripciones y preguntas frecuentes.
+              {t('seoNoSeoDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { type: 'event', label: 'Eventos', icon: <Award className="h-5 w-5" /> },
-                { type: 'competition', label: 'Competiciones', icon: <Flag className="h-5 w-5" /> },
-                { type: 'service', label: 'Servicios', icon: <Globe className="h-5 w-5" /> },
-                { type: 'specialSeries', label: 'Series Especiales', icon: <FileText className="h-5 w-5" /> },
+                { type: 'event', label: t('seoEventos'), icon: <Award className="h-5 w-5" /> },
+                { type: 'competition', label: t('seoCompeticiones'), icon: <Flag className="h-5 w-5" /> },
+                { type: 'service', label: t('seoServicios'), icon: <Globe className="h-5 w-5" /> },
+                { type: 'specialSeries', label: t('seoSeriesEspeciales'), icon: <FileText className="h-5 w-5" /> },
               ].map(({ type, label, icon }) => (
                 <Button
                   key={type}
@@ -404,20 +405,20 @@ export default function SEOManagementPage() {
                   {bulkGenerating === type ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : icon}
-                  <span>Generar SEO de {label}</span>
+                  <span>{t('seoGenerateSeoOf', { label })}</span>
                 </Button>
               ))}
             </div>
             {bulkResult && (
               <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm">
                 <p className="font-medium text-green-800">
-                  Generados: {bulkResult.generated} | Errores: {bulkResult.errors} | Total: {bulkResult.total}
+                  {t('seoBulkResult', { generated: bulkResult.generated, errors: bulkResult.errors, total: bulkResult.total })}
                 </p>
               </div>
             )}
             {bulkGenerating && (
               <p className="mt-4 text-sm text-muted-foreground text-center">
-                Generando SEO con IA... Esto puede tardar varios minutos dependiendo del número de entidades.
+                {t('seoGeneratingLong')}
               </p>
             )}
           </CardContent>
@@ -427,17 +428,17 @@ export default function SEOManagementPage() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="event" className="flex items-center gap-2">
               <Award className="h-4 w-4" />
-              Eventos
+              {t('seoEventos')}
               <Badge variant="secondary" className="ml-1">{groupedByType.event.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="competition" className="flex items-center gap-2">
               <Flag className="h-4 w-4" />
-              Competiciones
+              {t('seoCompeticiones')}
               <Badge variant="secondary" className="ml-1">{groupedByType.competition.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="post" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Posts
+              {t('seoPosts')}
               <Badge variant="secondary" className="ml-1">{groupedByType.post.length}</Badge>
             </TabsTrigger>
           </TabsList>
@@ -451,7 +452,7 @@ export default function SEOManagementPage() {
                   <Card>
                     <CardContent className="py-12">
                       <div className="text-center text-muted-foreground">
-                        No hay SEO generado para {getEntityLabel(entityType).toLowerCase()}
+                        {t('seoNoSeoForEntity', { entity: getEntityLabel(entityType).toLowerCase() })}
                       </div>
                     </CardContent>
                   </Card>
@@ -469,7 +470,7 @@ export default function SEOManagementPage() {
                             </div>
                             <Badge variant="outline">
                               <Globe className="h-3 w-3 mr-1" />
-                              {group.languages.length} idiomas
+                              {t('seoLanguagesCount', { count: group.languages.length })}
                             </Badge>
                           </div>
                         </CardHeader>
@@ -477,11 +478,11 @@ export default function SEOManagementPage() {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="w-[100px]">Idioma</TableHead>
-                                <TableHead>Meta Title</TableHead>
-                                <TableHead>FAQ</TableHead>
-                                <TableHead>Estado</TableHead>
-                                <TableHead className="text-right">Acciones</TableHead>
+                                <TableHead className="w-[100px]">{t('seoIdioma')}</TableHead>
+                                <TableHead>{t('seoMetaTitle')}</TableHead>
+                                <TableHead>{t('seoFaq')}</TableHead>
+                                <TableHead>{t('seoEstado')}</TableHead>
+                                <TableHead className="text-right">{t('seoAcciones')}</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -496,18 +497,18 @@ export default function SEOManagementPage() {
                                     {seo.metaTitle || '-'}
                                   </TableCell>
                                   <TableCell>
-                                    <Badge variant="outline">{seo.llmFaq?.length || 0} preguntas</Badge>
+                                    <Badge variant="outline">{t('seoQuestionsCount', { count: seo.llmFaq?.length || 0 })}</Badge>
                                   </TableCell>
                                   <TableCell>
                                     {seo.autoGenerated ? (
                                       <Badge variant="outline">
                                         <Clock className="mr-1 h-3 w-3" />
-                                        Auto
+                                        {t('seoAuto')}
                                       </Badge>
                                     ) : (
                                       <Badge>
                                         <CheckCircle2 className="mr-1 h-3 w-3" />
-                                        Manual
+                                        {t('seoManual')}
                                       </Badge>
                                     )}
                                   </TableCell>
@@ -517,7 +518,7 @@ export default function SEOManagementPage() {
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => handleEdit(seo)}
-                                        title="Editar"
+                                        title={t('editar')}
                                       >
                                         <Edit className="h-4 w-4" />
                                       </Button>
@@ -526,7 +527,7 @@ export default function SEOManagementPage() {
                                         size="sm"
                                         onClick={() => handleRegenerate(seo)}
                                         disabled={regenerating === seo.id}
-                                        title="Regenerar con IA"
+                                        title={t('seoRegenerateWithAi')}
                                       >
                                         {regenerating === seo.id ? (
                                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -538,7 +539,7 @@ export default function SEOManagementPage() {
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => handleDelete(seo.id)}
-                                        title="Eliminar"
+                                        title={t('eliminar')}
                                       >
                                         <Trash2 className="h-4 w-4" />
                                       </Button>
@@ -563,51 +564,51 @@ export default function SEOManagementPage() {
       <Dialog open={!!editingSEO} onOpenChange={(open) => !open && setEditingSEO(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar SEO</DialogTitle>
+            <DialogTitle>{t('seoEditSeo')}</DialogTitle>
             <DialogDescription>
-              Modifica el meta title, meta description y las preguntas frecuentes
+              {t('seoEditSeoDesc')}
             </DialogDescription>
           </DialogHeader>
 
           {editingSEO && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="meta-title">Meta Title</Label>
+                <Label htmlFor="meta-title">{t('seoMetaTitle')}</Label>
                 <Input
                   id="meta-title"
                   value={editingSEO.metaTitle || ''}
                   onChange={(e) =>
                     setEditingSEO({ ...editingSEO, metaTitle: e.target.value })
                   }
-                  placeholder="Título SEO..."
+                  placeholder={t('seoTitlePlaceholder')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  {editingSEO.metaTitle?.length || 0} / 60 caracteres
+                  {t('seoCharsOf60', { count: editingSEO.metaTitle?.length || 0 })}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="meta-description">Meta Description</Label>
+                <Label htmlFor="meta-description">{t('seoMetaDescription')}</Label>
                 <Textarea
                   id="meta-description"
                   value={editingSEO.metaDescription || ''}
                   onChange={(e) =>
                     setEditingSEO({ ...editingSEO, metaDescription: e.target.value })
                   }
-                  placeholder="Descripción SEO..."
+                  placeholder={t('seoDescPlaceholder')}
                   rows={3}
                 />
                 <p className="text-xs text-muted-foreground">
-                  {editingSEO.metaDescription?.length || 0} / 155 caracteres
+                  {t('seoCharsOf155', { count: editingSEO.metaDescription?.length || 0 })}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Preguntas Frecuentes (FAQ)</Label>
+                  <Label>{t('seoFaqLabel')}</Label>
                   <Button variant="outline" size="sm" onClick={addFAQItem}>
                     <Plus className="h-4 w-4 mr-1" />
-                    Añadir
+                    {t('seoAnadir')}
                   </Button>
                 </div>
 
@@ -617,23 +618,23 @@ export default function SEOManagementPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 space-y-3">
                           <div>
-                            <Label className="text-xs">Pregunta {index + 1}</Label>
+                            <Label className="text-xs">{t('seoQuestionN', { n: index + 1 })}</Label>
                             <Input
                               value={item.question}
                               onChange={(e) =>
                                 updateFAQItem(index, 'question', e.target.value)
                               }
-                              placeholder="¿Cuándo es el evento?"
+                              placeholder={t('seoQuestionPlaceholder')}
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Respuesta {index + 1}</Label>
+                            <Label className="text-xs">{t('seoAnswerN', { n: index + 1 })}</Label>
                             <Textarea
                               value={item.answer}
                               onChange={(e) =>
                                 updateFAQItem(index, 'answer', e.target.value)
                               }
-                              placeholder="El evento se celebra el..."
+                              placeholder={t('seoAnswerPlaceholder')}
                               rows={2}
                             />
                           </div>
@@ -652,7 +653,7 @@ export default function SEOManagementPage() {
 
                 {(!editingSEO.llmFaq || editingSEO.llmFaq.length === 0) && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No hay preguntas. Haz click en "Añadir" para crear una.
+                    {t('seoNoQuestions')}
                   </p>
                 )}
               </div>
@@ -661,9 +662,9 @@ export default function SEOManagementPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingSEO(null)}>
-              Cancelar
+              {t('cancelar')}
             </Button>
-            <Button onClick={handleSave}>Guardar Cambios</Button>
+            <Button onClick={handleSave}>{t('seoGuardarCambios')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

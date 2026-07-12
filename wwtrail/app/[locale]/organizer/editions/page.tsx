@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Plus, Loader2, Calendar, Mountain, TrendingUp, Users, Edit, Trash2, Eye, MapPin, Star } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -16,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function OrganizerEditionsPage() {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const { user } = useAuth();
 
   // State
@@ -176,8 +178,8 @@ export default function OrganizerEditionsPage() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Eliminar Edición',
-      message: `¿Estás seguro de que quieres eliminar la edición ${edition.year}? Esta acción no se puede deshacer.`,
+      title: t('deleteEditionTitle'),
+      message: t('deleteEditionMessage', { year: edition.year }),
       variant: 'danger',
       action: async () => {
         try {
@@ -187,7 +189,7 @@ export default function OrganizerEditionsPage() {
           setConfirmDialog({ ...confirmDialog, isOpen: false });
         } catch (error: any) {
           console.error('Error deleting edition:', error);
-          alert(error.response?.data?.message || 'Error al eliminar edición');
+          alert(error.response?.data?.message || t('errorDeletingEdition'));
         } finally {
           setIsLoadingAction(false);
         }
@@ -230,9 +232,9 @@ export default function OrganizerEditionsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Mis Ediciones</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('myEditions')}</h1>
             <p className="mt-1 text-sm text-gray-600">
-              Gestiona las ediciones de tus competiciones
+              {t('myEditionsSubtitle')}
             </p>
           </div>
         </div>
@@ -243,7 +245,7 @@ export default function OrganizerEditionsPage() {
             {/* Event Filter */}
             <div>
               <label htmlFor="event-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Evento
+                {t('filterByEvent')}
               </label>
               <EventSelect
                 value={selectedEventId}
@@ -254,9 +256,9 @@ export default function OrganizerEditionsPage() {
                   city: e.city,
                   country: e.country,
                 }))}
-                placeholder="Selecciona un evento"
+                placeholder={t('selectEvent')}
                 showAllOption={true}
-                allOptionLabel="Todos los eventos"
+                allOptionLabel={t('allEvents')}
                 isLoading={isLoading}
               />
             </div>
@@ -264,7 +266,7 @@ export default function OrganizerEditionsPage() {
             {/* Competition Filter */}
             <div>
               <label htmlFor="competition-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Competición
+                {t('filterByCompetition')}
               </label>
               <select
                 id="competition-filter"
@@ -275,8 +277,8 @@ export default function OrganizerEditionsPage() {
               >
                 <option value="">
                   {selectedEventId
-                    ? 'Todas las competiciones'
-                    : 'Selecciona un evento primero'}
+                    ? t('allCompetitions')
+                    : t('selectEventFirst')}
                 </option>
                 {competitions.map((comp) => (
                   <option key={comp.id} value={comp.id}>
@@ -290,7 +292,7 @@ export default function OrganizerEditionsPage() {
             <div>
               <label htmlFor="featured-filter" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 <Star className="h-4 w-4" />
-                Destacados
+                {t('featured')}
               </label>
               <select
                 id="featured-filter"
@@ -298,16 +300,16 @@ export default function OrganizerEditionsPage() {
                 onChange={(e) => setFeaturedFilter(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="all">Todas las ediciones</option>
-                <option value="true">Solo destacadas</option>
-                <option value="false">No destacadas</option>
+                <option value="all">{t('allEditions')}</option>
+                <option value="true">{t('onlyFeatured')}</option>
+                <option value="false">{t('notFeatured')}</option>
               </select>
             </div>
 
             {/* Search */}
             <div>
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar por Año
+                {t('searchByYear')}
               </label>
               <input
                 type="text"
@@ -326,7 +328,7 @@ export default function OrganizerEditionsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Ediciones</p>
+                <p className="text-sm font-medium text-gray-600">{t('totalEditions')}</p>
                 <p className="text-2xl font-bold text-gray-900">{sortedEditions.length}</p>
               </div>
               <Calendar className="h-12 w-12 text-blue-500" />
@@ -336,7 +338,7 @@ export default function OrganizerEditionsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Próximas</p>
+                <p className="text-sm font-medium text-gray-600">{t('upcoming')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {sortedEditions.filter((e) => e.status === 'UPCOMING').length}
                 </p>
@@ -348,7 +350,7 @@ export default function OrganizerEditionsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Finalizadas</p>
+                <p className="text-sm font-medium text-gray-600">{t('finished')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {sortedEditions.filter((e) => e.status === 'FINISHED').length}
                 </p>
@@ -360,7 +362,7 @@ export default function OrganizerEditionsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">En Curso</p>
+                <p className="text-sm font-medium text-gray-600">{t('inProgress')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {sortedEditions.filter((e) => e.status === 'ONGOING').length}
                 </p>
@@ -380,10 +382,10 @@ export default function OrganizerEditionsPage() {
             <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 mb-4">
               {selectedCompetitionId
-                ? 'Esta competición no tiene ediciones aún'
+                ? t('noEditionsInCompetition')
                 : selectedEventId
-                ? 'Este evento no tiene ediciones aún'
-                : 'No se encontraron ediciones'}
+                ? t('noEditionsInEvent')
+                : t('noEditionsFound')}
             </p>
             {selectedCompetitionId && (
               <button
@@ -393,7 +395,7 @@ export default function OrganizerEditionsPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="h-5 w-5" />
-                Crear Edición
+                {t('createEdition')}
               </button>
             )}
           </div>
@@ -428,25 +430,25 @@ export default function OrganizerEditionsPage() {
                             }`}
                           >
                             {edition.status === 'FINISHED'
-                              ? 'Finalizada'
+                              ? t('statusFinished')
                               : edition.status === 'UPCOMING'
-                              ? 'Próxima'
+                              ? t('statusUpcoming')
                               : edition.status === 'ONGOING'
-                              ? 'En curso'
-                              : 'Cancelada'}
+                              ? t('statusOngoing')
+                              : t('statusCancelled')}
                           </span>
                         )}
 
                         {edition.registrationStatus && (
                           <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
-                            Inscripción:{' '}
+                            {t('registrationColon')}{' '}
                             {edition.registrationStatus === 'OPEN'
-                              ? 'Abierta'
+                              ? t('regOpen')
                               : edition.registrationStatus === 'CLOSED'
-                              ? 'Cerrada'
+                              ? t('regClosed')
                               : edition.registrationStatus === 'FULL'
-                              ? 'Completa'
-                              : 'No abierta'}
+                              ? t('regFull')
+                              : t('regNotOpen')}
                           </span>
                         )}
                       </div>
@@ -502,7 +504,7 @@ export default function OrganizerEditionsPage() {
                             <Users className="h-4 w-4" />
                             <span>
                               {edition.currentParticipants}
-                              {edition.maxParticipants && `/${edition.maxParticipants}`} participantes
+                              {edition.maxParticipants && `/${edition.maxParticipants}`} {t('participants')}
                             </span>
                           </div>
                         )}
@@ -518,7 +520,7 @@ export default function OrganizerEditionsPage() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <Eye className="h-4 w-4" />
-                    Ver
+                    {t('view')}
                   </Link>
 
                   <button
@@ -526,7 +528,7 @@ export default function OrganizerEditionsPage() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
                   >
                     <Edit className="h-4 w-4" />
-                    Editar
+                    {t('edit')}
                   </button>
 
                   <button
@@ -534,7 +536,7 @@ export default function OrganizerEditionsPage() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors ml-auto"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Eliminar
+                    {t('delete')}
                   </button>
                 </div>
               </div>

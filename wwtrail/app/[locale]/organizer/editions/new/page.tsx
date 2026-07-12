@@ -4,6 +4,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import EditionForm from '@/components/forms/EditionForm';
@@ -12,6 +13,7 @@ import type { Competition } from '@/types/competition';
 
 function NewEditionContent() {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const searchParams = useSearchParams();
   const competitionId = searchParams.get('competitionId');
 
@@ -44,7 +46,7 @@ function NewEditionContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Cargando...</p>
+          <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -64,17 +66,17 @@ function NewEditionContent() {
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver al evento
+            {t('backToEvent')}
           </Link>
         </div>
 
         {/* Competition Context */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
           <p className="text-sm text-blue-900">
-            <span className="font-semibold">Competición:</span> {competition.name}
+            <span className="font-semibold">{t('competitionColon')}</span> {competition.name}
           </p>
           <p className="text-xs text-blue-700 mt-1">
-            Estás creando una nueva edición para esta competición
+            {t('creatingEditionForCompetition')}
           </p>
           {(competition.baseDistance || competition.baseElevation || competition.baseMaxParticipants) && (
             <div className="text-xs text-blue-700 mt-2 flex flex-wrap gap-3">
@@ -85,7 +87,7 @@ function NewEditionContent() {
                 <span>⛰️ {competition.baseElevation} m D+</span>
               )}
               {competition.baseMaxParticipants && (
-                <span>👥 {competition.baseMaxParticipants} participantes</span>
+                <span>👥 {competition.baseMaxParticipants} {t('participants')}</span>
               )}
             </div>
           )}
@@ -107,16 +109,21 @@ function NewEditionContent() {
   );
 }
 
+function NewEditionFallback() {
+  const t = useTranslations('boEvents');
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">{t('loading')}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function NewEditionPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<NewEditionFallback />}>
       <NewEditionContent />
     </Suspense>
   );

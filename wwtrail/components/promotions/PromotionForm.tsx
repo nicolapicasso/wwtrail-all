@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Promotion, CreatePromotionInput, UpdatePromotionInput, Language, PromotionType } from '@/types/v2';
 import { PostStatus } from '@/types/post';
 import { promotionsService } from '@/lib/api/v2';
@@ -27,6 +28,7 @@ const LANGUAGES: { value: Language; label: string }[] = [
 
 export default function PromotionForm({ promotion, onSuccess }: PromotionFormProps) {
   const router = useRouter();
+  const t = useTranslations('boAdmin');
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,19 +77,19 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
     try {
       // Validations
       if (!title.trim()) {
-        throw new Error('El título es obligatorio');
+        throw new Error(t('errorTitleRequired'));
       }
       if (!description.trim()) {
-        throw new Error('La descripción es obligatoria');
+        throw new Error(t('errorDescriptionRequired'));
       }
       if (type === 'EXCLUSIVE_CONTENT' && !exclusiveContent.trim()) {
-        throw new Error('El contenido exclusivo es obligatorio para este tipo');
+        throw new Error(t('errorExclusiveContentRequired'));
       }
       if (type === 'COUPON' && !promotion && !couponCodesText.trim()) {
-        throw new Error('Debes agregar al menos un código de cupón');
+        throw new Error(t('errorCouponCodesRequired'));
       }
       if (!isGlobal && countries.length === 0) {
-        throw new Error('Selecciona al menos un país o marca como Global');
+        throw new Error(t('errorCountryRequired'));
       }
 
       // Parse coupon codes
@@ -130,7 +132,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       }
     } catch (err: any) {
       console.error('Error saving promotion:', err);
-      setError(err.message || 'Error al guardar la promoción');
+      setError(err.message || t('errorSavingPromotion'));
     } finally {
       setLoading(false);
     }
@@ -148,7 +150,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       }
     } catch (err) {
       console.error('Error uploading image:', err);
-      alert('Error al subir la imagen');
+      alert(t('errorUploadingImage'));
     } finally {
       setUploadingImage(false);
     }
@@ -177,7 +179,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Type Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Tipo de Promoción *
+          {t('promotionType')} *
         </label>
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -191,8 +193,8 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
             } ${promotion ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="text-3xl mb-2">🎟️</div>
-            <div className="font-semibold">Cupón</div>
-            <div className="text-xs text-gray-600">Pool de códigos únicos</div>
+            <div className="font-semibold">{t('couponType')}</div>
+            <div className="text-xs text-gray-600">{t('couponDesc')}</div>
           </button>
 
           <button
@@ -206,8 +208,8 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
             } ${promotion ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="text-3xl mb-2">🔒</div>
-            <div className="font-semibold">Contenido Exclusivo</div>
-            <div className="text-xs text-gray-600">Solo para usuarios registrados</div>
+            <div className="font-semibold">{t('exclusiveContentLabel')}</div>
+            <div className="text-xs text-gray-600">{t('exclusiveContentDesc')}</div>
           </button>
         </div>
       </div>
@@ -215,7 +217,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Title */}
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-          Título *
+          {t('fieldTitle')} *
         </label>
         <input
           id="title"
@@ -223,7 +225,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          placeholder="Ej: Descuento 20% en equipamiento trail"
+          placeholder={t('titlePlaceholder')}
           required
         />
       </div>
@@ -231,7 +233,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Description */}
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-          Descripción *
+          {t('fieldDescription')} *
         </label>
         <textarea
           id="description"
@@ -239,7 +241,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          placeholder="Descripción de la promoción..."
+          placeholder={t('descriptionPlaceholder')}
           required
         />
       </div>
@@ -247,7 +249,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Brand URL */}
       <div>
         <label htmlFor="brandUrl" className="block text-sm font-medium text-gray-700 mb-2">
-          URL de la Marca/Fabricante
+          {t('brandUrl')}
         </label>
         <input
           id="brandUrl"
@@ -262,7 +264,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Category */}
       <div>
         <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-          Categoría
+          {t('category')}
         </label>
         <select
           id="category"
@@ -270,7 +272,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
           onChange={(e) => setCategoryId(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
         >
-          <option value="">Sin categoría</option>
+          <option value="">{t('noCategory')}</option>
           {categories.map(category => (
             <option key={category.id} value={category.id}>
               {category.icon} {category.name}
@@ -282,7 +284,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Cover Image */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Imagen de Portada
+          {t('coverImage')}
         </label>
         {coverImage ? (
           <div className="relative w-full h-64 rounded-lg overflow-hidden">
@@ -298,7 +300,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
         ) : (
           <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400">
             <Upload className="h-12 w-12 text-gray-400 mb-2" />
-            <span className="text-sm text-gray-600">Click para subir imagen</span>
+            <span className="text-sm text-gray-600">{t('clickToUpload')}</span>
             <input
               type="file"
               accept="image/*"
@@ -313,7 +315,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Gallery */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Galería de Fotos
+          {t('photoGallery')}
         </label>
         <div className="grid grid-cols-3 gap-4 mb-4">
           {gallery.map((img, index) => (
@@ -330,7 +332,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
           ))}
           <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400">
             <Plus className="h-8 w-8 text-gray-400 mb-1" />
-            <span className="text-xs text-gray-600">Agregar</span>
+            <span className="text-xs text-gray-600">{t('add')}</span>
             <input
               type="file"
               accept="image/*"
@@ -345,7 +347,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Language */}
       <div>
         <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
-          Idioma *
+          {t('language')} *
         </label>
         <select
           id="language"
@@ -365,7 +367,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {/* Status */}
       <div>
         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-          Estado de Publicación *
+          {t('publicationStatus')} *
         </label>
         <select
           id="status"
@@ -374,14 +376,14 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           required
         >
-          <option value={PostStatus.DRAFT}>📝 Borrador</option>
-          <option value={PostStatus.PUBLISHED}>✅ Publicado</option>
-          <option value={PostStatus.ARCHIVED}>📦 Archivado</option>
+          <option value={PostStatus.DRAFT}>📝 {t('statusDraft')}</option>
+          <option value={PostStatus.PUBLISHED}>✅ {t('statusPublished')}</option>
+          <option value={PostStatus.ARCHIVED}>📦 {t('statusArchived')}</option>
         </select>
         <p className="mt-1 text-sm text-gray-500">
-          {status === PostStatus.DRAFT && 'La promoción no será visible públicamente'}
-          {status === PostStatus.PUBLISHED && 'La promoción será visible para todos los usuarios'}
-          {status === PostStatus.ARCHIVED && 'La promoción no aparecerá en listados pero seguirá accesible por URL'}
+          {status === PostStatus.DRAFT && t('statusDraftHelp')}
+          {status === PostStatus.PUBLISHED && t('statusPublishedHelp')}
+          {status === PostStatus.ARCHIVED && t('statusArchivedHelp')}
         </p>
       </div>
 
@@ -398,14 +400,14 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
               }}
               className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
             />
-            <span className="text-sm font-medium text-gray-700">Global (todos los países)</span>
+            <span className="text-sm font-medium text-gray-700">{t('globalAllCountries')}</span>
           </label>
         </div>
 
         {!isGlobal && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Países Válidos * ({countries.length} seleccionados)
+              {t('validCountries')} * ({t('countriesSelected', { count: countries.length })})
             </label>
             <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-3">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -433,12 +435,12 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {type === 'EXCLUSIVE_CONTENT' && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Contenido Oculto (solo usuarios registrados) *
+            {t('hiddenContent')} *
           </label>
           <RichTextEditor
             content={exclusiveContent}
             onChange={setExclusiveContent}
-            placeholder="Escribe el contenido exclusivo que solo verán usuarios registrados..."
+            placeholder={t('hiddenContentPlaceholder')}
           />
         </div>
       )}
@@ -447,7 +449,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
       {type === 'COUPON' && !promotion && (
         <div>
           <label htmlFor="couponCodes" className="block text-sm font-medium text-gray-700 mb-2">
-            Códigos de Cupón * (uno por línea o separados por comas)
+            {t('couponCodes')}
           </label>
           <textarea
             id="couponCodes"
@@ -459,7 +461,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
             required
           />
           <p className="mt-1 text-sm text-gray-500">
-            Total de códigos: {couponCodesText.split(/[\n,]/).filter(c => c.trim()).length}
+            {t('totalCodes', { count: couponCodesText.split(/[\n,]/).filter(c => c.trim()).length })}
           </p>
         </div>
       )}
@@ -473,7 +475,7 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
             onChange={(e) => setFeatured(e.target.checked)}
             className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
           />
-          <span className="text-sm font-medium text-gray-700">Destacar esta promoción</span>
+          <span className="text-sm font-medium text-gray-700">{t('featurePromotion')}</span>
         </label>
       </div>
 
@@ -485,14 +487,14 @@ export default function PromotionForm({ promotion, onSuccess }: PromotionFormPro
           className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
           disabled={loading}
         >
-          Cancelar
+          {t('cancel')}
         </button>
         <button
           type="submit"
           disabled={loading || uploadingImage}
           className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Guardando...' : promotion ? 'Actualizar' : 'Crear Promoción'}
+          {loading ? t('saving') : promotion ? t('update') : t('createPromotion')}
         </button>
       </div>
     </form>

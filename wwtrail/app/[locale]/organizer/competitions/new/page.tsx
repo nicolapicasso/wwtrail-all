@@ -4,6 +4,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import CompetitionForm from '@/components/forms/CompetitionForm';
@@ -12,6 +13,7 @@ import type { Event } from '@/types/event';
 
 function NewCompetitionContent() {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const searchParams = useSearchParams();
   const eventId = searchParams.get('eventId');
 
@@ -44,7 +46,7 @@ function NewCompetitionContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
+          <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -64,17 +66,17 @@ function NewCompetitionContent() {
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver a {event.name}
+            {t('backTo', { name: event.name })}
           </Link>
         </div>
 
         {/* Event Context */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
           <p className="text-sm text-blue-900">
-            <span className="font-semibold">Evento:</span> {event.name}
+            <span className="font-semibold">{t('eventColon')}</span> {event.name}
           </p>
           <p className="text-xs text-blue-700 mt-1">
-            Estás creando una nueva competición para este evento
+            {t('creatingCompetitionForEvent')}
           </p>
         </div>
 
@@ -93,16 +95,21 @@ function NewCompetitionContent() {
   );
 }
 
+function NewCompetitionFallback() {
+  const t = useTranslations('boEvents');
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600">{t('loading')}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function NewCompetitionPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<NewCompetitionFallback />}>
       <NewCompetitionContent />
     </Suspense>
   );

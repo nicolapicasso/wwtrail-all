@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useParams } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,7 @@ export default function AdminEditUserPage() {
   const router = useRouter();
   const params = useParams();
   const locale = useLocale();
+  const t = useTranslations('boMisc');
   const userId = params.id as string;
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -90,7 +91,7 @@ export default function AdminEditUserPage() {
         });
       } catch (err: any) {
         console.error('Error fetching user:', err);
-        setError('Error al cargar el usuario');
+        setError(t('userEditLoadError'));
       } finally {
         setLoading(false);
       }
@@ -119,8 +120,8 @@ export default function AdminEditUserPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Usuario no encontrado</p>
-          <Button onClick={() => router.back()}>Volver</Button>
+          <p className="text-gray-600 mb-4">{t('userEditNotFound')}</p>
+          <Button onClick={() => router.back()}>{t('userEditBack')}</Button>
         </div>
       </div>
     );
@@ -156,7 +157,7 @@ export default function AdminEditUserPage() {
 
     // Validación de contraseña (opcional): si se rellena, mínimo 6 caracteres
     if (formData.newPassword && formData.newPassword.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError(t('userEditPasswordMinError'));
       setSaving(false);
       return;
     }
@@ -188,7 +189,7 @@ export default function AdminEditUserPage() {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError('Error al actualizar el usuario');
+        setError(t('userEditUpdateError'));
       }
     } finally {
       setSaving(false);
@@ -219,12 +220,12 @@ export default function AdminEditUserPage() {
             className="mb-4 text-white hover:text-white/80 hover:bg-white/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            {t('userEditBack')}
           </Button>
           <div className="flex items-center gap-4">
             <Shield className="w-8 h-8" />
             <div>
-              <h1 className="text-3xl font-bold">Editar Usuario</h1>
+              <h1 className="text-3xl font-bold">{t('userEditTitle')}</h1>
               <p className="text-lg opacity-90">
                 {userProfile.email}
                 <Badge className={`ml-2 ${getRoleBadgeColor(userProfile.role)}`}>
@@ -242,7 +243,7 @@ export default function AdminEditUserPage() {
           {/* Success Message */}
           {success && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800">Usuario actualizado correctamente</p>
+              <p className="text-green-800">{t('userEditSuccess')}</p>
             </div>
           )}
 
@@ -258,31 +259,31 @@ export default function AdminEditUserPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-blue-600" />
-                Cuenta y acceso
+                {t('userEditAccountSection')}
               </CardTitle>
               <CardDescription>
-                Como administrador puedes cambiar el email y establecer una nueva contraseña para este usuario.
+                {t('userEditAccountDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Email (editable) */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('userEditEmailLabel')}</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="usuario@ejemplo.com"
+                    placeholder={t('userEditEmailPlaceholder')}
                   />
                 </div>
                 {/* Nueva contraseña (opcional) */}
                 <div className="space-y-2">
                   <Label htmlFor="newPassword" className="flex items-center gap-2">
                     <Lock className="w-4 h-4" />
-                    Nueva contraseña
+                    {t('userEditNewPasswordLabel')}
                   </Label>
                   <Input
                     id="newPassword"
@@ -291,10 +292,10 @@ export default function AdminEditUserPage() {
                     autoComplete="new-password"
                     value={formData.newPassword}
                     onChange={handleChange}
-                    placeholder="Dejar en blanco para no cambiarla"
+                    placeholder={t('userEditNewPasswordPlaceholder')}
                   />
                   <p className="text-xs text-gray-500">
-                    Mínimo 6 caracteres. Si lo dejas vacío, la contraseña actual no se modifica.
+                    {t('userEditNewPasswordHint')}
                   </p>
                 </div>
               </div>
@@ -302,18 +303,18 @@ export default function AdminEditUserPage() {
               {/* Datos de solo lectura */}
               <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
                 <div>
-                  <Label className="text-gray-500">Username</Label>
+                  <Label className="text-gray-500">{t('userEditUsernameLabel')}</Label>
                   <p className="font-medium">@{userProfile.username}</p>
                 </div>
                 <div>
-                  <Label className="text-gray-500">Rol</Label>
+                  <Label className="text-gray-500">{t('userEditRoleLabel')}</Label>
                   <p><Badge className={getRoleBadgeColor(userProfile.role)}>{userProfile.role}</Badge></p>
                 </div>
                 <div>
-                  <Label className="text-gray-500">Estado</Label>
+                  <Label className="text-gray-500">{t('userEditStatusLabel')}</Label>
                   <p>
                     <Badge variant={userProfile.isActive ? 'default' : 'secondary'}>
-                      {userProfile.isActive ? 'Activo' : 'Inactivo'}
+                      {userProfile.isActive ? t('userEditStatusActive') : t('userEditStatusInactive')}
                     </Badge>
                   </p>
                 </div>
@@ -330,17 +331,17 @@ export default function AdminEditUserPage() {
                 ) : (
                   <Lock className="w-5 h-5 text-gray-600" />
                 )}
-                Privacidad del Perfil
+                {t('userEditPrivacySection')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="isPublic" className="text-base font-medium">
-                    Perfil público
+                    {t('userEditPublicProfileLabel')}
                   </Label>
                   <p className="text-sm text-gray-500">
-                    Si está activado, el perfil aparecerá en el listado de usuarios públicos
+                    {t('userEditPublicProfileHint')}
                   </p>
                 </div>
                 <Switch
@@ -355,21 +356,21 @@ export default function AdminEditUserPage() {
           {/* Avatar & Basic Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Información Personal</CardTitle>
+              <CardTitle>{t('userEditPersonalSection')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Avatar with FileUpload */}
               <div className="space-y-4">
                 <Label className="flex items-center gap-2">
                   <Camera className="w-4 h-4" />
-                  Foto de perfil
+                  {t('userEditAvatarLabel')}
                 </Label>
                 <div className="flex items-start gap-6">
                   <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 shrink-0">
                     {formData.avatar ? (
                       <Image
                         src={formData.avatar}
-                        alt="Avatar"
+                        alt={t('userEditAvatarAlt')}
                         fill
                         className="object-cover"
                       />
@@ -386,7 +387,7 @@ export default function AdminEditUserPage() {
                       }}
                       currentUrl={formData.avatar}
                       accept="image/*"
-                      buttonText="Subir foto"
+                      buttonText={t('userEditUploadPhoto')}
                     />
                     {formData.avatar && (
                       <Button
@@ -396,7 +397,7 @@ export default function AdminEditUserPage() {
                         className="mt-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={() => setFormData((prev) => ({ ...prev, avatar: '' }))}
                       >
-                        Eliminar foto
+                        {t('userEditRemovePhoto')}
                       </Button>
                     )}
                   </div>
@@ -406,23 +407,23 @@ export default function AdminEditUserPage() {
               {/* First Name & Last Name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">Nombre</Label>
+                  <Label htmlFor="firstName">{t('userEditFirstNameLabel')}</Label>
                   <Input
                     id="firstName"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="Juan"
+                    placeholder={t('userEditFirstNamePlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Apellidos</Label>
+                  <Label htmlFor="lastName">{t('userEditLastNameLabel')}</Label>
                   <Input
                     id="lastName"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    placeholder="García"
+                    placeholder={t('userEditLastNamePlaceholder')}
                   />
                 </div>
               </div>
@@ -430,7 +431,7 @@ export default function AdminEditUserPage() {
               {/* Gender & Birth Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="gender">Sexo</Label>
+                  <Label htmlFor="gender">{t('userEditGenderLabel')}</Label>
                   <select
                     id="gender"
                     name="gender"
@@ -438,14 +439,14 @@ export default function AdminEditUserPage() {
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="">Seleccionar...</option>
-                    <option value="MALE">Hombre</option>
-                    <option value="FEMALE">Mujer</option>
-                    <option value="NON_BINARY">No binario</option>
+                    <option value="">{t('userEditGenderSelect')}</option>
+                    <option value="MALE">{t('userEditGenderMale')}</option>
+                    <option value="FEMALE">{t('userEditGenderFemale')}</option>
+                    <option value="NON_BINARY">{t('userEditGenderNonBinary')}</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate">Fecha de nacimiento</Label>
+                  <Label htmlFor="birthDate">{t('userEditBirthDateLabel')}</Label>
                   <Input
                     id="birthDate"
                     name="birthDate"
@@ -459,7 +460,7 @@ export default function AdminEditUserPage() {
 
               {/* Phone */}
               <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
+                <Label htmlFor="phone">{t('userEditPhoneLabel')}</Label>
                 <Input
                   id="phone"
                   name="phone"
@@ -475,12 +476,12 @@ export default function AdminEditUserPage() {
           {/* Location */}
           <Card>
             <CardHeader>
-              <CardTitle>Ubicación</CardTitle>
+              <CardTitle>{t('userEditLocationSection')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="country">País</Label>
+                  <Label htmlFor="country">{t('userEditCountryLabel')}</Label>
                   <select
                     id="country"
                     name="country"
@@ -488,7 +489,7 @@ export default function AdminEditUserPage() {
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="">Seleccionar país...</option>
+                    <option value="">{t('userEditCountrySelect')}</option>
                     {COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code}>
                         {c.name}
@@ -497,13 +498,13 @@ export default function AdminEditUserPage() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city">Ciudad</Label>
+                  <Label htmlFor="city">{t('userEditCityLabel')}</Label>
                   <Input
                     id="city"
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    placeholder="Madrid"
+                    placeholder={t('userEditCityPlaceholder')}
                   />
                 </div>
               </div>
@@ -513,23 +514,23 @@ export default function AdminEditUserPage() {
           {/* Bio */}
           <Card>
             <CardHeader>
-              <CardTitle>Biografía</CardTitle>
+              <CardTitle>{t('userEditBioSection')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="bio">Descripción</Label>
+                <Label htmlFor="bio">{t('userEditBioLabel')}</Label>
                 <textarea
                   id="bio"
                   name="bio"
                   value={formData.bio}
                   onChange={handleChange}
                   rows={4}
-                  placeholder="Información sobre el usuario..."
+                  placeholder={t('userEditBioPlaceholder')}
                   className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   maxLength={500}
                 />
                 <p className="text-xs text-gray-500 text-right">
-                  {formData.bio.length}/500 caracteres
+                  {t('userEditBioCounter', { count: formData.bio.length })}
                 </p>
               </div>
             </CardContent>
@@ -538,7 +539,7 @@ export default function AdminEditUserPage() {
           {/* Social Media */}
           <Card>
             <CardHeader>
-              <CardTitle>Redes Sociales</CardTitle>
+              <CardTitle>{t('userEditSocialSection')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -612,18 +613,18 @@ export default function AdminEditUserPage() {
               className="flex-1"
               disabled={saving}
             >
-              Cancelar
+              {t('userEditCancel')}
             </Button>
             <Button type="submit" className="flex-1" disabled={saving}>
               {saving ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Guardando...
+                  {t('userEditSaving')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Guardar Cambios
+                  {t('userEditSave')}
                 </>
               )}
             </Button>

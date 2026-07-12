@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Save, Loader2, AlertCircle, Info, Image as ImageIcon, Globe, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import editionsService from '@/lib/api/v2/editions.service';
@@ -32,6 +32,7 @@ export default function EditionForm({
 }: EditionFormProps) {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('boForms');
   const [loading, setLoading] = useState(false);
   const [loadingAndEdit, setLoadingAndEdit] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,18 +94,18 @@ export default function EditionForm({
 
     // Validaciones
     if (!formData.year) {
-      setError('El año es obligatorio');
+      setError(t('yearRequired'));
       return;
     }
 
     const year = parseInt(formData.year);
     if (year < 1900 || year > 2100) {
-      setError('El año debe estar entre 1900 y 2100');
+      setError(t('yearRange'));
       return;
     }
 
     if (!formData.startDate) {
-      setError('La fecha de inicio es obligatoria');
+      setError(t('startDateRequired'));
       return;
     }
 
@@ -178,10 +179,10 @@ export default function EditionForm({
 
       if (isEditMode) {
         result = await editionsService.update(edition.id, payload);
-        toast.success('Edición actualizada correctamente');
+        toast.success(t('editionUpdatedSuccess'));
       } else {
         result = await editionsService.create(competitionId, payload);
-        toast.success('Edición creada correctamente');
+        toast.success(t('editionCreatedSuccess'));
       }
 
       if (onSuccess) {
@@ -202,7 +203,7 @@ export default function EditionForm({
       }
 
       // Construir mensaje de error detallado
-      let errorMessage = err.response?.data?.message || 'Error al guardar la edición';
+      let errorMessage = err.response?.data?.message || t('editionSaveError');
 
       if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors
@@ -225,18 +226,18 @@ export default function EditionForm({
 
     // Validaciones
     if (!formData.year) {
-      setError('El año es obligatorio');
+      setError(t('yearRequired'));
       return;
     }
 
     const year = parseInt(formData.year);
     if (year < 1900 || year > 2100) {
-      setError('El año debe estar entre 1900 y 2100');
+      setError(t('yearRange'));
       return;
     }
 
     if (!formData.startDate) {
-      setError('La fecha de inicio es obligatoria');
+      setError(t('startDateRequired'));
       return;
     }
 
@@ -280,13 +281,13 @@ export default function EditionForm({
       };
 
       const result = await editionsService.create(competitionId, payload);
-      toast.success('Edición creada. Redirigiendo para definir ranking y meteo...');
+      toast.success(t('editionCreatedRedirect'));
 
       // Redirect to edit mode
       router.push(`/${locale}/organizer/editions/edit/${result.id}`);
     } catch (err: any) {
       console.error('Error saving edition:', err);
-      let errorMessage = err.response?.data?.message || 'Error al guardar la edición';
+      let errorMessage = err.response?.data?.message || t('editionSaveError');
       if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         const validationErrors = err.response.data.errors
           .map((e: any) => `${e.field}: ${e.message}`)
@@ -306,10 +307,10 @@ export default function EditionForm({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            {isEditMode ? 'Editar Edición' : 'Nueva Edición'}
+            {isEditMode ? t('editEditionTitle') : t('newEditionTitle')}
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Define las características de esta edición de {competition.name}
+            {t('editionSubtitle', { name: competition.name })}
           </p>
         </div>
 
@@ -319,7 +320,7 @@ export default function EditionForm({
             onClick={onCancel}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancelar
+            {t('cancel')}
           </button>
         )}
       </div>
@@ -330,7 +331,7 @@ export default function EditionForm({
           <div className="flex items-start">
             <AlertCircle className="h-5 w-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
+              <h3 className="text-sm font-medium text-red-800">{t('errorTitle')}</h3>
               <p className="text-sm text-red-700 mt-1">{error}</p>
             </div>
           </div>
@@ -340,13 +341,13 @@ export default function EditionForm({
       {/* Basic Info Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Información Básica
+          {t('basicInfo')}
         </h3>
 
         {/* Year */}
         <div>
           <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
-            Año *
+            {t('yearLabel')}
           </label>
           <input
             type="number"
@@ -362,7 +363,7 @@ export default function EditionForm({
           />
           {isEditMode && (
             <p className="text-xs text-gray-500 mt-1">
-              El año no puede modificarse una vez creada la edición
+              {t('yearImmutable')}
             </p>
           )}
         </div>
@@ -372,7 +373,7 @@ export default function EditionForm({
           <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
             <span className="flex items-center gap-2">
               <Globe className="h-4 w-4" />
-              Idioma del Contenido *
+              {t('contentLanguageLabel')}
             </span>
           </label>
           <select
@@ -389,7 +390,7 @@ export default function EditionForm({
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+            {t('contentLanguageHelp')}
           </p>
         </div>
 
@@ -401,7 +402,7 @@ export default function EditionForm({
               htmlFor="startDate"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Fecha de Inicio *
+              {t('startDateLabel')}
             </label>
             <input
               type="date"
@@ -412,14 +413,14 @@ export default function EditionForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
-              El año se toma automáticamente del campo "Año" ({formData.year})
+              {t('yearAutoFromField', { year: formData.year })}
             </p>
           </div>
 
           {/* End Date */}
           <div>
             <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de Fin
+              {t('endDateLabel')}
             </label>
             <input
               type="date"
@@ -429,7 +430,7 @@ export default function EditionForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
-              El año se toma automáticamente del campo "Año" ({formData.year})
+              {t('yearAutoFromField', { year: formData.year })}
             </p>
           </div>
         </div>
@@ -437,7 +438,7 @@ export default function EditionForm({
         {/* City */}
         <div>
           <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-            Ciudad
+            {t('city')}
           </label>
           <input
             type="text"
@@ -446,51 +447,51 @@ export default function EditionForm({
             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
             placeholder={
               competition.event?.city
-                ? `Heredado del evento: ${competition.event.city}`
-                : 'Ciudad'
+                ? t('cityInheritedPlaceholder', { city: competition.event.city })
+                : t('city')
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
           <p className="text-xs text-gray-500 mt-1">
             {competition.event?.city
-              ? `Deja vacío para heredar del evento: ${competition.event.city}`
-              : 'Opcional'}
+              ? t('cityInheritHelp', { city: competition.event.city })
+              : t('optional')}
           </p>
         </div>
 
         {/* Chronicle */}
         <div>
           <label htmlFor="chronicle" className="block text-sm font-medium text-gray-700 mb-1">
-            Crónica
+            {t('chronicle')}
           </label>
           <textarea
             id="chronicle"
             value={formData.chronicle}
             onChange={(e) => setFormData({ ...formData, chronicle: e.target.value })}
             rows={6}
-            placeholder="Escribe aquí la crónica de esta edición..."
+            placeholder={t('chroniclePlaceholder')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Relato detallado de cómo fue esta edición (condiciones, anécdotas, etc.)
+            {t('chronicleHelp')}
           </p>
         </div>
 
         {/* Regulations */}
         <div>
           <label htmlFor="regulations" className="block text-sm font-medium text-gray-700 mb-1">
-            Reglamento
+            {t('regulations')}
           </label>
           <textarea
             id="regulations"
             value={formData.regulations}
             onChange={(e) => setFormData({ ...formData, regulations: e.target.value })}
             rows={10}
-            placeholder="Reglamento completo de la carrera..."
+            placeholder={t('regulationsPlaceholder')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Reglamento y normas oficiales de la carrera
+            {t('regulationsHelp')}
           </p>
         </div>
       </div>
@@ -501,10 +502,10 @@ export default function EditionForm({
           <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              Características Técnicas
+              {t('technicalCharacteristics')}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              Deja vacío para heredar los valores base de la competición
+              {t('technicalCharacteristicsHelp')}
             </p>
           </div>
         </div>
@@ -513,7 +514,7 @@ export default function EditionForm({
           {/* Distance */}
           <div>
             <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-1">
-              Distancia (km)
+              {t('distanceKm')}
             </label>
             <input
               type="number"
@@ -522,8 +523,8 @@ export default function EditionForm({
               onChange={(e) => setFormData({ ...formData, distance: e.target.value })}
               placeholder={
                 competition.baseDistance
-                  ? `Base: ${competition.baseDistance} km`
-                  : 'Distancia'
+                  ? t('baseDistancePlaceholder', { value: competition.baseDistance })
+                  : t('distance')
               }
               min="0"
               step="0.1"
@@ -531,7 +532,7 @@ export default function EditionForm({
             />
             {competition.baseDistance && (
               <p className="text-xs text-gray-500 mt-1">
-                Base: {competition.baseDistance} km
+                {t('baseDistanceNote', { value: competition.baseDistance })}
               </p>
             )}
           </div>
@@ -539,7 +540,7 @@ export default function EditionForm({
           {/* Elevation */}
           <div>
             <label htmlFor="elevation" className="block text-sm font-medium text-gray-700 mb-1">
-              Desnivel (m D+)
+              {t('elevationDPlus')}
             </label>
             <input
               type="number"
@@ -548,15 +549,15 @@ export default function EditionForm({
               onChange={(e) => setFormData({ ...formData, elevation: e.target.value })}
               placeholder={
                 competition.baseElevation
-                  ? `Base: ${competition.baseElevation} m D+`
-                  : 'Desnivel'
+                  ? t('baseElevationPlaceholder', { value: competition.baseElevation })
+                  : t('elevation')
               }
               min="0"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             {competition.baseElevation && (
               <p className="text-xs text-gray-500 mt-1">
-                Base: {competition.baseElevation} m D+
+                {t('baseElevationNote', { value: competition.baseElevation })}
               </p>
             )}
           </div>
@@ -567,7 +568,7 @@ export default function EditionForm({
               htmlFor="maxParticipants"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Participantes Máx.
+              {t('maxParticipants')}
             </label>
             <input
               type="number"
@@ -578,15 +579,15 @@ export default function EditionForm({
               }
               placeholder={
                 competition.baseMaxParticipants
-                  ? `Base: ${competition.baseMaxParticipants}`
-                  : 'Máximo'
+                  ? t('baseValuePlaceholder', { value: competition.baseMaxParticipants })
+                  : t('maximum')
               }
               min="0"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             {competition.baseMaxParticipants && (
               <p className="text-xs text-gray-500 mt-1">
-                Base: {competition.baseMaxParticipants}
+                {t('baseValueNote', { value: competition.baseMaxParticipants })}
               </p>
             )}
           </div>
@@ -598,7 +599,7 @@ export default function EditionForm({
             htmlFor="currentParticipants"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Participantes Actuales
+            {t('currentParticipants')}
           </label>
           <input
             type="number"
@@ -612,14 +613,14 @@ export default function EditionForm({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Número de participantes inscritos actualmente
+            {t('currentParticipantsHelp')}
           </p>
         </div>
       </div>
 
       {/* Registration Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Inscripción</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('registration')}</h3>
 
         {/* Registration URL */}
         <div>
@@ -627,7 +628,7 @@ export default function EditionForm({
             htmlFor="registrationUrl"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            URL de Inscripción
+            {t('registrationUrl')}
           </label>
           <input
             type="url"
@@ -638,7 +639,7 @@ export default function EditionForm({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Enlace externo de inscripción
+            {t('registrationUrlHelp')}
           </p>
         </div>
 
@@ -649,7 +650,7 @@ export default function EditionForm({
               htmlFor="registrationOpenDate"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Apertura de Inscripciones
+              {t('registrationOpenDate')}
             </label>
             <input
               type="date"
@@ -659,7 +660,7 @@ export default function EditionForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Puede ser anterior al año de la edición
+              {t('canBeBeforeEditionYear')}
             </p>
           </div>
 
@@ -668,7 +669,7 @@ export default function EditionForm({
               htmlFor="registrationCloseDate"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Cierre de Inscripciones
+              {t('registrationCloseDate')}
             </label>
             <input
               type="date"
@@ -678,7 +679,7 @@ export default function EditionForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Puede ser anterior al año de la edición
+              {t('canBeBeforeEditionYear')}
             </p>
           </div>
         </div>
@@ -686,7 +687,7 @@ export default function EditionForm({
         {/* Results URL */}
         <div>
           <label htmlFor="resultsUrl" className="block text-sm font-medium text-gray-700 mb-1">
-            URL de Resultados
+            {t('resultsUrl')}
           </label>
           <input
             type="url"
@@ -701,16 +702,16 @@ export default function EditionForm({
 
       {/* Prices Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Precios de Inscripción</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('registrationPrices')}</h3>
         <p className="text-sm text-gray-600 mb-4">
-          Define los precios para diferentes períodos de inscripción
+          {t('registrationPricesHelp')}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Early Bird Price */}
           <div>
             <label htmlFor="priceEarly" className="block text-sm font-medium text-gray-700 mb-1">
-              Precio Early Bird (€)
+              {t('priceEarly')}
             </label>
             <input
               type="number"
@@ -727,7 +728,7 @@ export default function EditionForm({
           {/* Normal Price */}
           <div>
             <label htmlFor="priceNormal" className="block text-sm font-medium text-gray-700 mb-1">
-              Precio Normal (€)
+              {t('priceNormal')}
             </label>
             <input
               type="number"
@@ -744,7 +745,7 @@ export default function EditionForm({
           {/* Late Price */}
           <div>
             <label htmlFor="priceLate" className="block text-sm font-medium text-gray-700 mb-1">
-              Precio Tardío (€)
+              {t('priceLate')}
             </label>
             <input
               type="number"
@@ -765,7 +766,7 @@ export default function EditionForm({
         <div className="flex items-center gap-2 mb-4">
           <ImageIcon className="h-5 w-5 text-blue-600" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Imágenes y Medios
+            {t('imagesAndMedia')}
           </h3>
         </div>
 
@@ -773,67 +774,67 @@ export default function EditionForm({
           {/* Cover Image */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Imagen de Portada
+              {t('coverImage')}
             </label>
             <FileUpload
               fieldname="cover"
               onUpload={(url) => setFormData({ ...formData, coverImage: url })}
               currentUrl={formData.coverImage}
-              buttonText="Subir portada"
+              buttonText={t('uploadCover')}
               maxSizeMB={5}
               accept="image/*"
               showPreview={true}
             />
             {formData.coverImage && (
               <p className="text-xs text-green-600 font-medium mt-2">
-                ✓ Portada subida
+                {t('coverUploaded')}
               </p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Imagen principal de esta edición
+              {t('editionCoverHelp')}
             </p>
           </div>
 
           {/* Gallery */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Galería de Fotos
+              {t('photoGallery')}
             </label>
             <FileUpload
               fieldname="gallery"
               multiple={true}
               onUploadMultiple={(urls) => setFormData({ ...formData, gallery: urls })}
               currentUrls={formData.gallery}
-              buttonText="Subir fotos"
+              buttonText={t('uploadPhotos')}
               maxSizeMB={3}
               accept="image/*"
               showPreview={true}
             />
             {formData.gallery.length > 0 && (
               <p className="text-xs text-green-600 font-medium mt-2">
-                ✓ {formData.gallery.length} fotos
+                {t('photosCount', { count: formData.gallery.length })}
               </p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Fotos de la edición ({formData.gallery.length} fotos)
+              {t('editionGalleryHelp', { count: formData.gallery.length })}
             </p>
           </div>
         </div>
 
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-          💡 Las imágenes se optimizan automáticamente. Máximo 5MB por archivo.
+          {t('imagesOptimizedNote')}
         </div>
       </div>
 
       {/* Status Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Estado y Visibilidad</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('statusAndVisibility')}</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Edition Status */}
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-              Estado de la Edición
+              {t('editionStatus')}
             </label>
             <select
               id="status"
@@ -843,10 +844,10 @@ export default function EditionForm({
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             >
-              <option value={EditionStatus.UPCOMING}>Próxima</option>
-              <option value={EditionStatus.ONGOING}>En Curso</option>
-              <option value={EditionStatus.FINISHED}>Finalizada</option>
-              <option value={EditionStatus.CANCELLED}>Cancelada</option>
+              <option value={EditionStatus.UPCOMING}>{t('editionUpcoming')}</option>
+              <option value={EditionStatus.ONGOING}>{t('editionOngoing')}</option>
+              <option value={EditionStatus.FINISHED}>{t('editionFinished')}</option>
+              <option value={EditionStatus.CANCELLED}>{t('statusCancelledFem')}</option>
             </select>
           </div>
 
@@ -856,7 +857,7 @@ export default function EditionForm({
               htmlFor="registrationStatus"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Estado de Inscripción
+              {t('registrationStatus')}
             </label>
             <select
               id="registrationStatus"
@@ -869,11 +870,11 @@ export default function EditionForm({
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             >
-              <option value={RegistrationStatus.NOT_OPEN}>No Abierta</option>
-              <option value={RegistrationStatus.COMING_SOON}>Próximamente</option>
-              <option value={RegistrationStatus.OPEN}>Abierta</option>
-              <option value={RegistrationStatus.CLOSED}>Cerrada</option>
-              <option value={RegistrationStatus.FULL}>Completa</option>
+              <option value={RegistrationStatus.NOT_OPEN}>{t('regNotOpen')}</option>
+              <option value={RegistrationStatus.COMING_SOON}>{t('regComingSoon')}</option>
+              <option value={RegistrationStatus.OPEN}>{t('regOpen')}</option>
+              <option value={RegistrationStatus.CLOSED}>{t('regClosed')}</option>
+              <option value={RegistrationStatus.FULL}>{t('regFull')}</option>
             </select>
           </div>
         </div>
@@ -881,7 +882,7 @@ export default function EditionForm({
         {/* Featured */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Edición Destacada
+            {t('featuredEdition')}
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -891,11 +892,11 @@ export default function EditionForm({
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
             <span className="text-sm text-gray-700">
-              {formData.featured ? 'Destacada' : 'Normal'}
+              {formData.featured ? t('featuredFem') : t('normal')}
             </span>
           </label>
           <p className="text-xs text-gray-500 mt-1">
-            Las ediciones destacadas se muestran de forma prominente en la página principal
+            {t('featuredEditionHelp')}
           </p>
         </div>
       </div>
@@ -913,12 +914,12 @@ export default function EditionForm({
             {loadingAndEdit ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Guardando...
+                {t('saving')}
               </>
             ) : (
               <>
                 <Trophy className="h-4 w-4" />
-                Guardar y definir ranking/meteo
+                {t('saveAndDefineRanking')}
               </>
             )}
           </button>
@@ -933,12 +934,12 @@ export default function EditionForm({
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Guardando...
+              {t('saving')}
             </>
           ) : (
             <>
               <Save className="h-4 w-4" />
-              {isEditMode ? 'Actualizar' : 'Crear'} Edición
+              {isEditMode ? t('updateEdition') : t('createEdition')}
             </>
           )}
         </button>

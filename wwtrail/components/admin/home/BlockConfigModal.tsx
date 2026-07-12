@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { X, Save } from 'lucide-react';
 import { homeService } from '@/lib/api/home.service';
 import FileUpload from '@/components/FileUpload';
@@ -32,6 +33,7 @@ interface BlockConfigModalProps {
 
 export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockConfigModalProps) {
   const isEditing = !!block;
+  const t = useTranslations('boAdmin');
 
   // Common fields
   const [blockType, setBlockType] = useState<HomeBlockType>(block?.type || HomeBlockType.EVENTS);
@@ -173,7 +175,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
       onSaved();
     } catch (error) {
       console.error('Error saving block:', error);
-      alert('Error al guardar el bloque');
+      alert(t('errorSavingBlock'));
     } finally {
       setSaving(false);
     }
@@ -201,9 +203,9 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
       onChange={(e) => onChange(e.target.value as HomeTextAlign)}
       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     >
-      <option value="LEFT">Izquierda</option>
-      <option value="CENTER">Centrado</option>
-      <option value="RIGHT">Derecha</option>
+      <option value="LEFT">{t('alignLeft')}</option>
+      <option value="CENTER">{t('alignCenter')}</option>
+      <option value="RIGHT">{t('alignRight')}</option>
     </select>
   );
 
@@ -215,10 +217,10 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
       onChange={(e) => onChange(e.target.value as HomeTextSize)}
       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     >
-      <option value="SM">Pequeño</option>
-      <option value="MD">Mediano</option>
-      <option value="LG">Grande</option>
-      <option value="XL">Extra Grande</option>
+      <option value="SM">{t('sizeSmall')}</option>
+      <option value="MD">{t('sizeMedium')}</option>
+      <option value="LG">{t('sizeLarge')}</option>
+      <option value="XL">{t('sizeExtraLarge')}</option>
     </select>
   );
 
@@ -228,7 +230,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-2xl font-bold text-gray-900">
-            {isEditing ? 'Editar Bloque' : 'Nuevo Bloque'}
+            {isEditing ? t('editBlock') : t('newBlock')}
           </h2>
           <button
             onClick={onClose}
@@ -243,7 +245,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
           {/* Block Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tipo de Bloque
+              {t('blockType')}
             </label>
             <select
               value={blockType}
@@ -251,21 +253,21 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               disabled={isEditing}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
             >
-              <option value="EVENTS">Eventos</option>
-              <option value="COMPETITIONS">Competiciones</option>
-              <option value="EDITIONS">Ediciones</option>
-              <option value="SERVICES">Servicios</option>
-              <option value="POSTS">Artículos (Magazine)</option>
-              <option value="TEXT">Texto</option>
-              <option value="LINKS">Enlaces</option>
-              <option value="MAP">Mapa</option>
+              <option value="EVENTS">{t('optionEvents')}</option>
+              <option value="COMPETITIONS">{t('optionCompetitions')}</option>
+              <option value="EDITIONS">{t('optionEditions')}</option>
+              <option value="SERVICES">{t('optionServices')}</option>
+              <option value="POSTS">{t('optionPosts')}</option>
+              <option value="TEXT">{t('optionText')}</option>
+              <option value="LINKS">{t('optionLinks')}</option>
+              <option value="MAP">{t('optionMap')}</option>
             </select>
           </div>
 
           {/* Order */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Orden
+              {t('order')}
             </label>
             <input
               type="number"
@@ -285,44 +287,44 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
             <label htmlFor="visible" className="text-sm font-medium text-gray-700">
-              Visible en la home
+              {t('visibleInHome')}
             </label>
           </div>
 
           {/* Config específica por tipo */}
           {(blockType === 'EVENTS' || blockType === 'COMPETITIONS' || blockType === 'EDITIONS' || blockType === 'SERVICES' || blockType === 'POSTS') && (
             <div className="space-y-4 border-t pt-4">
-              <h3 className="font-semibold text-gray-900">Configuración de Contenido</h3>
+              <h3 className="font-semibold text-gray-900">{t('contentConfig')}</h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Título personalizado
+                  {t('customTitle')}
                 </label>
                 <input
                   type="text"
                   value={contentTitle}
                   onChange={(e) => setContentTitle(e.target.value)}
-                  placeholder="Dejar vacío para usar título por defecto"
+                  placeholder={t('customTitlePlaceholder')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Subtítulo personalizado
+                  {t('customSubtitle')}
                 </label>
                 <input
                   type="text"
                   value={contentSubtitle}
                   onChange={(e) => setContentSubtitle(e.target.value)}
-                  placeholder="Dejar vacío para no mostrar subtítulo"
+                  placeholder={t('customSubtitlePlaceholder')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Límite de elementos
+                  {t('itemLimit')}
                 </label>
                 <input
                   type="number"
@@ -336,15 +338,15 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo de vista
+                  {t('viewType')}
                 </label>
                 <select
                   value={viewType}
                   onChange={(e) => setViewType(e.target.value as HomeBlockViewType)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="CARDS">Tarjetas (Grid)</option>
-                  <option value="LIST">Lista</option>
+                  <option value="CARDS">{t('viewCards')}</option>
+                  <option value="LIST">{t('viewList')}</option>
                 </select>
               </div>
 
@@ -357,7 +359,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="featuredOnly" className="text-sm font-medium text-gray-700">
-                  Solo elementos destacados
+                  {t('featuredOnly')}
                 </label>
               </div>
             </div>
@@ -365,11 +367,11 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
           {blockType === 'TEXT' && (
             <div className="space-y-4 border-t pt-4">
-              <h3 className="font-semibold text-gray-900">Configuración de Texto</h3>
+              <h3 className="font-semibold text-gray-900">{t('textConfig')}</h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contenido
+                  {t('content')}
                 </label>
                 <textarea
                   value={textContent}
@@ -382,14 +384,14 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tamaño
+                    {t('size')}
                   </label>
                   <SizeSelect value={textSize} onChange={setTextSize} id="textSize" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Alineación
+                    {t('alignment')}
                   </label>
                   <AlignSelect value={textAlign} onChange={setTextAlign} id="textAlign" />
                 </div>
@@ -397,15 +399,15 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Variante
+                  {t('variant')}
                 </label>
                 <select
                   value={textVariant}
                   onChange={(e) => setTextVariant(e.target.value as HomeTextVariant)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="PARAGRAPH">Párrafo</option>
-                  <option value="HEADING">Encabezado</option>
+                  <option value="PARAGRAPH">{t('variantParagraph')}</option>
+                  <option value="HEADING">{t('variantHeading')}</option>
                 </select>
               </div>
             </div>
@@ -414,17 +416,17 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
           {blockType === 'LINKS' && (
             <div className="space-y-4 border-t pt-4">
               {/* Título y Subtítulo de la sección */}
-              <h3 className="font-semibold text-gray-900">Título de la Sección</h3>
+              <h3 className="font-semibold text-gray-900">{t('sectionTitle')}</h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Título
+                  {t('fieldTitle')}
                 </label>
                 <input
                   type="text"
                   value={linksTitle}
                   onChange={(e) => setLinksTitle(e.target.value)}
-                  placeholder="Título de la sección (opcional)"
+                  placeholder={t('sectionTitlePlaceholder')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -432,13 +434,13 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tamaño del título
+                    {t('titleSize')}
                   </label>
                   <SizeSelect value={linksTitleSize} onChange={setLinksTitleSize} id="linksTitleSize" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Alineación del título
+                    {t('titleAlign')}
                   </label>
                   <AlignSelect value={linksTitleAlign} onChange={setLinksTitleAlign} id="linksTitleAlign" />
                 </div>
@@ -446,13 +448,13 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Subtítulo
+                  {t('fieldSubtitle')}
                 </label>
                 <input
                   type="text"
                   value={linksSubtitle}
                   onChange={(e) => setLinksSubtitle(e.target.value)}
-                  placeholder="Subtítulo de la sección (opcional)"
+                  placeholder={t('sectionSubtitlePlaceholder')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -460,13 +462,13 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tamaño del subtítulo
+                    {t('subtitleSize')}
                   </label>
                   <SizeSelect value={linksSubtitleSize} onChange={setLinksSubtitleSize} id="linksSubtitleSize" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Alineación del subtítulo
+                    {t('subtitleAlign')}
                   </label>
                   <AlignSelect value={linksSubtitleAlign} onChange={setLinksSubtitleAlign} id="linksSubtitleAlign" />
                 </div>
@@ -475,32 +477,32 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
               {/* Enlaces */}
               <div className="border-t pt-4 mt-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Enlaces</h3>
+                  <h3 className="font-semibold text-gray-900">{t('links')}</h3>
                   <button
                     onClick={addLink}
                     className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                   >
-                    Agregar Enlace
+                    {t('addLink')}
                   </button>
                 </div>
 
                 {items.map((item, index) => (
                   <div key={index} className="border rounded-md p-4 space-y-3 mb-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Enlace {index + 1}</span>
+                      <span className="text-sm font-medium text-gray-700">{t('linkItem', { num: index + 1 })}</span>
                       <button
                         onClick={() => removeLink(index)}
                         className="text-red-600 hover:text-red-700 text-sm"
                       >
-                        Eliminar
+                        {t('delete')}
                       </button>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Título</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">{t('fieldTitle')}</label>
                       <input
                         type="text"
-                        placeholder="Título del enlace"
+                        placeholder={t('linkTitlePlaceholder')}
                         value={item.title}
                         onChange={(e) => updateLink(index, 'title', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -508,9 +510,9 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Texto (opcional)</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">{t('textOptional')}</label>
                       <textarea
-                        placeholder="Descripción o párrafo bajo el título"
+                        placeholder={t('linkTextPlaceholder')}
                         value={item.text || ''}
                         onChange={(e) => updateLink(index, 'text', e.target.value)}
                         rows={2}
@@ -530,11 +532,11 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Imagen</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">{t('image')}</label>
                       <FileUpload
                         onUpload={(url) => updateLink(index, 'imageUrl', url)}
                         currentUrl={item.imageUrl}
-                        buttonText="Subir imagen"
+                        buttonText={t('uploadImage')}
                         fieldname="link"
                         maxSizeMB={5}
                         showPreview={true}
@@ -545,7 +547,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
                 {items.length === 0 && (
                   <p className="text-sm text-gray-500 text-center py-4">
-                    No hay enlaces. Agrega al menos uno.
+                    {t('noLinks')}
                   </p>
                 )}
               </div>
@@ -554,11 +556,11 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
 
           {blockType === 'MAP' && (
             <div className="space-y-4 border-t pt-4">
-              <h3 className="font-semibold text-gray-900">Configuración del Mapa</h3>
+              <h3 className="font-semibold text-gray-900">{t('mapConfig')}</h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Altura (píxeles)
+                  {t('heightPixels')}
                 </label>
                 <input
                   type="number"
@@ -568,27 +570,27 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                   max={800}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <p className="text-xs text-gray-500 mt-1">El zoom se ajusta automáticamente para mostrar todos los elementos</p>
+                <p className="text-xs text-gray-500 mt-1">{t('mapZoomHelp')}</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo de Mapa
+                  {t('mapType')}
                 </label>
                 <select
                   value={mapMode}
                   onChange={(e) => setMapMode(e.target.value as MapMode)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="terrain">Terreno (OpenTopoMap)</option>
-                  <option value="satellite">Satélite (ESRI)</option>
-                  <option value="street">Calles (OpenStreetMap)</option>
+                  <option value="terrain">{t('mapTerrain')}</option>
+                  <option value="satellite">{t('mapSatellite')}</option>
+                  <option value="street">{t('mapStreet')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Elementos a mostrar
+                  {t('elementsToShow')}
                 </label>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -598,7 +600,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                       onChange={(e) => setShowEvents(e.target.checked)}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">Eventos</span>
+                    <span className="text-sm text-gray-700">{t('optionEvents')}</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -607,7 +609,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                       onChange={(e) => setShowCompetitions(e.target.checked)}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">Competiciones</span>
+                    <span className="text-sm text-gray-700">{t('optionCompetitions')}</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -616,12 +618,12 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
                       onChange={(e) => setShowServices(e.target.checked)}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">Servicios</span>
+                    <span className="text-sm text-gray-700">{t('optionServices')}</span>
                   </label>
                 </div>
                 {!showEvents && !showCompetitions && !showServices && (
                   <p className="text-xs text-red-500 mt-1">
-                    Selecciona al menos un tipo de elemento
+                    {t('selectAtLeastOneElement')}
                   </p>
                 )}
               </div>
@@ -635,7 +637,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
             onClick={onClose}
             className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
           >
-            Cancelar
+            {t('cancel')}
           </button>
           <button
             onClick={handleSave}
@@ -643,7 +645,7 @@ export function BlockConfigModal({ configId, block, onClose, onSaved }: BlockCon
             className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
           >
             <Save className="w-5 h-5" />
-            {saving ? 'Guardando...' : 'Guardar'}
+            {saving ? t('saving') : t('save')}
           </button>
         </div>
       </div>

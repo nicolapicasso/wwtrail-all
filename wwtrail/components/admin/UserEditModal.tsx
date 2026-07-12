@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { User } from '@/lib/api/admin.service';
 import { X, Shield, User as UserIcon } from 'lucide-react';
 
@@ -11,15 +12,16 @@ interface UserEditModalProps {
 }
 
 const roles = [
-  { value: 'VIEWER', label: 'Viewer', description: 'Solo puede ver contenido', icon: UserIcon },
-  { value: 'ATHLETE', label: 'Athlete', description: 'Puede participar en eventos', icon: UserIcon },
-  { value: 'ORGANIZER', label: 'Organizer', description: 'Puede crear eventos', icon: UserIcon },
-  { value: 'ADMIN', label: 'Admin', description: 'Control total del sistema', icon: Shield },
-];
+  { value: 'VIEWER', label: 'Viewer', descriptionKey: 'roleViewerDesc', icon: UserIcon },
+  { value: 'ATHLETE', label: 'Athlete', descriptionKey: 'roleAthleteDesc', icon: UserIcon },
+  { value: 'ORGANIZER', label: 'Organizer', descriptionKey: 'roleOrganizerDesc', icon: UserIcon },
+  { value: 'ADMIN', label: 'Admin', descriptionKey: 'roleAdminDesc', icon: Shield },
+] as const;
 
 export default function UserEditModal({ user, onClose, onSave }: UserEditModalProps) {
   const [selectedRole, setSelectedRole] = useState(user?.role || 'VIEWER');
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('boAdmin');
 
   if (!user) return null;
 
@@ -35,7 +37,7 @@ export default function UserEditModal({ user, onClose, onSave }: UserEditModalPr
       onClose();
     } catch (error) {
       console.error('Error saving user role:', error);
-      alert('Error al guardar el rol');
+      alert(t('errorSavingRole'));
     } finally {
       setLoading(false);
     }
@@ -55,7 +57,7 @@ export default function UserEditModal({ user, onClose, onSave }: UserEditModalPr
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-200 p-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Editar Rol de Usuario</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('editUserRoleTitle')}</h3>
               <p className="mt-1 text-sm text-gray-500">{user.email}</p>
             </div>
             <button
@@ -69,7 +71,7 @@ export default function UserEditModal({ user, onClose, onSave }: UserEditModalPr
           {/* Content */}
           <div className="p-6">
             <label className="block text-sm font-medium text-gray-700 mb-4">
-              Selecciona el nuevo rol
+              {t('selectNewRole')}
             </label>
             
             <div className="space-y-3">
@@ -110,7 +112,7 @@ export default function UserEditModal({ user, onClose, onSave }: UserEditModalPr
                           )}
                         </div>
                         <p className="mt-1 text-sm text-gray-500">
-                          {role.description}
+                          {t(role.descriptionKey)}
                         </p>
                       </div>
                     </div>
@@ -126,10 +128,10 @@ export default function UserEditModal({ user, onClose, onSave }: UserEditModalPr
                   <Shield className="h-5 w-5 text-amber-600" />
                   <div className="ml-3">
                     <h4 className="text-sm font-medium text-amber-800">
-                      Cuidado con el rol Admin
+                      {t('adminRoleWarningTitle')}
                     </h4>
                     <p className="mt-1 text-sm text-amber-700">
-                      Los administradores tienen acceso completo al sistema.
+                      {t('adminRoleWarningText')}
                     </p>
                   </div>
                 </div>
@@ -144,14 +146,14 @@ export default function UserEditModal({ user, onClose, onSave }: UserEditModalPr
               disabled={loading}
               className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               onClick={handleSave}
               disabled={loading || selectedRole === user.role}
               className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Guardando...' : 'Guardar Cambios'}
+              {loading ? t('saving') : t('saveChanges')}
             </button>
           </div>
         </div>

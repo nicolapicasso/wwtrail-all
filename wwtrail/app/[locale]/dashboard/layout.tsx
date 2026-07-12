@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DashboardNav } from '@/components/layout/DashboardNav';
@@ -13,6 +14,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const t = useTranslations('boMisc');
   const { user, isAuthenticated, isOrganizer, isAdmin, logout } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,7 +33,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-primary-600"></div>
-          <p className="mt-2 text-gray-600">Verificando acceso...</p>
+          <p className="mt-2 text-gray-600">{t('dashVerifyingAccess')}</p>
         </div>
       </div>
     );
@@ -51,7 +53,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div>
                 <h1 className="text-lg font-bold text-gray-900">WWTRAIL</h1>
                 <p className="text-xs text-gray-500">
-                  {isAdmin ? 'Admin' : 'Organizador'}
+                  {isAdmin ? t('dashRoleAdmin') : t('dashRoleOrganizer')}
                 </p>
               </div>
             </Link>
@@ -93,7 +95,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div>
                     <h1 className="text-lg font-bold text-gray-900">WWTRAIL</h1>
                     <p className="text-xs text-gray-500">
-                      {isAdmin ? 'Admin' : 'Organizador'}
+                      {isAdmin ? t('dashRoleAdmin') : t('dashRoleOrganizer')}
                     </p>
                   </div>
                 </Link>

@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Plus, Loader2, Sparkles, Edit, Trash2, Check, X, Search } from 'lucide-react';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { SpecialSeries, SpecialSeriesListItem } from '@/types/v2';
@@ -11,6 +12,7 @@ import CountrySelect from '@/components/CountrySelect';
 
 export default function SpecialSeriesListPage() {
   const router = useRouter();
+  const t = useTranslations('boCatalog');
   const { user } = useAuth();
 
   // State
@@ -53,7 +55,7 @@ export default function SpecialSeriesListPage() {
       setTotalPages(response.pagination.pages || 0);
     } catch (error: any) {
       console.error('Error fetching special series:', error);
-      alert(error.response?.data?.message || 'Error al cargar series especiales');
+      alert(error.response?.data?.message || t('errorLoading'));
     } finally {
       setIsLoading(false);
     }
@@ -70,16 +72,16 @@ export default function SpecialSeriesListPage() {
    * Handle approve
    */
   const handleApprove = async (id: string) => {
-    if (!confirm('¿Aprobar esta serie especial?')) return;
+    if (!confirm(t('confirmApproveSeries'))) return;
 
     try {
       setIsLoadingAction(true);
       await specialSeriesService.approve(id);
       await fetchSpecialSeries();
-      alert('✓ Serie especial aprobada');
+      alert(t('approvedSuccess'));
     } catch (error: any) {
       console.error('Error approving special series:', error);
-      alert(error.response?.data?.message || 'Error al aprobar serie especial');
+      alert(error.response?.data?.message || t('errorApprove'));
     } finally {
       setIsLoadingAction(false);
     }
@@ -89,16 +91,16 @@ export default function SpecialSeriesListPage() {
    * Handle reject
    */
   const handleReject = async (id: string) => {
-    if (!confirm('¿Rechazar esta serie especial? El estado cambiará a CANCELLED.')) return;
+    if (!confirm(t('confirmRejectSeries'))) return;
 
     try {
       setIsLoadingAction(true);
       await specialSeriesService.reject(id);
       await fetchSpecialSeries();
-      alert('✓ Serie especial rechazada');
+      alert(t('rejectedSuccess'));
     } catch (error: any) {
       console.error('Error rejecting special series:', error);
-      alert(error.response?.data?.message || 'Error al rechazar serie especial');
+      alert(error.response?.data?.message || t('errorReject'));
     } finally {
       setIsLoadingAction(false);
     }
@@ -108,16 +110,16 @@ export default function SpecialSeriesListPage() {
    * Handle delete
    */
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar esta serie especial? Esta acción no se puede deshacer.')) return;
+    if (!confirm(t('confirmDeleteSeries'))) return;
 
     try {
       setIsLoadingAction(true);
       await specialSeriesService.delete(id);
       await fetchSpecialSeries();
-      alert('✓ Serie especial eliminada');
+      alert(t('deletedSuccess'));
     } catch (error: any) {
       console.error('Error deleting special series:', error);
-      alert(error.response?.data?.message || 'Error al eliminar serie especial');
+      alert(error.response?.data?.message || t('errorDelete'));
     } finally {
       setIsLoadingAction(false);
     }
@@ -132,10 +134,10 @@ export default function SpecialSeriesListPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                 <Sparkles className="h-8 w-8 text-purple-600" />
-                Series Especiales
+                {t('specialSeriesTitle')}
               </h1>
               <p className="mt-2 text-gray-600">
-                Gestiona circuitos y series especiales que agrupan competiciones
+                {t('subtitle')}
               </p>
             </div>
             <button
@@ -143,7 +145,7 @@ export default function SpecialSeriesListPage() {
               className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              Nueva Serie Especial
+              {t('newSpecialSeries')}
             </button>
           </div>
         </div>
@@ -154,7 +156,7 @@ export default function SpecialSeriesListPage() {
             {/* Search */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Buscar
+                {t('search')}
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -165,7 +167,7 @@ export default function SpecialSeriesListPage() {
                     setSearchQuery(e.target.value);
                     setPage(1);
                   }}
-                  placeholder="Buscar por nombre..."
+                  placeholder={t('searchPlaceholder')}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
                 />
               </div>
@@ -174,7 +176,7 @@ export default function SpecialSeriesListPage() {
             {/* Status Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Estado
+                {t('status')}
               </label>
               <select
                 value={statusFilter}
@@ -184,17 +186,17 @@ export default function SpecialSeriesListPage() {
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
               >
-                <option value="ALL">Todos</option>
-                <option value="PUBLISHED">Publicados</option>
-                <option value="DRAFT">Borradores</option>
-                <option value="CANCELLED">Cancelados</option>
+                <option value="ALL">{t('all')}</option>
+                <option value="PUBLISHED">{t('published')}</option>
+                <option value="DRAFT">{t('statusDraftFilter')}</option>
+                <option value="CANCELLED">{t('statusCancelledFilter')}</option>
               </select>
             </div>
 
             {/* Country Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                País
+                {t('country')}
               </label>
               <CountrySelect
                 value={countryFilter}
@@ -202,7 +204,7 @@ export default function SpecialSeriesListPage() {
                   setCountryFilter(value);
                   setPage(1);
                 }}
-                placeholder="Todos los países"
+                placeholder={t('allCountries')}
               />
             </div>
           </div>
@@ -213,7 +215,7 @@ export default function SpecialSeriesListPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
             <div className="flex items-center justify-center">
               <Loader2 className="h-8 w-8 text-purple-600 animate-spin" />
-              <span className="ml-3 text-gray-600">Cargando series especiales...</span>
+              <span className="ml-3 text-gray-600">{t('loading')}</span>
             </div>
           </div>
         )}
@@ -223,12 +225,12 @@ export default function SpecialSeriesListPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <Sparkles className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No hay series especiales
+              {t('emptyTitle')}
             </h3>
             <p className="text-gray-600 mb-6">
               {searchQuery || statusFilter !== 'ALL' || countryFilter
-                ? 'No se encontraron series especiales con los filtros aplicados'
-                : 'Comienza creando tu primera serie especial'}
+                ? t('emptyFiltered')
+                : t('emptyCreateFirst')}
             </p>
             {!searchQuery && statusFilter === 'ALL' && !countryFilter && (
               <button
@@ -249,19 +251,19 @@ export default function SpecialSeriesListPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Serie Especial
+                    {t('columnName')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    País
+                    {t('country')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Competiciones
+                    {t('columnCompetitions')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
+                    {t('status')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
+                    {t('columnActions')}
                   </th>
                 </tr>
               </thead>
@@ -312,8 +314,8 @@ export default function SpecialSeriesListPage() {
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {series.status === 'PUBLISHED' ? 'Publicada' :
-                         series.status === 'DRAFT' ? 'Borrador' : 'Cancelada'}
+                        {series.status === 'PUBLISHED' ? t('badgePublished') :
+                         series.status === 'DRAFT' ? t('badgeDraft') : t('badgeCancelled')}
                       </span>
                     </td>
 
@@ -326,10 +328,10 @@ export default function SpecialSeriesListPage() {
                             onClick={() => handleApprove(series.id)}
                             disabled={isLoadingAction}
                             className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-green-700 bg-green-50 hover:bg-green-100 rounded border border-green-200 transition-colors disabled:opacity-50"
-                            title="Aprobar"
+                            title={t('approve')}
                           >
                             <Check className="h-4 w-4" />
-                            Aprobar
+                            {t('approve')}
                           </button>
                         )}
 
@@ -339,10 +341,10 @@ export default function SpecialSeriesListPage() {
                             onClick={() => handleReject(series.id)}
                             disabled={isLoadingAction}
                             className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition-colors disabled:opacity-50"
-                            title="Rechazar"
+                            title={t('reject')}
                           >
                             <X className="h-4 w-4" />
-                            Rechazar
+                            {t('reject')}
                           </button>
                         )}
 
@@ -350,10 +352,10 @@ export default function SpecialSeriesListPage() {
                         <button
                           onClick={() => router.push(`/organizer/special-series/edit/${series.id}`)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
-                          title="Editar"
+                          title={t('edit')}
                         >
                           <Edit className="h-4 w-4" />
-                          Editar
+                          {t('edit')}
                         </button>
 
                         {/* Delete (ADMIN only) */}
@@ -362,10 +364,10 @@ export default function SpecialSeriesListPage() {
                             onClick={() => handleDelete(series.id)}
                             disabled={isLoadingAction}
                             className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition-colors disabled:opacity-50"
-                            title="Eliminar"
+                            title={t('delete')}
                           >
                             <Trash2 className="h-4 w-4" />
-                            Eliminar
+                            {t('delete')}
                           </button>
                         )}
                       </div>
@@ -381,7 +383,7 @@ export default function SpecialSeriesListPage() {
         {!isLoading && specialSeriesList.length > 0 && totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Página {page} de {totalPages}
+              {t('pageOf', { page, totalPages })}
             </div>
             <div className="flex gap-2">
               <button
@@ -389,14 +391,14 @@ export default function SpecialSeriesListPage() {
                 disabled={page === 1}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Anterior
+                {t('previous')}
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Siguiente
+                {t('next')}
               </button>
             </div>
           </div>

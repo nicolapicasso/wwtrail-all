@@ -4,6 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import serviceCategoriesService from '@/lib/api/v2/serviceCategories.service';
@@ -14,6 +15,7 @@ import { toast } from 'sonner';
 export default function ServiceCategoriesAdminPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const t = useTranslations('boCatalog');
 
   const [categories, setCategories] = useState<ServiceCategoryWithCount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export default function ServiceCategoriesAdminPage() {
       setCategories(data);
     } catch (error: any) {
       console.error('Error loading categories:', error);
-      toast.error('Error al cargar las categorías');
+      toast.error(t('errorLoadingCategories'));
     } finally {
       setLoading(false);
     }
@@ -81,7 +83,7 @@ export default function ServiceCategoriesAdminPage() {
     e.preventDefault();
 
     if (!formData.name.trim() || !formData.icon.trim()) {
-      toast.error('Nombre e icono son obligatorios');
+      toast.error(t('nameAndIconRequired'));
       return;
     }
 
@@ -89,17 +91,17 @@ export default function ServiceCategoriesAdminPage() {
     try {
       if (editingCategory) {
         await serviceCategoriesService.update(editingCategory.id, formData);
-        toast.success('Categoría actualizada correctamente');
+        toast.success(t('categoryUpdated'));
       } else {
         await serviceCategoriesService.create(formData);
-        toast.success('Categoría creada correctamente');
+        toast.success(t('categoryCreated'));
       }
 
       handleCloseModal();
       await loadCategories();
     } catch (error: any) {
       console.error('Error saving category:', error);
-      const message = error.response?.data?.message || 'Error al guardar la categoría';
+      const message = error.response?.data?.message || t('errorSavingCategory');
       toast.error(message);
     } finally {
       setFormLoading(false);
@@ -108,22 +110,22 @@ export default function ServiceCategoriesAdminPage() {
 
   const handleDelete = async (categoryId: string, categoryName: string, count: number) => {
     if (count > 0) {
-      toast.error(`No se puede eliminar "${categoryName}" porque tiene ${count} servicios asociados`);
+      toast.error(t('cannotDeleteCategoryWithServices', { name: categoryName, count }));
       return;
     }
 
-    if (!confirm(`¿Estás seguro de eliminar la categoría "${categoryName}"?`)) {
+    if (!confirm(t('confirmDeleteCategory', { name: categoryName }))) {
       return;
     }
 
     setDeleting(categoryId);
     try {
       await serviceCategoriesService.delete(categoryId);
-      toast.success('Categoría eliminada correctamente');
+      toast.success(t('categoryDeleted'));
       await loadCategories();
     } catch (error: any) {
       console.error('Error deleting category:', error);
-      const message = error.response?.data?.message || 'Error al eliminar la categoría';
+      const message = error.response?.data?.message || t('errorDeletingCategory');
       toast.error(message);
     } finally {
       setDeleting(null);
@@ -149,10 +151,10 @@ export default function ServiceCategoriesAdminPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Tag className="h-8 w-8" />
-            Categorías de Servicios
+            {t('serviceCategories')}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Gestiona las categorías que se pueden asignar a los servicios
+            {t('serviceCategoriesSubtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -162,14 +164,14 @@ export default function ServiceCategoriesAdminPage() {
             className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-accent transition-colors disabled:opacity-50"
           >
             <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Actualizar
+            {t('refresh')}
           </button>
           <button
             onClick={() => handleOpenModal()}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-4 w-4" />
-            Nueva Categoría
+            {t('newCategory')}
           </button>
         </div>
       </div>
@@ -182,16 +184,16 @@ export default function ServiceCategoriesAdminPage() {
       ) : categories.length === 0 ? (
         <div className="text-center py-12 border rounded-lg bg-card">
           <Tag className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No hay categorías</h3>
+          <h3 className="text-xl font-semibold mb-2">{t('noCategories')}</h3>
           <p className="text-muted-foreground mb-4">
-            Crea la primera categoría para empezar
+            {t('createFirstCategory')}
           </p>
           <button
             onClick={() => handleOpenModal()}
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
-            Nueva Categoría
+            {t('newCategory')}
           </button>
         </div>
       ) : (
@@ -206,7 +208,7 @@ export default function ServiceCategoriesAdminPage() {
                 <div>
                   <h3 className="font-semibold text-lg">{category.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {category.count} {category.count === 1 ? 'servicio' : 'servicios'}
+                    {category.count} {category.count === 1 ? t('serviceSingular') : t('servicePlural')}
                   </p>
                 </div>
               </div>
@@ -215,7 +217,7 @@ export default function ServiceCategoriesAdminPage() {
                 <button
                   onClick={() => handleOpenModal(category)}
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                  title="Editar"
+                  title={t('edit')}
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>
@@ -223,7 +225,7 @@ export default function ServiceCategoriesAdminPage() {
                   onClick={() => handleDelete(category.id, category.name, category.count)}
                   disabled={deleting === category.id}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
-                  title="Eliminar"
+                  title={t('delete')}
                 >
                   {deleting === category.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -243,7 +245,7 @@ export default function ServiceCategoriesAdminPage() {
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">
-                {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
+                {editingCategory ? t('editCategory') : t('newCategory')}
               </h2>
               <button
                 onClick={handleCloseModal}
@@ -257,7 +259,7 @@ export default function ServiceCategoriesAdminPage() {
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Nombre *
+                  {t('nameRequired')}
                 </label>
                 <input
                   type="text"
@@ -265,14 +267,14 @@ export default function ServiceCategoriesAdminPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: Alojamiento, Restaurante, Tienda"
+                  placeholder={t('categoryNamePlaceholder')}
                 />
               </div>
 
               {/* Icon */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Icono (Emoji) *
+                  {t('iconEmojiRequired')}
                 </label>
                 <div className="flex gap-2">
                   <div className="flex items-center justify-center w-16 h-16 border rounded-md text-4xl bg-gray-50">
@@ -289,7 +291,7 @@ export default function ServiceCategoriesAdminPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Puedes copiar un emoji desde{' '}
+                  {t('copyEmojiFrom')}{' '}
                   <a
                     href="https://emojipedia.org/"
                     target="_blank"
@@ -308,7 +310,7 @@ export default function ServiceCategoriesAdminPage() {
                   onClick={handleCloseModal}
                   className="px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors"
                 >
-                  Cancelar
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
@@ -318,12 +320,12 @@ export default function ServiceCategoriesAdminPage() {
                   {formLoading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Guardando...
+                      {t('saving')}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4" />
-                      {editingCategory ? 'Actualizar' : 'Crear'}
+                      {editingCategory ? t('update') : t('create')}
                     </>
                   )}
                 </button>
