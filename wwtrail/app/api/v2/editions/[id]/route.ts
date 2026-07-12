@@ -43,3 +43,6 @@ export async function DELETE(
     return apiError(error);
   }
 }
+
+// Alias: some clients use PATCH for partial updates.
+export const PATCH = PUT;
