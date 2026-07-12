@@ -51,7 +51,8 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
   } = useWeather(edition.id);
 
   // User's rating
-  const myRating = ratings.find((r) => r.userId === user?.id);
+  const ratingsList = Array.isArray(ratings) ? ratings : [];
+  const myRating = ratingsList.find((r) => r.userId === user?.id);
   const canRate = !!user && !myRating;
 
   const tabs = [
@@ -263,9 +264,9 @@ export default function EditionDetailTabs({ edition }: EditionDetailTabsProps) {
                   />
                 ))}
               </div>
-            ) : ratings.length > 0 ? (
+            ) : ratingsList.length > 0 ? (
               <div className="space-y-4">
-                {ratings.map((rating) => (
+                {ratingsList.map((rating) => (
                   <RatingCard
                     key={rating.id}
                     rating={rating}
