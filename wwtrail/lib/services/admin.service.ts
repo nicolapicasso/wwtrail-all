@@ -1242,6 +1242,8 @@ export class AdminService {
     facebookUrl?: string;
     twitterUrl?: string;
     youtubeUrl?: string;
+    email?: string;
+    password?: string;
   }) {
     // Check if user exists
     const user = await prisma.user.findUnique({
@@ -1258,6 +1260,29 @@ export class AdminService {
     // Convert birthDate string to Date if provided
     if (data.birthDate) {
       updateData.birthDate = new Date(data.birthDate);
+    }
+
+    // Email: validar unicidad si cambia (evita colisión con otro usuario)
+    if (typeof data.email === 'string' && data.email.trim() && data.email.trim() !== user.email) {
+      const normalizedEmail = data.email.trim().toLowerCase();
+      const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+      if (existing && existing.id !== userId) {
+        throw new Error('El email ya está en uso por otro usuario');
+      }
+      updateData.email = normalizedEmail;
+    } else {
+      delete updateData.email;
+    }
+
+    // Password: si el admin define una nueva contraseña, hashearla.
+    // Si viene vacía/ausente, no se toca la contraseña existente.
+    if (typeof data.password === 'string' && data.password.length > 0) {
+      if (data.password.length < 6) {
+        throw new Error('La contraseña debe tener al menos 6 caracteres');
+      }
+      updateData.password = await bcrypt.hash(data.password, 10);
+    } else {
+      delete updateData.password;
     }
 
     // Update user

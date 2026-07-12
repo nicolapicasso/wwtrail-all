@@ -525,6 +525,8 @@ class AdminService {
     facebookUrl?: string;
     twitterUrl?: string;
     youtubeUrl?: string;
+    email?: string;
+    password?: string;
   }): Promise<User> {
     const { data } = await apiClientV2.put(`/admin/users/${userId}`, userData);
     return data.data;

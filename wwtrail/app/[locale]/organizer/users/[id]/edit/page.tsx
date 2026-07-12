@@ -47,6 +47,8 @@ export default function AdminEditUserPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    email: '',
+    newPassword: '',
     bio: '',
     avatar: '',
     phone: '',
@@ -71,6 +73,8 @@ export default function AdminEditUserPage() {
         setFormData({
           firstName: data.firstName || '',
           lastName: data.lastName || '',
+          email: data.email || '',
+          newPassword: '',
           bio: data.bio || '',
           avatar: data.avatar || '',
           phone: data.phone || '',
@@ -150,15 +154,28 @@ export default function AdminEditUserPage() {
     setError(null);
     setSuccess(false);
 
+    // Validación de contraseña (opcional): si se rellena, mínimo 6 caracteres
+    if (formData.newPassword && formData.newPassword.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      setSaving(false);
+      return;
+    }
+
     try {
-      const updateData = {
-        ...formData,
+      const { newPassword, ...rest } = formData;
+      const updateData: any = {
+        ...rest,
+        email: formData.email.trim() || undefined,
         birthDate: formData.birthDate || undefined,
         instagramUrl: formData.instagramUrl || undefined,
         facebookUrl: formData.facebookUrl || undefined,
         twitterUrl: formData.twitterUrl || undefined,
         youtubeUrl: formData.youtubeUrl || undefined,
       };
+      // Solo enviar la contraseña si el admin la ha definido
+      if (newPassword) {
+        updateData.password = newPassword;
+      }
 
       await adminService.updateUserById(userId, updateData);
 
@@ -236,20 +253,54 @@ export default function AdminEditUserPage() {
             </div>
           )}
 
-          {/* User Info (Read Only) */}
+          {/* Cuenta y acceso */}
           <Card>
             <CardHeader>
-              <CardTitle>Información de cuenta (solo lectura)</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-blue-600" />
+                Cuenta y acceso
+              </CardTitle>
               <CardDescription>
-                Estos datos no se pueden modificar desde aquí
+                Como administrador puedes cambiar el email y establecer una nueva contraseña para este usuario.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-gray-500">Email</Label>
-                  <p className="font-medium">{userProfile.email}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Email (editable) */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="usuario@ejemplo.com"
+                  />
                 </div>
+                {/* Nueva contraseña (opcional) */}
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword" className="flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Nueva contraseña
+                  </Label>
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type="text"
+                    autoComplete="new-password"
+                    value={formData.newPassword}
+                    onChange={handleChange}
+                    placeholder="Dejar en blanco para no cambiarla"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Mínimo 6 caracteres. Si lo dejas vacío, la contraseña actual no se modifica.
+                  </p>
+                </div>
+              </div>
+
+              {/* Datos de solo lectura */}
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
                 <div>
                   <Label className="text-gray-500">Username</Label>
                   <p className="font-medium">@{userProfile.username}</p>
