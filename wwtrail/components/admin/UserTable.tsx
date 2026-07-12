@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { User } from '@/lib/api/admin.service';
 import { 
   MoreVertical, 
@@ -21,6 +22,7 @@ interface UserTableProps {
 
 export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: UserTableProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const t = useTranslations('boAdmin');
 
   const getRoleBadge = (role: string) => {
     const styles = {
@@ -52,12 +54,12 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
     return isActive ? (
       <span className="inline-flex items-center gap-1 rounded-none bg-[#0E612F] text-white px-2.5 py-0.5 text-xs font-medium">
         <UserCheck className="h-3 w-3" />
-        Activo
+        {t('statusActive')}
       </span>
     ) : (
       <span className="inline-flex items-center gap-1 rounded-none bg-[#991B1B] text-white px-2.5 py-0.5 text-xs font-medium">
         <UserX className="h-3 w-3" />
-        Inactivo
+        {t('statusInactive')}
       </span>
     );
   };
@@ -77,22 +79,22 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Usuario
+                {t('columnUser')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Email
+                {t('columnEmail')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Rol
+                {t('columnRole')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Estado
+                {t('columnStatus')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Registro
+                {t('columnRegistration')}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                Acciones
+                {t('columnActions')}
               </th>
             </tr>
           </thead>
@@ -106,7 +108,7 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {user.fullName || 'Sin nombre'}
+                        {user.fullName || t('noName')}
                       </div>
                     </div>
                   </div>
@@ -148,7 +150,7 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
                               className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             >
                               <Edit className="mr-3 h-4 w-4" />
-                              Editar rol
+                              {t('editRole')}
                             </button>
                             <button
                               onClick={() => {
@@ -160,18 +162,18 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
                               {user.isActive ? (
                                 <>
                                   <UserX className="mr-3 h-4 w-4" />
-                                  Desactivar
+                                  {t('deactivate')}
                                 </>
                               ) : (
                                 <>
                                   <UserCheck className="mr-3 h-4 w-4" />
-                                  Activar
+                                  {t('activate')}
                                 </>
                               )}
                             </button>
                             <button
                               onClick={() => {
-                                if (confirm('¿Estás seguro de eliminar este usuario?')) {
+                                if (confirm(t('confirmDeleteUser'))) {
                                   onDelete(user.id);
                                 }
                                 setOpenMenuId(null);
@@ -179,7 +181,7 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
                               className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                             >
                               <Trash2 className="mr-3 h-4 w-4" />
-                              Eliminar
+                              {t('delete')}
                             </button>
                           </div>
                         </div>
@@ -196,9 +198,9 @@ export default function UserTable({ users, onEdit, onToggleStatus, onDelete }: U
       {users.length === 0 && (
         <div className="py-12 text-center">
           <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay usuarios</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('noUsers')}</h3>
           <p className="mt-1 text-sm text-gray-500">
-            No se encontraron usuarios con los filtros aplicados.
+            {t('noUsersDescription')}
           </p>
         </div>
       )}

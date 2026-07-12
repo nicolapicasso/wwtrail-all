@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { SpecialSeriesGrid } from '@/components/SpecialSeriesGrid';
 import { SpecialSeriesListItem } from '@/types/v2';
 
 export default function SpecialSeriesPage() {
+  const t = useTranslations('pgCatalog');
   const [specialSeries, setSpecialSeries] = useState<SpecialSeriesListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function SpecialSeriesPage() {
       setSpecialSeries(response.data || []);
     } catch (err: any) {
       console.error('Error loading special series:', err);
-      setError(err.message || 'Error al cargar las special series');
+      setError(err.message || t('errorLoadingSpecialSeries'));
     } finally {
       setLoading(false);
     }
@@ -49,7 +51,7 @@ export default function SpecialSeriesPage() {
         {/* Header */}
         <h1 className="text-[36px] font-black tracking-[-0.02em] text-ink-2">Special Series</h1>
         <p className="mt-2 text-[15px] text-text-muted">
-          Descubre los circuitos y series especiales de trail running
+          {t('specialSeriesSubtitle')}
           {!loading && !error && (
             <> · <span className="font-semibold text-ink-2">{specialSeries.length}</span></>
           )}
@@ -61,7 +63,7 @@ export default function SpecialSeriesPage() {
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-faint" />
             <input
               type="text"
-              placeholder="Buscar por nombre..."
+              placeholder={t('searchByNamePlaceholder')}
               value={search}
               onChange={handleSearchChange}
               className="w-full rounded-md border border-border bg-surface py-2 pl-10 pr-4 text-[15px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
@@ -74,7 +76,7 @@ export default function SpecialSeriesPage() {
           <div className="mt-6 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
             <p className="text-destructive">{error}</p>
             <button onClick={loadSpecialSeries} className="mt-2 text-[14px] font-semibold text-destructive underline">
-              Reintentar
+              {t('retry')}
             </button>
           </div>
         )}
@@ -99,7 +101,7 @@ export default function SpecialSeriesPage() {
           <div className="mt-8">
             <SpecialSeriesGrid
               specialSeries={specialSeries}
-              emptyMessage="No se encontraron special series"
+              emptyMessage={t('noSpecialSeriesFound')}
             />
           </div>
         )}

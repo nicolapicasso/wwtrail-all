@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { postsService } from '@/lib/api/v2';
@@ -8,6 +9,7 @@ import { PostListItem, POST_CATEGORY_LABELS } from '@/types/v2';
 import { Plus, Edit, Eye, Trash2, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 export default function OrganizerPostsPage() {
+  const t = useTranslations('boCatalog');
   const { user } = useAuth();
   const [posts, setPosts] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,14 +36,14 @@ export default function OrganizerPostsPage() {
       setPosts(response.data || []);
     } catch (err: any) {
       console.error('Error loading posts:', err);
-      setError(err.message || 'Error al cargar los artículos');
+      setError(err.message || t('errorLoadingPosts'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este artículo?')) {
+    if (!confirm(t('confirmDeletePost'))) {
       return;
     }
 
@@ -50,7 +52,7 @@ export default function OrganizerPostsPage() {
       setPosts(posts.filter((p) => p.id !== id));
     } catch (err: any) {
       console.error('Error deleting post:', err);
-      alert(err.message || 'Error al eliminar el artículo');
+      alert(err.message || t('errorDeletingPost'));
     }
   };
 
@@ -60,21 +62,21 @@ export default function OrganizerPostsPage() {
         return (
           <span className="inline-flex items-center gap-1 rounded-none bg-[#0E612F] text-white px-2.5 py-0.5 text-xs font-semibold">
             <CheckCircle className="h-3 w-3" />
-            Publicado
+            {t('published')}
           </span>
         );
       case 'DRAFT':
         return (
           <span className="inline-flex items-center gap-1 rounded-none bg-black text-white px-2.5 py-0.5 text-xs font-semibold">
             <Clock className="h-3 w-3" />
-            Borrador
+            {t('draft')}
           </span>
         );
       case 'ARCHIVED':
         return (
           <span className="inline-flex items-center gap-1 rounded-none bg-[#B66916] text-white px-2.5 py-0.5 text-xs font-semibold">
             <XCircle className="h-3 w-3" />
-            Archivado
+            {t('archived')}
           </span>
         );
       default:
@@ -88,16 +90,16 @@ export default function OrganizerPostsPage() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Mis Artículos</h1>
+            <h1 className="text-4xl font-bold mb-2">{t('myPosts')}</h1>
             <p className="text-muted-foreground">
-              Gestiona tus artículos del magazine
+              {t('managePostsSubtitle')}
             </p>
           </div>
 
           <Link href="/organizer/posts/new">
             <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Nuevo Artículo
+              {t('newPost')}
             </button>
           </Link>
         </div>
@@ -110,7 +112,7 @@ export default function OrganizerPostsPage() {
               onClick={loadPosts}
               className="mt-2 text-red-600 hover:text-red-800 underline"
             >
-              Reintentar
+              {t('retry')}
             </button>
           </div>
         )}
@@ -132,11 +134,11 @@ export default function OrganizerPostsPage() {
             {posts.length === 0 ? (
               <div className="bg-white rounded-lg border p-12 text-center">
                 <p className="text-muted-foreground text-lg mb-4">
-                  No tienes artículos todavía
+                  {t('noPostsYet')}
                 </p>
                 <Link href="/organizer/posts/new">
                   <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    Crear Tu Primer Artículo
+                    {t('createFirstPost')}
                   </button>
                 </Link>
               </div>
@@ -147,22 +149,22 @@ export default function OrganizerPostsPage() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Título
+                          {t('title')}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Categoría
+                          {t('category')}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Estado
+                          {t('status')}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Vistas
+                          {t('views')}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Fecha
+                          {t('date')}
                         </th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Acciones
+                          {t('actions')}
                         </th>
                       </tr>
                     </thead>
@@ -202,7 +204,7 @@ export default function OrganizerPostsPage() {
                                     post.slug
                                   }`}
                                   className="text-gray-600 hover:text-gray-900"
-                                  title="Ver"
+                                  title={t('view')}
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Link>
@@ -210,7 +212,7 @@ export default function OrganizerPostsPage() {
                               <Link
                                 href={`/organizer/posts/edit/${post.id}`}
                                 className="text-green-600 hover:text-green-900"
-                                title="Editar"
+                                title={t('edit')}
                               >
                                 <Edit className="h-4 w-4" />
                               </Link>
@@ -218,7 +220,7 @@ export default function OrganizerPostsPage() {
                                 <button
                                   onClick={() => handleDelete(post.id)}
                                   className="text-red-600 hover:text-red-900"
-                                  title="Eliminar"
+                                  title={t('delete')}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
@@ -235,7 +237,7 @@ export default function OrganizerPostsPage() {
 
             {posts.length > 0 && (
               <div className="mt-4 text-sm text-muted-foreground">
-                Total: {posts.length} artículo{posts.length !== 1 ? 's' : ''}
+                {t('totalPosts', { count: posts.length })}
               </div>
             )}
           </>

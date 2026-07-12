@@ -1,4 +1,7 @@
+'use client';
+
 import { LucideIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StatsCardProps {
   title: string;
@@ -12,6 +15,7 @@ interface StatsCardProps {
 }
 
 export default function StatsCard({ title, value, icon: Icon, trend, description }: StatsCardProps) {
+  const t = useTranslations('boAdmin');
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
@@ -29,7 +33,7 @@ export default function StatsCard({ title, value, icon: Icon, trend, description
                 {trend.isPositive ? '+' : ''}
                 {trend.value}%
               </span>
-              <span className="ml-2 text-sm text-gray-500">vs mes anterior</span>
+              <span className="ml-2 text-sm text-gray-500">{t('vsPreviousMonth')}</span>
             </div>
           )}
           

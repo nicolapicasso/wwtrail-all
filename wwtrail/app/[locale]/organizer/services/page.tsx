@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { servicesService, serviceCategoriesService } from '@/lib/api/v2';
 import { Service, ServiceCategory } from '@/types/v2';
@@ -12,6 +13,7 @@ import { Plus, Loader2, Search, Star, Package, FileCheck, FileClock } from 'luci
 
 export default function OrganizerServicesPage() {
   const router = useRouter();
+  const t = useTranslations('boCatalog');
   const { user, loading } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
@@ -106,7 +108,7 @@ export default function OrganizerServicesPage() {
       await fetchServices();
     } catch (error) {
       console.error('Error deleting service:', error);
-      alert('Error al eliminar el servicio');
+      alert(t('errorDeletingService'));
     }
   };
 
@@ -116,7 +118,7 @@ export default function OrganizerServicesPage() {
       await fetchServices();
     } catch (error) {
       console.error('Error toggling featured:', error);
-      alert('Error al cambiar estado de destacado');
+      alert(t('errorTogglingFeatured'));
     }
   };
 
@@ -132,9 +134,9 @@ export default function OrganizerServicesPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Acceso denegado</h2>
+          <h2 className="text-2xl font-bold mb-2">{t('accessDenied')}</h2>
           <p className="text-muted-foreground">
-            No tienes permiso para acceder a esta página
+            {t('noPermissionPage')}
           </p>
         </div>
       </div>
@@ -148,12 +150,12 @@ export default function OrganizerServicesPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold mb-2">
-              {user.role === 'ADMIN' ? 'Todos los Servicios' : 'Mis Servicios'}
+              {user.role === 'ADMIN' ? t('allServices') : t('myServices')}
             </h1>
             <p className="text-muted-foreground">
               {user.role === 'ADMIN'
-                ? 'Gestiona todos los servicios de la plataforma'
-                : 'Gestiona tus alojamientos, restaurantes y otros servicios'}
+                ? t('manageAllServices')
+                : t('manageOwnServices')}
             </p>
           </div>
           <button
@@ -161,7 +163,7 @@ export default function OrganizerServicesPage() {
             className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
           >
             <Plus className="h-5 w-5" />
-            Nuevo Servicio
+            {t('newService')}
           </button>
         </div>
 
@@ -171,7 +173,7 @@ export default function OrganizerServicesPage() {
             {/* Country Filter */}
             <div>
               <label htmlFor="country-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                País
+                {t('country')}
               </label>
               <select
                 id="country-filter"
@@ -179,7 +181,7 @@ export default function OrganizerServicesPage() {
                 onChange={(e) => setSelectedCountry(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="">Todos los países</option>
+                <option value="">{t('allCountries')}</option>
                 {countries.map((country) => (
                   <option key={country} value={country}>
                     {country}
@@ -191,7 +193,7 @@ export default function OrganizerServicesPage() {
             {/* Category Filter */}
             <div>
               <label htmlFor="category-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                Categoría
+                {t('category')}
               </label>
               <select
                 id="category-filter"
@@ -199,7 +201,7 @@ export default function OrganizerServicesPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="">Todas las categorías</option>
+                <option value="">{t('allCategories')}</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.icon} {cat.name}
@@ -211,7 +213,7 @@ export default function OrganizerServicesPage() {
             {/* Search */}
             <div>
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar
+                {t('search')}
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -220,7 +222,7 @@ export default function OrganizerServicesPage() {
                   id="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Nombre del servicio..."
+                  placeholder={t('serviceNamePlaceholder')}
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
@@ -229,7 +231,7 @@ export default function OrganizerServicesPage() {
             {/* Featured Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Destacados
+                {t('featured')}
               </label>
               <button
                 onClick={() => setFeaturedOnly(!featuredOnly)}
@@ -240,7 +242,7 @@ export default function OrganizerServicesPage() {
                 }`}
               >
                 <Star className={`h-4 w-4 ${featuredOnly ? 'fill-yellow-500' : ''}`} />
-                {featuredOnly ? 'Solo destacados' : 'Todos'}
+                {featuredOnly ? t('onlyFeatured') : t('all')}
               </button>
             </div>
           </div>
@@ -253,7 +255,7 @@ export default function OrganizerServicesPage() {
               <Package className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Total</p>
+              <p className="text-sm text-gray-600">{t('total')}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
           </div>
@@ -263,7 +265,7 @@ export default function OrganizerServicesPage() {
               <FileClock className="h-6 w-6 text-amber-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Pendientes</p>
+              <p className="text-sm text-gray-600">{t('pending')}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.draft}</p>
             </div>
           </div>
@@ -273,7 +275,7 @@ export default function OrganizerServicesPage() {
               <FileCheck className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Publicados</p>
+              <p className="text-sm text-gray-600">{t('published')}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.published}</p>
             </div>
           </div>
@@ -298,12 +300,12 @@ export default function OrganizerServicesPage() {
           <div className="text-center py-12 bg-white rounded-lg border">
             <Plus className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">
-              {services.length === 0 ? 'No tienes servicios aún' : 'No se encontraron servicios'}
+              {services.length === 0 ? t('noServicesYet') : t('noServicesFound')}
             </h3>
             <p className="text-muted-foreground mb-6">
               {services.length === 0
-                ? 'Crea tu primer servicio para empezar'
-                : 'Prueba a cambiar los filtros de búsqueda'}
+                ? t('createFirstService')
+                : t('tryChangingFilters')}
             </p>
             {services.length === 0 && (
               <button
@@ -311,7 +313,7 @@ export default function OrganizerServicesPage() {
                 className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Crear Servicio
+                {t('createService')}
               </button>
             )}
           </div>

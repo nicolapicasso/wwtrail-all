@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Plus, Loader2, Building2, Edit, Trash2, Check, X, Search } from 'lucide-react';
 import { organizersService } from '@/lib/api/v2';
 import { Organizer, OrganizerListItem } from '@/types/v2';
@@ -11,6 +12,7 @@ import CountrySelect from '@/components/CountrySelect';
 
 export default function OrganizersListPage() {
   const router = useRouter();
+  const t = useTranslations('boCatalog');
   const { user } = useAuth();
 
   // State
@@ -51,7 +53,7 @@ export default function OrganizersListPage() {
       setTotalPages(response.pagination.pages || 0);
     } catch (error: any) {
       console.error('Error fetching organizers:', error);
-      alert(error.response?.data?.message || 'Error al cargar organizadores');
+      alert(error.response?.data?.message || t('errorLoadingOrganizers'));
     } finally {
       setIsLoading(false);
     }
@@ -68,16 +70,16 @@ export default function OrganizersListPage() {
    * Handle approve
    */
   const handleApprove = async (id: string) => {
-    if (!confirm('¿Aprobar este organizador?')) return;
+    if (!confirm(t('confirmApprove'))) return;
 
     try {
       setIsLoadingAction(true);
       await organizersService.approve(id);
       await fetchOrganizers();
-      alert('✓ Organizador aprobado');
+      alert(t('organizerApproved'));
     } catch (error: any) {
       console.error('Error approving organizer:', error);
-      alert(error.response?.data?.message || 'Error al aprobar organizador');
+      alert(error.response?.data?.message || t('errorApproving'));
     } finally {
       setIsLoadingAction(false);
     }
@@ -87,16 +89,16 @@ export default function OrganizersListPage() {
    * Handle reject
    */
   const handleReject = async (id: string) => {
-    if (!confirm('¿Rechazar este organizador? El estado cambiará a CANCELLED.')) return;
+    if (!confirm(t('confirmReject'))) return;
 
     try {
       setIsLoadingAction(true);
       await organizersService.reject(id);
       await fetchOrganizers();
-      alert('✓ Organizador rechazado');
+      alert(t('organizerRejected'));
     } catch (error: any) {
       console.error('Error rejecting organizer:', error);
-      alert(error.response?.data?.message || 'Error al rechazar organizador');
+      alert(error.response?.data?.message || t('errorRejecting'));
     } finally {
       setIsLoadingAction(false);
     }
@@ -106,16 +108,16 @@ export default function OrganizersListPage() {
    * Handle delete
    */
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este organizador? Esta acción no se puede deshacer.')) return;
+    if (!confirm(t('confirmDelete'))) return;
 
     try {
       setIsLoadingAction(true);
       await organizersService.delete(id);
       await fetchOrganizers();
-      alert('✓ Organizador eliminado');
+      alert(t('organizerDeleted'));
     } catch (error: any) {
       console.error('Error deleting organizer:', error);
-      alert(error.response?.data?.message || 'Error al eliminar organizador');
+      alert(error.response?.data?.message || t('errorDeletingOrganizer'));
     } finally {
       setIsLoadingAction(false);
     }
@@ -130,10 +132,10 @@ export default function OrganizersListPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                 <Building2 className="h-8 w-8 text-blue-600" />
-                Organizadores
+                {t('organizersTitle')}
               </h1>
               <p className="mt-2 text-gray-600">
-                Gestiona las entidades organizadoras de eventos
+                {t('organizersSubtitle')}
               </p>
             </div>
             <button
@@ -141,7 +143,7 @@ export default function OrganizersListPage() {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              Nuevo Organizador
+              {t('newOrganizer')}
             </button>
           </div>
         </div>
@@ -152,7 +154,7 @@ export default function OrganizersListPage() {
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Buscar
+                {t('search')}
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -163,7 +165,7 @@ export default function OrganizersListPage() {
                     setSearchQuery(e.target.value);
                     setPage(1);
                   }}
-                  placeholder="Nombre..."
+                  placeholder={t('namePlaceholder')}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
@@ -172,7 +174,7 @@ export default function OrganizersListPage() {
             {/* Status Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Estado
+                {t('status')}
               </label>
               <select
                 value={statusFilter}
@@ -182,17 +184,17 @@ export default function OrganizersListPage() {
                 }}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
-                <option value="ALL">Todos</option>
-                <option value="PUBLISHED">Publicados</option>
-                <option value="DRAFT">Borradores</option>
-                <option value="CANCELLED">Cancelados</option>
+                <option value="ALL">{t('all')}</option>
+                <option value="PUBLISHED">{t('published')}</option>
+                <option value="DRAFT">{t('draftsFilter')}</option>
+                <option value="CANCELLED">{t('cancelledFilter')}</option>
               </select>
             </div>
 
             {/* Country Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                País
+                {t('country')}
               </label>
               <CountrySelect
                 value={countryFilter}
@@ -200,7 +202,7 @@ export default function OrganizersListPage() {
                   setCountryFilter(code);
                   setPage(1);
                 }}
-                placeholder="Todos los países"
+                placeholder={t('allCountries')}
               />
             </div>
           </div>
@@ -220,12 +222,12 @@ export default function OrganizersListPage() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
                 <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No se encontraron organizadores
+                  {t('noOrganizersFound')}
                 </h3>
                 <p className="text-gray-600 mb-6">
                   {searchQuery || statusFilter !== 'ALL' || countryFilter
-                    ? 'Intenta ajustar los filtros de búsqueda'
-                    : 'Crea tu primer organizador para comenzar'}
+                    ? t('adjustFilters')
+                    : t('createFirstOrganizer')}
                 </p>
                 {!searchQuery && statusFilter === 'ALL' && !countryFilter && (
                   <button
@@ -233,7 +235,7 @@ export default function OrganizersListPage() {
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <Plus className="h-5 w-5" />
-                    Crear Organizador
+                    {t('createOrganizer')}
                   </button>
                 )}
               </div>
@@ -269,16 +271,16 @@ export default function OrganizersListPage() {
                                 ? 'bg-yellow-100 text-yellow-800'
                                 : 'bg-gray-100 text-gray-800'
                             }`}>
-                              {org.status === 'PUBLISHED' ? 'Publicado' :
-                               org.status === 'DRAFT' ? 'Borrador' :
-                               'Cancelado'}
+                              {org.status === 'PUBLISHED' ? t('statusPublished') :
+                               org.status === 'DRAFT' ? t('statusDraft') :
+                               t('statusCancelled')}
                             </span>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <span>/{org.slug}</span>
                             <span>{org.country}</span>
                             {org._count && (
-                              <span>{org._count.events} evento{org._count.events !== 1 ? 's' : ''}</span>
+                              <span>{t('eventsCount', { count: org._count.events })}</span>
                             )}
                           </div>
                         </div>
@@ -293,7 +295,7 @@ export default function OrganizersListPage() {
                               onClick={() => handleApprove(org.id)}
                               disabled={isLoadingAction}
                               className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                              title="Aprobar"
+                              title={t('approve')}
                             >
                               <Check className="h-5 w-5" />
                             </button>
@@ -301,7 +303,7 @@ export default function OrganizersListPage() {
                               onClick={() => handleReject(org.id)}
                               disabled={isLoadingAction}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Rechazar"
+                              title={t('reject')}
                             >
                               <X className="h-5 w-5" />
                             </button>
@@ -312,7 +314,7 @@ export default function OrganizersListPage() {
                         <button
                           onClick={() => router.push(`/organizer/organizers/edit/${org.id}`)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Editar"
+                          title={t('edit')}
                         >
                           <Edit className="h-5 w-5" />
                         </button>
@@ -323,7 +325,7 @@ export default function OrganizersListPage() {
                             onClick={() => handleDelete(org.id)}
                             disabled={isLoadingAction}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Eliminar"
+                            title={t('delete')}
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
@@ -343,17 +345,17 @@ export default function OrganizersListPage() {
                   disabled={page === 1}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Anterior
+                  {t('previous')}
                 </button>
                 <span className="px-4 py-2 text-gray-700">
-                  Página {page} de {totalPages}
+                  {t('pageOf', { page, totalPages })}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Siguiente
+                  {t('next')}
                 </button>
               </div>
             )}

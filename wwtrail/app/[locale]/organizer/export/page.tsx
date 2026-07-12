@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { adminService } from '@/lib/api/admin.service';
+import { useTranslations } from 'next-intl';
 
 interface ExportStats {
   events: number;
@@ -91,6 +92,7 @@ function StatCard({
 }
 
 export default function ExportPage() {
+  const t = useTranslations('boMisc');
   const [stats, setStats] = useState<ExportStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState<string | null>(null);
@@ -129,7 +131,7 @@ export default function ExportPage() {
       downloadBlob(blob, `wwtrail_${entityType}_${date}.json`);
     } catch (error) {
       console.error('Error exporting:', error);
-      alert('Error al exportar los datos');
+      alert(t('exportErrorExporting'));
     } finally {
       setExporting(null);
     }
@@ -143,7 +145,7 @@ export default function ExportPage() {
       downloadBlob(blob, `wwtrail_backup_${date}.json`);
     } catch (error) {
       console.error('Error exporting:', error);
-      alert('Error al exportar los datos');
+      alert(t('exportErrorExporting'));
     } finally {
       setExporting(null);
     }
@@ -165,12 +167,12 @@ export default function ExportPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Exportacion de Datos</h1>
-          <p className="text-gray-500">Descarga backups de la base de datos</p>
+          <h1 className="text-2xl font-bold">{t('exportTitle')}</h1>
+          <p className="text-gray-500">{t('exportSubtitle')}</p>
         </div>
         <Button variant="outline" onClick={fetchStats} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
+          {t('exportRefresh')}
         </Button>
       </div>
 
@@ -179,20 +181,20 @@ export default function ExportPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="w-5 h-5 text-blue-600" />
-            Backup Completo
+            {t('exportFullBackup')}
           </CardTitle>
           <CardDescription>
-            Exporta todos los datos del portal en un unico archivo JSON
+            {t('exportFullBackupDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-lg font-semibold text-blue-900">
-                {totalRecords.toLocaleString()} registros totales
+                {t('exportTotalRecords', { count: totalRecords.toLocaleString() })}
               </p>
               <p className="text-sm text-blue-700">
-                Incluye eventos, competiciones, ediciones, organizadores, series, servicios, posts y usuarios
+                {t('exportFullBackupIncludes')}
               </p>
             </div>
             <Button
@@ -204,12 +206,12 @@ export default function ExportPage() {
               {exporting === 'all' ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Exportando...
+                  {t('exportExporting')}
                 </>
               ) : (
                 <>
                   <Download className="w-4 h-4 mr-2" />
-                  Descargar Backup Completo
+                  {t('exportDownloadFullBackup')}
                 </>
               )}
             </Button>
@@ -222,10 +224,10 @@ export default function ExportPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileJson className="w-5 h-5" />
-            Exportacion por Entidad
+            {t('exportByEntity')}
           </CardTitle>
           <CardDescription>
-            Descarga archivos JSON individuales para cada tipo de entidad
+            {t('exportByEntityDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -236,7 +238,7 @@ export default function ExportPage() {
           ) : stats ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
-                title="Eventos"
+                title={t('exportEventos')}
                 value={stats.events}
                 icon={MapPin}
                 color="green"
@@ -244,7 +246,7 @@ export default function ExportPage() {
                 exporting={exporting === 'events'}
               />
               <StatCard
-                title="Competiciones"
+                title={t('exportCompeticiones')}
                 value={stats.competitions}
                 icon={Trophy}
                 color="yellow"
@@ -252,7 +254,7 @@ export default function ExportPage() {
                 exporting={exporting === 'competitions'}
               />
               <StatCard
-                title="Ediciones"
+                title={t('exportEdiciones')}
                 value={stats.editions}
                 icon={Calendar}
                 color="orange"
@@ -260,7 +262,7 @@ export default function ExportPage() {
                 exporting={exporting === 'editions'}
               />
               <StatCard
-                title="Organizadores"
+                title={t('exportOrganizadores')}
                 value={stats.organizers}
                 icon={Briefcase}
                 color="blue"
@@ -268,7 +270,7 @@ export default function ExportPage() {
                 exporting={exporting === 'organizers'}
               />
               <StatCard
-                title="Series Especiales"
+                title={t('exportSeriesEspeciales')}
                 value={stats.specialSeries}
                 icon={Sparkles}
                 color="purple"
@@ -276,7 +278,7 @@ export default function ExportPage() {
                 exporting={exporting === 'series'}
               />
               <StatCard
-                title="Servicios"
+                title={t('exportServicios')}
                 value={stats.services}
                 icon={Building2}
                 color="pink"
@@ -284,7 +286,7 @@ export default function ExportPage() {
                 exporting={exporting === 'services'}
               />
               <StatCard
-                title="Posts"
+                title={t('exportPosts')}
                 value={stats.posts}
                 icon={FileText}
                 color="indigo"
@@ -292,7 +294,7 @@ export default function ExportPage() {
                 exporting={exporting === 'posts'}
               />
               <StatCard
-                title="Usuarios"
+                title={t('exportUsuarios')}
                 value={stats.users}
                 icon={Users}
                 color="gray"
@@ -302,7 +304,7 @@ export default function ExportPage() {
             </div>
           ) : (
             <div className="text-center text-gray-500 py-8">
-              Error al cargar las estadisticas
+              {t('exportErrorStats')}
             </div>
           )}
         </CardContent>
@@ -311,29 +313,29 @@ export default function ExportPage() {
       {/* Info Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Informacion sobre la Exportacion</CardTitle>
+          <CardTitle>{t('exportInfoTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-sm max-w-none">
           <ul className="list-disc list-inside space-y-2 text-gray-600">
             <li>
-              <strong>Formato:</strong> Los archivos se exportan en formato JSON, listo para backup o reimportacion.
+              <strong>{t('exportInfoFormatTitle')}</strong> {t('exportInfoFormatDesc')}
             </li>
             <li>
-              <strong>Relaciones:</strong> Los archivos incluyen referencias a entidades relacionadas (IDs y nombres).
+              <strong>{t('exportInfoRelationsTitle')}</strong> {t('exportInfoRelationsDesc')}
             </li>
             <li>
-              <strong>Coordenadas:</strong> Las ubicaciones se exportan como latitud/longitud en lugar del formato PostGIS interno.
+              <strong>{t('exportInfoCoordsTitle')}</strong> {t('exportInfoCoordsDesc')}
             </li>
             <li>
-              <strong>Usuarios:</strong> La exportacion de usuarios excluye datos sensibles como contrasenas.
+              <strong>{t('exportInfoUsersTitle')}</strong> {t('exportInfoUsersDesc')}
             </li>
             <li>
-              <strong>Uso:</strong> Estos archivos son ideales para backups, migracion de datos o analisis offline.
+              <strong>{t('exportInfoUsageTitle')}</strong> {t('exportInfoUsageDesc')}
             </li>
           </ul>
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-blue-800 text-sm">
-              <strong>Tip:</strong> Para modificaciones masivas de datos, usa el <strong>Editor Masivo</strong> en lugar de exportar/importar. Es mas rapido y seguro.
+              {t.rich('exportTip', { strong: (chunks) => <strong>{chunks}</strong> })}
             </p>
           </div>
         </CardContent>

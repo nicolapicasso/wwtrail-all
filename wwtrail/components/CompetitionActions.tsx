@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Star, Check, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,11 +27,13 @@ interface CompetitionActionsProps {
 
 export function CompetitionActions({
   competitionId,
-  competitionName = 'esta competición',
+  competitionName,
   onStatusChange,
 }: CompetitionActionsProps) {
   const router = useRouter();
+  const t = useTranslations('cmpLayout');
   const { user } = useAuth();
+  const resolvedCompetitionName = competitionName ?? t('thisCompetition');
   const { userCompetition, isMarked, refresh } = useCompetitionStatus(competitionId);
   const { markCompetition, unmarkCompetition } = useUserCompetitions();
   const [loading, setLoading] = useState(false);
@@ -38,7 +41,7 @@ export function CompetitionActions({
   if (!user) {
     return (
       <Button onClick={() => router.push('/auth/login')} variant="default">
-        Iniciar sesión para guardar
+        {t('loginToSave')}
       </Button>
     );
   }
@@ -51,17 +54,17 @@ export function CompetitionActions({
       onStatusChange?.();
 
       const statusLabels: Record<UserCompetitionStatus, string> = {
-        [UserCompetitionStatus.INTERESTED]: 'Te interesa',
-        [UserCompetitionStatus.REGISTERED]: 'Inscrito',
-        [UserCompetitionStatus.CONFIRMED]: 'Confirmado',
-        [UserCompetitionStatus.COMPLETED]: 'Completado',
-        [UserCompetitionStatus.DNF]: 'No terminado',
-        [UserCompetitionStatus.DNS]: 'No participado',
+        [UserCompetitionStatus.INTERESTED]: t('statusInterestedToast'),
+        [UserCompetitionStatus.REGISTERED]: t('statusRegistered'),
+        [UserCompetitionStatus.CONFIRMED]: t('statusConfirmed'),
+        [UserCompetitionStatus.COMPLETED]: t('statusCompleted'),
+        [UserCompetitionStatus.DNF]: t('statusDnfToast'),
+        [UserCompetitionStatus.DNS]: t('statusDnsToast'),
       };
 
-      toast.success(`${statusLabels[status]}: ${competitionName}`);
+      toast.success(`${statusLabels[status]}: ${resolvedCompetitionName}`);
     } catch (error: any) {
-      toast.error(error.message || 'Error al marcar competición');
+      toast.error(error.message || t('errorMarking'));
     } finally {
       setLoading(false);
     }
@@ -73,9 +76,9 @@ export function CompetitionActions({
       await unmarkCompetition(competitionId);
       refresh();
       onStatusChange?.();
-      toast.success('Competición eliminada de tu lista');
+      toast.success(t('competitionRemoved'));
     } catch (error: any) {
-      toast.error(error.message || 'Error al desmarcar competición');
+      toast.error(error.message || t('errorUnmarking'));
     } finally {
       setLoading(false);
     }
@@ -87,21 +90,21 @@ export function CompetitionActions({
         <DropdownMenuTrigger asChild>
           <Button disabled={loading} variant="default" className="gap-2">
             <Plus className="h-4 w-4" />
-            Añadir a mi lista
+            {t('addToMyList')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuItem onClick={() => handleMark(UserCompetitionStatus.INTERESTED)}>
             <Star className="mr-2 h-4 w-4" />
-            Me interesa
+            {t('statusInterested')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleMark(UserCompetitionStatus.REGISTERED)}>
             <Check className="mr-2 h-4 w-4" />
-            Me he inscrito
+            {t('meHeInscrito')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleMark(UserCompetitionStatus.CONFIRMED)}>
             <Check className="mr-2 h-4 w-4 text-green-600" />
-            Inscripción confirmada
+            {t('inscripcionConfirmada')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -109,17 +112,17 @@ export function CompetitionActions({
   }
 
   const statusLabels: Record<UserCompetitionStatus, string> = {
-    [UserCompetitionStatus.INTERESTED]: 'Me interesa',
-    [UserCompetitionStatus.REGISTERED]: 'Inscrito',
-    [UserCompetitionStatus.CONFIRMED]: 'Confirmado',
-    [UserCompetitionStatus.COMPLETED]: 'Completado',
-    [UserCompetitionStatus.DNF]: 'No terminé',
-    [UserCompetitionStatus.DNS]: 'No participé',
+    [UserCompetitionStatus.INTERESTED]: t('statusInterested'),
+    [UserCompetitionStatus.REGISTERED]: t('statusRegistered'),
+    [UserCompetitionStatus.CONFIRMED]: t('statusConfirmed'),
+    [UserCompetitionStatus.COMPLETED]: t('statusCompleted'),
+    [UserCompetitionStatus.DNF]: t('statusDnf'),
+    [UserCompetitionStatus.DNS]: t('statusDns'),
   };
 
   const currentStatusLabel = userCompetition?.status
     ? statusLabels[userCompetition.status]
-    : 'En mi lista';
+    : t('enMiLista');
 
   return (
     <div className="flex gap-2">
@@ -133,20 +136,20 @@ export function CompetitionActions({
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuItem onClick={() => handleMark(UserCompetitionStatus.INTERESTED)}>
             <Star className="mr-2 h-4 w-4" />
-            Me interesa
+            {t('statusInterested')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleMark(UserCompetitionStatus.REGISTERED)}>
             <Check className="mr-2 h-4 w-4" />
-            Me he inscrito
+            {t('meHeInscrito')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleMark(UserCompetitionStatus.CONFIRMED)}>
             <Check className="mr-2 h-4 w-4 text-green-600" />
-            Inscripción confirmada
+            {t('inscripcionConfirmada')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleUnmark} className="text-red-600">
             <Trash2 className="mr-2 h-4 w-4" />
-            Eliminar de mi lista
+            {t('eliminarDeMiLista')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -156,7 +159,7 @@ export function CompetitionActions({
           variant="default"
           onClick={() => router.push(`/competitions/${competitionId}/add-result`)}
         >
-          Añadir resultado
+          {t('anadirResultado')}
         </Button>
       )}
     </div>

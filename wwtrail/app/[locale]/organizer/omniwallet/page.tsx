@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { zancadasAdminService, ZancadasConfig, ZancadasStats } from '@/lib/api/zancadas-admin.service';
 import { CheckCircle, XCircle, Loader2, Wallet, TrendingUp, Users, Zap } from 'lucide-react';
 
 export default function OmniwalletConfigPage() {
+  const t = useTranslations('boMisc');
   const [config, setConfig] = useState({
     subdomain: '',
     apiToken: '',
@@ -50,7 +52,7 @@ export default function OmniwalletConfigPage() {
       }
     } catch (error) {
       console.error('Error loading config:', error);
-      toast.error('Error al cargar la configuración');
+      toast.error(t('omniConfigLoadError'));
     } finally {
       setLoading(false);
     }
@@ -63,13 +65,13 @@ export default function OmniwalletConfigPage() {
       setConnectionStatus(result.connected ? 'success' : 'error');
 
       if (result.connected) {
-        toast.success('Conexión exitosa con Omniwallet');
+        toast.success(t('omniConnectionSuccess'));
       } else {
-        toast.error(`Error de conexión: ${result.message}`);
+        toast.error(t('omniConnectionError', { message: result.message ?? '' }));
       }
     } catch (error) {
       setConnectionStatus('error');
-      toast.error('Error al probar la conexión');
+      toast.error(t('omniConnectionTestError'));
     }
   };
 
@@ -91,10 +93,10 @@ export default function OmniwalletConfigPage() {
       }));
 
       await loadData();
-      toast.success('Configuración guardada correctamente');
+      toast.success(t('omniConfigSaved'));
     } catch (error) {
       console.error('Error saving config:', error);
-      toast.error('Error al guardar la configuración');
+      toast.error(t('omniConfigSaveError'));
     } finally {
       setSaving(false);
     }
@@ -104,10 +106,10 @@ export default function OmniwalletConfigPage() {
     setRetrying(true);
     try {
       const result = await zancadasAdminService.retrySyncs(50);
-      toast.success(`Procesadas ${result.processed} transacciones, ${result.synced} sincronizadas`);
+      toast.success(t('omniRetryResult', { processed: result.processed, synced: result.synced }));
       await loadData();
     } catch (error) {
-      toast.error('Error al reintentar sincronizaciones');
+      toast.error(t('omniRetryError'));
     } finally {
       setRetrying(false);
     }
@@ -131,9 +133,9 @@ export default function OmniwalletConfigPage() {
           <Wallet className="h-6 w-6 text-primary-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Configuración de Omniwallet</h1>
+          <h1 className="text-2xl font-bold">{t('omniPageTitle')}</h1>
           <p className="text-muted-foreground">
-            Configura la conexión con Omniwallet para el sistema de Zancadas
+            {t('omniPageSubtitle')}
           </p>
         </div>
       </div>
@@ -148,7 +150,7 @@ export default function OmniwalletConfigPage() {
                   <TrendingUp className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Puntos otorgados</p>
+                  <p className="text-sm text-muted-foreground">{t('omniPointsAwarded')}</p>
                   <p className="text-2xl font-bold">{stats.totalPointsAwarded.toLocaleString()}</p>
                 </div>
               </div>
@@ -161,7 +163,7 @@ export default function OmniwalletConfigPage() {
                   <Zap className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Transacciones</p>
+                  <p className="text-sm text-muted-foreground">{t('omniTransactions')}</p>
                   <p className="text-2xl font-bold">{stats.totalTransactions.toLocaleString()}</p>
                 </div>
               </div>
@@ -174,7 +176,7 @@ export default function OmniwalletConfigPage() {
                   <Users className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Usuarios con puntos</p>
+                  <p className="text-sm text-muted-foreground">{t('omniUsersWithPoints')}</p>
                   <p className="text-2xl font-bold">{stats.usersWithPoints.toLocaleString()}</p>
                 </div>
               </div>
@@ -186,23 +188,23 @@ export default function OmniwalletConfigPage() {
       {/* Connection Config */}
       <Card>
         <CardHeader>
-          <CardTitle>Conexión con Omniwallet</CardTitle>
+          <CardTitle>{t('omniConnectionTitle')}</CardTitle>
           <CardDescription>
-            Configura los datos de conexión con tu cuenta de Omniwallet
+            {t('omniConnectionDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="subdomain">Subdominio</Label>
+              <Label htmlFor="subdomain">{t('omniSubdomain')}</Label>
               <Input
                 id="subdomain"
-                placeholder="tu-cuenta"
+                placeholder={t('omniSubdomainPlaceholder')}
                 value={config.subdomain}
                 onChange={(e) => setConfig((prev) => ({ ...prev, subdomain: e.target.value }))}
               />
               <p className="text-xs text-muted-foreground">
-                El subdominio de tu cuenta (ej: si accedes por miempresa.omniwallet.net, escribe &quot;miempresa&quot;)
+                {t('omniSubdomainHelp')}
               </p>
             </div>
             <div className="space-y-2">
@@ -210,27 +212,27 @@ export default function OmniwalletConfigPage() {
               <Input
                 id="apiToken"
                 type="password"
-                placeholder={originalConfig?.hasToken ? '********** (configurado)' : 'Introduce tu API Token'}
+                placeholder={originalConfig?.hasToken ? t('omniTokenConfigured') : t('omniApiTokenPlaceholder')}
                 value={config.apiToken}
                 onChange={(e) => setConfig((prev) => ({ ...prev, apiToken: e.target.value }))}
               />
               {originalConfig?.hasToken && (
-                <p className="text-xs text-green-600">Token ya configurado. Deja vacío para mantener el actual.</p>
+                <p className="text-xs text-green-600">{t('omniTokenAlreadyConfigured')}</p>
               )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="webhookSecret">Webhook Secret (opcional)</Label>
+            <Label htmlFor="webhookSecret">{t('omniWebhookSecret')}</Label>
             <Input
               id="webhookSecret"
               type="password"
-              placeholder={originalConfig?.hasWebhookSecret ? '********** (configurado)' : 'Introduce el Webhook Secret'}
+              placeholder={originalConfig?.hasWebhookSecret ? t('omniTokenConfigured') : t('omniWebhookSecretPlaceholder')}
               value={config.webhookSecret}
               onChange={(e) => setConfig((prev) => ({ ...prev, webhookSecret: e.target.value }))}
             />
             <p className="text-xs text-muted-foreground">
-              Necesario solo si quieres recibir webhooks de Omniwallet
+              {t('omniWebhookSecretHelp')}
             </p>
           </div>
 
@@ -242,7 +244,7 @@ export default function OmniwalletConfigPage() {
                 onCheckedChange={(checked) => setConfig((prev) => ({ ...prev, isEnabled: checked }))}
               />
               <Label htmlFor="enabled" className="font-medium">
-                Sistema de Zancadas activo
+                {t('omniSystemActive')}
               </Label>
             </div>
 
@@ -251,11 +253,11 @@ export default function OmniwalletConfigPage() {
                 {connectionStatus === 'testing' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {connectionStatus === 'success' && <CheckCircle className="mr-2 h-4 w-4 text-green-500" />}
                 {connectionStatus === 'error' && <XCircle className="mr-2 h-4 w-4 text-red-500" />}
-                Probar Conexión
+                {t('omniTestConnection')}
               </Button>
               <Button onClick={saveConfig} disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Guardar
+                {t('guardar')}
               </Button>
             </div>
           </div>
@@ -265,22 +267,22 @@ export default function OmniwalletConfigPage() {
       {/* Sync Management */}
       <Card>
         <CardHeader>
-          <CardTitle>Sincronización</CardTitle>
+          <CardTitle>{t('omniSyncTitle')}</CardTitle>
           <CardDescription>
-            Gestiona la sincronización de transacciones con Omniwallet
+            {t('omniSyncDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Reintentar sincronizaciones fallidas</p>
+              <p className="font-medium">{t('omniRetryFailedTitle')}</p>
               <p className="text-sm text-muted-foreground">
-                Procesa transacciones que no pudieron sincronizarse con Omniwallet
+                {t('omniRetryFailedDescription')}
               </p>
             </div>
             <Button variant="outline" onClick={retrySyncs} disabled={retrying}>
               {retrying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Reintentar
+              {t('omniRetry')}
             </Button>
           </div>
         </CardContent>
@@ -290,7 +292,7 @@ export default function OmniwalletConfigPage() {
       {stats && stats.transactionsByAction.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Transacciones por Acción</CardTitle>
+            <CardTitle>{t('omniTransactionsByAction')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -301,11 +303,11 @@ export default function OmniwalletConfigPage() {
                 >
                   <div>
                     <p className="font-medium">{action.actionName}</p>
-                    <p className="text-sm text-muted-foreground">{action.count} transacciones</p>
+                    <p className="text-sm text-muted-foreground">{t('omniTransactionsCount', { count: action.count })}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-green-600">+{action.points.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">puntos</p>
+                    <p className="text-xs text-muted-foreground">{t('omniPoints')}</p>
                   </div>
                 </div>
               ))}

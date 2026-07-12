@@ -17,6 +17,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   adminService,
   BulkEditEntityType,
@@ -28,20 +29,6 @@ import {
   FilterOperator,
   BulkEditPreview,
 } from '@/lib/api/admin.service';
-
-// Filter operator labels
-const OPERATOR_LABELS: Record<FilterOperator, string> = {
-  equals: 'es igual a',
-  not_equals: 'no es igual a',
-  contains: 'contiene',
-  starts_with: 'empieza por',
-  ends_with: 'termina en',
-  greater_than: 'mayor que',
-  less_than: 'menor que',
-  in: 'esta en',
-  is_null: 'esta vacio',
-  is_not_null: 'no esta vacio',
-};
 
 // Get operators available for field type
 function getOperatorsForType(type: FieldMetadata['type']): FilterOperator[] {
@@ -79,6 +66,19 @@ function FilterRow({
   onRemove: () => void;
   onLoadRelationOptions: (relationEntity: string) => void;
 }) {
+  const t = useTranslations('boMisc');
+  const OPERATOR_LABELS: Record<FilterOperator, string> = {
+    equals: t('bulkOpEquals'),
+    not_equals: t('bulkOpNotEquals'),
+    contains: t('bulkOpContains'),
+    starts_with: t('bulkOpStartsWith'),
+    ends_with: t('bulkOpEndsWith'),
+    greater_than: t('bulkOpGreaterThan'),
+    less_than: t('bulkOpLessThan'),
+    in: t('bulkOpIn'),
+    is_null: t('bulkOpIsNull'),
+    is_not_null: t('bulkOpIsNotNull'),
+  };
   const selectedField = fields.find((f) => f.name === condition.field);
   const operators = selectedField ? getOperatorsForType(selectedField.type) : [];
   const needsValue = !['is_null', 'is_not_null'].includes(condition.operator);
@@ -98,7 +98,7 @@ function FilterRow({
         onChange={(e) => onUpdate({ ...condition, field: e.target.value, value: '' })}
         className="px-3 py-2 border rounded-md text-sm min-w-[150px]"
       >
-        <option value="">Seleccionar campo...</option>
+        <option value="">{t('bulkSelectField')}</option>
         {fields.filter((f) => f.filterable).map((field) => (
           <option key={field.name} value={field.name}>
             {field.label}
@@ -129,8 +129,8 @@ function FilterRow({
               onChange={(e) => onUpdate({ ...condition, value: e.target.value === 'true' })}
               className="px-3 py-2 border rounded-md text-sm min-w-[100px]"
             >
-              <option value="true">Si</option>
-              <option value="false">No</option>
+              <option value="true">{t('bulkYes')}</option>
+              <option value="false">{t('bulkNo')}</option>
             </select>
           ) : selectedField.type === 'enum' && selectedField.enumValues ? (
             <select
@@ -138,7 +138,7 @@ function FilterRow({
               onChange={(e) => onUpdate({ ...condition, value: e.target.value })}
               className="px-3 py-2 border rounded-md text-sm min-w-[150px]"
             >
-              <option value="">Seleccionar...</option>
+              <option value="">{t('bulkSelect')}</option>
               {selectedField.enumValues.map((val) => (
                 <option key={val} value={val}>
                   {val}
@@ -151,7 +151,7 @@ function FilterRow({
               onChange={(e) => onUpdate({ ...condition, value: e.target.value })}
               className="px-3 py-2 border rounded-md text-sm min-w-[200px]"
             >
-              <option value="">Seleccionar...</option>
+              <option value="">{t('bulkSelect')}</option>
               {(relationOptions[selectedField.relationEntity] || []).map((opt) => (
                 <option key={opt.id} value={opt.id}>
                   {opt.name}
@@ -164,7 +164,7 @@ function FilterRow({
               value={condition.value || ''}
               onChange={(e) => onUpdate({ ...condition, value: parseFloat(e.target.value) || 0 })}
               className="px-3 py-2 border rounded-md text-sm w-[120px]"
-              placeholder="Valor..."
+              placeholder={t('bulkValuePlaceholder')}
             />
           ) : (
             <input
@@ -172,7 +172,7 @@ function FilterRow({
               value={condition.value || ''}
               onChange={(e) => onUpdate({ ...condition, value: e.target.value })}
               className="px-3 py-2 border rounded-md text-sm flex-1 min-w-[150px]"
-              placeholder="Valor..."
+              placeholder={t('bulkValuePlaceholder')}
             />
           )}
         </>
@@ -198,10 +198,11 @@ function ResultsTable({
   onToggleSelection: (id: string) => void;
   onToggleAll: () => void;
 }) {
+  const t = useTranslations('boMisc');
   if (records.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No se encontraron registros con los filtros aplicados
+        {t('bulkNoRecordsFound')}
       </div>
     );
   }
@@ -221,9 +222,9 @@ function ResultsTable({
                 className="rounded"
               />
             </th>
-            <th className="px-4 py-3 text-left">Nombre</th>
-            <th className="px-4 py-3 text-left">Estado</th>
-            <th className="px-4 py-3 text-left">ID</th>
+            <th className="px-4 py-3 text-left">{t('bulkName')}</th>
+            <th className="px-4 py-3 text-left">{t('bulkStatus')}</th>
+            <th className="px-4 py-3 text-left">{t('bulkId')}</th>
           </tr>
         </thead>
         <tbody className="divide-y">
@@ -272,25 +273,26 @@ function PreviewModal({
   onCancel: () => void;
   executing: boolean;
 }) {
+  const t = useTranslations('boMisc');
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
         <div className="p-6 border-b">
-          <h3 className="text-lg font-semibold">Vista Previa de Cambios</h3>
+          <h3 className="text-lg font-semibold">{t('bulkPreviewTitle')}</h3>
           <p className="text-sm text-gray-500">
-            Se modificaran {preview.matchingCount} registros
+            {t('bulkRecordsWillBeModified', { count: preview.matchingCount })}
           </p>
         </div>
         <div className="p-6 overflow-y-auto max-h-[50vh]">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left">Registro</th>
-                <th className="px-4 py-2 text-left">Valor Actual</th>
+                <th className="px-4 py-2 text-left">{t('bulkRecord')}</th>
+                <th className="px-4 py-2 text-left">{t('bulkCurrentValue')}</th>
                 <th className="px-4 py-2 text-center">
                   <ChevronRight className="w-4 h-4 inline" />
                 </th>
-                <th className="px-4 py-2 text-left">Nuevo Valor</th>
+                <th className="px-4 py-2 text-left">{t('bulkNewValue')}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -298,13 +300,13 @@ function PreviewModal({
                 <tr key={record.id}>
                   <td className="px-4 py-2 font-medium">{record.displayName}</td>
                   <td className="px-4 py-2 text-gray-500">
-                    {record.currentValue?.toString() || <span className="italic">vacio</span>}
+                    {record.currentValue?.toString() || <span className="italic">{t('bulkEmpty')}</span>}
                   </td>
                   <td className="px-4 py-2 text-center text-gray-400">
                     <ChevronRight className="w-4 h-4 inline" />
                   </td>
                   <td className="px-4 py-2 text-blue-600 font-medium">
-                    {record.newValue?.toString() || <span className="italic">vacio</span>}
+                    {record.newValue?.toString() || <span className="italic">{t('bulkEmpty')}</span>}
                   </td>
                 </tr>
               ))}
@@ -312,24 +314,24 @@ function PreviewModal({
           </table>
           {preview.matchingRecords.length > 20 && (
             <p className="text-sm text-gray-500 mt-4 text-center">
-              ... y {preview.matchingRecords.length - 20} registros mas
+              {t('bulkAndMoreRecords', { count: preview.matchingRecords.length - 20 })}
             </p>
           )}
         </div>
         <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
           <Button variant="outline" onClick={onCancel} disabled={executing}>
-            Cancelar
+            {t('cancelar')}
           </Button>
           <Button onClick={onConfirm} disabled={executing} className="bg-blue-600 hover:bg-blue-700">
             {executing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Aplicando...
+                {t('bulkApplying')}
               </>
             ) : (
               <>
                 <Play className="w-4 h-4 mr-2" />
-                Aplicar Cambios
+                {t('bulkApplyChanges')}
               </>
             )}
           </Button>
@@ -340,6 +342,7 @@ function PreviewModal({
 }
 
 export default function BulkEditPage() {
+  const t = useTranslations('boMisc');
   // State
   const [metadata, setMetadata] = useState<EntityMetadata[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<BulkEditEntityType | ''>('');
@@ -416,7 +419,7 @@ export default function BulkEditPage() {
       setSelectedIds(new Set(data.map((r: any) => r.id)));
     } catch (error) {
       console.error('Error querying:', error);
-      alert('Error al buscar registros');
+      alert(t('bulkErrorQuerying'));
     } finally {
       setQuerying(false);
     }
@@ -474,7 +477,7 @@ export default function BulkEditPage() {
       setPreview(previewData);
     } catch (error) {
       console.error('Error previewing:', error);
-      alert('Error al generar la vista previa');
+      alert(t('bulkErrorPreview'));
     }
   };
 
@@ -498,7 +501,7 @@ export default function BulkEditPage() {
       handleQuery();
     } catch (error) {
       console.error('Error executing:', error);
-      alert('Error al aplicar los cambios');
+      alert(t('bulkErrorExecuting'));
     } finally {
       setExecuting(false);
     }
@@ -526,8 +529,8 @@ export default function BulkEditPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Editor Masivo</h1>
-        <p className="text-gray-500">Modifica multiples registros a la vez</p>
+        <h1 className="text-2xl font-bold">{t('bulkTitle')}</h1>
+        <p className="text-gray-500">{t('bulkSubtitle')}</p>
       </div>
 
       {/* Success Message */}
@@ -535,8 +538,8 @@ export default function BulkEditPage() {
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-green-600" />
           <div>
-            <p className="font-medium text-green-800">Cambios aplicados correctamente</p>
-            <p className="text-sm text-green-700">{result.count} registros actualizados</p>
+            <p className="font-medium text-green-800">{t('bulkChangesApplied')}</p>
+            <p className="text-sm text-green-700">{t('bulkRecordsUpdated', { count: result.count })}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setResult(null)} className="ml-auto">
             <X className="w-4 h-4" />
@@ -551,9 +554,9 @@ export default function BulkEditPage() {
             <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-bold">
               1
             </span>
-            Seleccionar Entidad
+            {t('bulkSelectEntity')}
           </CardTitle>
-          <CardDescription>Elige el tipo de elemento que quieres modificar</CardDescription>
+          <CardDescription>{t('bulkSelectEntityDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
@@ -581,9 +584,9 @@ export default function BulkEditPage() {
               <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-bold">
                 2
               </span>
-              Filtrar Registros
+              {t('bulkFilterRecords')}
             </CardTitle>
-            <CardDescription>Añade filtros para encontrar los registros a modificar</CardDescription>
+            <CardDescription>{t('bulkFilterRecordsDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Filters */}
@@ -603,18 +606,18 @@ export default function BulkEditPage() {
             <div className="flex gap-2">
               <Button variant="outline" onClick={addFilter}>
                 <Plus className="w-4 h-4 mr-2" />
-                Añadir Filtro
+                {t('bulkAddFilter')}
               </Button>
               <Button onClick={handleQuery} disabled={querying}>
                 {querying ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Buscando...
+                    {t('bulkSearching')}
                   </>
                 ) : (
                   <>
                     <Search className="w-4 h-4 mr-2" />
-                    Buscar
+                    {t('buscar')}
                   </>
                 )}
               </Button>
@@ -631,9 +634,9 @@ export default function BulkEditPage() {
               <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-bold">
                 3
               </span>
-              Resultados ({records.length} encontrados, {selectedIds.size} seleccionados)
+              {t('bulkResultsHeader', { found: records.length, selected: selectedIds.size })}
             </CardTitle>
-            <CardDescription>Selecciona los registros que quieres modificar</CardDescription>
+            <CardDescription>{t('bulkResultsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResultsTable
@@ -654,17 +657,17 @@ export default function BulkEditPage() {
               <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-bold">
                 4
               </span>
-              Definir Cambio
+              {t('bulkDefineChange')}
             </CardTitle>
             <CardDescription>
-              Selecciona el campo a modificar y el nuevo valor para {selectedIds.size} registro(s)
+              {t('bulkDefineChangeDesc', { count: selectedIds.size })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
               {/* Field selector */}
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Campo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('bulkField')}</label>
                 <select
                   value={editField}
                   onChange={(e) => {
@@ -673,7 +676,7 @@ export default function BulkEditPage() {
                   }}
                   className="w-full px-3 py-2 border rounded-md"
                 >
-                  <option value="">Seleccionar campo...</option>
+                  <option value="">{t('bulkSelectField')}</option>
                   {editableFields.map((field) => (
                     <option key={field.name} value={field.name}>
                       {field.label}
@@ -685,15 +688,15 @@ export default function BulkEditPage() {
               {/* Value input */}
               {selectedEditField && (
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nuevo Valor</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('bulkNewValue')}</label>
                   {selectedEditField.type === 'boolean' ? (
                     <select
                       value={editValue?.toString() || ''}
                       onChange={(e) => setEditValue(e.target.value === 'true')}
                       className="w-full px-3 py-2 border rounded-md"
                     >
-                      <option value="true">Si</option>
-                      <option value="false">No</option>
+                      <option value="true">{t('bulkYes')}</option>
+                      <option value="false">{t('bulkNo')}</option>
                     </select>
                   ) : selectedEditField.type === 'enum' && selectedEditField.enumValues ? (
                     <select
@@ -701,7 +704,7 @@ export default function BulkEditPage() {
                       onChange={(e) => setEditValue(e.target.value)}
                       className="w-full px-3 py-2 border rounded-md"
                     >
-                      <option value="">Seleccionar...</option>
+                      <option value="">{t('bulkSelect')}</option>
                       {selectedEditField.enumValues.map((val) => (
                         <option key={val} value={val}>
                           {val}
@@ -714,7 +717,7 @@ export default function BulkEditPage() {
                       onChange={(e) => setEditValue(e.target.value)}
                       className="w-full px-3 py-2 border rounded-md"
                     >
-                      <option value="">Seleccionar...</option>
+                      <option value="">{t('bulkSelect')}</option>
                       {(relationOptions[selectedEditField.relationEntity] || []).map((opt) => (
                         <option key={opt.id} value={opt.id}>
                           {opt.name}
@@ -727,7 +730,7 @@ export default function BulkEditPage() {
                       value={editValue || ''}
                       onChange={(e) => setEditValue(parseFloat(e.target.value) || 0)}
                       className="w-full px-3 py-2 border rounded-md"
-                      placeholder="Nuevo valor..."
+                      placeholder={t('bulkNewValuePlaceholder')}
                     />
                   ) : (
                     <input
@@ -735,7 +738,7 @@ export default function BulkEditPage() {
                       value={editValue || ''}
                       onChange={(e) => setEditValue(e.target.value)}
                       className="w-full px-3 py-2 border rounded-md"
-                      placeholder="Nuevo valor..."
+                      placeholder={t('bulkNewValuePlaceholder')}
                     />
                   )}
                 </div>
@@ -746,7 +749,7 @@ export default function BulkEditPage() {
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={handleReset}>
                 <Trash2 className="w-4 h-4 mr-2" />
-                Limpiar
+                {t('bulkClear')}
               </Button>
               <Button
                 onClick={handlePreview}
@@ -754,7 +757,7 @@ export default function BulkEditPage() {
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 <Eye className="w-4 h-4 mr-2" />
-                Vista Previa
+                {t('bulkPreview')}
               </Button>
             </div>
           </CardContent>
@@ -774,30 +777,29 @@ export default function BulkEditPage() {
       {/* Instructions */}
       <Card>
         <CardHeader>
-          <CardTitle>Como usar el Editor Masivo</CardTitle>
+          <CardTitle>{t('bulkHowToTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-sm max-w-none">
           <ol className="list-decimal list-inside space-y-2 text-gray-600">
             <li>
-              <strong>Selecciona la entidad:</strong> Elige si quieres modificar competiciones, eventos, ediciones, etc.
+              <strong>{t('bulkHowToStep1Title')}</strong> {t('bulkHowToStep1Desc')}
             </li>
             <li>
-              <strong>Aplica filtros:</strong> Añade condiciones para encontrar los registros especificos que quieres modificar.
+              <strong>{t('bulkHowToStep2Title')}</strong> {t('bulkHowToStep2Desc')}
             </li>
             <li>
-              <strong>Revisa y selecciona:</strong> Verifica los resultados y selecciona los registros a modificar.
+              <strong>{t('bulkHowToStep3Title')}</strong> {t('bulkHowToStep3Desc')}
             </li>
             <li>
-              <strong>Define el cambio:</strong> Elige el campo y el nuevo valor que quieres aplicar.
+              <strong>{t('bulkHowToStep4Title')}</strong> {t('bulkHowToStep4Desc')}
             </li>
             <li>
-              <strong>Vista previa y confirma:</strong> Revisa los cambios antes de aplicarlos definitivamente.
+              <strong>{t('bulkHowToStep5Title')}</strong> {t('bulkHowToStep5Desc')}
             </li>
           </ol>
           <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-yellow-800 text-sm">
-              <strong>Importante:</strong> Los cambios se aplican inmediatamente y no se pueden deshacer.
-              Asegurate de revisar la vista previa antes de confirmar.
+              <strong>{t('bulkImportantTitle')}</strong> {t('bulkImportantDesc')}
             </p>
           </div>
         </CardContent>

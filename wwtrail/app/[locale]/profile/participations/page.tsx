@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -83,6 +83,7 @@ export default function ParticipationsPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('pgAccount');
 
   const [participations, setParticipations] = useState<UserParticipation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,7 +113,7 @@ export default function ParticipationsPage() {
       setParticipations(data);
     } catch (err: any) {
       console.error('Error fetching participations:', err);
-      setError('Error al cargar las participaciones');
+      setError(t('errorLoadingParticipations'));
     } finally {
       setLoading(false);
     }
@@ -234,7 +235,7 @@ export default function ParticipationsPage() {
       setIsAddDialogOpen(false);
     } catch (err: any) {
       console.error('Error adding participation:', err);
-      setError(err.response?.data?.message || 'Error al añadir la participación');
+      setError(err.response?.data?.message || t('errorAddingParticipation'));
     } finally {
       setSaving(false);
     }
@@ -263,7 +264,7 @@ export default function ParticipationsPage() {
       setEditingParticipation(null);
     } catch (err: any) {
       console.error('Error updating participation:', err);
-      setError(err.response?.data?.message || 'Error al actualizar la participación');
+      setError(err.response?.data?.message || t('errorUpdatingParticipation'));
     } finally {
       setSaving(false);
     }
@@ -280,7 +281,7 @@ export default function ParticipationsPage() {
       setEditingParticipation(null);
     } catch (err: any) {
       console.error('Error deleting participation:', err);
-      setError(err.response?.data?.message || 'Error al eliminar la participación');
+      setError(err.response?.data?.message || t('errorDeletingParticipation'));
     } finally {
       setSaving(false);
     }
@@ -295,13 +296,13 @@ export default function ParticipationsPage() {
     if (!type) return '-';
     switch (type) {
       case 'GENERAL':
-        return 'General';
+        return t('categoryGeneral');
       case 'MALE':
-        return 'Masculina';
+        return t('categoryMale');
       case 'FEMALE':
-        return 'Femenina';
+        return t('categoryFemale');
       case 'CATEGORY':
-        return name || 'Categoría';
+        return name || t('category');
       default:
         return type;
     }
@@ -333,11 +334,11 @@ export default function ParticipationsPage() {
             className="mb-4 text-white hover:text-white/80 hover:bg-white/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            {t('back')}
           </Button>
-          <h1 className="text-4xl font-bold mb-2">Mis Participaciones</h1>
+          <h1 className="text-4xl font-bold mb-2">{t('myParticipations')}</h1>
           <p className="text-lg opacity-90">
-            Gestiona tu historial de carreras y resultados
+            {t('participationsSubtitle')}
           </p>
         </div>
       </div>
@@ -352,7 +353,7 @@ export default function ParticipationsPage() {
               onClick={() => setError(null)}
               className="text-red-600 text-sm underline mt-1"
             >
-              Cerrar
+              {t('close')}
             </button>
           </div>
         )}
@@ -364,7 +365,7 @@ export default function ParticipationsPage() {
               <div className="text-center">
                 <Flag className="w-8 h-8 mx-auto mb-2 text-blue-600" />
                 <p className="text-2xl font-bold">{participations.length}</p>
-                <p className="text-sm text-gray-500">Total carreras</p>
+                <p className="text-sm text-gray-500">{t('totalRaces')}</p>
               </div>
             </CardContent>
           </Card>
@@ -375,7 +376,7 @@ export default function ParticipationsPage() {
                 <p className="text-2xl font-bold">
                   {participations.filter((p) => p.status === 'COMPLETED').length}
                 </p>
-                <p className="text-sm text-gray-500">Finisher</p>
+                <p className="text-sm text-gray-500">{t('finisher')}</p>
               </div>
             </CardContent>
           </Card>
@@ -386,7 +387,7 @@ export default function ParticipationsPage() {
                 <p className="text-2xl font-bold">
                   {participations.filter((p) => p.status === 'DNF').length}
                 </p>
-                <p className="text-sm text-gray-500">DNF</p>
+                <p className="text-sm text-gray-500">{t('statDNF')}</p>
               </div>
             </CardContent>
           </Card>
@@ -395,7 +396,7 @@ export default function ParticipationsPage() {
               <div className="text-center">
                 <Calendar className="w-8 h-8 mx-auto mb-2 text-black" />
                 <p className="text-2xl font-bold">{sortedYears.length}</p>
-                <p className="text-sm text-gray-500">Temporadas</p>
+                <p className="text-sm text-gray-500">{t('seasons')}</p>
               </div>
             </CardContent>
           </Card>
@@ -405,7 +406,7 @@ export default function ParticipationsPage() {
         <div className="mb-6">
           <Button onClick={handleOpenAddDialog} className="w-full md:w-auto">
             <Plus className="w-4 h-4 mr-2" />
-            Añadir participación
+            {t('addParticipation')}
           </Button>
         </div>
 
@@ -415,14 +416,14 @@ export default function ParticipationsPage() {
             <CardContent className="py-12 text-center">
               <Trophy className="w-16 h-16 mx-auto mb-4 text-gray-300" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No tienes participaciones registradas
+                {t('noParticipationsRegistered')}
               </h3>
               <p className="text-gray-500 mb-4">
-                Añade tus carreras para llevar un registro de tu historial deportivo
+                {t('addRacesHint')}
               </p>
               <Button onClick={handleOpenAddDialog}>
                 <Plus className="w-4 h-4 mr-2" />
-                Añadir mi primera participación
+                {t('addFirstParticipation')}
               </Button>
             </CardContent>
           </Card>
@@ -434,7 +435,7 @@ export default function ParticipationsPage() {
                   <Calendar className="w-6 h-6" />
                   {year}
                   <span className="text-sm font-normal text-gray-500">
-                    ({groupedParticipations[year].length} carreras)
+                    ({t('racesCountParen', { count: groupedParticipations[year].length })})
                   </span>
                 </h2>
                 <div className="space-y-4">
@@ -541,9 +542,9 @@ export default function ParticipationsPage() {
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Añadir participación</DialogTitle>
+            <DialogTitle>{t('addParticipation')}</DialogTitle>
             <DialogDescription>
-              Busca la carrera en la que participaste y añade tus resultados
+              {t('addParticipationDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -551,11 +552,11 @@ export default function ParticipationsPage() {
             {/* Edition Search */}
             {!selectedEdition ? (
               <div className="space-y-2">
-                <Label>Buscar carrera</Label>
+                <Label>{t('searchRace')}</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
-                    placeholder="Nombre de la carrera..."
+                    placeholder={t('raceNamePlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -563,7 +564,7 @@ export default function ParticipationsPage() {
                 </div>
 
                 {isSearching && (
-                  <p className="text-sm text-gray-500">Buscando...</p>
+                  <p className="text-sm text-gray-500">{t('searching')}</p>
                 )}
 
                 {searchResults.length > 0 && (
@@ -600,7 +601,7 @@ export default function ParticipationsPage() {
 
                 {searchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
                   <p className="text-sm text-gray-500">
-                    No se encontraron resultados
+                    {t('noResultsFound')}
                   </p>
                 )}
               </div>
@@ -618,7 +619,7 @@ export default function ParticipationsPage() {
                     size="sm"
                     onClick={() => setSelectedEdition(null)}
                   >
-                    Cambiar
+                    {t('change')}
                   </Button>
                 </div>
               </div>
@@ -628,7 +629,7 @@ export default function ParticipationsPage() {
               <>
                 {/* Status */}
                 <div className="space-y-2">
-                  <Label>Estado</Label>
+                  <Label>{t('status')}</Label>
                   <div className="flex gap-2">
                     <Button
                       type="button"
@@ -639,7 +640,7 @@ export default function ParticipationsPage() {
                       }
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Finisher
+                      {t('finisher')}
                     </Button>
                     <Button
                       type="button"
@@ -650,7 +651,7 @@ export default function ParticipationsPage() {
                       }
                     >
                       <XCircle className="w-4 h-4 mr-2" />
-                      DNF
+                      {t('statDNF')}
                     </Button>
                   </div>
                 </div>
@@ -660,7 +661,7 @@ export default function ParticipationsPage() {
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="finishTime">Tiempo</Label>
+                        <Label htmlFor="finishTime">{t('time')}</Label>
                         <Input
                           id="finishTime"
                           name="finishTime"
@@ -670,7 +671,7 @@ export default function ParticipationsPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="position">Posición general</Label>
+                        <Label htmlFor="position">{t('overallPosition')}</Label>
                         <Input
                           id="position"
                           name="position"
@@ -684,7 +685,7 @@ export default function ParticipationsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="categoryType">Categoría</Label>
+                      <Label htmlFor="categoryType">{t('category')}</Label>
                       <select
                         id="categoryType"
                         name="categoryType"
@@ -692,20 +693,20 @@ export default function ParticipationsPage() {
                         onChange={handleFormChange}
                         className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                       >
-                        <option value="">Sin categoría</option>
-                        <option value="MALE">Masculina</option>
-                        <option value="FEMALE">Femenina</option>
-                        <option value="CATEGORY">Otra categoría</option>
+                        <option value="">{t('noCategory')}</option>
+                        <option value="MALE">{t('categoryMale')}</option>
+                        <option value="FEMALE">{t('categoryFemale')}</option>
+                        <option value="CATEGORY">{t('otherCategory')}</option>
                       </select>
                     </div>
 
                     {formData.categoryType === 'CATEGORY' && (
                       <div className="space-y-2">
-                        <Label htmlFor="categoryName">Nombre de la categoría</Label>
+                        <Label htmlFor="categoryName">{t('categoryName')}</Label>
                         <Input
                           id="categoryName"
                           name="categoryName"
-                          placeholder="Ej: Veteranos +40"
+                          placeholder={t('categoryNamePlaceholder')}
                           value={formData.categoryName}
                           onChange={handleFormChange}
                         />
@@ -714,7 +715,7 @@ export default function ParticipationsPage() {
 
                     {formData.categoryType && (
                       <div className="space-y-2">
-                        <Label htmlFor="categoryPosition">Posición en categoría</Label>
+                        <Label htmlFor="categoryPosition">{t('categoryPosition')}</Label>
                         <Input
                           id="categoryPosition"
                           name="categoryPosition"
@@ -731,7 +732,7 @@ export default function ParticipationsPage() {
 
                 {/* Personal rating */}
                 <div className="space-y-2">
-                  <Label>Valoración personal</Label>
+                  <Label>{t('personalRating')}</Label>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((rating) => (
                       <button
@@ -754,14 +755,14 @@ export default function ParticipationsPage() {
 
                 {/* Notes */}
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notas (opcional)</Label>
+                  <Label htmlFor="notes">{t('notesOptional')}</Label>
                   <textarea
                     id="notes"
                     name="notes"
                     value={formData.notes}
                     onChange={handleFormChange}
                     rows={3}
-                    placeholder="Notas personales sobre la carrera..."
+                    placeholder={t('notesPlaceholder')}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   />
                 </div>
@@ -775,13 +776,13 @@ export default function ParticipationsPage() {
               onClick={() => setIsAddDialogOpen(false)}
               disabled={saving}
             >
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button
               onClick={handleSubmitAdd}
               disabled={!selectedEdition || saving}
             >
-              {saving ? 'Guardando...' : 'Añadir participación'}
+              {saving ? t('saving') : t('addParticipation')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -791,7 +792,7 @@ export default function ParticipationsPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar participación</DialogTitle>
+            <DialogTitle>{t('editParticipation')}</DialogTitle>
             <DialogDescription>
               {editingParticipation && (
                 <>
@@ -805,7 +806,7 @@ export default function ParticipationsPage() {
           <div className="space-y-6 py-4">
             {/* Status */}
             <div className="space-y-2">
-              <Label>Estado</Label>
+              <Label>{t('status')}</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -816,7 +817,7 @@ export default function ParticipationsPage() {
                   }
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Finisher
+                  {t('finisher')}
                 </Button>
                 <Button
                   type="button"
@@ -827,7 +828,7 @@ export default function ParticipationsPage() {
                   }
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  DNF
+                  {t('statDNF')}
                 </Button>
               </div>
             </div>
@@ -837,7 +838,7 @@ export default function ParticipationsPage() {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-finishTime">Tiempo</Label>
+                    <Label htmlFor="edit-finishTime">{t('time')}</Label>
                     <Input
                       id="edit-finishTime"
                       name="finishTime"
@@ -847,7 +848,7 @@ export default function ParticipationsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-position">Posición general</Label>
+                    <Label htmlFor="edit-position">{t('overallPosition')}</Label>
                     <Input
                       id="edit-position"
                       name="position"
@@ -861,7 +862,7 @@ export default function ParticipationsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-categoryType">Categoría</Label>
+                  <Label htmlFor="edit-categoryType">{t('category')}</Label>
                   <select
                     id="edit-categoryType"
                     name="categoryType"
@@ -869,20 +870,20 @@ export default function ParticipationsPage() {
                     onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="">Sin categoría</option>
-                    <option value="MALE">Masculina</option>
-                    <option value="FEMALE">Femenina</option>
-                    <option value="CATEGORY">Otra categoría</option>
+                    <option value="">{t('noCategory')}</option>
+                    <option value="MALE">{t('categoryMale')}</option>
+                    <option value="FEMALE">{t('categoryFemale')}</option>
+                    <option value="CATEGORY">{t('otherCategory')}</option>
                   </select>
                 </div>
 
                 {formData.categoryType === 'CATEGORY' && (
                   <div className="space-y-2">
-                    <Label htmlFor="edit-categoryName">Nombre de la categoría</Label>
+                    <Label htmlFor="edit-categoryName">{t('categoryName')}</Label>
                     <Input
                       id="edit-categoryName"
                       name="categoryName"
-                      placeholder="Ej: Veteranos +40"
+                      placeholder={t('categoryNamePlaceholder')}
                       value={formData.categoryName}
                       onChange={handleFormChange}
                     />
@@ -891,7 +892,7 @@ export default function ParticipationsPage() {
 
                 {formData.categoryType && (
                   <div className="space-y-2">
-                    <Label htmlFor="edit-categoryPosition">Posición en categoría</Label>
+                    <Label htmlFor="edit-categoryPosition">{t('categoryPosition')}</Label>
                     <Input
                       id="edit-categoryPosition"
                       name="categoryPosition"
@@ -908,7 +909,7 @@ export default function ParticipationsPage() {
 
             {/* Personal rating */}
             <div className="space-y-2">
-              <Label>Valoración personal</Label>
+              <Label>{t('personalRating')}</Label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((rating) => (
                   <button
@@ -931,14 +932,14 @@ export default function ParticipationsPage() {
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="edit-notes">Notas (opcional)</Label>
+              <Label htmlFor="edit-notes">{t('notesOptional')}</Label>
               <textarea
                 id="edit-notes"
                 name="notes"
                 value={formData.notes}
                 onChange={handleFormChange}
                 rows={3}
-                placeholder="Notas personales sobre la carrera..."
+                placeholder={t('notesPlaceholder')}
                 className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               />
             </div>
@@ -950,10 +951,10 @@ export default function ParticipationsPage() {
               onClick={() => setIsEditDialogOpen(false)}
               disabled={saving}
             >
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button onClick={handleSubmitEdit} disabled={saving}>
-              {saving ? 'Guardando...' : 'Guardar cambios'}
+              {saving ? t('saving') : t('saveChangesShort')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -963,26 +964,26 @@ export default function ParticipationsPage() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar participación</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteParticipation')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de que deseas eliminar esta participación?
+              {t('deleteConfirm')}
               {editingParticipation && (
                 <span className="block mt-2 font-medium text-gray-700">
                   {editingParticipation.edition.competition.name} (
                   {editingParticipation.edition.year})
                 </span>
               )}
-              Esta acción no se puede deshacer.
+              {t('deleteCannotUndo')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={saving}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={saving}>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={saving}
               className="bg-red-600 hover:bg-red-700"
             >
-              {saving ? 'Eliminando...' : 'Eliminar'}
+              {saving ? t('deleting') : t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

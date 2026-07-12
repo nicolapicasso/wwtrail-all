@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { organizersService } from '@/lib/api/v2';
 import { ArrowLeft, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2, Building2 } from 'lucide-react';
@@ -19,6 +20,7 @@ interface OrganizerFormProps {
 
 export default function OrganizerForm({ mode, initialData, organizerId }: OrganizerFormProps) {
   const router = useRouter();
+  const t = useTranslations('boForms');
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
       setSlugValidation({
         isChecking: false,
         isAvailable: null,
-        error: 'Error al verificar disponibilidad',
+        error: t('slugAvailabilityError'),
       });
     }
   };
@@ -134,16 +136,16 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setError('El nombre del organizador es obligatorio');
+      setError(t('organizerNameRequired'));
       return false;
     }
     if (!formData.country.trim()) {
-      setError('El país es obligatorio');
+      setError(t('countryRequired'));
       return false;
     }
 
     if (formData.slug.length >= 3 && slugValidation.isAvailable === false) {
-      setError('El slug ya está en uso. Por favor, modifica el nombre del organizador.');
+      setError(t('slugInUseOrganizer'));
       return false;
     }
 
@@ -186,10 +188,10 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
       let response;
       if (mode === 'create') {
         response = await organizersService.create(cleanOrganizerData);
-        alert('✓ Organizador creado exitosamente');
+        alert(t('organizerCreatedSuccess'));
       } else {
         response = await organizersService.update(organizerId!, cleanOrganizerData);
-        alert('✓ Organizador actualizado exitosamente');
+        alert(t('organizerUpdatedSuccess'));
       }
 
       console.log('✅ Respuesta del backend:', response);
@@ -197,7 +199,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
       router.push('/organizer/organizers');
     } catch (err: any) {
       console.error(`❌ Error al ${mode === 'create' ? 'crear' : 'actualizar'} organizador:`, err);
-      setError(err.message || `Error al ${mode === 'create' ? 'crear' : 'actualizar'} el organizador`);
+      setError(err.message || (mode === 'create' ? t('organizerCreateError') : t('organizerUpdateError')));
     } finally {
       setLoading(false);
     }
@@ -226,7 +228,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
       {/* Status Badge (edit mode only) */}
       {mode === 'edit' && initialData?.status && (
         <div className="mb-6 flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">Estado:</span>
+          <span className="text-sm font-medium text-gray-700">{t('statusLabel')}</span>
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
             initialData.status === 'PUBLISHED'
               ? 'bg-green-100 text-green-800'
@@ -234,9 +236,9 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
               ? 'bg-yellow-100 text-yellow-800'
               : 'bg-gray-100 text-gray-800'
           }`}>
-            {initialData.status === 'PUBLISHED' ? 'Publicado' :
-             initialData.status === 'DRAFT' ? 'Borrador (Pendiente aprobación)' :
-             'Cancelado'}
+            {initialData.status === 'PUBLISHED' ? t('statusPublishedMasc') :
+             initialData.status === 'DRAFT' ? t('statusDraftPending') :
+             t('statusCancelledMasc')}
           </span>
         </div>
       )}
@@ -247,20 +249,20 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <Building2 className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Información Básica</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('basicInfo')}</h2>
           </div>
 
           <div className="space-y-4">
             {/* Nombre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre del Organizador *
+                {t('organizerNameLabel')}
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="Ej: Club Deportivo Montaña"
+                placeholder={t('organizerNamePlaceholder')}
                 required
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
@@ -269,7 +271,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
             {/* Slug (auto-generado) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Slug (URL amigable)
+                {t('slugLabel')}
               </label>
               <div className="relative">
                 <input
@@ -292,12 +294,12 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
               </div>
               {formData.slug.length >= 3 && slugValidation.isAvailable === false && (
                 <p className="mt-1 text-sm text-red-600">
-                  Este slug ya está en uso
+                  {t('slugInUse')}
                 </p>
               )}
               {formData.slug.length >= 3 && slugValidation.isAvailable === true && (
                 <p className="mt-1 text-sm text-green-600">
-                  Slug disponible
+                  {t('slugAvailable')}
                 </p>
               )}
             </div>
@@ -305,13 +307,13 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
             {/* Descripción */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción
+                {t('description')}
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 rows={4}
-                placeholder="Describe el organizador, su historia, misión..."
+                placeholder={t('organizerDescriptionPlaceholder')}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
@@ -319,19 +321,19 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
             {/* País */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                País *
+                {t('countryLabel')}
               </label>
               <CountrySelect
                 value={formData.country}
                 onChange={(code) => handleChange('country', code)}
-                error={!formData.country && error ? 'Selecciona un país' : undefined}
+                error={!formData.country && error ? t('selectCountry') : undefined}
               />
             </div>
 
             {/* Website */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sitio Web Oficial
+                {t('officialWebsite')}
               </label>
               <input
                 type="url"
@@ -348,14 +350,14 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <ImageIcon className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Logotipo</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('logoTitle')}</h2>
           </div>
 
           <div>
             <FileUpload
               fieldname="logo"
               onUpload={(url) => handleChange('logoUrl', url)}
-              buttonText="Subir logotipo"
+              buttonText={t('uploadLogotype')}
               maxSizeMB={2}
               accept="image/*"
               showPreview={true}
@@ -363,13 +365,13 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
             />
             {formData.logoUrl && (
               <p className="text-xs text-green-600 font-medium mt-2">
-                ✓ Logo subido
+                {t('logoUploaded')}
               </p>
             )}
           </div>
 
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-            💡 El logotipo se optimiza automáticamente. Máximo 2MB.
+            {t('logoOptimizedNote')}
           </div>
         </div>
 
@@ -377,7 +379,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <Share2 className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Redes Sociales</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('socialMedia')}</h2>
           </div>
 
           <div className="space-y-4">
@@ -459,7 +461,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
           </div>
 
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-            💡 Todos los campos de redes sociales son opcionales
+            {t('socialOptionalNote')}
           </div>
         </div>
 
@@ -470,7 +472,7 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
             onClick={() => router.back()}
             className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancelar
+            {t('cancel')}
           </button>
           <button
             type="submit"
@@ -483,12 +485,12 @@ export default function OrganizerForm({ mode, initialData, organizerId }: Organi
             {loading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                {mode === 'create' ? 'Creando...' : 'Guardando...'}
+                {mode === 'create' ? t('creating') : t('saving')}
               </>
             ) : (
               <>
                 <Save className="h-5 w-5" />
-                {mode === 'create' ? 'Crear Organizador' : 'Guardar Cambios'}
+                {mode === 'create' ? t('createOrganizer') : t('saveChanges')}
               </>
             )}
           </button>

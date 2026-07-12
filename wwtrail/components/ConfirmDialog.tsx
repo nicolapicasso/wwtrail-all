@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { X, AlertTriangle, Info, CheckCircle } from 'lucide-react';
 
 interface ConfirmDialogProps {
@@ -21,11 +22,14 @@ export default function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
+  confirmText,
+  cancelText,
   variant = 'danger',
   isLoading = false,
 }: ConfirmDialogProps) {
+  const t = useTranslations('cmpLayout');
+  const resolvedConfirmText = confirmText ?? t('confirm');
+  const resolvedCancelText = cancelText ?? t('cancel');
   if (!isOpen) return null;
 
   const variantStyles = {
@@ -100,14 +104,14 @@ export default function ConfirmDialog({
               disabled={isLoading}
               className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {cancelText}
+              {resolvedCancelText}
             </button>
             <button
               onClick={onConfirm}
               disabled={isLoading}
               className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${style.buttonBg}`}
             >
-              {isLoading ? 'Procesando...' : confirmText}
+              {isLoading ? t('processing') : resolvedConfirmText}
             </button>
           </div>
         </div>

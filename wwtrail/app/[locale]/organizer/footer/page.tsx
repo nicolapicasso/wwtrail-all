@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Loader2, Save } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslations } from 'next-intl';
 
 const LANGUAGES = [
   { code: 'ES', label: '🇪🇸 Español' },
@@ -20,16 +21,17 @@ const LANGUAGES = [
   { code: 'DE', label: '🇩🇪 Deutsch' },
 ];
 
-const COLUMNS = [
-  { key: 'left', label: 'Columna Izquierda (1/4)' },
-  { key: 'center', label: 'Columna Central (2/4)' },
-  { key: 'right', label: 'Columna Derecha (1/4)' },
-];
-
 export default function FooterAdminPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('boMisc');
+
+  const COLUMNS = [
+    { key: 'left', label: t('footerColumnLeft') },
+    { key: 'center', label: t('footerColumnCenter') },
+    { key: 'right', label: t('footerColumnRight') },
+  ];
 
   const [footer, setFooter] = useState<Footer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,8 +54,8 @@ export default function FooterAdminPage() {
       setFooter(data);
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al cargar la configuración del footer',
+        title: t('footerError'),
+        description: error.message || t('footerErrorLoading'),
         variant: 'destructive',
       });
     } finally {
@@ -68,13 +70,13 @@ export default function FooterAdminPage() {
       setSaving(true);
       await footerService.updateFooter(footer);
       toast({
-        title: '✅ Guardado',
-        description: 'Configuración del footer actualizada correctamente',
+        title: t('footerSavedTitle'),
+        description: t('footerSavedSuccess'),
       });
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al guardar',
+        title: t('footerError'),
+        description: error.message || t('footerErrorSaving'),
         variant: 'destructive',
       });
     } finally {
@@ -109,9 +111,9 @@ export default function FooterAdminPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">⚙️ Configuración del Footer</h1>
+        <h1 className="text-3xl font-bold mb-2">⚙️ {t('footerTitle')}</h1>
         <p className="text-muted-foreground">
-          Gestiona el contenido del footer en todos los idiomas. Usa HTML para personalizar el contenido.
+          {t('footerSubtitle')}
         </p>
       </div>
 
@@ -131,13 +133,13 @@ export default function FooterAdminPage() {
                 <CardHeader>
                   <CardTitle>{column.label}</CardTitle>
                   <CardDescription>
-                    Contenido HTML para {lang.label}
+                    {t('footerHtmlContentFor', { lang: lang.label })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     <Label htmlFor={`${column.key}-${lang.code}`}>
-                      HTML Content
+                      {t('footerHtmlContent')}
                     </Label>
                     <textarea
                       id={`${column.key}-${lang.code}`}
@@ -147,10 +149,10 @@ export default function FooterAdminPage() {
                       }
                       rows={12}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                      placeholder={`<div>\n  <h3>Título</h3>\n  <p>Contenido...</p>\n  <a href="#">Enlace</a>\n</div>`}
+                      placeholder={t('footerHtmlPlaceholder')}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Puedes usar HTML: &lt;h3&gt;, &lt;p&gt;, &lt;a&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;img&gt;, etc.
+                      {t('footerHtmlHint')}
                     </p>
                   </div>
                 </CardContent>
@@ -170,12 +172,12 @@ export default function FooterAdminPage() {
           {saving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Guardando...
+              {t('guardando')}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              Guardar Configuración
+              {t('footerGuardarConfiguracion')}
             </>
           )}
         </Button>

@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Calendar, CheckCircle, Clock, XCircle, TrendingUp } from 'lucide-react';
 
 export interface EventStatsData {
@@ -16,6 +17,7 @@ interface EventStatsProps {
 }
 
 export default function EventStats({ stats, isLoading = false }: EventStatsProps) {
+  const t = useTranslations('cmp');
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -31,35 +33,35 @@ export default function EventStats({ stats, isLoading = false }: EventStatsProps
 
   const statsItems = [
     {
-      label: 'Total',
+      label: t('total'),
       value: stats.total,
       icon: Calendar,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
-      label: 'Publicados',
+      label: t('published'),
       value: stats.published,
       icon: CheckCircle,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
-      label: 'Pendientes',
+      label: t('pending'),
       value: stats.draft,
       icon: Clock,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
     },
     {
-      label: 'Rechazados',
+      label: t('rejected'),
       value: stats.rejected,
       icon: XCircle,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
     },
     {
-      label: 'Tasa Aprobación',
+      label: t('approvalRate'),
       value: stats.approvalRate ? `${parseFloat(stats.approvalRate.toString()).toFixed(0)}%` : '—', // ✅ CORREGIDO
       icon: TrendingUp,
       color: 'text-purple-600',

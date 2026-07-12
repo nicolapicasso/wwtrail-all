@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { emailTemplatesService } from '@/lib/api/v2';
 import {
   EmailTemplate,
@@ -11,6 +12,7 @@ import {
 import { Mail, Save, Eye, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function EmailTemplatesPage() {
+  const t = useTranslations('boMisc');
   const router = useRouter();
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
@@ -50,7 +52,7 @@ export default function EmailTemplatesPage() {
       if (typeInfo) {
         const initialSampleData: Record<string, string> = {};
         Object.keys(typeInfo.defaultVariables).forEach((key) => {
-          initialSampleData[key] = `Ejemplo ${key}`;
+          initialSampleData[key] = t('promoExampleValue', { key });
         });
         setSampleData(initialSampleData);
       }
@@ -71,7 +73,7 @@ export default function EmailTemplatesPage() {
       }
     } catch (err: any) {
       console.error('Error loading templates:', err);
-      setError(err.message || 'Error al cargar plantillas');
+      setError(err.message || t('promoErrorLoadTemplates'));
     } finally {
       setLoading(false);
     }
@@ -91,14 +93,14 @@ export default function EmailTemplatesPage() {
         textBody,
       });
 
-      setSuccess('Plantilla guardada correctamente');
+      setSuccess(t('promoTemplateSavedSuccess'));
       await loadTemplates();
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
       console.error('Error saving template:', err);
-      setError(err.message || 'Error al guardar plantilla');
+      setError(err.message || t('promoErrorSaveTemplate'));
     } finally {
       setSaving(false);
     }
@@ -119,7 +121,7 @@ export default function EmailTemplatesPage() {
       setShowPreview(true);
     } catch (err: any) {
       console.error('Error generating preview:', err);
-      setError(err.message || 'Error al generar vista previa');
+      setError(err.message || t('promoErrorGeneratePreview'));
     } finally {
       setPreviewLoading(false);
     }
@@ -146,7 +148,7 @@ export default function EmailTemplatesPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando plantillas...</p>
+          <p className="text-gray-600">{t('promoLoadingTemplates')}</p>
         </div>
       </div>
     );
@@ -163,10 +165,10 @@ export default function EmailTemplatesPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <Mail className="h-8 w-8 text-green-600" />
-                Configuración de Emails
+                {t('promoEmailSettingsTitle')}
               </h1>
               <p className="mt-2 text-gray-600">
-                Personaliza las plantillas de email que se envían automáticamente
+                {t('promoEmailSettingsSubtitle')}
               </p>
             </div>
           </div>
@@ -191,7 +193,7 @@ export default function EmailTemplatesPage() {
           {/* Template Selector Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tipo de Email</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('promoEmailType')}</h2>
               <div className="space-y-2">
                 {templates.map((template) => {
                   const info = getTemplateTypeInfo(template.type);
@@ -239,7 +241,7 @@ export default function EmailTemplatesPage() {
                     className="w-full px-6 py-4 flex items-center justify-between text-left"
                   >
                     <h3 className="text-lg font-semibold text-gray-900">
-                      Variables Disponibles
+                      {t('promoAvailableVariables')}
                     </h3>
                     {showVariables ? (
                       <ChevronUp className="h-5 w-5 text-gray-400" />
@@ -251,7 +253,7 @@ export default function EmailTemplatesPage() {
                   {showVariables && (
                     <div className="px-6 pb-6 border-t">
                       <p className="text-sm text-gray-600 mb-4 mt-4">
-                        Usa estas variables en tu plantilla con la sintaxis{' '}
+                        {t('promoVariablesSyntaxHint')}{' '}
                         <code className="bg-gray-100 px-2 py-1 rounded">
                           {'{{nombreVariable}}'}
                         </code>
@@ -277,7 +279,7 @@ export default function EmailTemplatesPage() {
                               onChange={(e) =>
                                 setSampleData({ ...sampleData, [key]: e.target.value })
                               }
-                              placeholder={`Ejemplo: ${key}`}
+                              placeholder={t('promoExamplePlaceholder', { key })}
                               className="mt-2 w-full text-xs px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             />
                           </div>
@@ -290,42 +292,42 @@ export default function EmailTemplatesPage() {
                 {/* Subject Field */}
                 <div className="bg-white rounded-lg shadow p-6">
                   <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Asunto del Email
+                    {t('promoEmailSubjectLabel')}
                   </label>
                   <input
                     type="text"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Asunto del email..."
+                    placeholder={t('promoEmailSubjectPlaceholder')}
                   />
                 </div>
 
                 {/* HTML Body */}
                 <div className="bg-white rounded-lg shadow p-6">
                   <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Cuerpo HTML
+                    {t('promoHtmlBodyLabel')}
                   </label>
                   <textarea
                     value={htmlBody}
                     onChange={(e) => setHtmlBody(e.target.value)}
                     rows={15}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
-                    placeholder="HTML del email..."
+                    placeholder={t('promoHtmlBodyPlaceholder')}
                   />
                 </div>
 
                 {/* Text Body */}
                 <div className="bg-white rounded-lg shadow p-6">
                   <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Texto Plano (fallback)
+                    {t('promoTextBodyLabel')}
                   </label>
                   <textarea
                     value={textBody}
                     onChange={(e) => setTextBody(e.target.value)}
                     rows={8}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
-                    placeholder="Versión en texto plano..."
+                    placeholder={t('promoTextBodyPlaceholder')}
                   />
                 </div>
 
@@ -337,7 +339,7 @@ export default function EmailTemplatesPage() {
                     className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
                   >
                     <Eye className="h-5 w-5" />
-                    {previewLoading ? 'Generando...' : 'Vista Previa'}
+                    {previewLoading ? t('promoGenerating') : t('promoPreview')}
                   </button>
 
                   <button
@@ -346,7 +348,7 @@ export default function EmailTemplatesPage() {
                     className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
                   >
                     <Save className="h-5 w-5" />
-                    {saving ? 'Guardando...' : 'Guardar Cambios'}
+                    {saving ? t('promoSaving') : t('promoSaveChanges')}
                   </button>
                 </div>
 
@@ -356,7 +358,7 @@ export default function EmailTemplatesPage() {
                     <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                       <div className="p-6 border-b sticky top-0 bg-white">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-2xl font-bold text-gray-900">Vista Previa</h3>
+                          <h3 className="text-2xl font-bold text-gray-900">{t('promoPreview')}</h3>
                           <button
                             onClick={() => setShowPreview(false)}
                             className="text-gray-400 hover:text-gray-600"
@@ -382,7 +384,7 @@ export default function EmailTemplatesPage() {
                         {/* Preview Subject */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Asunto:
+                            {t('promoSubjectLabelShort')}
                           </label>
                           <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                             <p className="font-medium">{previewSubject}</p>
@@ -392,7 +394,7 @@ export default function EmailTemplatesPage() {
                         {/* Preview HTML */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Vista HTML:
+                            {t('promoHtmlViewLabel')}
                           </label>
                           <div className="border border-gray-200 rounded-lg overflow-hidden">
                             <iframe
@@ -406,7 +408,7 @@ export default function EmailTemplatesPage() {
                         {/* Preview Text */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Versión Texto:
+                            {t('promoTextVersionLabel')}
                           </label>
                           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                             <pre className="whitespace-pre-wrap font-mono text-sm">

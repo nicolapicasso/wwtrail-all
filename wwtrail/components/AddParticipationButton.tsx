@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,6 +67,7 @@ export function AddParticipationButton({
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('cmpLayout');
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<ParticipationFormData>(initialFormData);
@@ -156,7 +157,7 @@ export function AddParticipationButton({
       onParticipationAdded?.();
     } catch (err: any) {
       console.error('Error saving participation:', err);
-      setError(err.response?.data?.message || 'Error al guardar la participación');
+      setError(err.response?.data?.message || t('participationSaveError'));
     } finally {
       setSaving(false);
     }
@@ -180,12 +181,12 @@ export function AddParticipationButton({
         ) : existingParticipation ? (
           <>
             <CheckCircle className="w-4 h-4 mr-2" />
-            Participé
+            {t('participated')}
           </>
         ) : (
           <>
             <Plus className="w-4 h-4 mr-2" />
-            Marcar participación
+            {t('markParticipation')}
           </>
         )}
       </Button>
@@ -194,7 +195,7 @@ export function AddParticipationButton({
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {existingParticipation ? 'Editar participación' : 'Añadir participación'}
+              {existingParticipation ? t('editParticipation') : t('addParticipation')}
             </DialogTitle>
             <DialogDescription>
               {editionName} ({editionYear})
@@ -211,7 +212,7 @@ export function AddParticipationButton({
 
             {/* Status */}
             <div className="space-y-2">
-              <Label>Estado</Label>
+              <Label>{t('statusLabel')}</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -220,7 +221,7 @@ export function AddParticipationButton({
                   onClick={() => setFormData((prev) => ({ ...prev, status: 'COMPLETED' }))}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Finisher
+                  {t('finisher')}
                 </Button>
                 <Button
                   type="button"
@@ -229,7 +230,7 @@ export function AddParticipationButton({
                   onClick={() => setFormData((prev) => ({ ...prev, status: 'DNF' }))}
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  DNF
+                  {t('dnf')}
                 </Button>
               </div>
             </div>
@@ -241,7 +242,7 @@ export function AddParticipationButton({
                   <div className="space-y-2">
                     <Label htmlFor="finishTime">
                       <Clock className="w-4 h-4 inline mr-1" />
-                      Tiempo
+                      {t('timeLabel')}
                     </Label>
                     <Input
                       id="finishTime"
@@ -254,7 +255,7 @@ export function AddParticipationButton({
                   <div className="space-y-2">
                     <Label htmlFor="position">
                       <Medal className="w-4 h-4 inline mr-1" />
-                      Posición
+                      {t('positionLabel')}
                     </Label>
                     <Input
                       id="position"
@@ -269,7 +270,7 @@ export function AddParticipationButton({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="categoryType">Categoría</Label>
+                  <Label htmlFor="categoryType">{t('categoryLabel')}</Label>
                   <select
                     id="categoryType"
                     name="categoryType"
@@ -277,20 +278,20 @@ export function AddParticipationButton({
                     onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="">Sin categoría</option>
-                    <option value="MALE">Masculina</option>
-                    <option value="FEMALE">Femenina</option>
-                    <option value="CATEGORY">Otra categoría</option>
+                    <option value="">{t('noCategory')}</option>
+                    <option value="MALE">{t('maleCategory')}</option>
+                    <option value="FEMALE">{t('femaleCategory')}</option>
+                    <option value="CATEGORY">{t('otherCategory')}</option>
                   </select>
                 </div>
 
                 {formData.categoryType === 'CATEGORY' && (
                   <div className="space-y-2">
-                    <Label htmlFor="categoryName">Nombre de la categoría</Label>
+                    <Label htmlFor="categoryName">{t('categoryNameLabel')}</Label>
                     <Input
                       id="categoryName"
                       name="categoryName"
-                      placeholder="Ej: Veteranos +40"
+                      placeholder={t('categoryNamePlaceholder')}
                       value={formData.categoryName}
                       onChange={handleFormChange}
                     />
@@ -299,7 +300,7 @@ export function AddParticipationButton({
 
                 {formData.categoryType && (
                   <div className="space-y-2">
-                    <Label htmlFor="categoryPosition">Posición en categoría</Label>
+                    <Label htmlFor="categoryPosition">{t('categoryPositionLabel')}</Label>
                     <Input
                       id="categoryPosition"
                       name="categoryPosition"
@@ -316,7 +317,7 @@ export function AddParticipationButton({
 
             {/* Personal rating */}
             <div className="space-y-2">
-              <Label>Valoración personal</Label>
+              <Label>{t('personalRating')}</Label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((rating) => (
                   <button
@@ -340,18 +341,18 @@ export function AddParticipationButton({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={saving}>
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={saving}>
               {saving ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Guardando...
+                  {t('saving')}
                 </>
               ) : existingParticipation ? (
-                'Guardar cambios'
+                t('saveChanges')
               ) : (
-                'Añadir participación'
+                t('addParticipation')
               )}
             </Button>
           </DialogFooter>

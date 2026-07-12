@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Loader2, Trophy, Plus, Edit2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import EditionForm from '@/components/forms/EditionForm';
@@ -26,6 +27,7 @@ interface EditEditionPageProps {
 
 export default function EditEditionPage({ params }: EditEditionPageProps) {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const [edition, setEdition] = useState<Edition | null>(null);
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
         setCompetition(competitionData);
       } catch (err: any) {
         console.error('Error fetching data:', err);
-        setError('No se pudo cargar la edición');
+        setError(t('errorLoadingEditionShort'));
       } finally {
         setLoading(false);
       }
@@ -80,7 +82,7 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Cargando edición...</p>
+          <p className="text-gray-600">{t('loadingEdition')}</p>
         </div>
       </div>
     );
@@ -92,17 +94,17 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
             <h2 className="text-lg font-semibold text-red-900 mb-2">
-              Error al cargar
+              {t('errorLoading')}
             </h2>
             <p className="text-sm text-red-700 mb-4">
-              {error || 'Edición no encontrada'}
+              {error || t('editionNotFound')}
             </p>
             <Link
               href="/organizer/events"
               className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              Volver a mis eventos
+              {t('backToMyEvents')}
             </Link>
           </div>
         </div>
@@ -120,21 +122,21 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver al evento
+            {t('backToEvent')}
           </Link>
         </div>
 
         {/* Edition Context */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
           <p className="text-sm text-blue-900">
-            <span className="font-semibold">Editando:</span> {competition.name} {edition.year}
+            <span className="font-semibold">{t('editingColon')}</span> {competition.name} {edition.year}
           </p>
           <p className="text-xs text-blue-700 mt-1">
-            Los cambios se aplicarán inmediatamente
+            {t('changesApplyImmediately')}
           </p>
           {(competition.baseDistance || competition.baseElevation || competition.baseMaxParticipants) && (
             <div className="text-xs text-blue-700 mt-2 flex flex-wrap gap-3">
-              <span className="font-medium">Valores base de la competición:</span>
+              <span className="font-medium">{t('baseCompetitionValues')}</span>
               {competition.baseDistance && (
                 <span>📏 {competition.baseDistance} km</span>
               )}
@@ -142,7 +144,7 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
                 <span>⛰️ {competition.baseElevation} m D+</span>
               )}
               {competition.baseMaxParticipants && (
-                <span>👥 {competition.baseMaxParticipants} participantes</span>
+                <span>👥 {competition.baseMaxParticipants} {t('participants')}</span>
               )}
             </div>
           )}
@@ -164,11 +166,10 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
         {/* Weather Section */}
         <div className="mt-8 bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            Datos Meteorológicos
+            {t('weatherData')}
           </h2>
           <p className="text-sm text-gray-600 mb-4">
-            Obtén los datos climáticos históricos de esta edición desde Open-Meteo API.
-            Los datos se guardarán en la base de datos y se mostrarán en la página pública de la edición.
+            {t('weatherHelp')}
           </p>
 
           <WeatherCard
@@ -186,10 +187,10 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Clasificaciones
+                {t('classifications')}
               </h2>
               <p className="text-sm text-gray-600">
-                Gestiona las clasificaciones y podios de esta edición. Puedes añadir clasificaciones generales, por género y por categorías.
+                {t('classificationsHelp')}
               </p>
             </div>
             {!showPodiumForm && (
@@ -201,7 +202,7 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Nueva Clasificación
+                {t('newClassification')}
               </button>
             )}
           </div>
@@ -238,10 +239,10 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
             <div className="text-center py-8 text-gray-500">
               <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-400" />
               <p className="text-sm">
-                No hay clasificaciones registradas para esta edición.
+                {t('noClassifications')}
               </p>
               <p className="text-xs mt-1">
-                Haz clic en "Nueva Clasificación" para añadir una.
+                {t('noClassificationsHint')}
               </p>
             </div>
           ) : (
@@ -258,18 +259,18 @@ export default function EditEditionPage({ params }: EditEditionPageProps) {
                         setShowPodiumForm(true);
                       }}
                       className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
-                      title="Editar clasificación"
+                      title={t('editClassification')}
                     >
                       <Edit2 className="w-4 h-4 text-gray-700" />
                     </button>
                     <button
                       onClick={async () => {
-                        if (window.confirm('¿Estás seguro de que quieres eliminar esta clasificación?')) {
+                        if (window.confirm(t('confirmDeleteClassification'))) {
                           await deletePodium(podium.id);
                         }
                       }}
                       className="p-2 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors shadow-sm"
-                      title="Eliminar clasificación"
+                      title={t('deleteClassification')}
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
                     </button>

@@ -23,9 +23,11 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { adminService } from '@/lib/api/admin.service';
+import { useTranslations } from 'next-intl';
 
 export default function OrganizerDashboard() {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const { isAdmin, isOrganizer } = useAuth();
   const [stats, setStats] = useState({
     events: 0,
@@ -84,39 +86,39 @@ export default function OrganizerDashboard() {
 
   const quickActions = [
     {
-      title: 'Nuevo Evento',
-      description: 'Crear un nuevo evento desde cero',
+      title: t('newEvent'),
+      description: t('newEventDesc'),
       icon: MapPin,
       href: '/organizer/events/new',
       color: 'bg-blue-500',
       hoverColor: 'hover:bg-blue-600',
     },
     {
-      title: 'Nueva Competición',
-      description: 'Añadir una competición a un evento',
+      title: t('newCompetition'),
+      description: t('newCompetitionDesc'),
       icon: Flag,
       href: '/organizer/competitions/new',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600',
       disabled: true,
-      note: 'Requiere seleccionar un evento primero',
+      note: t('newCompetitionNote'),
     },
     {
-      title: 'Nueva Edición',
-      description: 'Crear una edición de una competición',
+      title: t('newEdition'),
+      description: t('newEditionDesc'),
       icon: Calendar,
       href: '/organizer/editions/new',
       color: 'bg-gray-800',
       hoverColor: 'hover:bg-black',
       disabled: true,
-      note: 'Requiere seleccionar una competición primero',
+      note: t('newEditionNote'),
     },
   ];
 
   const sections = [
     {
-      title: 'Eventos',
-      description: 'Gestiona tus eventos deportivos',
+      title: t('sectionEvents'),
+      description: t('sectionEventsDesc'),
       icon: MapPin,
       href: '/organizer/events',
       count: stats.events,
@@ -125,8 +127,8 @@ export default function OrganizerDashboard() {
       borderColor: 'border-blue-200',
     },
     {
-      title: 'Competiciones',
-      description: 'Administra las competiciones',
+      title: t('sectionCompetitions'),
+      description: t('sectionCompetitionsDesc'),
       icon: Flag,
       href: '/organizer/competitions',
       count: stats.competitions,
@@ -135,8 +137,8 @@ export default function OrganizerDashboard() {
       borderColor: 'border-green-200',
     },
     {
-      title: 'Ediciones',
-      description: 'Gestiona las ediciones anuales',
+      title: t('sectionEditions'),
+      description: t('sectionEditionsDesc'),
       icon: Calendar,
       href: '/organizer/editions',
       count: stats.editions,
@@ -145,8 +147,8 @@ export default function OrganizerDashboard() {
       borderColor: 'border-gray-200',
     },
     {
-      title: 'Servicios',
-      description: 'Gestiona alojamientos, restaurantes y más',
+      title: t('sectionServices'),
+      description: t('sectionServicesDesc'),
       icon: Building2,
       href: '/organizer/services',
       count: stats.services,
@@ -155,8 +157,8 @@ export default function OrganizerDashboard() {
       borderColor: 'border-orange-200',
     },
     {
-      title: 'Artículos',
-      description: 'Gestiona tus artículos del magazine',
+      title: t('sectionArticles'),
+      description: t('sectionArticlesDesc'),
       icon: BookOpen,
       href: '/organizer/posts',
       count: stats.posts,
@@ -169,8 +171,8 @@ export default function OrganizerDashboard() {
   // Admin-only sections
   const adminSections = isAdmin ? [
     {
-      title: 'Contenido Pendiente',
-      description: 'Revisa y aprueba contenido de organizadores',
+      title: t('sectionPending'),
+      description: t('sectionPendingDesc'),
       icon: AlertCircle,
       href: '/organizer/pending',
       count: stats.pendingTotal,
@@ -180,8 +182,8 @@ export default function OrganizerDashboard() {
       highlight: stats.pendingTotal > 0,
     },
     {
-      title: 'Series Especiales',
-      description: 'Circuitos y series de competiciones',
+      title: t('sectionSpecialSeries'),
+      description: t('sectionSpecialSeriesDesc'),
       icon: Layers,
       href: '/organizer/special-series',
       count: stats.specialSeries,
@@ -190,8 +192,8 @@ export default function OrganizerDashboard() {
       borderColor: 'border-indigo-200',
     },
     {
-      title: 'Usuarios',
-      description: 'Gestiona usuarios y permisos',
+      title: t('sectionUsers'),
+      description: t('sectionUsersDesc'),
       icon: Users,
       href: '/organizer/users',
       count: 0,
@@ -200,8 +202,8 @@ export default function OrganizerDashboard() {
       borderColor: 'border-purple-200',
     },
     {
-      title: 'Traducciones',
-      description: 'Gestiona traducciones del sistema',
+      title: t('sectionTranslations'),
+      description: t('sectionTranslationsDesc'),
       icon: FileText,
       href: '/organizer/translations',
       count: 0,
@@ -216,7 +218,7 @@ export default function OrganizerDashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando dashboard...</p>
+          <p className="text-gray-600">{t('loadingDashboard')}</p>
         </div>
       </div>
     );
@@ -228,10 +230,10 @@ export default function OrganizerDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Panel de Organizador
+            {t('dashboardTitle')}
           </h1>
           <p className="text-gray-600">
-            Gestiona tus eventos, competiciones y ediciones desde aquí
+            {t('dashboardSubtitle')}
           </p>
         </div>
 
@@ -240,7 +242,7 @@ export default function OrganizerDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Eventos</p>
+                <p className="text-sm text-gray-600 mb-1">{t('totalEvents')}</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.events}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -252,7 +254,7 @@ export default function OrganizerDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Competiciones</p>
+                <p className="text-sm text-gray-600 mb-1">{t('sectionCompetitions')}</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.competitions}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -264,7 +266,7 @@ export default function OrganizerDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Ediciones</p>
+                <p className="text-sm text-gray-600 mb-1">{t('sectionEditions')}</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.editions}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -276,7 +278,7 @@ export default function OrganizerDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Próximas</p>
+                <p className="text-sm text-gray-600 mb-1">{t('upcoming')}</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.upcomingEditions}</p>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -288,7 +290,7 @@ export default function OrganizerDashboard() {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('quickActions')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {quickActions.map((action) => (
               <div
@@ -333,7 +335,7 @@ export default function OrganizerDashboard() {
 
         {/* Main Sections */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión de Contenido</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('contentManagement')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sections.map((section) => (
               <Link
@@ -361,7 +363,7 @@ export default function OrganizerDashboard() {
         {/* Admin Sections */}
         {isAdmin && adminSections.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Administración</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('administration')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {adminSections.map((section: any) => (
                 <Link
@@ -394,15 +396,15 @@ export default function OrganizerDashboard() {
         {/* Help Section */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            ¿Necesitas ayuda?
+            {t('needHelp')}
           </h3>
           <p className="text-sm text-blue-700 mb-4">
-            El flujo de trabajo típico es: <strong>Evento → Competición → Edición</strong>
+            {t('workflowIntro')} <strong>{t('workflowChain')}</strong>
           </p>
           <ul className="text-sm text-blue-700 space-y-2">
-            <li>• <strong>Evento</strong>: Un evento deportivo (ej. "Ultra Trail del Mont Blanc")</li>
-            <li>• <strong>Competición</strong>: Una modalidad dentro del evento (ej. "UTMB 170K", "CCC 100K")</li>
-            <li>• <strong>Edición</strong>: Una edición anual de la competición (ej. "UTMB 170K 2024")</li>
+            <li>• <strong>{t('eventLabel')}</strong>: {t('helpEventText')}</li>
+            <li>• <strong>{t('competitionLabel')}</strong>: {t('helpCompetitionText')}</li>
+            <li>• <strong>{t('editionLabel')}</strong>: {t('helpEditionText')}</li>
           </ul>
         </div>
       </div>

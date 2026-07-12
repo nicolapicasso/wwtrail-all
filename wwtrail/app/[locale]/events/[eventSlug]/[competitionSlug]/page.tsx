@@ -4,6 +4,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { useCompetition } from '@/hooks/useCompetitions';
 import { useEditions } from '@/hooks/useEditions';
@@ -27,6 +28,7 @@ import { FavoriteButton } from '@/components/FavoriteButton';
 
 export default function CompetitionDetailPage() {
   const params = useParams();
+  const t = useTranslations('pgEvents');
   const competitionSlug = params?.competitionSlug as string;
   const eventSlug = params?.eventSlug as string;
   const locale = params?.locale as string; // ✅ Get current locale
@@ -102,13 +104,13 @@ export default function CompetitionDetailPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <h2 className="text-2xl font-bold text-red-900">Competition not found</h2>
-          <p className="mt-2 text-red-700">{error || 'This competition does not exist'}</p>
+          <h2 className="text-2xl font-bold text-red-900">{t('competitionNotFound')}</h2>
+          <p className="mt-2 text-red-700">{error || t('competitionDoesNotExist')}</p>
           <Link
             href={`/events/${eventSlug}`}
             className="mt-4 inline-block rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
           >
-            Back to Event
+            {t('backToEvent')}
           </Link>
         </div>
       </div>
@@ -141,7 +143,7 @@ export default function CompetitionDetailPage() {
                 <div className="mb-4">
                   <nav className="flex items-center gap-2 text-sm text-white/80">
                     <Link href="/events" className="hover:text-white transition-colors">
-                      Eventos
+                      {t('breadcrumbEvents')}
                     </Link>
                     <span>/</span>
                     <Link
@@ -168,7 +170,7 @@ export default function CompetitionDetailPage() {
               <div className="flex items-center gap-3">
                 {!competition.isActive && (
                   <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
-                    Inactiva
+                    {t('inactive')}
                   </span>
                 )}
                 <FavoriteButton
@@ -193,7 +195,7 @@ export default function CompetitionDetailPage() {
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
                   <Info className="h-6 w-6 text-[#B66916]" />
-                  Acerca de
+                  {t('about')}
                 </h2>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {competition.description}
@@ -203,7 +205,7 @@ export default function CompetitionDetailPage() {
 
             {/* Edition Selector */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-xl font-bold">Select Edition</h2>
+              <h2 className="mb-4 text-xl font-bold">{t('selectEdition')}</h2>
               <EditionSelector
                 competitionId={competition.id}
                 competitionName={competition.name}
@@ -214,7 +216,7 @@ export default function CompetitionDetailPage() {
             {/* Selected Edition Details */}
             {selectedEdition && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-xl font-bold">Edition Details</h2>
+                <h2 className="mb-4 text-xl font-bold">{t('editionDetails')}</h2>
                 <EditionCard edition={selectedEdition} showInheritance />
               </div>
             )}
@@ -233,10 +235,10 @@ export default function CompetitionDetailPage() {
             <div className="rounded-lg border bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
                 <Calendar className="h-6 w-6 text-[#B66916]" />
-                All Editions ({editions.length})
+                {t('allEditionsWithCount', { count: editions.length })}
               </h2>
               <p className="text-sm text-gray-600 mb-4">
-                Browse all available editions of this competition
+                {t('browseAllEditions')}
               </p>
 
               {editionsLoading ? (
@@ -285,7 +287,7 @@ export default function CompetitionDetailPage() {
                               <span>{edition.elevation} m D+</span>
                             )}
                             {edition.currentParticipants !== undefined && (
-                              <span>{edition.currentParticipants} participantes</span>
+                              <span>{t('participantsCount', { count: edition.currentParticipants })}</span>
                             )}
                           </div>
                         </div>
@@ -298,9 +300,9 @@ export default function CompetitionDetailPage() {
                               edition.status === 'ONGOING' ? 'bg-green-100 text-green-700' :
                               'bg-gray-100 text-gray-700'
                             }`}>
-                              {edition.status === 'FINISHED' ? 'Finalizada' :
-                               edition.status === 'UPCOMING' ? 'Próxima' :
-                               edition.status === 'ONGOING' ? 'En curso' :
+                              {edition.status === 'FINISHED' ? t('statusFinished') :
+                               edition.status === 'UPCOMING' ? t('statusUpcoming') :
+                               edition.status === 'ONGOING' ? t('statusOngoing') :
                                edition.status}
                             </span>
                           )}
@@ -314,7 +316,7 @@ export default function CompetitionDetailPage() {
                 <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
                   <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-sm text-gray-600">
-                    No hay ediciones disponibles aún
+                    {t('noEditionsAvailable')}
                   </p>
                 </div>
               )}
@@ -346,7 +348,7 @@ export default function CompetitionDetailPage() {
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <h3 className="mb-4 font-semibold flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-green-600" />
-                  Ubicación
+                  {t('location')}
                 </h3>
                 <EventMap
                   event={{
@@ -381,7 +383,7 @@ export default function CompetitionDetailPage() {
                     className="text-sm text-[#B66916] hover:underline flex items-center gap-2"
                   >
                     <MapPin className="h-4 w-4" />
-                    Ver en Google Maps
+                    {t('viewOnGoogleMaps')}
                   </a>
                 </div>
               </div>
@@ -389,7 +391,7 @@ export default function CompetitionDetailPage() {
 
             {/* Base Information */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="mb-4 font-semibold">Base Information</h3>
+              <h3 className="mb-4 font-semibold">{t('baseInformation')}</h3>
               <div className="space-y-4">
                 {/* Type */}
                 <div className="flex items-center gap-3">
@@ -397,7 +399,7 @@ export default function CompetitionDetailPage() {
                     <Mountain className="h-5 w-5 text-[#B66916]" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Type</p>
+                    <p className="text-xs text-muted-foreground">{t('type')}</p>
                     <p className="font-semibold">{competition.type}</p>
                   </div>
                 </div>
@@ -409,7 +411,7 @@ export default function CompetitionDetailPage() {
                       <TrendingUp className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Base Distance</p>
+                      <p className="text-xs text-muted-foreground">{t('baseDistance')}</p>
                       <p className="font-semibold">{competition.baseDistance}km</p>
                     </div>
                   </div>
@@ -422,7 +424,7 @@ export default function CompetitionDetailPage() {
                       <Mountain className="h-5 w-5 text-orange-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Base Elevation</p>
+                      <p className="text-xs text-muted-foreground">{t('baseElevation')}</p>
                       <p className="font-semibold">{competition.baseElevation}m D+</p>
                     </div>
                   </div>
@@ -435,7 +437,7 @@ export default function CompetitionDetailPage() {
                       <Users className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Max Participants</p>
+                      <p className="text-xs text-muted-foreground">{t('maxParticipants')}</p>
                       <p className="font-semibold">{competition.baseMaxParticipants}</p>
                     </div>
                   </div>
@@ -448,7 +450,7 @@ export default function CompetitionDetailPage() {
               <div className="rounded-lg border bg-white p-6 shadow-sm">
                 <h3 className="mb-4 font-semibold flex items-center gap-2">
                   <Award className="h-5 w-5 text-purple-600" />
-                  Clasificación
+                  {t('classification')}
                 </h3>
                 <div className="space-y-4">
                   {/* Terrain Type */}
@@ -458,7 +460,7 @@ export default function CompetitionDetailPage() {
                         <Mountain className="h-5 w-5 text-amber-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Tipo de Terreno</p>
+                        <p className="text-xs text-muted-foreground">{t('terrainType')}</p>
                         <p className="font-semibold">{competition.terrainType.name}</p>
                       </div>
                     </div>
@@ -470,7 +472,7 @@ export default function CompetitionDetailPage() {
                       <div className="flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-purple-600" />
                         <p className="text-xs text-muted-foreground">
-                          {competition.specialSeries.length === 1 ? 'Serie Especial' : 'Series Especiales'}
+                          {competition.specialSeries.length === 1 ? t('specialSeries') : t('specialSeriesPlural')}
                         </p>
                       </div>
                       {competition.specialSeries.map((series: any) => (
@@ -502,8 +504,8 @@ export default function CompetitionDetailPage() {
                         <Award className="h-5 w-5 text-[#B66916]" />
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Puntos ITRA</p>
-                        <p className="font-semibold">{competition.itraPoints} {competition.itraPoints === 1 ? 'punto' : 'puntos'}</p>
+                        <p className="text-xs text-muted-foreground">{t('itraPoints')}</p>
+                        <p className="font-semibold">{t('itraPointsValue', { count: competition.itraPoints })}</p>
                       </div>
                     </div>
                   )}
@@ -515,7 +517,7 @@ export default function CompetitionDetailPage() {
                         <TrendingUp className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Índice UTMB</p>
+                        <p className="text-xs text-muted-foreground">{t('utmbIndex')}</p>
                         <p className="font-semibold">
                           {competition.utmbIndex.replace('INDEX_', '')}
                         </p>
@@ -529,7 +531,7 @@ export default function CompetitionDetailPage() {
             {/* Event Info */}
             {competition.event && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h3 className="mb-4 font-semibold">Event</h3>
+                <h3 className="mb-4 font-semibold">{t('event')}</h3>
                 <Link
                   href={`/events/${competition.event.slug}`}
                   className="group block"
@@ -547,10 +549,10 @@ export default function CompetitionDetailPage() {
             {/* Stats */}
             {competition._count && (
               <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h3 className="mb-4 font-semibold">Statistics</h3>
+                <h3 className="mb-4 font-semibold">{t('statistics')}</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Editions:</span>
+                    <span className="text-muted-foreground">{t('totalEditions')}</span>
                     <span className="font-semibold">{competition._count.editions || 0}</span>
                   </div>
                 </div>
@@ -561,7 +563,7 @@ export default function CompetitionDetailPage() {
         </div>
 
         {/* Related Articles */}
-        <RelatedArticles competitionId={competition.id} title="Artículos sobre esta competición" className="mt-8" />
+        <RelatedArticles competitionId={competition.id} title={t('articlesAboutCompetition')} className="mt-8" />
 
         {/* SEO FAQ Schema.org + Visible FAQ */}
         {seo && seo.llmFaq && seo.llmFaq.length > 0 && (
@@ -572,7 +574,7 @@ export default function CompetitionDetailPage() {
       {/* Admin Edit Button (floating) */}
       <AdminEditButtonFloating
         editUrl={`/organizer/competitions/edit/${competition.id}`}
-        label="Editar Competición"
+        label={t('editCompetition')}
       />
     </div>
   );

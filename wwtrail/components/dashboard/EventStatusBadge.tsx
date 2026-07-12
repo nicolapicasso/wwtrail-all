@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { EventStatus } from '@/types/event';
 
 interface EventStatusBadgeProps {
@@ -6,21 +9,22 @@ interface EventStatusBadgeProps {
 }
 
 export function EventStatusBadge({ status, className = '' }: EventStatusBadgeProps) {
+  const t = useTranslations('boAdmin');
   const statusConfig = {
     [EventStatus.DRAFT]: {
-      label: 'Borrador',
+      label: t('statusDraft'),
       className: 'bg-black text-white'
     },
     [EventStatus.PUBLISHED]: {
-      label: 'Publicado',
+      label: t('statusPublished'),
       className: 'bg-[#0E612F] text-white'
     },
     [EventStatus.CANCELLED]: {
-      label: 'Cancelado',
+      label: t('statusCancelled'),
       className: 'bg-[#991B1B] text-white'
     },
     [EventStatus.ARCHIVED]: {
-      label: 'Archivado',
+      label: t('statusArchived'),
       className: 'bg-[#B66916] text-white'
     }
   };

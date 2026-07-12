@@ -3,6 +3,7 @@
 'use client';
 
 import { Star } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import StarRating from './StarRating';
 import { RATING_CRITERIA } from '@/types/rating';
 import type { RatingSummary as RatingSummaryType } from '@/types/rating';
@@ -12,6 +13,7 @@ interface RatingSummaryProps {
 }
 
 export default function RatingSummary({ summary }: RatingSummaryProps) {
+  const t = useTranslations('cmpLayout');
   const { avgRating, totalRatings, breakdown } = summary;
 
   return (
@@ -26,17 +28,16 @@ export default function RatingSummary({ summary }: RatingSummaryProps) {
             <StarRating value={Math.round(avgRating)} readonly size="sm" />
           </div>
           <p className="text-sm text-gray-600 mt-2">
-            {totalRatings} {totalRatings === 1 ? 'valoración' : 'valoraciones'}
+            {t('ratingsCount', { count: totalRatings })}
           </p>
         </div>
 
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">
-            Valoración General
+            {t('ratingGeneralTitle')}
           </h3>
           <p className="text-sm text-gray-600">
-            Basado en las valoraciones de {totalRatings} corredores que
-            participaron en este evento
+            {t('ratingBasedOn', { count: totalRatings })}
           </p>
         </div>
       </div>
@@ -44,7 +45,7 @@ export default function RatingSummary({ summary }: RatingSummaryProps) {
       {/* Desglose por criterios */}
       <div className="pt-6 space-y-3">
         <h4 className="text-sm font-semibold text-gray-900 mb-4">
-          Desglose por Criterios
+          {t('ratingBreakdownTitle')}
         </h4>
 
         {Object.entries(RATING_CRITERIA).map(([key, criteria]) => {

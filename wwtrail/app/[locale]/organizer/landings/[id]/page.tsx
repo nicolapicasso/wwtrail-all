@@ -8,6 +8,7 @@ import LandingForm from '@/components/forms/LandingForm';
 import { ArrowLeft, Loader2, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslations } from 'next-intl';
 import { Language } from '@/types/v2';
 
 const ALL_LANGUAGES: Language[] = [Language.ES, Language.EN, Language.IT, Language.CA, Language.FR, Language.DE];
@@ -16,6 +17,7 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('boCatalog');
 
   const [landing, setLanding] = useState<Landing | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,8 +40,8 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
       setLanding(data);
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al cargar la landing',
+        title: t('error'),
+        description: error.message || t('errorLoadingLanding'),
         variant: 'destructive',
       });
       router.push('/organizer/landings');
@@ -59,13 +61,13 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
 
     if (missingLanguages.length === 0) {
       toast({
-        title: 'Info',
-        description: 'Ya existen traducciones para todos los idiomas',
+        title: t('info'),
+        description: t('allTranslationsExist'),
       });
       return;
     }
 
-    if (!confirm(`¿Traducir automáticamente a ${missingLanguages.join(', ')}?`)) {
+    if (!confirm(t('confirmAutoTranslate', { languages: missingLanguages.join(', ') }))) {
       return;
     }
 
@@ -73,14 +75,14 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
       setTranslating(true);
       await landingService.translate(landing.id, missingLanguages, false);
       toast({
-        title: '✅ Traducido',
-        description: `Landing traducida a ${missingLanguages.length} idioma(s)`,
+        title: `✅ ${t('translated')}`,
+        description: t('landingTranslatedSuccess', { count: missingLanguages.length }),
       });
       loadLanding(); // Reload to show translations
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Error al traducir',
+        title: t('error'),
+        description: error.message || t('errorTranslating'),
         variant: 'destructive',
       });
     } finally {
@@ -106,11 +108,11 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
       <div className="mb-8">
         <Button variant="ghost" onClick={() => router.back()} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver
+          {t('back')}
         </Button>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">✏️ Editar Landing</h1>
+            <h1 className="text-3xl font-bold">✏️ {t('editLanding')}</h1>
             <p className="text-muted-foreground mt-1">{landing.title}</p>
           </div>
           <Button
@@ -121,12 +123,12 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
             {translating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Traduciendo...
+                {t('translating')}
               </>
             ) : (
               <>
                 <Languages className="mr-2 h-4 w-4" />
-                Auto-traducir
+                {t('autoTranslate')}
               </>
             )}
           </Button>
@@ -146,7 +148,7 @@ export default function EditLandingPage({ params }: { params: { id: string } }) 
         {landing.translations && landing.translations.length > 0 && (
           <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
             <h3 className="font-semibold text-green-900 mb-2">
-              Traducciones disponibles:
+              {t('availableTranslations')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {landing.translations.map((t) => (

@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { organizersService } from '@/lib/api/v2';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -11,6 +12,7 @@ import OrganizerForm from '@/components/forms/OrganizerForm';
 export default function EditOrganizerPage() {
   const router = useRouter();
   const params = useParams();
+  const t = useTranslations('boCatalog');
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [organizer, setOrganizer] = useState<any>(null);
@@ -29,7 +31,7 @@ export default function EditOrganizerPage() {
         setOrganizer(data);
       } catch (err: any) {
         console.error('❌ Error loading organizer:', err);
-        setError(err.message || 'Error al cargar el organizador');
+        setError(err.message || t('errorLoadingOrganizer'));
       } finally {
         setLoading(false);
       }
@@ -46,15 +48,15 @@ export default function EditOrganizerPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <div className="text-red-500 text-5xl mb-4">⛔</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Denegado</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('accessDenied')}</h2>
           <p className="text-gray-600 mb-6">
-            No tienes permisos para editar este organizador.
+            {t('noPermissionEdit')}
           </p>
           <button
             onClick={() => router.back()}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Volver
+            {t('back')}
           </button>
         </div>
       </div>
@@ -66,7 +68,7 @@ export default function EditOrganizerPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando organizador...</p>
+          <p className="text-gray-600">{t('loadingOrganizer')}</p>
         </div>
       </div>
     );
@@ -77,13 +79,13 @@ export default function EditOrganizerPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <div className="text-red-500 text-5xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('errorTitle')}</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => router.back()}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Volver
+            {t('back')}
           </button>
         </div>
       </div>
@@ -95,15 +97,15 @@ export default function EditOrganizerPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <div className="text-gray-400 text-5xl mb-4">📋</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No encontrado</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('notFound')}</h2>
           <p className="text-gray-600 mb-6">
-            El organizador no existe o no tienes permisos para verlo.
+            {t('organizerNotFoundDesc')}
           </p>
           <button
             onClick={() => router.back()}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Volver
+            {t('back')}
           </button>
         </div>
       </div>
@@ -122,9 +124,9 @@ export default function EditOrganizerPage() {
             <ArrowLeft className="h-5 w-5" />
             Volver
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Editar Organizador</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('editOrganizer')}</h1>
           <p className="mt-2 text-gray-600">
-            Actualiza la información del organizador
+            {t('editOrganizerSubtitle')}
           </p>
         </div>
 

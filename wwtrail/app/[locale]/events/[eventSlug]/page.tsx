@@ -7,6 +7,7 @@
  * ✅ Redes sociales completas (Instagram, Facebook, Twitter, YouTube)
  */
 
+import { getTranslations } from 'next-intl/server';
 import { eventsService } from '@/lib/api/events.service';
 import { seoService } from '@/lib/api/seo.service';
 import servicesService from '@/lib/api/v2/services.service';
@@ -82,6 +83,7 @@ export default async function EventDetailPage({
   let nearbyEvents: Event[] = [];
   let nearbyServices: Service[] = [];
   let seo: any = null;
+  const t = await getTranslations('pgEvents');
 
   try {
     event = await eventsService.getBySlug(params.eventSlug);
@@ -158,7 +160,7 @@ export default async function EventDetailPage({
           <div className="mx-auto max-w-content px-6 pb-9 sm:px-8 lg:px-10">
             {/* Breadcrumb */}
             <nav className="mb-4 flex items-center gap-2 text-[13px] text-white/70">
-              <Link href="/events" className="hover:text-white">Eventos</Link>
+              <Link href="/events" className="hover:text-white">{t('breadcrumbEvents')}</Link>
               <span>/</span>
               <span className="font-semibold text-white">{event.name}</span>
             </nav>
@@ -187,12 +189,12 @@ export default async function EventDetailPage({
               )}
               {event._count?.competitions ? (
                 <span className="flex items-center gap-1.5">
-                  <Trophy className="h-4 w-4" /> {event._count.competitions} competiciones
+                  <Trophy className="h-4 w-4" /> {t('competitionsCount', { count: event._count.competitions })}
                 </span>
               ) : null}
               {yearsOfHistory && (
                 <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" /> {yearsOfHistory} años de historia
+                  <Clock className="h-4 w-4" /> {t('yearsOfHistory', { count: yearsOfHistory })}
                 </span>
               )}
             </div>
@@ -210,7 +212,7 @@ export default async function EventDetailPage({
             {/* Descripción */}
             {event.description && (
               <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
-                <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">Sobre el Evento</h2>
+                <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">{t('aboutEvent')}</h2>
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {event.description}
                 </p>
@@ -227,7 +229,7 @@ export default async function EventDetailPage({
               <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
                 <h2 className="mb-4 flex items-center gap-2 text-[22px] font-black tracking-[-0.01em] text-ink-2">
                   <Trophy className="h-5 w-5 text-green-brand" />
-                  Competiciones ({event.competitions.length})
+                  {t('competitionsWithCount', { count: event.competitions.length })}
                 </h2>
                 <div className="space-y-3">
                   {event.competitions.map((competition) => (
@@ -249,8 +251,8 @@ export default async function EventDetailPage({
                         <h3 className="text-[16px] font-extrabold text-ink-2">{competition.name}</h3>
                         <p className="text-[13px] text-text-muted">
                           {competition._count?.editions && competition._count.editions > 0
-                            ? `${competition._count.editions} ediciones`
-                            : 'Aún sin ediciones creadas'}
+                            ? t('editionsCount', { count: competition._count.editions })
+                            : t('noEditionsYet')}
                         </p>
                       </div>
                       <span className="text-green-brand">→</span>
@@ -262,19 +264,19 @@ export default async function EventDetailPage({
 
             {/* Información Detallada */}
             <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
-              <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">Información Detallada</h2>
+              <h2 className="mb-4 text-[22px] font-black tracking-[-0.01em] text-ink-2">{t('detailedInfo')}</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow label="País" value={event.country} />
-                <InfoRow label="Ciudad" value={event.city} />
+                <InfoRow label={t('country')} value={event.country} />
+                <InfoRow label={t('city')} value={event.city} />
 
                 {event.firstEditionYear && (
-                  <InfoRow label="Primera Edición" value={event.firstEditionYear.toString()} />
+                  <InfoRow label={t('firstEdition')} value={event.firstEditionYear.toString()} />
                 )}
 
                 {event.organizer && (
                   <InfoRow
-                    label="Organizador"
+                    label={t('organizer')}
                     value={event.organizer.name}
                   />
                 )}
@@ -313,7 +315,7 @@ export default async function EventDetailPage({
               <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
                 <h3 className="mb-4 flex items-center gap-2 text-[16px] font-black text-ink-2">
                   <MapPin className="h-5 w-5 text-green-brand" />
-                  Ubicación
+                  {t('location')}
                 </h3>
                 <EventMap
                   event={event}
@@ -354,7 +356,7 @@ export default async function EventDetailPage({
                     className="text-sm text-green-brand hover:underline flex items-center gap-2"
                   >
                     <MapPin className="h-4 w-4" />
-                    Ver en Google Maps
+                    {t('viewOnGoogleMaps')}
                   </a>
                 </div>
               </div>
@@ -362,24 +364,24 @@ export default async function EventDetailPage({
             
             {/* Estadísticas */}
             <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
-              <h3 className="mb-4 text-[16px] font-black text-ink-2">Estadísticas</h3>
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">{t('statistics')}</h3>
               <div className="space-y-3">
                 <StatItem
                   icon={<Eye className="h-5 w-5 text-gray-500" />}
-                  label="Visualizaciones"
+                  label={t('views')}
                   value={event.viewCount.toLocaleString()}
                 />
                 {event._count?.competitions && (
                   <StatItem
                     icon={<Trophy className="h-5 w-5 text-gray-500" />}
-                    label="Competiciones"
+                    label={t('competitions')}
                     value={event._count.competitions.toString()}
                   />
                 )}
                 {event.firstEditionYear && (
                   <StatItem
                     icon={<Clock className="h-5 w-5 text-gray-500" />}
-                    label="Años de historia"
+                    label={t('yearsOfHistoryLabel')}
                     value={(new Date().getFullYear() - event.firstEditionYear + 1).toString()}
                   />
                 )}
@@ -388,14 +390,14 @@ export default async function EventDetailPage({
 
             {/* ✅ CONTACTO Y REDES SOCIALES - ACTUALIZADO */}
             <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
-              <h3 className="mb-4 text-[16px] font-black text-ink-2">Contacto y Redes</h3>
+              <h3 className="mb-4 text-[16px] font-black text-ink-2">{t('contactAndSocial')}</h3>
               <div className="space-y-3">
                 {/* Sitio Web */}
                 {event.website && (
                   <ContactLink
                     href={event.website}
                     icon={<Globe className="h-5 w-5" />}
-                    label="Sitio Web"
+                    label={t('website')}
                     color="text-green-brand"
                   />
                 )}
@@ -424,7 +426,7 @@ export default async function EventDetailPage({
                 {(event.instagramUrl || event.facebookUrl || event.twitterUrl || event.youtubeUrl) && (
                   <div className="pt-3 mt-3 border-t border-gray-200">
                     <p className="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide">
-                      Redes Sociales
+                      {t('socialNetworks')}
                     </p>
                   </div>
                 )}
@@ -475,7 +477,7 @@ export default async function EventDetailPage({
             {nearbyEvents && nearbyEvents.length > 0 && (
               <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
                 <h3 className="mb-4 text-[16px] font-black text-ink-2">
-                  Eventos Cercanos ({nearbyEvents.length})
+                  {t('nearbyEvents', { count: nearbyEvents.length })}
                 </h3>
                 <div className="space-y-2">
                   {nearbyEvents.slice(0, 3).map((nearbyEvent) => (
@@ -494,7 +496,7 @@ export default async function EventDetailPage({
         </div>
 
         {/* Related Articles */}
-        <RelatedArticles eventId={event.id} title="Artículos sobre este evento" className="mt-8" />
+        <RelatedArticles eventId={event.id} title={t('articlesAboutEvent')} className="mt-8" />
 
         {/* SEO FAQ Schema.org + Visible FAQ */}
         {seo && seo.llmFaq && seo.llmFaq.length > 0 && (
@@ -505,7 +507,7 @@ export default async function EventDetailPage({
       {/* Admin Edit Button (floating) */}
       <AdminEditButtonFloating
         editUrl={`/organizer/events/edit/${event.id}`}
-        label="Editar Evento"
+        label={t('editEvent')}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { promotionsService } from '@/lib/api/v2';
 import serviceCategoriesService, { ServiceCategory } from '@/lib/api/v2/serviceCategories.service';
 import { Promotion, PromotionType } from '@/types/v2';
@@ -10,6 +10,7 @@ import { Search, Filter } from 'lucide-react';
 
 export default function PromotionsPage() {
   const locale = useLocale();
+  const t = useTranslations('pgCatalog');
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<ServiceCategory[]>([]);
@@ -86,9 +87,9 @@ export default function PromotionsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Promociones Exclusivas</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('promotionsTitle')}</h1>
           <p className="text-lg text-gray-600">
-            Descubre cupones y contenido exclusivo para la comunidad trail
+            {t('promotionsSubtitle')}
           </p>
         </div>
 
@@ -102,7 +103,7 @@ export default function PromotionsPage() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar promociones..."
+                  placeholder={t('searchPromotionsPlaceholder')}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916] outline-none"
                 />
               </div>
@@ -113,9 +114,9 @@ export default function PromotionsPage() {
                 onChange={(e) => setTypeFilter(e.target.value as any)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
               >
-                <option value="ALL">Todas</option>
-                <option value="COUPON">Cupones</option>
-                <option value="EXCLUSIVE_CONTENT">Contenido Exclusivo</option>
+                <option value="ALL">{t('all')}</option>
+                <option value="COUPON">{t('coupons')}</option>
+                <option value="EXCLUSIVE_CONTENT">{t('exclusiveContent')}</option>
               </select>
             </div>
             <div>
@@ -124,7 +125,7 @@ export default function PromotionsPage() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B66916] focus:border-[#B66916]"
               >
-                <option value="">Todas las categorías</option>
+                <option value="">{t('allCategories')}</option>
                 {filteredCategories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.icon} {category.name}
@@ -139,11 +140,11 @@ export default function PromotionsPage() {
         {loading && promotions.length === 0 ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Cargando promociones...</p>
+            <p className="text-gray-600">{t('loadingPromotions')}</p>
           </div>
         ) : promotions.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
-            <p className="text-gray-600">No se encontraron promociones</p>
+            <p className="text-gray-600">{t('noPromotionsFound')}</p>
           </div>
         ) : (
           <>

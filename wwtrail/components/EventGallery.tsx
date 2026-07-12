@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -13,6 +14,7 @@ interface EventGalleryProps {
 }
 
 export default function EventGallery({ images, eventName }: EventGalleryProps) {
+  const t = useTranslations('cmp');
   const [open, setOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -39,7 +41,7 @@ export default function EventGallery({ images, eventName }: EventGalleryProps) {
       <div className="mb-8">
         <h2 className="flex items-center gap-2 text-2xl font-bold mb-4">
           <ImageIcon className="w-6 h-6 text-green-600" />
-          Galería
+          {t('gallery')}
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -50,11 +52,11 @@ export default function EventGallery({ images, eventName }: EventGalleryProps) {
               className="relative aspect-square overflow-hidden rounded-lg group cursor-pointer
                          hover:ring-2 hover:ring-green-500 transition-all duration-200
                          focus:outline-none focus:ring-2 focus:ring-green-500"
-              aria-label={`Ver imagen ${index + 1} de ${normalizedImages.length}`}
+              aria-label={t('viewImageAria', { index: index + 1, total: normalizedImages.length })}
             >
               <Image
                 src={image}
-                alt={`${eventName} - Imagen ${index + 1}`}
+                alt={t('imageAlt', { name: eventName, index: index + 1 })}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-200"
                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"

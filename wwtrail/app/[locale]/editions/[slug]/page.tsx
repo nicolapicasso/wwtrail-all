@@ -1,6 +1,8 @@
 // app/editions/[slug]/page.tsx - Public edition detail page
 
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, MapPin, Mountain, TrendingUp, Users, Clock, Award, Sparkles } from 'lucide-react';
 import editionsService from '@/lib/api/v2/editions.service';
@@ -49,6 +51,7 @@ export default async function EditionDetailPage({
   let editionWithDetails;
   let nearbyEvents: Event[] = [];
   let nearbyServices: Service[] = [];
+  const t = await getTranslations('pgEvents');
 
   try {
     editionWithDetails = await editionsService.getBySlugWithInheritance(params.slug);
@@ -113,7 +116,7 @@ export default async function EditionDetailPage({
           <div className="mb-6">
             <nav className="flex items-center gap-2 text-sm text-white/80">
               <Link href="/events" className="hover:text-white transition-colors">
-                Eventos
+                {t('breadcrumbEvents')}
               </Link>
               <span>/</span>
               <Link
@@ -141,7 +144,7 @@ export default async function EditionDetailPage({
                 {competition.name}
               </h1>
               <div className="text-xl md:text-2xl font-semibold text-white/90">
-                Edición {edition.year}
+                {t('editionYear', { year: edition.year })}
               </div>
               <div className="flex flex-wrap gap-4 mt-4 text-white/90">
                 <div className="flex items-center gap-2">
@@ -181,26 +184,26 @@ export default async function EditionDetailPage({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard
                 icon={<TrendingUp className="h-5 w-5" />}
-                label="Distancia"
+                label={t('distance')}
                 value={`${editionWithDetails.resolvedDistance} km`}
               />
               <StatCard
                 icon={<Mountain className="h-5 w-5" />}
-                label="Desnivel"
+                label={t('elevation')}
                 value={`${editionWithDetails.resolvedElevation} m D+`}
               />
               {/* Only show max participants if value is positive */}
               {editionWithDetails.resolvedMaxParticipants > 0 && (
                 <StatCard
                   icon={<Users className="h-5 w-5" />}
-                  label="Máx. Participantes"
+                  label={t('maxParticipantsShort')}
                   value={`${editionWithDetails.resolvedMaxParticipants}`}
                 />
               )}
               {edition.avgRating && (
                 <StatCard
                   icon={<span className="text-xl">⭐</span>}
-                  label="Valoración"
+                  label={t('rating')}
                   value={`${edition.avgRating.toFixed(1)}/4`}
                 />
               )}
@@ -249,7 +252,7 @@ export default async function EditionDetailPage({
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-green-600" />
-                  Ubicación
+                  {t('location')}
                 </h3>
                 <EventMap
                   event={{
@@ -284,7 +287,7 @@ export default async function EditionDetailPage({
                     className="text-sm text-blue-600 hover:underline flex items-center gap-2"
                   >
                     <MapPin className="h-4 w-4" />
-                    Ver en Google Maps
+                    {t('viewOnGoogleMaps')}
                   </a>
                 </div>
               </div>
@@ -295,7 +298,7 @@ export default async function EditionDetailPage({
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <Award className="h-5 w-5 text-black" />
-                  Clasificación
+                  {t('classification')}
                 </h3>
                 <div className="space-y-4 text-sm">
                   {/* Terrain Type */}
@@ -305,7 +308,7 @@ export default async function EditionDetailPage({
                         <Mountain className="h-5 w-5 text-amber-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">Tipo de Terreno</p>
+                        <p className="text-xs text-gray-500">{t('terrainType')}</p>
                         <p className="font-semibold">{competition.terrainType.name}</p>
                       </div>
                     </div>
@@ -318,7 +321,7 @@ export default async function EditionDetailPage({
                         <Sparkles className="h-5 w-5 text-black" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs text-gray-500">Serie Especial</p>
+                        <p className="text-xs text-gray-500">{t('specialSeries')}</p>
                         <Link
                           href={`/special-series/${primarySeries.slug}`}
                           className="font-semibold hover:text-gray-600 transition-colors"
@@ -343,8 +346,8 @@ export default async function EditionDetailPage({
                         <Award className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">Puntos ITRA</p>
-                        <p className="font-semibold">{competition.itraPoints} {competition.itraPoints === 1 ? 'punto' : 'puntos'}</p>
+                        <p className="text-xs text-gray-500">{t('itraPoints')}</p>
+                        <p className="font-semibold">{t('itraPointsValue', { count: competition.itraPoints })}</p>
                       </div>
                     </div>
                   )}
@@ -356,7 +359,7 @@ export default async function EditionDetailPage({
                         <TrendingUp className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">Índice UTMB</p>
+                        <p className="text-xs text-gray-500">{t('utmbIndex')}</p>
                         <p className="font-semibold">
                           {competition.utmbIndex.replace('INDEX_', '')}
                         </p>
@@ -370,17 +373,17 @@ export default async function EditionDetailPage({
             {/* Registration Info */}
             {edition.registrationUrl && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="font-bold text-lg mb-4">Inscripción</h3>
+                <h3 className="font-bold text-lg mb-4">{t('registration')}</h3>
                 <div className="space-y-3">
                   {edition.registrationOpenDate && (
                     <InfoRow
-                      label="Apertura"
+                      label={t('opening')}
                       value={formatDate(edition.registrationOpenDate) || '-'}
                     />
                   )}
                   {edition.registrationCloseDate && (
                     <InfoRow
-                      label="Cierre"
+                      label={t('closing')}
                       value={formatDate(edition.registrationCloseDate) || '-'}
                     />
                   )}
@@ -389,16 +392,16 @@ export default async function EditionDetailPage({
                   {edition.prices && (edition.prices.early || edition.prices.normal || edition.prices.late) && (
                     <>
                       <div className="border-t pt-3 mt-3">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Precios:</p>
+                        <p className="text-sm font-medium text-gray-700 mb-2">{t('prices')}</p>
                         <div className="space-y-1">
                           {edition.prices.early && (
                             <InfoRow label="Early Bird" value={`${edition.prices.early}€`} />
                           )}
                           {edition.prices.normal && (
-                            <InfoRow label="Normal" value={`${edition.prices.normal}€`} />
+                            <InfoRow label={t('priceNormal')} value={`${edition.prices.normal}€`} />
                           )}
                           {edition.prices.late && (
-                            <InfoRow label="Tardío" value={`${edition.prices.late}€`} />
+                            <InfoRow label={t('priceLate')} value={`${edition.prices.late}€`} />
                           )}
                         </div>
                       </div>
@@ -414,7 +417,7 @@ export default async function EditionDetailPage({
                     rel="noopener noreferrer"
                     className="block w-full px-4 py-2 bg-black text-white text-center rounded-lg hover:bg-gray-800 transition-colors font-semibold"
                   >
-                    Inscripciones
+                    {t('registerAction')}
                   </a>
                 </div>
               </div>
@@ -423,21 +426,21 @@ export default async function EditionDetailPage({
             {/* Results */}
             {edition.resultsUrl && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="font-bold text-lg mb-4">Resultados</h3>
+                <h3 className="font-bold text-lg mb-4">{t('results')}</h3>
                 <a
                   href={edition.resultsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full px-4 py-2 bg-green-600 text-white text-center rounded-lg hover:bg-green-700 transition-colors font-semibold"
                 >
-                  Ver Resultados
+                  {t('viewResults')}
                 </a>
               </div>
             )}
 
             {/* Event Info */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-bold text-lg mb-4">Evento</h3>
+              <h3 className="font-bold text-lg mb-4">{t('event')}</h3>
               <Link
                 href={`/events/${event.slug}`}
                 className="group block"
@@ -453,7 +456,7 @@ export default async function EditionDetailPage({
 
             {/* Competition Info */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-bold text-lg mb-4">Competición</h3>
+              <h3 className="font-bold text-lg mb-4">{t('competition')}</h3>
               <Link
                 href={`/events/${event.slug}/${competition.slug}`}
                 className="group block"
@@ -462,12 +465,12 @@ export default async function EditionDetailPage({
                   {competition.name}
                 </p>
                 <div className="text-sm text-gray-600 mt-2 space-y-1">
-                  <p>Tipo: {competition.type}</p>
+                  <p>{t('typeLabel', { type: competition.type })}</p>
                   {competition.baseDistance && (
-                    <p>Distancia base: {competition.baseDistance} km</p>
+                    <p>{t('baseDistanceLabel', { value: competition.baseDistance })}</p>
                   )}
                   {competition.baseElevation && (
-                    <p>Desnivel base: {competition.baseElevation} m D+</p>
+                    <p>{t('baseElevationLabel', { value: competition.baseElevation })}</p>
                   )}
                 </div>
               </Link>
@@ -475,25 +478,25 @@ export default async function EditionDetailPage({
 
             {/* Other Editions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-bold text-lg mb-4">Otras Ediciones</h3>
+              <h3 className="font-bold text-lg mb-4">{t('otherEditions')}</h3>
               <Link
                 href={`/events/${event.slug}/${competition.slug}`}
                 className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
               >
-                Ver todas las ediciones →
+                {t('viewAllEditions')} →
               </Link>
             </div>
           </div>
         </div>
 
         {/* Related Articles */}
-        <RelatedArticles editionId={editionWithDetails.id} title={`Artículos sobre ${competition.name} ${editionWithDetails.year}`} className="mt-8" />
+        <RelatedArticles editionId={editionWithDetails.id} title={t('articlesAbout', { name: `${competition.name} ${editionWithDetails.year}` })} className="mt-8" />
       </div>
 
       {/* Admin Edit Button (floating) */}
       <AdminEditButtonFloating
         editUrl={`/organizer/editions/edit/${edition.id}`}
-        label="Editar Edición"
+        label={t('editEdition')}
       />
     </div>
   );
@@ -533,6 +536,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations('pgEvents');
   const styles = {
     UPCOMING: 'bg-blue-100 text-blue-800',
     ONGOING: 'bg-green-100 text-green-800',
@@ -540,21 +544,22 @@ function StatusBadge({ status }: { status: string }) {
     CANCELLED: 'bg-red-100 text-red-800',
   };
 
-  const labels = {
-    UPCOMING: 'Próxima',
-    ONGOING: 'En Curso',
-    FINISHED: 'Finalizada',
-    CANCELLED: 'Cancelada',
+  const labels: Record<string, string> = {
+    UPCOMING: t('statusUpcoming'),
+    ONGOING: t('statusOngoingCaps'),
+    FINISHED: t('statusFinished'),
+    CANCELLED: t('statusCancelled'),
   };
 
   return (
     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${styles[status as keyof typeof styles]}`}>
-      {labels[status as keyof typeof labels] || status}
+      {labels[status] || status}
     </span>
   );
 }
 
 function RegistrationStatusBadge({ status }: { status: string }) {
+  const t = useTranslations('pgEvents');
   const styles = {
     NOT_OPEN: 'bg-gray-100 text-gray-800',
     COMING_SOON: 'bg-blue-100 text-blue-800',
@@ -563,17 +568,17 @@ function RegistrationStatusBadge({ status }: { status: string }) {
     FULL: 'bg-orange-100 text-orange-800',
   };
 
-  const labels = {
-    NOT_OPEN: 'No Abierta',
-    COMING_SOON: 'Próximamente',
-    OPEN: 'Abierta',
-    CLOSED: 'Cerrada',
-    FULL: 'Completa',
+  const labels: Record<string, string> = {
+    NOT_OPEN: t('regNotOpen'),
+    COMING_SOON: t('regComingSoon'),
+    OPEN: t('regOpen'),
+    CLOSED: t('regClosed'),
+    FULL: t('regFull'),
   };
 
   return (
     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${styles[status as keyof typeof styles]}`}>
-      {labels[status as keyof typeof labels] || status}
+      {labels[status] || status}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Plus, Loader2, Mountain, TrendingUp, Users, Edit, Trash2, Eye, Calendar, Star, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -14,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function OrganizerCompetitionsPage() {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const { user } = useAuth();
 
   // State
@@ -108,8 +110,8 @@ export default function OrganizerCompetitionsPage() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Eliminar Competición',
-      message: `¿Estás seguro de que quieres eliminar "${competition.name}"? Esta acción eliminará también todas sus ediciones.`,
+      title: t('deleteCompetitionTitle'),
+      message: t('deleteCompetitionMessage', { name: competition.name }),
       variant: 'danger',
       action: async () => {
         try {
@@ -119,7 +121,7 @@ export default function OrganizerCompetitionsPage() {
           setConfirmDialog({ ...confirmDialog, isOpen: false });
         } catch (error: any) {
           console.error('Error deleting competition:', error);
-          alert(error.response?.data?.message || 'Error al eliminar competición');
+          alert(error.response?.data?.message || t('errorDeletingCompetition'));
         } finally {
           setIsLoadingAction(false);
         }
@@ -159,9 +161,9 @@ export default function OrganizerCompetitionsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Mis Competiciones</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('myCompetitions')}</h1>
             <p className="mt-1 text-sm text-gray-600">
-              Gestiona las competiciones de tus eventos
+              {t('myCompetitionsSubtitle')}
             </p>
           </div>
         </div>
@@ -172,7 +174,7 @@ export default function OrganizerCompetitionsPage() {
             {/* Event Filter with search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Evento
+                {t('filterByEvent')}
               </label>
               <EventSelect
                 value={selectedEventId}
@@ -183,9 +185,9 @@ export default function OrganizerCompetitionsPage() {
                   city: e.city,
                   country: e.country,
                 }))}
-                placeholder="Selecciona un evento"
+                placeholder={t('selectEvent')}
                 showAllOption={true}
-                allOptionLabel="Todos los eventos"
+                allOptionLabel={t('allEvents')}
                 isLoading={isLoadingEvents}
               />
             </div>
@@ -194,7 +196,7 @@ export default function OrganizerCompetitionsPage() {
             <div>
               <label htmlFor="featured-filter" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 <Star className="h-4 w-4" />
-                Destacados
+                {t('featured')}
               </label>
               <select
                 id="featured-filter"
@@ -202,16 +204,16 @@ export default function OrganizerCompetitionsPage() {
                 onChange={(e) => setFeaturedFilter(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="all">Todas las competiciones</option>
-                <option value="true">Solo destacadas</option>
-                <option value="false">No destacadas</option>
+                <option value="all">{t('allCompetitions')}</option>
+                <option value="true">{t('onlyFeatured')}</option>
+                <option value="false">{t('notFeatured')}</option>
               </select>
             </div>
 
             {/* Search */}
             <div>
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar competición
+                {t('searchCompetition')}
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -220,7 +222,7 @@ export default function OrganizerCompetitionsPage() {
                   id="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar por nombre..."
+                  placeholder={t('searchByNamePlaceholder')}
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
                 {searchQuery && (
@@ -241,7 +243,7 @@ export default function OrganizerCompetitionsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Competiciones</p>
+                <p className="text-sm font-medium text-gray-600">{t('totalCompetitions')}</p>
                 <p className="text-2xl font-bold text-gray-900">{filteredCompetitions.length}</p>
               </div>
               <Mountain className="h-12 w-12 text-blue-500" />
@@ -251,7 +253,7 @@ export default function OrganizerCompetitionsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Eventos</p>
+                <p className="text-sm font-medium text-gray-600">{t('sectionEvents')}</p>
                 <p className="text-2xl font-bold text-gray-900">{events.length}</p>
               </div>
               <Calendar className="h-12 w-12 text-green-500" />
@@ -261,7 +263,7 @@ export default function OrganizerCompetitionsPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Activas</p>
+                <p className="text-sm font-medium text-gray-600">{t('active')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {filteredCompetitions.filter((c) => c.isActive).length}
                 </p>
@@ -281,8 +283,8 @@ export default function OrganizerCompetitionsPage() {
             <Mountain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 mb-4">
               {selectedEventId
-                ? 'Este evento no tiene competiciones aún'
-                : 'No se encontraron competiciones'}
+                ? t('noCompetitionsInEvent')
+                : t('noCompetitionsFound')}
             </p>
             {selectedEventId && (
               <button
@@ -290,7 +292,7 @@ export default function OrganizerCompetitionsPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="h-5 w-5" />
-                Crear Competición
+                {t('createCompetition')}
               </button>
             )}
           </div>
@@ -308,7 +310,7 @@ export default function OrganizerCompetitionsPage() {
                         <h3 className="text-xl font-bold text-gray-900">{competition.name}</h3>
                         {!competition.isActive && (
                           <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
-                            Inactiva
+                            {t('inactive')}
                           </span>
                         )}
                         <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
@@ -325,7 +327,7 @@ export default function OrganizerCompetitionsPage() {
                       {/* Event Info */}
                       {competition.event && (
                         <div className="text-sm text-gray-500 mb-3">
-                          <span className="font-medium">Evento:</span> {competition.event.name}
+                          <span className="font-medium">{t('eventColon')}</span> {competition.event.name}
                         </div>
                       )}
 
@@ -352,7 +354,7 @@ export default function OrganizerCompetitionsPage() {
                         {competition._count?.editions !== undefined && (
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            <span>{competition._count.editions} ediciones</span>
+                            <span>{t('editionsCount', { count: competition._count.editions })}</span>
                           </div>
                         )}
                       </div>
@@ -367,7 +369,7 @@ export default function OrganizerCompetitionsPage() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <Eye className="h-4 w-4" />
-                    Ver
+                    {t('view')}
                   </Link>
 
                   <button
@@ -375,7 +377,7 @@ export default function OrganizerCompetitionsPage() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
                   >
                     <Edit className="h-4 w-4" />
-                    Editar
+                    {t('edit')}
                   </button>
 
                   <button
@@ -385,7 +387,7 @@ export default function OrganizerCompetitionsPage() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
                   >
                     <Plus className="h-4 w-4" />
-                    Nueva Edición
+                    {t('newEdition')}
                   </button>
 
                   <button
@@ -393,7 +395,7 @@ export default function OrganizerCompetitionsPage() {
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors ml-auto"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Eliminar
+                    {t('delete')}
                   </button>
                 </div>
               </div>

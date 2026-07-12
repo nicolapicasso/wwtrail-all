@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import serviceCategoriesService, { ServiceCategory, CreateServiceCategoryInput, UpdateServiceCategoryInput } from '@/lib/api/v2/serviceCategories.service';
 import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
 
 export default function PromotionCategoriesPage() {
+  const t = useTranslations('boMisc');
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
@@ -40,7 +42,7 @@ export default function PromotionCategoriesPage() {
       setCategories(data);
     } catch (err: any) {
       console.error('Error loading categories:', err);
-      setError(err.message || 'Error al cargar categorías');
+      setError(err.message || t('promoErrorLoadCategories'));
     } finally {
       setLoading(false);
     }
@@ -51,7 +53,7 @@ export default function PromotionCategoriesPage() {
 
     try {
       if (!formData.name.trim()) {
-        alert('El nombre es obligatorio');
+        alert(t('promoNameRequired'));
         return;
       }
 
@@ -71,7 +73,7 @@ export default function PromotionCategoriesPage() {
       // Reload
       loadCategories();
     } catch (err: any) {
-      alert(err.message || 'Error al guardar categoría');
+      alert(err.message || t('promoErrorSaveCategory'));
     }
   };
 
@@ -85,7 +87,7 @@ export default function PromotionCategoriesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta categoría? Se desvinculará de todas las promociones y servicios asociados.')) {
+    if (!confirm(t('promoConfirmDeleteCategory'))) {
       return;
     }
 
@@ -93,7 +95,7 @@ export default function PromotionCategoriesPage() {
       await serviceCategoriesService.delete(id);
       loadCategories();
     } catch (err: any) {
-      alert(err.message || 'Error al eliminar categoría');
+      alert(err.message || t('promoErrorDeleteCategory'));
     }
   };
 
@@ -108,7 +110,7 @@ export default function PromotionCategoriesPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando categorías...</p>
+          <p className="text-gray-600">{t('promoLoadingCategories')}</p>
         </div>
       </div>
     );
@@ -125,14 +127,14 @@ export default function PromotionCategoriesPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Categorías de Promociones</h1>
-              <p className="text-gray-600 mt-1">Gestiona las categorías compartidas con servicios</p>
+              <h1 className="text-3xl font-bold text-gray-900">{t('promoCategoriesTitle')}</h1>
+              <p className="text-gray-600 mt-1">{t('promoCategoriesSubtitle')}</p>
             </div>
             <button
               onClick={() => router.push('/organizer/promotions')}
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
             >
-              Volver a Promociones
+              {t('promoBackToPromotions')}
             </button>
           </div>
         </div>
@@ -148,13 +150,13 @@ export default function PromotionCategoriesPage() {
         {showForm && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">
-              {editingId ? 'Editar Categoría' : 'Nueva Categoría'}
+              {editingId ? t('promoEditCategory') : t('promoNewCategory')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre *
+                    {t('promoNameLabel')}
                   </label>
                   <input
                     id="name"
@@ -162,13 +164,13 @@ export default function PromotionCategoriesPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Ej: Alojamiento"
+                    placeholder={t('promoNamePlaceholder')}
                     required
                   />
                 </div>
                 <div>
                   <label htmlFor="icon" className="block text-sm font-medium text-gray-700 mb-2">
-                    Icono (emoji)
+                    {t('promoIconLabel')}
                   </label>
                   <input
                     id="icon"
@@ -186,7 +188,7 @@ export default function PromotionCategoriesPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
                   <Save className="h-5 w-5" />
-                  {editingId ? 'Actualizar' : 'Crear'}
+                  {editingId ? t('promoUpdate') : t('promoCreate')}
                 </button>
                 <button
                   type="button"
@@ -194,7 +196,7 @@ export default function PromotionCategoriesPage() {
                   className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   <X className="h-5 w-5" />
-                  Cancelar
+                  {t('cancelar')}
                 </button>
               </div>
             </form>
@@ -209,7 +211,7 @@ export default function PromotionCategoriesPage() {
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
               <Plus className="h-5 w-5" />
-              Nueva Categoría
+              {t('promoNewCategory')}
             </button>
           </div>
         )}
@@ -220,16 +222,16 @@ export default function PromotionCategoriesPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Icono
+                  {t('promoIcon')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nombre
+                  {t('promoName')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Slug
+                  {t('promoSlug')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                  {t('promoActions')}
                 </th>
               </tr>
             </thead>
@@ -237,7 +239,7 @@ export default function PromotionCategoriesPage() {
               {categories.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                    No hay categorías creadas todavía
+                    {t('promoNoCategories')}
                   </td>
                 </tr>
               ) : (

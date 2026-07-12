@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { PostListItem, POST_CATEGORY_LABELS, LANGUAGE_LABELS } from '@/types/v2';
 import { Calendar, User, Eye, BookOpen } from 'lucide-react';
 
@@ -19,6 +20,7 @@ export function ArticleCard({
   onClick,
   className = ''
 }: ArticleCardProps) {
+  const t = useTranslations('cmp');
   const [imageError, setImageError] = useState(false);
 
   // Format date
@@ -39,7 +41,7 @@ export function ArticleCard({
     ? article.author.firstName && article.author.lastName
       ? `${article.author.firstName} ${article.author.lastName}`
       : article.author.username
-    : 'Anónimo';
+    : t('anonymous');
 
   const content = (
     <article className={`group relative overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:shadow-md flex flex-col h-full ${className}`}>
@@ -71,7 +73,7 @@ export function ArticleCard({
         {article.status === 'DRAFT' && (
           <div className="absolute bottom-3 right-3 z-10">
             <span className="inline-flex items-center rounded-none bg-gray-800 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg">
-              Borrador
+              {t('statusDraft')}
             </span>
           </div>
         )}
@@ -109,7 +111,7 @@ export function ArticleCard({
           {article.viewCount > 0 && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Eye className="h-3.5 w-3.5" />
-              <span>{article.viewCount.toLocaleString()} vistas</span>
+              <span>{t('viewsCount', { count: article.viewCount })}</span>
             </div>
           )}
 
@@ -123,7 +125,7 @@ export function ArticleCard({
                 <span>🏃 {article.competition.name}</span>
               )}
               {article.edition && (
-                <span>📅 Edición {article.edition.year}</span>
+                <span>📅 {t('editionYear', { year: article.edition.year })}</span>
               )}
             </div>
           )}

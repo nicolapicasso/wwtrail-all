@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import translationsService from '@/lib/api/v2/translations.service';
 
 interface EntityStats {
@@ -46,23 +47,25 @@ interface EntityConfig {
 }
 
 const ENTITY_CONFIGS: EntityConfig[] = [
-  { key: 'event', label: 'Eventos', icon: Calendar, color: 'text-blue-600' },
-  { key: 'competition', label: 'Competiciones', icon: Trophy, color: 'text-green-600' },
-  { key: 'post', label: 'Artículos', icon: FileText, color: 'text-purple-600' },
-  { key: 'service', label: 'Servicios', icon: Briefcase, color: 'text-orange-600' },
-  { key: 'promotion', label: 'Promociones', icon: Tag, color: 'text-pink-600' },
-  { key: 'specialSeries', label: 'Series Especiales', icon: Star, color: 'text-yellow-600' },
+  { key: 'event', label: 'transEventos', icon: Calendar, color: 'text-blue-600' },
+  { key: 'competition', label: 'transCompeticiones', icon: Trophy, color: 'text-green-600' },
+  { key: 'post', label: 'transArticulos', icon: FileText, color: 'text-purple-600' },
+  { key: 'service', label: 'transServicios', icon: Briefcase, color: 'text-orange-600' },
+  { key: 'promotion', label: 'transPromociones', icon: Tag, color: 'text-pink-600' },
+  { key: 'specialSeries', label: 'transSeriesEspeciales', icon: Star, color: 'text-yellow-600' },
 ];
 
 export default function TranslationsDashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const t = useTranslations('boMisc');
   const [stats, setStats] = useState<TranslationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [translatingEntity, setTranslatingEntity] = useState<EntityType | null>(null);
   const [translatingAll, setTranslatingAll] = useState(false);
   const [lastTranslationResult, setLastTranslationResult] = useState<string | null>(null);
+  const [lastResultIsError, setLastResultIsError] = useState(false);
 
   // Check auth
   useEffect(() => {
@@ -84,7 +87,7 @@ export default function TranslationsDashboardPage() {
       setStats(response.data);
     } catch (err: any) {
       console.error('Error loading translation stats:', err);
-      setError(err.message || 'Error al cargar estadísticas');
+      setError(err.message || t('transErrorCargarEstadisticas'));
     } finally {
       setLoading(false);
     }
@@ -94,12 +97,14 @@ export default function TranslationsDashboardPage() {
     try {
       setTranslatingEntity(entityType);
       setLastTranslationResult(null);
+      setLastResultIsError(false);
       const result = await translationsService.bulkTranslate(entityType);
-      setLastTranslationResult(`${result.data.translated} elementos traducidos`);
+      setLastTranslationResult(t('transElementosTraducidos', { count: result.data.translated }));
       await loadStats(); // Refresh stats
     } catch (err: any) {
       console.error('Error translating:', err);
-      setLastTranslationResult(`Error: ${err.message}`);
+      setLastResultIsError(true);
+      setLastTranslationResult(t('transErrorConMensaje', { message: err.message }));
     } finally {
       setTranslatingEntity(null);
     }
@@ -109,13 +114,15 @@ export default function TranslationsDashboardPage() {
     try {
       setTranslatingAll(true);
       setLastTranslationResult(null);
+      setLastResultIsError(false);
       const results = await translationsService.bulkTranslateAll();
       const totalTranslated = results.reduce((acc, r) => acc + (r.data?.translated || 0), 0);
-      setLastTranslationResult(`Total: ${totalTranslated} elementos traducidos`);
+      setLastTranslationResult(t('transTotalElementosTraducidos', { count: totalTranslated }));
       await loadStats(); // Refresh stats
     } catch (err: any) {
       console.error('Error translating all:', err);
-      setLastTranslationResult(`Error: ${err.message}`);
+      setLastResultIsError(true);
+      setLastTranslationResult(t('transErrorConMensaje', { message: err.message }));
     } finally {
       setTranslatingAll(false);
     }
@@ -140,7 +147,7 @@ export default function TranslationsDashboardPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando estadísticas...</p>
+          <p className="text-gray-600">{t('transCargandoEstadisticas')}</p>
         </div>
       </div>
     );
@@ -161,8 +168,8 @@ export default function TranslationsDashboardPage() {
             <div className="flex items-center gap-3">
               <Languages className="h-8 w-8 text-blue-600" />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard de Traducciones</h1>
-                <p className="text-gray-600">Gestiona las traducciones automáticas con IA</p>
+                <h1 className="text-3xl font-bold text-gray-900">{t('transDashboardTitulo')}</h1>
+                <p className="text-gray-600">{t('transDashboardSubtitulo')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -173,7 +180,7 @@ export default function TranslationsDashboardPage() {
                 disabled={loading}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Actualizar
+                {t('transActualizar')}
               </Button>
               <Button
                 onClick={handleTranslateAll}
@@ -183,12 +190,12 @@ export default function TranslationsDashboardPage() {
                 {translatingAll ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Traduciendo...
+                    {t('transTraduciendo')}
                   </>
                 ) : (
                   <>
                     <Play className="h-4 w-4 mr-2" />
-                    Traducir Todo ({totalStats.missingTranslations} pendientes)
+                    {t('transTraducirTodo', { count: totalStats.missingTranslations })}
                   </>
                 )}
               </Button>
@@ -198,11 +205,11 @@ export default function TranslationsDashboardPage() {
           {/* Last result message */}
           {lastTranslationResult && (
             <div className={`p-3 rounded-lg mb-4 ${
-              lastTranslationResult.startsWith('Error')
+              lastResultIsError
                 ? 'bg-red-50 text-red-700 border border-red-200'
                 : 'bg-green-50 text-green-700 border border-green-200'
             }`}>
-              {lastTranslationResult.startsWith('Error') ? (
+              {lastResultIsError ? (
                 <AlertCircle className="h-4 w-4 inline mr-2" />
               ) : (
                 <CheckCircle className="h-4 w-4 inline mr-2" />
@@ -222,28 +229,28 @@ export default function TranslationsDashboardPage() {
         {/* Summary Card */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Resumen General</CardTitle>
-            <CardDescription>Estado global de traducciones en la plataforma</CardDescription>
+            <CardTitle>{t('transResumenGeneral')}</CardTitle>
+            <CardDescription>{t('transResumenGeneralDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-3xl font-bold text-gray-900">{totalStats.total}</div>
-                <div className="text-sm text-gray-600">Total elementos</div>
+                <div className="text-sm text-gray-600">{t('transTotalElementos')}</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <div className="text-3xl font-bold text-green-600">{totalStats.withTranslations}</div>
-                <div className="text-sm text-gray-600">Con traducciones</div>
+                <div className="text-sm text-gray-600">{t('transConTraducciones')}</div>
               </div>
               <div className="text-center p-4 bg-yellow-50 rounded-lg">
                 <div className="text-3xl font-bold text-yellow-600">{totalStats.missingTranslations}</div>
-                <div className="text-sm text-gray-600">Sin traducciones</div>
+                <div className="text-sm text-gray-600">{t('transSinTraducciones')}</div>
               </div>
             </div>
             {totalStats.total > 0 && (
               <div className="mt-6">
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm text-gray-600">Progreso total</span>
+                  <span className="text-sm text-gray-600">{t('transProgresoTotal')}</span>
                   <span className="text-sm font-medium">{getProgressPercentage(totalStats)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
@@ -276,7 +283,7 @@ export default function TranslationsDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon className={`h-5 w-5 ${config.color}`} />
-                      <CardTitle className="text-lg">{config.label}</CardTitle>
+                      <CardTitle className="text-lg">{t(config.label)}</CardTitle>
                     </div>
                     <span className={`text-sm font-medium ${
                       progress === 100 ? 'text-green-600' : 'text-yellow-600'
@@ -299,15 +306,15 @@ export default function TranslationsDashboardPage() {
                     <div className="grid grid-cols-3 gap-2 text-center text-sm">
                       <div>
                         <div className="font-semibold text-gray-900">{entityStats.total}</div>
-                        <div className="text-gray-500 text-xs">Total</div>
+                        <div className="text-gray-500 text-xs">{t('transTotal')}</div>
                       </div>
                       <div>
                         <div className="font-semibold text-green-600">{entityStats.withTranslations}</div>
-                        <div className="text-gray-500 text-xs">Traducidos</div>
+                        <div className="text-gray-500 text-xs">{t('transTraducidos')}</div>
                       </div>
                       <div>
                         <div className="font-semibold text-yellow-600">{entityStats.missingTranslations}</div>
-                        <div className="text-gray-500 text-xs">Pendientes</div>
+                        <div className="text-gray-500 text-xs">{t('transPendientes')}</div>
                       </div>
                     </div>
 
@@ -321,17 +328,17 @@ export default function TranslationsDashboardPage() {
                       {isTranslating ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Traduciendo...
+                          {t('transTraduciendo')}
                         </>
                       ) : entityStats.missingTranslations === 0 ? (
                         <>
                           <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                          Completo
+                          {t('transCompleto')}
                         </>
                       ) : (
                         <>
                           <Languages className="h-4 w-4 mr-2" />
-                          Traducir pendientes ({entityStats.missingTranslations})
+                          {t('transTraducirPendientes', { count: entityStats.missingTranslations })}
                         </>
                       )}
                     </Button>
@@ -344,12 +351,12 @@ export default function TranslationsDashboardPage() {
 
         {/* Info */}
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="font-semibold text-blue-900 mb-2">Acerca de las traducciones</h3>
+          <h3 className="font-semibold text-blue-900 mb-2">{t('transAcercaTitulo')}</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>Las traducciones se generan automáticamente usando IA (OpenAI GPT-4o-mini)</li>
-            <li>Se traducen del idioma base de cada contenido a: EN, ES, FR, IT, DE, CA</li>
-            <li>Solo se traducen los elementos que no tienen traducciones previas</li>
-            <li>Las traducciones se aplican a: nombre, descripción, y otros campos de texto</li>
+            <li>{t('transAcerca1')}</li>
+            <li>{t('transAcerca2')}</li>
+            <li>{t('transAcerca3')}</li>
+            <li>{t('transAcerca4')}</li>
           </ul>
         </div>
       </div>

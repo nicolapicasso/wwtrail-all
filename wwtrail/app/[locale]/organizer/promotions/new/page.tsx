@@ -2,11 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import PromotionForm from '@/components/promotions/PromotionForm';
 import { ArrowLeft } from 'lucide-react';
 
 export default function NewPromotionPage() {
+  const t = useTranslations('boMisc');
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -21,7 +23,7 @@ export default function NewPromotionPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
+          <p className="text-gray-600">{t('cargando')}</p>
         </div>
       </div>
     );
@@ -41,11 +43,11 @@ export default function NewPromotionPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            Volver
+            {t('volver')}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Nueva Promoción</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('promoNewPromotion')}</h1>
           <p className="text-gray-600 mt-1">
-            Crea un nuevo cupón o contenido exclusivo
+            {t('promoNewSubtitle')}
           </p>
         </div>
 

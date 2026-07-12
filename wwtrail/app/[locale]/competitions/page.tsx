@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Star } from 'lucide-react';
 import { competitionsService } from '@/lib/api';
 import { CompetitionCard } from '@/components/CompetitionCard';
@@ -11,6 +11,7 @@ import { CompetitionFilters, FilterState } from '@/components/CompetitionFilters
 
 export default function CompetitionsPage() {
   const locale = useLocale();
+  const t = useTranslations('pgEvents');
   const [competitions, setCompetitions] = useState<any[]>([]);
   const [featuredCompetitions, setFeaturedCompetitions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,7 +80,7 @@ export default function CompetitionsPage() {
       setCompetitions(response.data || []);
     } catch (err: any) {
       console.error('Error loading competitions:', err);
-      setError(err.message || 'Error al cargar las competiciones');
+      setError(err.message || t('errorLoadingCompetitions'));
     } finally {
       setLoading(false);
     }
@@ -108,9 +109,9 @@ export default function CompetitionsPage() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Competiciones de Trail Running</h1>
+          <h1 className="text-4xl font-bold mb-2">{t('trailRunningCompetitions')}</h1>
           <p className="text-muted-foreground">
-            Descubre las mejores carreras de montaña
+            {t('discoverBestRaces')}
           </p>
         </div>
 
@@ -119,7 +120,7 @@ export default function CompetitionsPage() {
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-6">
               <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-              <h2 className="text-2xl font-bold text-gray-900">Competiciones Destacadas</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('featuredCompetitions')}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {featuredCompetitions.map((competition) => (
@@ -138,7 +139,7 @@ export default function CompetitionsPage() {
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-6">
               <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-              <h2 className="text-2xl font-bold text-gray-900">Competiciones Destacadas</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('featuredCompetitions')}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -152,8 +153,8 @@ export default function CompetitionsPage() {
 
         {/* All Competitions Section */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Todas las Competiciones</h2>
-          <p className="text-gray-600">Explora todas las carreras de trail running disponibles</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('allCompetitions')}</h2>
+          <p className="text-gray-600">{t('exploreAllRaces')}</p>
         </div>
 
         {/* Filters */}
@@ -172,7 +173,7 @@ export default function CompetitionsPage() {
               onClick={loadCompetitions}
               className="mt-2 text-red-600 hover:text-red-800 underline"
             >
-              Reintentar
+              {t('retry')}
             </button>
           </div>
         )}
@@ -185,12 +186,12 @@ export default function CompetitionsPage() {
           <>
             <div className="mb-6 flex items-center justify-between">
               <p className="text-muted-foreground">
-                {competitions.length} {competitions.length === 1 ? 'competición encontrada' : 'competiciones encontradas'}
+                {t('competitionsFoundCount', { count: competitions.length })}
               </p>
             </div>
             <CompetitionGrid
               competitions={competitions}
-              emptyMessage="No se encontraron competiciones con estos filtros. Prueba con otros criterios."
+              emptyMessage={t('noCompetitionsFound')}
             />
           </>
         )}

@@ -1,5 +1,6 @@
 // components/SpecialSeriesGrid.tsx - Grid layout for special series list
 
+import { getTranslations } from 'next-intl/server';
 import { SpecialSeriesCard } from './SpecialSeriesCard';
 import { SpecialSeriesListItem } from '@/types/v2';
 
@@ -8,14 +9,15 @@ interface SpecialSeriesGridProps {
   emptyMessage?: string;
 }
 
-export function SpecialSeriesGrid({
+export async function SpecialSeriesGrid({
   specialSeries,
-  emptyMessage = 'No se encontraron special series'
+  emptyMessage
 }: SpecialSeriesGridProps) {
+  const t = await getTranslations('cmp');
   if (specialSeries.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground text-lg">{emptyMessage}</p>
+        <p className="text-muted-foreground text-lg">{emptyMessage ?? t('noSpecialSeries')}</p>
       </div>
     );
   }

@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
 import CompetitionForm from '@/components/forms/CompetitionForm';
@@ -20,6 +21,7 @@ interface EditCompetitionPageProps {
 
 export default function EditCompetitionPage({ params }: EditCompetitionPageProps) {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
         setCompetition(data);
       } catch (err: any) {
         console.error('Error fetching competition:', err);
-        setError('No se pudo cargar la competición');
+        setError(t('errorLoadingCompetitionShort'));
       } finally {
         setLoading(false);
       }
@@ -45,7 +47,7 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Cargando competición...</p>
+          <p className="text-gray-600">{t('loadingCompetition')}</p>
         </div>
       </div>
     );
@@ -57,17 +59,17 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
             <h2 className="text-lg font-semibold text-red-900 mb-2">
-              Error al cargar
+              {t('errorLoading')}
             </h2>
             <p className="text-sm text-red-700 mb-4">
-              {error || 'Competición no encontrada'}
+              {error || t('competitionNotFound')}
             </p>
             <Link
               href="/organizer/events"
               className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              Volver a mis eventos
+              {t('backToMyEvents')}
             </Link>
           </div>
         </div>
@@ -85,7 +87,7 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver al evento
+            {t('backToEvent')}
           </Link>
           <div className="flex items-center gap-2">
             <GenerateTranslationsButton
@@ -99,7 +101,7 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
               className="flex items-center gap-2"
             >
               <Search className="h-4 w-4" />
-              Gestionar SEO
+              {t('manageSeo')}
             </Button>
           </div>
         </div>
@@ -107,10 +109,10 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
         {/* Competition Context */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
           <p className="text-sm text-blue-900">
-            <span className="font-semibold">Editando:</span> {competition.name}
+            <span className="font-semibold">{t('editingColon')}</span> {competition.name}
           </p>
           <p className="text-xs text-blue-700 mt-1">
-            Los cambios se aplicarán inmediatamente
+            {t('changesApplyImmediately')}
           </p>
         </div>
 

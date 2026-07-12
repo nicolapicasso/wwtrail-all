@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { PendingEvent } from '@/lib/api/admin.service';
 import { Calendar, MapPin, User, Clock, Check, X, Eye } from 'lucide-react';
 
@@ -16,6 +17,7 @@ export default function EventApprovalQueue({
   onReject,
   onView 
 }: EventApprovalQueueProps) {
+  const t = useTranslations('boAdmin');
   const getStatusBadge = (status: string) => {
     const styles = {
       DRAFT: 'bg-black text-white',
@@ -45,10 +47,10 @@ export default function EventApprovalQueue({
       <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
         <Clock className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-4 text-lg font-medium text-gray-900">
-          No hay eventos pendientes
+          {t('noPendingEvents')}
         </h3>
         <p className="mt-2 text-sm text-gray-500">
-          Todos los eventos han sido revisados
+          {t('allEventsReviewed')}
         </p>
       </div>
     );
@@ -90,13 +92,13 @@ export default function EventApprovalQueue({
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      <span>Enviado {formatDate(event.createdAt)}</span>
+                      <span>{t('submittedOn', { date: formatDate(event.createdAt) })}</span>
                     </div>
                   </div>
 
                   {/* Organizer Info */}
                   <div className="mt-3 rounded-lg bg-gray-50 p-3">
-                    <p className="text-xs font-medium text-gray-500">ORGANIZADOR</p>
+                    <p className="text-xs font-medium text-gray-500">{t('organizerLabel')}</p>
                     <div className="mt-1 flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-sm font-semibold">
                         {event.organizer.name.charAt(0).toUpperCase()}
@@ -122,22 +124,22 @@ export default function EventApprovalQueue({
                 className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 <Eye className="h-4 w-4" />
-                Ver Detalle
+                {t('viewDetail')}
               </button>
               <button
                 onClick={() => {
-                  if (confirm(`¿Aprobar el evento "${event.name}"?`)) {
+                  if (confirm(t('confirmApproveEvent', { name: event.name }))) {
                     onApprove(event.id);
                   }
                 }}
                 className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
               >
                 <Check className="h-4 w-4" />
-                Aprobar
+                {t('approve')}
               </button>
               <button
                 onClick={() => {
-                  const reason = prompt('Motivo del rechazo (opcional):');
+                  const reason = prompt(t('rejectReasonPrompt'));
                   if (reason !== null) {
                     onReject(event.id);
                   }
@@ -145,7 +147,7 @@ export default function EventApprovalQueue({
                 className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
               >
                 <X className="h-4 w-4" />
-                Rechazar
+                {t('reject')}
               </button>
             </div>
           </div>

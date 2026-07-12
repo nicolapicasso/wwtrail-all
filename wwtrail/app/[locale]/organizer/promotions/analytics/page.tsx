@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { promotionsService } from '@/lib/api/v2';
 import { CouponAnalytics } from '@/types/v2';
 import { ArrowLeft, TrendingUp, Gift, Users, Eye } from 'lucide-react';
 
 export default function PromotionsAnalyticsPage() {
+  const t = useTranslations('boMisc');
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [analytics, setAnalytics] = useState<CouponAnalytics[]>([]);
@@ -37,7 +39,7 @@ export default function PromotionsAnalyticsPage() {
       setAnalytics(response.data);
     } catch (err: any) {
       console.error('Error loading analytics:', err);
-      setError(err.message || 'Error al cargar analítica');
+      setError(err.message || t('promoErrorLoadAnalytics'));
     } finally {
       setLoading(false);
     }
@@ -48,7 +50,7 @@ export default function PromotionsAnalyticsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando analítica...</p>
+          <p className="text-gray-600">{t('promoLoadingAnalytics')}</p>
         </div>
       </div>
     );
@@ -83,11 +85,11 @@ export default function PromotionsAnalyticsPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            Volver
+            {t('volver')}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Analítica de Cupones</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('promoCouponAnalyticsTitle')}</h1>
           <p className="text-gray-600 mt-1">
-            Estadísticas y métricas de todos los cupones
+            {t('promoCouponAnalyticsSubtitle')}
           </p>
         </div>
 
@@ -102,7 +104,7 @@ export default function PromotionsAnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-600">Total Códigos</div>
+              <div className="text-sm text-gray-600">{t('promoTotalCodes')}</div>
               <Gift className="h-5 w-5 text-blue-500" />
             </div>
             <div className="text-3xl font-bold text-gray-900">{totals.total}</div>
@@ -110,18 +112,18 @@ export default function PromotionsAnalyticsPage() {
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-600">Usados</div>
+              <div className="text-sm text-gray-600">{t('promoUsed')}</div>
               <TrendingUp className="h-5 w-5 text-green-500" />
             </div>
             <div className="text-3xl font-bold text-green-600">{totals.used}</div>
             <div className="text-xs text-gray-500 mt-1">
-              {usageRate.toFixed(1)}% de uso
+              {t('promoUsageRate', { rate: usageRate.toFixed(1) })}
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-600">Disponibles</div>
+              <div className="text-sm text-gray-600">{t('promoAvailable')}</div>
               <Gift className="h-5 w-5 text-purple-500" />
             </div>
             <div className="text-3xl font-bold text-purple-600">{totals.available}</div>
@@ -129,7 +131,7 @@ export default function PromotionsAnalyticsPage() {
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-600">Canjes</div>
+              <div className="text-sm text-gray-600">{t('promoRedemptions')}</div>
               <Users className="h-5 w-5 text-orange-500" />
             </div>
             <div className="text-3xl font-bold text-orange-600">{totals.redemptions}</div>
@@ -137,14 +139,14 @@ export default function PromotionsAnalyticsPage() {
 
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-600">Conversión</div>
+              <div className="text-sm text-gray-600">{t('promoConversion')}</div>
               <Eye className="h-5 w-5 text-indigo-500" />
             </div>
             <div className="text-3xl font-bold text-indigo-600">
               {conversionRate.toFixed(1)}%
             </div>
             <div className="text-xs text-gray-500 mt-1">
-              {totals.views} vistas
+              {t('promoViewsCount', { count: totals.views })}
             </div>
           </div>
         </div>
@@ -156,31 +158,31 @@ export default function PromotionsAnalyticsPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Promoción
+                    {t('promoColPromotion')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
+                    {t('promoColStatus')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
+                    {t('promoColTotal')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Usados
+                    {t('promoUsed')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Disponibles
+                    {t('promoAvailable')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    % Uso
+                    {t('promoColUsagePct')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Vistas
+                    {t('promoColViews')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Conversión
+                    {t('promoConversion')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
+                    {t('promoActions')}
                   </th>
                 </tr>
               </thead>
@@ -188,7 +190,7 @@ export default function PromotionsAnalyticsPage() {
                 {!Array.isArray(analytics) || analytics.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
-                      No hay cupones creados todavía
+                      {t('promoNoCoupons')}
                     </td>
                   </tr>
                 ) : (
@@ -214,7 +216,7 @@ export default function PromotionsAnalyticsPage() {
                               ? 'bg-gray-100 text-gray-800'
                               : 'bg-red-100 text-red-800'
                           }`}>
-                            {item.status === 'PUBLISHED' ? 'Publicado' : item.status === 'DRAFT' ? 'Borrador' : 'Archivado'}
+                            {item.status === 'PUBLISHED' ? t('promoStatusPublished') : item.status === 'DRAFT' ? t('promoStatusDraft') : t('promoStatusArchived')}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
@@ -240,7 +242,7 @@ export default function PromotionsAnalyticsPage() {
                             onClick={() => router.push(`/organizer/promotions/${item.id}`)}
                             className="text-blue-600 hover:text-blue-900 font-medium"
                           >
-                            Ver
+                            {t('promoView')}
                           </button>
                         </td>
                       </tr>

@@ -7,10 +7,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function SaveEventButton({ eventId }: { eventId: string }) {
+  const t = useTranslations('cmpLayout');
   const [saved, setSaved] = useState(false);
 
   return (
@@ -27,7 +29,7 @@ export function SaveEventButton({ eventId }: { eventId: string }) {
       )}
     >
       <Star className={cn('h-4.5 w-4.5', saved && 'fill-current')} />
-      {saved ? 'Evento guardado' : 'Guardar evento'}
+      {saved ? t('eventSaved') : t('saveEvent')}
     </button>
   );
 }

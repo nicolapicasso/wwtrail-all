@@ -14,7 +14,7 @@ import {
 import { Footprints, RefreshCw, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 // Constantes de conversión
 const METERS_PER_ZANCADA = 1.5;
@@ -40,6 +40,7 @@ function ProgressScale({
   type: 'distance' | 'elevation';
   locale: string;
 }) {
+  const t = useTranslations('boAdmin');
   const isDistance = type === 'distance';
   const colorClass = isDistance ? 'blue' : 'green';
   const unit = isDistance ? 'km' : 'm D+';
@@ -103,7 +104,7 @@ function ProgressScale({
           {scale.progress.toFixed(1)}%
         </span>
         <span className="text-xs text-muted-foreground ml-1">
-          hacia {formatValue(scale.scaleMax)} {unit}
+          {t('towards', { value: `${formatValue(scale.scaleMax)} ${unit}` })}
         </span>
       </div>
 
@@ -182,6 +183,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
   const [syncing, setSyncing] = useState(false);
   const [equivalentData, setEquivalentData] = useState<EquivalentCompetitionsResponse | null>(null);
   const locale = useLocale();
+  const t = useTranslations('boAdmin');
 
   const localEquivalentKm = balance ? (balance.balance * METERS_PER_ZANCADA) / 1000 : 0;
   const localEquivalentElevation = balance ? balance.balance * ELEVATION_METERS_PER_ZANCADA : 0;
@@ -223,7 +225,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
         omniwalletBalance: null,
         synced: true,
       });
-      toast.success('Balance sincronizado correctamente');
+      toast.success(t('balanceSynced'));
       onSyncComplete?.();
 
       if (result.balance > 0) {
@@ -232,7 +234,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
       }
     } catch (error) {
       console.error('Error syncing balance:', error);
-      toast.error('Error al sincronizar el balance');
+      toast.error(t('errorSyncingBalance'));
     } finally {
       setSyncing(false);
     }
@@ -266,7 +268,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Footprints className="h-5 w-5 text-primary-500" />
-            <CardTitle className="text-lg">Mis Zancadas</CardTitle>
+            <CardTitle className="text-lg">{t('myZancadas')}</CardTitle>
           </div>
           <Button
             variant="ghost"
@@ -285,7 +287,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
           <span className="text-4xl font-bold text-primary-600">
             {balance.balance.toLocaleString()}
           </span>
-          <span className="text-lg text-muted-foreground mb-1">Zancadas</span>
+          <span className="text-lg text-muted-foreground mb-1">{t('zancadas')}</span>
         </div>
 
         {/* Equivalencias resumidas */}
@@ -307,7 +309,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
             {!equivalentData.distanceScale.isMaxLevel && equivalentData.distanceScale.competitions.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-blue-700 mb-3 flex items-center gap-1">
-                  📍 Progreso en distancia
+                  📍 {t('progressDistance')}
                 </h4>
                 <ProgressScale
                   scale={equivalentData.distanceScale}
@@ -322,10 +324,10 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
               <div className="text-center py-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg">
                 <span className="text-2xl">🏆</span>
                 <p className="text-sm font-medium text-amber-700 mt-1">
-                  ¡Nivel máximo de distancia alcanzado!
+                  {t('maxDistanceReached')}
                 </p>
                 <p className="text-xs text-amber-600">
-                  {displayKm.toLocaleString()} km recorridos
+                  {t('kmTraveled', { km: displayKm.toLocaleString() })}
                 </p>
               </div>
             )}
@@ -334,7 +336,7 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
             {!equivalentData.elevationScale.isMaxLevel && equivalentData.elevationScale.competitions.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-green-700 mb-3 flex items-center gap-1">
-                  ⛰️ Progreso en desnivel
+                  ⛰️ {t('progressElevation')}
                 </h4>
                 <ProgressScale
                   scale={equivalentData.elevationScale}
@@ -349,10 +351,10 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
               <div className="text-center py-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg">
                 <span className="text-2xl">🏔️</span>
                 <p className="text-sm font-medium text-amber-700 mt-1">
-                  ¡Nivel máximo de desnivel alcanzado!
+                  {t('maxElevationReached')}
                 </p>
                 <p className="text-xs text-amber-600">
-                  {displayElevation.toLocaleString()} m D+ acumulados
+                  {t('elevationAccumulated', { m: displayElevation.toLocaleString() })}
                 </p>
               </div>
             )}
@@ -361,12 +363,13 @@ export function ZancadasBalance({ onSyncComplete }: ZancadasBalanceProps) {
 
         {balance.syncedAt && (
           <p className="text-xs text-muted-foreground pt-2 border-t">
-            Última sincronización:{' '}
-            {new Date(balance.syncedAt).toLocaleDateString('es-ES', {
-              day: 'numeric',
-              month: 'short',
-              hour: '2-digit',
-              minute: '2-digit',
+            {t('lastSync', {
+              date: new Date(balance.syncedAt).toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
             })}
           </p>
         )}

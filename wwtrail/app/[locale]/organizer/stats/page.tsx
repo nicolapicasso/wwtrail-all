@@ -29,36 +29,37 @@ import {
   Layers,
   Footprints,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { adminService, ComprehensiveStats, ZancadasStats } from '@/lib/api/admin.service';
 import { COUNTRIES } from '@/lib/utils/countries';
 
-// Role labels
+// Role label keys
 const ROLE_LABELS: Record<string, string> = {
-  ADMIN: 'Administradores',
-  ORGANIZER: 'Organizadores',
-  ATHLETE: 'Atletas',
-  VIEWER: 'Visitantes',
+  ADMIN: 'statsRoleAdmin',
+  ORGANIZER: 'statsRoleOrganizer',
+  ATHLETE: 'statsRoleAthlete',
+  VIEWER: 'statsRoleViewer',
 };
 
-// Status labels
+// Status label keys
 const STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Borrador',
-  PUBLISHED: 'Publicado',
-  CANCELLED: 'Cancelado',
-  ARCHIVED: 'Archivado',
+  DRAFT: 'statsStatusDraft',
+  PUBLISHED: 'statsStatusPublished',
+  CANCELLED: 'statsStatusCancelled',
+  ARCHIVED: 'statsStatusArchived',
 };
 
-// Competition type labels
+// Competition type label keys
 const TYPE_LABELS: Record<string, string> = {
-  TRAIL: 'Trail',
-  ULTRA: 'Ultra',
-  MARATHON: 'Maratón',
-  HALF_MARATHON: 'Media Maratón',
-  VERTICAL: 'Vertical',
-  SKYRUNNING: 'Skyrunning',
-  CROSS_COUNTRY: 'Cross Country',
-  ROAD: 'Carretera',
-  OTHER: 'Otro',
+  TRAIL: 'statsTypeTrail',
+  ULTRA: 'statsTypeUltra',
+  MARATHON: 'statsTypeMarathon',
+  HALF_MARATHON: 'statsTypeHalfMarathon',
+  VERTICAL: 'statsTypeVertical',
+  SKYRUNNING: 'statsTypeSkyrunning',
+  CROSS_COUNTRY: 'statsTypeCrossCountry',
+  ROAD: 'statsTypeRoad',
+  OTHER: 'statsTypeOther',
 };
 
 function getCountryName(code: string): string {
@@ -82,6 +83,7 @@ function StatCard({
   trend?: number;
   color?: 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'orange';
 }) {
+  const t = useTranslations('boMisc');
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600',
     green: 'bg-green-100 text-green-600',
@@ -102,7 +104,7 @@ function StatCard({
             {trend !== undefined && (
               <div className={`flex items-center gap-1 mt-1 text-xs ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 <TrendingUp className={`w-3 h-3 ${trend < 0 ? 'rotate-180' : ''}`} />
-                {trend >= 0 ? '+' : ''}{trend} este mes
+                {trend >= 0 ? '+' : ''}{trend} {t('statsEsteMes')}
               </div>
             )}
           </div>
@@ -136,6 +138,7 @@ function ProgressBar({ value, max, label, color = 'blue' }: { value: number; max
 }
 
 export default function StatsPage() {
+  const t = useTranslations('boMisc');
   const [stats, setStats] = useState<ComprehensiveStats | null>(null);
   const [zancadasStats, setZancadasStats] = useState<ZancadasStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -153,7 +156,7 @@ export default function StatsPage() {
       setZancadasStats(zancadasData);
     } catch (err: any) {
       console.error('Error fetching stats:', err);
-      setError(err.response?.data?.message || 'Error al cargar las estadísticas');
+      setError(err.response?.data?.message || t('statsErrorCargar'));
     } finally {
       setLoading(false);
     }
@@ -168,7 +171,7 @@ export default function StatsPage() {
       <div className="p-6 flex items-center justify-center min-h-[400px]">
         <div className="flex items-center gap-3">
           <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
-          <span className="text-gray-600">Cargando estadísticas...</span>
+          <span className="text-gray-600">{t('statsCargando')}</span>
         </div>
       </div>
     );
@@ -182,7 +185,7 @@ export default function StatsPage() {
             <p className="text-red-600 mb-4">{error}</p>
             <Button onClick={fetchStats} variant="outline">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Reintentar
+              {t('statsReintentar')}
             </Button>
           </CardContent>
         </Card>
@@ -197,32 +200,32 @@ export default function StatsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Estadísticas del Portal</h1>
-          <p className="text-gray-500">Vista general de todos los datos de WWTrail</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('statsTituloPortal')}</h1>
+          <p className="text-gray-500">{t('statsSubtituloPortal')}</p>
         </div>
         <Button onClick={fetchStats} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-2" />
-          Actualizar
+          {t('statsActualizar')}
         </Button>
       </div>
 
       {/* Overview Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <StatCard title="Usuarios" value={stats.overview.totalUsers} icon={Users} color="blue" />
-        <StatCard title="Eventos" value={stats.overview.totalEvents} icon={MapPin} color="green" />
-        <StatCard title="Competiciones" value={stats.overview.totalCompetitions} icon={Trophy} color="yellow" />
-        <StatCard title="Ediciones" value={stats.overview.totalEditions} icon={Calendar} color="purple" />
-        <StatCard title="Series" value={stats.overview.totalSpecialSeries} icon={Award} color="orange" />
-        <StatCard title="Servicios" value={stats.overview.totalServices} icon={Briefcase} color="blue" />
+        <StatCard title={t('statsUsuarios')} value={stats.overview.totalUsers} icon={Users} color="blue" />
+        <StatCard title={t('statsEventos')} value={stats.overview.totalEvents} icon={MapPin} color="green" />
+        <StatCard title={t('statsCompeticiones')} value={stats.overview.totalCompetitions} icon={Trophy} color="yellow" />
+        <StatCard title={t('statsEdiciones')} value={stats.overview.totalEditions} icon={Calendar} color="purple" />
+        <StatCard title={t('statsSeries')} value={stats.overview.totalSpecialSeries} icon={Award} color="orange" />
+        <StatCard title={t('statsServicios')} value={stats.overview.totalServices} icon={Briefcase} color="blue" />
       </div>
 
       {/* Second row overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatCard title="Reviews" value={stats.overview.totalReviews} icon={MessageSquare} color="green" />
-        <StatCard title="Organizadores" value={stats.overview.totalOrganizers} icon={Building2} color="purple" />
-        <StatCard title="Categorías" value={stats.overview.totalCategories} icon={Layers} color="yellow" />
-        <StatCard title="Participantes" value={stats.overview.totalParticipants} icon={UserCheck} color="blue" />
-        <StatCard title="Favoritos" value={stats.overview.totalFavorites} icon={Heart} color="red" />
+        <StatCard title={t('statsReviews')} value={stats.overview.totalReviews} icon={MessageSquare} color="green" />
+        <StatCard title={t('statsOrganizadores')} value={stats.overview.totalOrganizers} icon={Building2} color="purple" />
+        <StatCard title={t('statsCategorias')} value={stats.overview.totalCategories} icon={Layers} color="yellow" />
+        <StatCard title={t('statsParticipantes')} value={stats.overview.totalParticipants} icon={UserCheck} color="blue" />
+        <StatCard title={t('statsFavoritos')} value={stats.overview.totalFavorites} icon={Heart} color="red" />
       </div>
 
       {/* Detailed Sections */}
@@ -232,44 +235,44 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5 text-blue-600" />
-              Usuarios
+              {t('statsUsuarios')}
             </CardTitle>
-            <CardDescription>Desglose de usuarios del portal</CardDescription>
+            <CardDescription>{t('statsUsuariosDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
                 <UserCheck className="w-5 h-5 text-green-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Activos</p>
+                  <p className="text-sm text-gray-500">{t('statsActivos')}</p>
                   <p className="font-bold text-green-700">{stats.users.active}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
                 <UserX className="w-5 h-5 text-red-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Inactivos</p>
+                  <p className="text-sm text-gray-500">{t('statsInactivos')}</p>
                   <p className="font-bold text-red-700">{stats.users.inactive}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg">
                 <Star className="w-5 h-5 text-yellow-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Insiders</p>
+                  <p className="text-sm text-gray-500">{t('statsInsiders')}</p>
                   <p className="font-bold text-yellow-700">{stats.users.insiders}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                 <Globe className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Públicos</p>
+                  <p className="text-sm text-gray-500">{t('statsPublicos')}</p>
                   <p className="font-bold text-blue-700">{stats.users.publicProfiles}</p>
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm font-medium text-gray-700 mb-3">Por rol</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">{t('statsPorRol')}</p>
               <div className="space-y-2">
                 {stats.users.byRole.map((item) => (
                   <div key={item.role} className="flex items-center justify-between">
@@ -278,7 +281,7 @@ export default function StatsPage() {
                       {item.role === 'ORGANIZER' && <Shield className="w-4 h-4 text-blue-500" />}
                       {item.role === 'ATHLETE' && <Trophy className="w-4 h-4 text-green-500" />}
                       {item.role === 'VIEWER' && <Eye className="w-4 h-4 text-gray-500" />}
-                      <span className="text-sm text-gray-600">{ROLE_LABELS[item.role] || item.role}</span>
+                      <span className="text-sm text-gray-600">{ROLE_LABELS[item.role] ? t(ROLE_LABELS[item.role]) : item.role}</span>
                     </div>
                     <span className="font-medium">{item.count}</span>
                   </div>
@@ -288,11 +291,11 @@ export default function StatsPage() {
 
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Nuevos esta semana</span>
+                <span className="text-gray-500">{t('statsNuevosEstaSemana')}</span>
                 <span className="font-medium text-green-600">+{stats.users.newThisWeek}</span>
               </div>
               <div className="flex items-center justify-between text-sm mt-1">
-                <span className="text-gray-500">Nuevos este mes</span>
+                <span className="text-gray-500">{t('statsNuevosEsteMes')}</span>
                 <span className="font-medium text-green-600">+{stats.users.newThisMonth}</span>
               </div>
             </div>
@@ -304,9 +307,9 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-green-600" />
-              Eventos
+              {t('statsEventos')}
             </CardTitle>
-            <CardDescription>Distribución de eventos por estado y país</CardDescription>
+            <CardDescription>{t('statsEventosDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-3">
@@ -319,13 +322,13 @@ export default function StatsPage() {
                   }`}
                 >
                   <p className="text-2xl font-bold">{item.count}</p>
-                  <p className="text-xs text-gray-500">{STATUS_LABELS[item.status] || item.status}</p>
+                  <p className="text-xs text-gray-500">{STATUS_LABELS[item.status] ? t(STATUS_LABELS[item.status]) : item.status}</p>
                 </div>
               ))}
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm font-medium text-gray-700 mb-3">Top países</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">{t('statsTopPaises')}</p>
               <div className="space-y-2">
                 {stats.events.byCountry.slice(0, 5).map((item, index) => (
                   <div key={item.country} className="flex items-center justify-between">
@@ -341,7 +344,7 @@ export default function StatsPage() {
 
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Nuevos este mes</span>
+                <span className="text-gray-500">{t('statsNuevosEsteMes')}</span>
                 <span className="font-medium text-green-600">+{stats.events.newThisMonth}</span>
               </div>
             </div>
@@ -353,9 +356,9 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-600" />
-              Competiciones
+              {t('statsCompeticiones')}
             </CardTitle>
-            <CardDescription>Distribución por tipo y estado</CardDescription>
+            <CardDescription>{t('statsCompeticionesDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-3">
@@ -368,17 +371,17 @@ export default function StatsPage() {
                   }`}
                 >
                   <p className="text-2xl font-bold">{item.count}</p>
-                  <p className="text-xs text-gray-500">{STATUS_LABELS[item.status] || item.status}</p>
+                  <p className="text-xs text-gray-500">{STATUS_LABELS[item.status] ? t(STATUS_LABELS[item.status]) : item.status}</p>
                 </div>
               ))}
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm font-medium text-gray-700 mb-3">Por tipo</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">{t('statsPorTipo')}</p>
               <div className="space-y-2">
                 {stats.competitions.byType.map((item) => (
                   <div key={item.type} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{TYPE_LABELS[item.type] || item.type}</span>
+                    <span className="text-sm text-gray-600">{TYPE_LABELS[item.type] ? t(TYPE_LABELS[item.type]) : item.type}</span>
                     <span className="font-medium">{item.count}</span>
                   </div>
                 ))}
@@ -387,7 +390,7 @@ export default function StatsPage() {
 
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Nuevas este mes</span>
+                <span className="text-gray-500">{t('statsNuevasEsteMes')}</span>
                 <span className="font-medium text-green-600">+{stats.competitions.newThisMonth}</span>
               </div>
             </div>
@@ -399,34 +402,34 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-purple-600" />
-              Ediciones
+              {t('statsEdiciones')}
             </CardTitle>
-            <CardDescription>Estado temporal de las ediciones</CardDescription>
+            <CardDescription>{t('statsEdicionesDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                 <Clock className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Próximas</p>
+                  <p className="text-sm text-gray-500">{t('statsProximas')}</p>
                   <p className="font-bold text-blue-700">{stats.editions.upcoming}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                 <CheckCircle className="w-5 h-5 text-gray-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Pasadas</p>
+                  <p className="text-sm text-gray-500">{t('statsPasadas')}</p>
                   <p className="font-bold text-gray-700">{stats.editions.past}</p>
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm font-medium text-gray-700 mb-3">Por estado</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">{t('statsPorEstado')}</p>
               <div className="space-y-2">
                 {stats.editions.byStatus.map((item) => (
                   <div key={item.status} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{STATUS_LABELS[item.status] || item.status}</span>
+                    <span className="text-sm text-gray-600">{STATUS_LABELS[item.status] ? t(STATUS_LABELS[item.status]) : item.status}</span>
                     <span className="font-medium">{item.count}</span>
                   </div>
                 ))}
@@ -435,7 +438,7 @@ export default function StatsPage() {
 
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Nuevas este mes</span>
+                <span className="text-gray-500">{t('statsNuevasEsteMes')}</span>
                 <span className="font-medium text-green-600">+{stats.editions.newThisMonth}</span>
               </div>
             </div>
@@ -447,30 +450,30 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Briefcase className="w-5 h-5 text-blue-600" />
-              Servicios
+              {t('statsServicios')}
             </CardTitle>
-            <CardDescription>Servicios por categoría y estado</CardDescription>
+            <CardDescription>{t('statsServiciosDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                 <Briefcase className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Total</p>
+                  <p className="text-sm text-gray-500">{t('statsTotal')}</p>
                   <p className="font-bold text-blue-700">{stats.services.total}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg">
                 <Star className="w-5 h-5 text-yellow-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Destacados</p>
+                  <p className="text-sm text-gray-500">{t('statsDestacados')}</p>
                   <p className="font-bold text-yellow-700">{stats.services.featured}</p>
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm font-medium text-gray-700 mb-3">Por categoría</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">{t('statsPorCategoria')}</p>
               <div className="space-y-2">
                 {stats.services.byCategory.map((item) => (
                   <div key={item.categoryId} className="flex items-center justify-between">
@@ -488,41 +491,41 @@ export default function StatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-green-600" />
-              Reviews y Organizadores
+              {t('statsReviewsYOrganizadores')}
             </CardTitle>
-            <CardDescription>Actividad de la comunidad</CardDescription>
+            <CardDescription>{t('statsActividadComunidad')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-green-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <MessageSquare className="w-5 h-5 text-green-600" />
-                  <span className="font-medium text-green-700">Reviews</span>
+                  <span className="font-medium text-green-700">{t('statsReviews')}</span>
                 </div>
                 <p className="text-3xl font-bold text-green-800">{stats.reviews.total}</p>
                 <div className="flex items-center gap-1 mt-2">
                   <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                   <span className="text-sm text-gray-600">
-                    Promedio: {stats.reviews.averageRating}/5
+                    {t('statsPromedio', { rating: stats.reviews.averageRating })}
                   </span>
                 </div>
                 <div className="mt-2 text-xs text-gray-500">
-                  <span className="text-green-600">+{stats.reviews.thisMonth}</span> este mes
+                  <span className="text-green-600">+{stats.reviews.thisMonth}</span> {t('statsEsteMes')}
                 </div>
               </div>
               <div className="p-4 bg-purple-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Building2 className="w-5 h-5 text-purple-600" />
-                  <span className="font-medium text-purple-700">Organizadores</span>
+                  <span className="font-medium text-purple-700">{t('statsOrganizadores')}</span>
                 </div>
                 <p className="text-3xl font-bold text-purple-800">{stats.organizers.total}</p>
                 <div className="mt-2 space-y-1 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Verificados</span>
+                    <span className="text-gray-500">{t('statsVerificados')}</span>
                     <span className="text-green-600">{stats.organizers.verified}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Pendientes</span>
+                    <span className="text-gray-500">{t('statsPendientes')}</span>
                     <span className="text-yellow-600">{stats.organizers.unverified}</span>
                   </div>
                 </div>
@@ -530,16 +533,16 @@ export default function StatsPage() {
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm font-medium text-gray-700 mb-3">Special Series</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">{t('statsSpecialSeries')}</p>
               <div className="space-y-2">
                 {stats.specialSeries.byStatus.map((item) => (
                   <div key={item.status} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{STATUS_LABELS[item.status] || item.status}</span>
+                    <span className="text-sm text-gray-600">{STATUS_LABELS[item.status] ? t(STATUS_LABELS[item.status]) : item.status}</span>
                     <span className="font-medium">{item.count}</span>
                   </div>
                 ))}
                 <div className="flex items-center justify-between font-medium pt-2 border-t">
-                  <span className="text-gray-700">Total</span>
+                  <span className="text-gray-700">{t('statsTotal')}</span>
                   <span>{stats.specialSeries.total}</span>
                 </div>
               </div>
@@ -553,36 +556,36 @@ export default function StatsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-blue-600" />
-            Actividad Reciente
+            {t('statsActividadReciente')}
           </CardTitle>
-          <CardDescription>Resumen de actividad en los últimos 7 días y mes</CardDescription>
+          <CardDescription>{t('statsActividadRecienteDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <Users className="w-6 h-6 mx-auto text-blue-600 mb-2" />
               <p className="text-2xl font-bold text-blue-700">{stats.recentActivity.usersThisWeek}</p>
-              <p className="text-xs text-gray-500">Usuarios (7 días)</p>
+              <p className="text-xs text-gray-500">{t('statsUsuarios7Dias')}</p>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <MapPin className="w-6 h-6 mx-auto text-green-600 mb-2" />
               <p className="text-2xl font-bold text-green-700">{stats.recentActivity.eventsThisMonth}</p>
-              <p className="text-xs text-gray-500">Eventos (mes)</p>
+              <p className="text-xs text-gray-500">{t('statsEventosMes')}</p>
             </div>
             <div className="text-center p-4 bg-yellow-50 rounded-lg">
               <Trophy className="w-6 h-6 mx-auto text-yellow-600 mb-2" />
               <p className="text-2xl font-bold text-yellow-700">{stats.recentActivity.competitionsThisMonth}</p>
-              <p className="text-xs text-gray-500">Competiciones (mes)</p>
+              <p className="text-xs text-gray-500">{t('statsCompeticionesMes')}</p>
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <Calendar className="w-6 h-6 mx-auto text-purple-600 mb-2" />
               <p className="text-2xl font-bold text-purple-700">{stats.recentActivity.editionsThisMonth}</p>
-              <p className="text-xs text-gray-500">Ediciones (mes)</p>
+              <p className="text-xs text-gray-500">{t('statsEdicionesMes')}</p>
             </div>
             <div className="text-center p-4 bg-orange-50 rounded-lg">
               <MessageSquare className="w-6 h-6 mx-auto text-orange-600 mb-2" />
               <p className="text-2xl font-bold text-orange-700">{stats.recentActivity.reviewsThisWeek}</p>
-              <p className="text-xs text-gray-500">Reviews (7 días)</p>
+              <p className="text-xs text-gray-500">{t('statsReviews7Dias')}</p>
             </div>
           </div>
         </CardContent>
@@ -596,34 +599,34 @@ export default function StatsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Footprints className="w-5 h-5 text-green-600" />
-                Zancadas - Resumen
+                {t('statsZancadasResumen')}
               </CardTitle>
-              <CardDescription>Estadísticas del programa de puntos</CardDescription>
+              <CardDescription>{t('statsZancadasResumenDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <p className="text-3xl font-bold text-green-700">{zancadasStats.totalPointsAwarded.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500">Puntos totales</p>
+                  <p className="text-xs text-gray-500">{t('statsPuntosTotales')}</p>
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <p className="text-3xl font-bold text-blue-700">{zancadasStats.totalTransactions}</p>
-                  <p className="text-xs text-gray-500">Transacciones</p>
+                  <p className="text-xs text-gray-500">{t('statsTransacciones')}</p>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <p className="text-3xl font-bold text-purple-700">{zancadasStats.usersWithPoints}</p>
-                  <p className="text-xs text-gray-500">Usuarios con puntos</p>
+                  <p className="text-xs text-gray-500">{t('statsUsuariosConPuntos')}</p>
                 </div>
               </div>
 
               <div className="pt-4 border-t">
-                <p className="text-sm font-medium text-gray-700 mb-3">Puntos por acción</p>
+                <p className="text-sm font-medium text-gray-700 mb-3">{t('statsPuntosPorAccion')}</p>
                 <div className="space-y-3">
                   {zancadasStats.transactionsByAction.map((action) => (
                     <div key={action.actionCode} className="flex items-center justify-between">
                       <div>
                         <span className="text-sm font-medium text-gray-700">{action.actionName}</span>
-                        <span className="text-xs text-gray-400 ml-2">({action.count} veces)</span>
+                        <span className="text-xs text-gray-400 ml-2">{t('statsVeces', { count: action.count })}</span>
                       </div>
                       <span className="font-bold text-green-600">{action.points.toLocaleString()} pts</span>
                     </div>
@@ -638,14 +641,14 @@ export default function StatsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-600" />
-                Últimas Zancadas
+                {t('statsUltimasZancadas')}
               </CardTitle>
-              <CardDescription>10 transacciones más recientes</CardDescription>
+              <CardDescription>{t('statsUltimasZancadasDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {zancadasStats.recentTransactions.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">No hay transacciones aún</p>
+                  <p className="text-sm text-gray-500 text-center py-4">{t('statsNoTransacciones')}</p>
                 ) : (
                   zancadasStats.recentTransactions.map((tx) => (
                     <div key={tx.id} className="flex items-center justify-between py-2 border-b last:border-0">

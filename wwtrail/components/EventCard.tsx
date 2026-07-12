@@ -6,6 +6,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ManagedEvent } from '@/types/event';
 import { 
   Calendar, MapPin, Users, Eye, Edit, Trash2, Plus, 
@@ -65,7 +66,8 @@ export default function EventCard({
   // Simplified mode
   simplified = false,
 }: EventCardProps) {
-  
+  const t = useTranslations('cmp');
+
   const [imageError, setImageError] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
@@ -90,28 +92,28 @@ export default function EventCard({
   const getStatusConfig = (status: string) => {
     const configs = {
       PUBLISHED: {
-        label: 'Publicado',
+        label: t('statusPublished'),
         color: 'text-green-700',
         bgColor: 'bg-green-50',
         borderColor: 'border-green-200',
         icon: CheckCircle,
       },
       DRAFT: {
-        label: 'Borrador',
+        label: t('statusDraft'),
         color: 'text-yellow-700',
         bgColor: 'bg-yellow-50',
         borderColor: 'border-yellow-200',
         icon: Clock,
       },
       REJECTED: {
-        label: 'Rechazado',
+        label: t('statusRejected'),
         color: 'text-red-700',
         bgColor: 'bg-red-50',
         borderColor: 'border-red-200',
         icon: XCircle,
       },
       CANCELLED: {
-        label: 'Cancelado',
+        label: t('statusCancelled'),
         color: 'text-gray-700',
         bgColor: 'bg-gray-50',
         borderColor: 'border-gray-200',
@@ -335,14 +337,14 @@ export default function EventCard({
         {/* Rejection reason (management mode) */}
         {managementMode && event.status === 'REJECTED' && event.rejectionReason && (
           <div className="mb-3 p-2 bg-red-50 border border-red-100 rounded text-xs text-red-700">
-            <strong>Motivo:</strong> {event.rejectionReason}
+            <strong>{t('reasonLabel')}</strong> {event.rejectionReason}
           </div>
         )}
 
         {/* Admin notes (management mode) */}
         {managementMode && userRole === 'ADMIN' && event.adminNotes && (
           <div className="mb-3 p-2 bg-blue-50 border border-blue-100 rounded text-xs text-blue-700">
-            <strong>Notas admin:</strong> {event.adminNotes}
+            <strong>{t('adminNotesLabel')}</strong> {event.adminNotes}
           </div>
         )}
 
@@ -471,7 +473,7 @@ export default function EventCard({
             onClick={(e) => e.stopPropagation()}
           >
             <Eye className="h-4 w-4" />
-            Ver
+            {t('view')}
           </Link>
 
           {/* Editar */}
@@ -484,7 +486,7 @@ export default function EventCard({
               className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <Edit className="h-4 w-4" />
-              Editar
+              {t('edit')}
             </button>
           )}
 
@@ -498,7 +500,7 @@ export default function EventCard({
               className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              Competición
+              {t('competition')}
             </button>
           )}
 
@@ -512,7 +514,7 @@ export default function EventCard({
               className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
             >
               <CheckCircle className="h-4 w-4" />
-              Aprobar
+              {t('approve')}
             </button>
           )}
 
@@ -526,7 +528,7 @@ export default function EventCard({
               className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
             >
               <XCircle className="h-4 w-4" />
-              Rechazar
+              {t('reject')}
             </button>
           )}
 
@@ -540,7 +542,7 @@ export default function EventCard({
               className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors"
             >
               <Star className={`h-4 w-4 ${(event.isFeatured || event.featured) ? 'fill-yellow-500' : ''}`} />
-              {(event.isFeatured || event.featured) ? 'Quitar' : 'Destacar'}
+              {(event.isFeatured || event.featured) ? t('unfeature') : t('feature')}
             </button>
           )}
 
@@ -554,7 +556,7 @@ export default function EventCard({
               className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors ml-auto"
             >
               <Trash2 className="h-4 w-4" />
-              Eliminar
+              {t('delete')}
             </button>
           )}
         </div>

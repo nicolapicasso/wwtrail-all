@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import competitionsService from '@/lib/api/v2/competitions.service';
@@ -27,6 +28,7 @@ const EventMap = dynamic(() => import('@/components/EventMap'), {
 export default function CompetitionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('pgEvents');
   const slug = params.slug as string;
   const locale = params.locale as string; // ✅ Get current locale
 
@@ -115,7 +117,7 @@ export default function CompetitionDetailPage() {
       }
     } catch (err: any) {
       console.error('Error loading competition:', err);
-      setError(err.message || 'Error al cargar la competición');
+      setError(err.message || t('errorLoadingCompetition'));
     } finally {
       setLoading(false);
     }
@@ -141,10 +143,10 @@ export default function CompetitionDetailPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">❌ {error || 'Competición no encontrada'}</h1>
+          <h1 className="text-2xl font-bold mb-4">❌ {error || t('competitionNotFound')}</h1>
           <Button onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            {t('back')}
           </Button>
         </div>
       </div>
@@ -197,7 +199,7 @@ export default function CompetitionDetailPage() {
               <div className="mb-4">
                 <nav className="flex items-center gap-2 text-sm text-white/80">
                   <Link href="/events" className="hover:text-white transition-colors">
-                    Eventos
+                    {t('breadcrumbEvents')}
                   </Link>
                   <span>/</span>
                   <Link
@@ -218,7 +220,7 @@ export default function CompetitionDetailPage() {
               </span>
               {competition.isHighlighted && (
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
-                  ⭐ Destacada
+                  ⭐ {t('highlighted')}
                 </span>
               )}
             </div>
@@ -257,11 +259,11 @@ export default function CompetitionDetailPage() {
             {/* Description */}
             <Card>
               <CardHeader>
-                <CardTitle>Descripción</CardTitle>
+                <CardTitle>{t('description')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground whitespace-pre-line">
-                  {competition.description || 'No hay descripción disponible.'}
+                  {competition.description || t('noDescriptionAvailable')}
                 </p>
               </CardContent>
             </Card>
@@ -269,32 +271,32 @@ export default function CompetitionDetailPage() {
             {/* Stats */}
             <Card>
               <CardHeader>
-                <CardTitle>Características</CardTitle>
+                <CardTitle>{t('characteristics')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {competition.baseDistance && (
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <p className="text-2xl font-bold text-primary">{competition.baseDistance} km</p>
-                      <p className="text-sm text-muted-foreground">Distancia</p>
+                      <p className="text-sm text-muted-foreground">{t('distance')}</p>
                     </div>
                   )}
                   {competition.baseElevation && (
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <p className="text-2xl font-bold text-primary">{competition.baseElevation} m</p>
-                      <p className="text-sm text-muted-foreground">Desnivel +</p>
+                      <p className="text-sm text-muted-foreground">{t('elevationGain')}</p>
                     </div>
                   )}
                   {competition.baseMaxParticipants && (
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <p className="text-2xl font-bold text-primary">{competition.baseMaxParticipants}</p>
-                      <p className="text-sm text-muted-foreground">Plazas</p>
+                      <p className="text-sm text-muted-foreground">{t('slots')}</p>
                     </div>
                   )}
                   {competition.type && (
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <p className="text-2xl font-bold text-primary">{competition.type}</p>
-                      <p className="text-sm text-muted-foreground">Modalidad</p>
+                      <p className="text-sm text-muted-foreground">{t('modality')}</p>
                     </div>
                   )}
                 </div>
@@ -337,7 +339,7 @@ export default function CompetitionDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    Ubicación
+                    {t('location')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -374,7 +376,7 @@ export default function CompetitionDetailPage() {
                       className="text-sm text-primary hover:underline flex items-center gap-2"
                     >
                       <MapPin className="h-4 w-4" />
-                      Ver en Google Maps
+                      {t('viewOnGoogleMaps')}
                     </a>
                   </div>
                 </CardContent>
@@ -384,14 +386,14 @@ export default function CompetitionDetailPage() {
             {/* Registration Card */}
             <Card>
               <CardHeader>
-                <CardTitle>Información</CardTitle>
+                <CardTitle>{t('information')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Date */}
                 <div className="flex items-start">
                   <Calendar className="w-5 h-5 mr-3 mt-0.5 text-primary flex-shrink-0" />
                   <div>
-                    <p className="font-semibold">Fecha</p>
+                    <p className="font-semibold">{t('date')}</p>
                     <p className="text-sm text-muted-foreground capitalize">{formattedDate}</p>
                   </div>
                 </div>
@@ -400,7 +402,7 @@ export default function CompetitionDetailPage() {
                 <div className="flex items-start">
                   <MapPin className="w-5 h-5 mr-3 mt-0.5 text-primary flex-shrink-0" />
                   <div>
-                    <p className="font-semibold">Ubicación</p>
+                    <p className="font-semibold">{t('location')}</p>
                     <p className="text-sm text-muted-foreground">
                       {competition.city}, {competition.country}
                     </p>
@@ -412,7 +414,7 @@ export default function CompetitionDetailPage() {
                   <div className="flex items-start">
                     <Users className="w-5 h-5 mr-3 mt-0.5 text-primary flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="font-semibold">Participantes</p>
+                      <p className="font-semibold">{t('participants')}</p>
                       <p className="text-sm text-muted-foreground">
                         {competition._count?.participants || 0} / {competition.maxParticipants}
                       </p>
@@ -443,7 +445,7 @@ export default function CompetitionDetailPage() {
             {(competition.websiteUrl || competition.email) && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Contacto</CardTitle>
+                  <CardTitle>{t('contact')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {competition.websiteUrl && (
@@ -453,7 +455,7 @@ export default function CompetitionDetailPage() {
                       rel="noopener noreferrer"
                       className="block text-primary hover:underline"
                     >
-                      Sitio web oficial →
+                      {t('officialWebsite')} →
                     </a>
                   )}
                   {competition.email && (
@@ -461,7 +463,7 @@ export default function CompetitionDetailPage() {
                       href={`mailto:${competition.email}`}
                       className="block text-primary hover:underline"
                     >
-                      Enviar email →
+                      {t('sendEmail')} →
                     </a>
                   )}
                 </CardContent>

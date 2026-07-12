@@ -23,7 +23,7 @@ import {
   Heart,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { userService, UserParticipation } from '@/lib/api/user.service';
 import { favoritesService, FavoriteCompetition } from '@/lib/api/favorites.service';
@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('pgAccount');
 
   const [participations, setParticipations] = useState<UserParticipation[]>([]);
   const [loadingParticipations, setLoadingParticipations] = useState(true);
@@ -71,7 +72,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Cargando perfil...</div>
+        <div className="animate-pulse">{t('loadingProfile')}</div>
       </div>
     );
   }
@@ -93,9 +94,9 @@ export default function ProfilePage() {
       <div className="relative bg-gradient-to-r from-blue-600 to-green-600 text-white py-12">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-2">Mi Perfil</h1>
+          <h1 className="text-4xl font-bold mb-2">{t('myProfile')}</h1>
           <p className="text-lg opacity-90">
-            Gestiona tu información personal
+            {t('myProfileSubtitle')}
           </p>
         </div>
       </div>
@@ -107,7 +108,7 @@ export default function ProfilePage() {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Información Personal</CardTitle>
+                <CardTitle>{t('personalInfo')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Avatar */}
@@ -135,7 +136,7 @@ export default function ProfilePage() {
                       onClick={() => router.push(`/${locale}/profile/edit`)}
                     >
                       <Edit className="w-4 h-4 mr-2" />
-                      Editar Perfil
+                      {t('editProfile')}
                     </Button>
                     <Button
                       variant="outline"
@@ -143,7 +144,7 @@ export default function ProfilePage() {
                       onClick={() => router.push(`/${locale}/profile/participations`)}
                     >
                       <Trophy className="w-4 h-4 mr-2" />
-                      Mis Participaciones
+                      {t('myParticipations')}
                     </Button>
                     <Button
                       variant="outline"
@@ -151,7 +152,7 @@ export default function ProfilePage() {
                       onClick={() => router.push(`/${locale}/profile/change-password`)}
                     >
                       <Lock className="w-4 h-4 mr-2" />
-                      Cambiar Contraseña
+                      {t('changePassword')}
                     </Button>
                   </div>
                 </div>
@@ -159,7 +160,7 @@ export default function ProfilePage() {
                 {/* Role Badge */}
                 <div className="pt-4 border-t">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Rol</span>
+                    <span className="text-sm text-muted-foreground">{t('role')}</span>
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       user.role === 'ADMIN' 
                         ? 'bg-red-100 text-red-800'
@@ -169,17 +170,17 @@ export default function ProfilePage() {
                         ? 'bg-green-100 text-green-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {user.role === 'ADMIN' && '👑 Administrador'}
-                      {user.role === 'ORGANIZER' && '📋 Organizador'}
-                      {user.role === 'ATHLETE' && '🏃 Atleta'}
-                      {user.role === 'VIEWER' && '👀 Visitante'}
+                      {user.role === 'ADMIN' && `👑 ${t('roleAdmin')}`}
+                      {user.role === 'ORGANIZER' && `📋 ${t('roleOrganizer')}`}
+                      {user.role === 'ATHLETE' && `🏃 ${t('roleAthlete')}`}
+                      {user.role === 'VIEWER' && `👀 ${t('roleViewer')}`}
                     </span>
                   </div>
                 </div>
 
                 {/* Profile Visibility */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Visibilidad</span>
+                  <span className="text-sm text-muted-foreground">{t('visibility')}</span>
                   <span
                     className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
                       user.isPublic
@@ -190,12 +191,12 @@ export default function ProfilePage() {
                     {user.isPublic ? (
                       <>
                         <Globe className="w-3 h-3" />
-                        Público
+                        {t('public')}
                       </>
                     ) : (
                       <>
                         <Lock className="w-3 h-3" />
-                        Privado
+                        {t('private')}
                       </>
                     )}
                   </span>
@@ -203,7 +204,7 @@ export default function ProfilePage() {
 
                 {/* Member Since */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Miembro desde</span>
+                  <span className="text-sm text-muted-foreground">{t('memberSince')}</span>
                   <span className="text-sm font-medium capitalize">{memberSince}</span>
                 </div>
               </CardContent>
@@ -215,13 +216,13 @@ export default function ProfilePage() {
             {/* Contact Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Información de Contacto</CardTitle>
+                <CardTitle>{t('contactInfo')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center">
                   <Mail className="w-5 h-5 mr-3 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="text-sm text-muted-foreground">{t('email')}</p>
                     <p className="font-medium">{user.email}</p>
                   </div>
                 </div>
@@ -230,7 +231,7 @@ export default function ProfilePage() {
                   <div className="flex items-center">
                     <MapPin className="w-5 h-5 mr-3 text-muted-foreground" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Ubicación</p>
+                      <p className="text-sm text-muted-foreground">{t('location')}</p>
                       <p className="font-medium">
                         {user.city && user.country 
                           ? `${user.city}, ${user.country}`
@@ -242,13 +243,13 @@ export default function ProfilePage() {
 
                 {(!user.city && !user.country) && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No hay información de contacto adicional.
+                    {t('noContactInfo')}
                     <br />
                     <button
                       onClick={() => router.push('/profile/edit')}
                       className="text-primary hover:underline mt-2"
                     >
-                      Agregar información
+                      {t('addInfo')}
                     </button>
                   </p>
                 )}
@@ -258,20 +259,20 @@ export default function ProfilePage() {
             {/* Bio */}
             <Card>
               <CardHeader>
-                <CardTitle>Biografía</CardTitle>
+                <CardTitle>{t('biography')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {user.bio ? (
                   <p className="text-muted-foreground whitespace-pre-line">{user.bio}</p>
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    Cuéntanos sobre ti...
+                    {t('tellUsAboutYou')}
                     <br />
                     <button
                       onClick={() => router.push('/profile/edit')}
                       className="text-primary hover:underline mt-2"
                     >
-                      Agregar biografía
+                      {t('addBiography')}
                     </button>
                   </p>
                 )}
@@ -286,7 +287,7 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="w-5 h-5 text-red-500" />
-                  Competiciones Favoritas
+                  {t('favoriteCompetitions')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -298,14 +299,14 @@ export default function ProfilePage() {
                   <div className="text-center py-8">
                     <Heart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                     <p className="text-muted-foreground mb-3">
-                      No tienes competiciones favoritas
+                      {t('noFavorites')}
                     </p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => router.push(`/${locale}/events`)}
                     >
-                      Explorar competiciones
+                      {t('exploreCompetitions')}
                     </Button>
                   </div>
                 ) : (
@@ -339,7 +340,7 @@ export default function ProfilePage() {
                     ))}
                     {favorites.length > 5 && (
                       <p className="text-center text-sm text-muted-foreground pt-2">
-                        Y {favorites.length - 5} más...
+                        {t('andMore', { count: favorites.length - 5 })}
                       </p>
                     )}
                   </div>
@@ -358,14 +359,14 @@ export default function ProfilePage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="w-5 h-5" />
-                  Participaciones recientes
+                  {t('recentParticipations')}
                 </CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push(`/${locale}/profile/participations`)}
                 >
-                  Ver todas
+                  {t('viewAll')}
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </CardHeader>
@@ -378,14 +379,14 @@ export default function ProfilePage() {
                   <div className="text-center py-8">
                     <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                     <p className="text-muted-foreground mb-3">
-                      No tienes participaciones registradas
+                      {t('noParticipationsRegistered')}
                     </p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => router.push(`/${locale}/profile/participations`)}
                     >
-                      Añadir participación
+                      {t('addParticipation')}
                     </Button>
                   </div>
                 ) : (
@@ -439,7 +440,7 @@ export default function ProfilePage() {
                     ))}
                     {participations.length > 5 && (
                       <p className="text-center text-sm text-muted-foreground pt-2">
-                        Y {participations.length - 5} más...
+                        {t('andMore', { count: participations.length - 5 })}
                       </p>
                     )}
                   </div>

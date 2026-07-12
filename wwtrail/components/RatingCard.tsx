@@ -3,6 +3,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { User, Edit2, Trash2 } from 'lucide-react';
@@ -22,6 +23,7 @@ export default function RatingCard({
   onEdit,
   onDelete,
 }: RatingCardProps) {
+  const t = useTranslations('cmpLayout');
   const avgRating =
     (rating.ratingInfoBriefing +
       rating.ratingRacePack +
@@ -56,7 +58,7 @@ export default function RatingCard({
 
           <div>
             <p className="font-semibold text-gray-900">
-              {rating.user?.username || 'Usuario'}
+              {rating.user?.username || t('userFallback')}
             </p>
             <p className="text-xs text-gray-500">{timeAgo}</p>
           </div>
@@ -82,37 +84,37 @@ export default function RatingCard({
       {/* Detalles expandibles */}
       <details className="group">
         <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-700 font-medium list-none flex items-center gap-1">
-          <span className="group-open:hidden">Ver desglose</span>
-          <span className="hidden group-open:inline">Ocultar desglose</span>
+          <span className="group-open:hidden">{t('ratingShowBreakdown')}</span>
+          <span className="hidden group-open:inline">{t('ratingHideBreakdown')}</span>
         </summary>
 
         <div className="mt-3 pt-3 border-t grid grid-cols-2 gap-3 text-xs">
           <div>
-            <p className="text-gray-600">Info & Briefing</p>
+            <p className="text-gray-600">{t('critInfoBriefing')}</p>
             <StarRating value={rating.ratingInfoBriefing} readonly size="sm" />
           </div>
           <div>
-            <p className="text-gray-600">Race Pack</p>
+            <p className="text-gray-600">{t('critRacePack')}</p>
             <StarRating value={rating.ratingRacePack} readonly size="sm" />
           </div>
           <div>
-            <p className="text-gray-600">Village</p>
+            <p className="text-gray-600">{t('critVillage')}</p>
             <StarRating value={rating.ratingVillage} readonly size="sm" />
           </div>
           <div>
-            <p className="text-gray-600">Marking</p>
+            <p className="text-gray-600">{t('critMarking')}</p>
             <StarRating value={rating.ratingMarking} readonly size="sm" />
           </div>
           <div>
-            <p className="text-gray-600">Aid Stations</p>
+            <p className="text-gray-600">{t('critAidStations')}</p>
             <StarRating value={rating.ratingAid} readonly size="sm" />
           </div>
           <div>
-            <p className="text-gray-600">Finisher</p>
+            <p className="text-gray-600">{t('critFinisher')}</p>
             <StarRating value={rating.ratingFinisher} readonly size="sm" />
           </div>
           <div className="col-span-2">
-            <p className="text-gray-600">ECO Friendly</p>
+            <p className="text-gray-600">{t('critEcoFriendly')}</p>
             <StarRating value={rating.ratingEco} readonly size="sm" />
           </div>
         </div>
@@ -127,7 +129,7 @@ export default function RatingCard({
               className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             >
               <Edit2 className="w-3.5 h-3.5" />
-              Editar
+              {t('edit')}
             </button>
           )}
 
@@ -137,7 +139,7 @@ export default function RatingCard({
               className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Eliminar
+              {t('delete')}
             </button>
           )}
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { PostForm } from '@/components/PostForm';
 import { postsService } from '@/lib/api/v2';
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
 
 export default function EditPostPage() {
+  const t = useTranslations('boCatalog');
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -33,7 +35,7 @@ export default function EditPostPage() {
       setPost(data);
     } catch (err: any) {
       console.error('Error loading post:', err);
-      setError(err.message || 'Error al cargar el artículo');
+      setError(err.message || t('errorLoadingPost'));
     } finally {
       setLoading(false);
     }
@@ -44,7 +46,7 @@ export default function EditPostPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-green-600" />
-          <p className="text-muted-foreground">Cargando artículo...</p>
+          <p className="text-muted-foreground">{t('loadingPost')}</p>
         </div>
       </div>
     );
@@ -54,11 +56,11 @@ export default function EditPostPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">❌ {error || 'Artículo no encontrado'}</h1>
+          <h1 className="text-2xl font-bold mb-4">❌ {error || t('postNotFound')}</h1>
           <Link href="/organizer/posts">
             <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               <ArrowLeft className="w-4 h-4 inline mr-2" />
-              Volver a Mis Artículos
+              {t('backToPosts')}
             </button>
           </Link>
         </div>
@@ -77,7 +79,7 @@ export default function EditPostPage() {
               className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver a Mis Artículos
+              {t('backToPosts')}
             </Link>
             <div className="flex items-center gap-2">
               <GenerateTranslationsButton
@@ -91,13 +93,13 @@ export default function EditPostPage() {
                 className="flex items-center gap-2"
               >
                 <Search className="h-4 w-4" />
-                Gestionar SEO
+                {t('manageSeo')}
               </Button>
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-2">Editar Artículo</h1>
+          <h1 className="text-4xl font-bold mb-2">{t('editPost')}</h1>
           <p className="text-muted-foreground">
-            Edita el artículo &quot;{post.title}&quot;
+            {t('editPostSubtitle', { title: post.title })}
           </p>
         </div>
 

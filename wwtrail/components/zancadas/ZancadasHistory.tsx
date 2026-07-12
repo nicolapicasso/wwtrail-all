@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { zancadasService, ZancadasTransaction } from '@/lib/api/zancadas.service';
 import { History, ChevronDown, UserPlus, LogIn, Star, Trophy, Footprints } from 'lucide-react';
 
@@ -15,11 +16,11 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   PARTICIPATION: Trophy,
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  REGISTER: 'Registro',
-  LOGIN: 'Inicio de sesión',
-  RATING: 'Valoración',
-  PARTICIPATION: 'Participación',
+const ACTION_LABEL_KEYS: Record<string, string> = {
+  REGISTER: 'actionRegister',
+  LOGIN: 'actionLogin',
+  RATING: 'actionRating',
+  PARTICIPATION: 'actionParticipation',
 };
 
 interface ZancadasHistoryProps {
@@ -27,6 +28,7 @@ interface ZancadasHistoryProps {
 }
 
 export function ZancadasHistory({ refreshTrigger }: ZancadasHistoryProps) {
+  const t = useTranslations('boAdmin');
   const [transactions, setTransactions] = useState<ZancadasTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -100,17 +102,17 @@ export function ZancadasHistory({ refreshTrigger }: ZancadasHistoryProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <History className="h-5 w-5 text-muted-foreground" />
-            <CardTitle className="text-lg">Historial de Zancadas</CardTitle>
+            <CardTitle className="text-lg">{t('zancadasHistory')}</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
             <Footprints className="h-12 w-12 mx-auto text-gray-300 mb-3" />
             <p className="text-muted-foreground">
-              Aún no tienes transacciones de Zancadas
+              {t('noTransactions')}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              Participa en carreras, valora ediciones y gana puntos
+              {t('noTransactionsHelp')}
             </p>
           </div>
         </CardContent>
@@ -123,7 +125,7 @@ export function ZancadasHistory({ refreshTrigger }: ZancadasHistoryProps) {
       <CardHeader>
         <div className="flex items-center gap-2">
           <History className="h-5 w-5 text-muted-foreground" />
-          <CardTitle className="text-lg">Historial de Zancadas</CardTitle>
+          <CardTitle className="text-lg">{t('zancadasHistory')}</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -142,7 +144,9 @@ export function ZancadasHistory({ refreshTrigger }: ZancadasHistoryProps) {
                 </div>
                 <div>
                   <p className="font-medium text-sm">
-                    {ACTION_LABELS[transaction.actionCode] || transaction.actionCode}
+                    {ACTION_LABEL_KEYS[transaction.actionCode]
+                      ? t(ACTION_LABEL_KEYS[transaction.actionCode])
+                      : transaction.actionCode}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {new Date(transaction.createdAt).toLocaleDateString('es-ES', {
@@ -164,12 +168,12 @@ export function ZancadasHistory({ refreshTrigger }: ZancadasHistoryProps) {
                 </Badge>
                 {transaction.syncStatus === 'PENDING' && (
                   <Badge variant="outline" className="text-xs">
-                    Pendiente
+                    {t('pending')}
                   </Badge>
                 )}
                 {transaction.syncStatus === 'FAILED' && (
                   <Badge variant="destructive" className="text-xs">
-                    Error
+                    {t('error')}
                   </Badge>
                 )}
               </div>
@@ -186,11 +190,11 @@ export function ZancadasHistory({ refreshTrigger }: ZancadasHistoryProps) {
               disabled={loadingMore}
             >
               {loadingMore ? (
-                'Cargando...'
+                t('loading')
               ) : (
                 <>
                   <ChevronDown className="h-4 w-4 mr-2" />
-                  Ver más
+                  {t('loadMore')}
                 </>
               )}
             </Button>

@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Save, Loader2, AlertCircle, Image as ImageIcon, Tag, Globe, Sparkles, ExternalLink, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,6 +34,7 @@ export default function CompetitionForm({
   onCancel,
 }: CompetitionFormProps) {
   const router = useRouter();
+  const t = useTranslations('boForms');
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export default function CompetitionForm({
 
   const handleAiAutofill = async () => {
     if (!aiUrl.trim()) {
-      setError('Introduce la URL de la competición para usar el auto-relleno con IA');
+      setError(t('aiUrlRequiredComp'));
       return;
     }
 
@@ -83,11 +85,11 @@ export default function CompetitionForm({
       }
 
       setAiDone(true);
-      toast.success(`Auto-relleno completado. Se encontraron ${Object.keys(result).filter(k => result[k as keyof CompetitionAutoFillResult]).length} campos.`);
+      toast.success(t('aiAutofillDoneFields', { fields: Object.keys(result).filter(k => result[k as keyof CompetitionAutoFillResult]).length }));
     } catch (err: any) {
       console.error('AI autofill error:', err);
-      setError(err.response?.data?.error || err.message || 'Error al analizar la URL con IA');
-      toast.error('Error al analizar la URL');
+      setError(err.response?.data?.error || err.message || t('aiUrlError'));
+      toast.error(t('aiUrlAnalyzeError'));
     } finally {
       setAiLoading(false);
     }
@@ -148,7 +150,7 @@ export default function CompetitionForm({
         setSpecialSeriesList(ssArray);
       } catch (err) {
         console.error('Error loading catalogs:', err);
-        toast.error('Error al cargar los catálogos');
+        toast.error(t('catalogsLoadError'));
       } finally {
         setLoadingCatalogs(false);
       }
@@ -183,17 +185,17 @@ export default function CompetitionForm({
 
     // Validaciones
     if (!formData.name.trim()) {
-      setError('El nombre es obligatorio');
+      setError(t('nameRequired'));
       return;
     }
 
     if (!formData.slug.trim()) {
-      setError('El slug es obligatorio');
+      setError(t('slugRequired'));
       return;
     }
 
     if (!formData.type) {
-      setError('El tipo de competición es obligatorio');
+      setError(t('compTypeRequired'));
       return;
     }
 
@@ -231,10 +233,10 @@ export default function CompetitionForm({
 
       if (isEditMode) {
         result = await competitionsService.update(competition.id, payload);
-        toast.success('Competición actualizada correctamente');
+        toast.success(t('compUpdatedSuccess'));
       } else {
         result = await competitionsService.create(eventId, payload);
-        toast.success('Competición creada correctamente');
+        toast.success(t('compCreatedSuccess'));
       }
 
       if (onSuccess) {
@@ -247,7 +249,7 @@ export default function CompetitionForm({
       const errorMessage =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        'Error al guardar la competición';
+        t('compSaveError');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -261,10 +263,10 @@ export default function CompetitionForm({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            {isEditMode ? 'Editar Competición' : 'Nueva Competición'}
+            {isEditMode ? t('editCompTitle') : t('newCompTitle')}
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Define las características de esta competición
+            {t('compSubtitle')}
           </p>
         </div>
 
@@ -274,7 +276,7 @@ export default function CompetitionForm({
             onClick={onCancel}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancelar
+            {t('cancel')}
           </button>
         )}
       </div>
@@ -283,10 +285,10 @@ export default function CompetitionForm({
       <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-5 w-5 text-purple-600" />
-          <h3 className="text-lg font-semibold text-purple-900">Auto-relleno con IA</h3>
+          <h3 className="text-lg font-semibold text-purple-900">{t('aiAutofillTitle')}</h3>
         </div>
         <p className="text-sm text-purple-700 mb-4">
-          Introduce la URL específica de esta competición y la IA rellenará los campos posibles.
+          {t('aiAutofillCompDesc')}
         </p>
 
         <div className="flex gap-2">
@@ -306,12 +308,12 @@ export default function CompetitionForm({
             {aiLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Analizando...
+                {t('analyzing')}
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                Analizar con IA
+                {t('analyzeWithAi')}
               </>
             )}
           </button>
@@ -321,7 +323,7 @@ export default function CompetitionForm({
           <div className="mt-3 p-3 bg-purple-100 border border-purple-200 rounded-lg">
             <p className="text-sm text-purple-800 flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              La IA está analizando la web de la competición...
+              {t('aiAnalyzingComp')}
             </p>
           </div>
         )}
@@ -329,7 +331,7 @@ export default function CompetitionForm({
         {aiDone && !aiLoading && (
           <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-800 font-medium">
-              Auto-relleno completado. Revisa los campos y ajusta lo que necesites.
+              {t('aiAutofillReview')}
             </p>
           </div>
         )}
@@ -358,7 +360,7 @@ export default function CompetitionForm({
           <div className="flex items-start">
             <AlertCircle className="h-5 w-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
+              <h3 className="text-sm font-medium text-red-800">{t('errorTitle')}</h3>
               <p className="text-sm text-red-700 mt-1">{error}</p>
             </div>
           </div>
@@ -368,13 +370,13 @@ export default function CompetitionForm({
       {/* Basic Info Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Información Básica
+          {t('basicInfo')}
         </h3>
 
         {/* Name */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre *
+            {t('nameRequiredLabel')}
           </label>
           <input
             type="text"
@@ -390,7 +392,7 @@ export default function CompetitionForm({
         {/* Slug */}
         <div>
           <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-            Slug *
+            {t('slugRequiredLabel')}
           </label>
           <input
             type="text"
@@ -404,7 +406,7 @@ export default function CompetitionForm({
           />
           {isEditMode && (
             <p className="text-xs text-gray-500 mt-1">
-              El slug no puede modificarse una vez creada la competición
+              {t('slugImmutableComp')}
             </p>
           )}
         </div>
@@ -412,7 +414,7 @@ export default function CompetitionForm({
         {/* Type */}
         <div>
           <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-            Tipo de Competición *
+            {t('compTypeLabel')}
           </label>
           <select
             id="type"
@@ -426,21 +428,21 @@ export default function CompetitionForm({
             <option value={CompetitionType.VERTICAL}>Vertical</option>
             <option value={CompetitionType.SKYRUNNING}>Skyrunning</option>
             <option value={CompetitionType.CANICROSS}>Canicross</option>
-            <option value={CompetitionType.OTHER}>Otro</option>
+            <option value={CompetitionType.OTHER}>{t('other')}</option>
           </select>
         </div>
 
         {/* Description */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Descripción
+            {t('description')}
           </label>
           <textarea
             id="description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={4}
-            placeholder="Descripción de la competición..."
+            placeholder={t('compDescriptionPlaceholder')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
           />
         </div>
@@ -450,7 +452,7 @@ export default function CompetitionForm({
           <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
             <span className="flex items-center gap-2">
               <Globe className="h-4 w-4" />
-              Idioma del Contenido *
+              {t('contentLanguageLabel')}
             </span>
           </label>
           <select
@@ -467,7 +469,7 @@ export default function CompetitionForm({
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+            {t('contentLanguageHelp')}
           </p>
         </div>
       </div>
@@ -475,17 +477,17 @@ export default function CompetitionForm({
       {/* Technical Specs Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Características Base
+          {t('baseCharacteristics')}
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          Estos valores pueden ser sobreescritos en cada edición
+          {t('baseCharacteristicsHelp')}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Base Distance */}
           <div>
             <label htmlFor="baseDistance" className="block text-sm font-medium text-gray-700 mb-1">
-              Distancia (km)
+              {t('distanceKm')}
             </label>
             <input
               type="number"
@@ -502,7 +504,7 @@ export default function CompetitionForm({
           {/* Base Elevation */}
           <div>
             <label htmlFor="baseElevation" className="block text-sm font-medium text-gray-700 mb-1">
-              Desnivel (m D+)
+              {t('elevationDPlus')}
             </label>
             <input
               type="number"
@@ -521,7 +523,7 @@ export default function CompetitionForm({
               htmlFor="baseMaxParticipants"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Participantes Máx.
+              {t('maxParticipants')}
             </label>
             <input
               type="number"
@@ -541,24 +543,24 @@ export default function CompetitionForm({
         <div className="flex items-center gap-2 mb-4">
           <Tag className="h-5 w-5 text-purple-600" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Clasificación y Certificaciones
+            {t('classificationCertifications')}
           </h3>
         </div>
         <p className="text-sm text-gray-600 mb-4">
-          Información adicional para filtros y búsqueda en el directorio
+          {t('classificationHelp')}
         </p>
 
         {loadingCatalogs ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            <span className="ml-2 text-gray-500">Cargando catálogos...</span>
+            <span className="ml-2 text-gray-500">{t('loadingCatalogs')}</span>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Terrain Type */}
             <div>
               <label htmlFor="terrainTypeId" className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo de Terreno
+                {t('terrainType')}
               </label>
               <select
                 id="terrainTypeId"
@@ -566,7 +568,7 @@ export default function CompetitionForm({
                 onChange={(e) => setFormData({ ...formData, terrainTypeId: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="">-- Sin especificar --</option>
+                <option value="">{t('unspecified')}</option>
                 {terrainTypes.map((type) => (
                   <option key={type.id} value={type.id}>
                     {type.name}
@@ -574,21 +576,21 @@ export default function CompetitionForm({
                 ))}
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Ej: Alta montaña, Costa, Desierto
+                {t('terrainTypeHelp')}
               </p>
             </div>
 
             {/* Special Series - Multi-select */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Series Especiales
+                {t('specialSeries')}
               </label>
               <p className="text-xs text-gray-500 mb-2">
-                Selecciona todas las series a las que pertenece esta competición
+                {t('specialSeriesHelp')}
               </p>
               <div className="border border-gray-300 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
                 {specialSeriesList.length === 0 ? (
-                  <p className="text-sm text-gray-500">No hay series disponibles</p>
+                  <p className="text-sm text-gray-500">{t('noSeriesAvailable')}</p>
                 ) : (
                   specialSeriesList.map((series) => (
                     <label
@@ -622,7 +624,7 @@ export default function CompetitionForm({
               </div>
               {formData.specialSeriesIds.length > 0 && (
                 <p className="text-xs text-blue-600 mt-2">
-                  {formData.specialSeriesIds.length} serie(s) seleccionada(s)
+                  {t('seriesSelectedCount', { count: formData.specialSeriesIds.length })}
                 </p>
               )}
             </div>
@@ -630,7 +632,7 @@ export default function CompetitionForm({
             {/* ITRA Points */}
             <div>
               <label htmlFor="itraPoints" className="block text-sm font-medium text-gray-700 mb-1">
-                Puntos ITRA
+                {t('itraPoints')}
               </label>
               <select
                 id="itraPoints"
@@ -638,24 +640,24 @@ export default function CompetitionForm({
                 onChange={(e) => setFormData({ ...formData, itraPoints: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="">-- Sin especificar --</option>
-                <option value="0">0 puntos</option>
-                <option value="1">1 punto</option>
-                <option value="2">2 puntos</option>
-                <option value="3">3 puntos</option>
-                <option value="4">4 puntos</option>
-                <option value="5">5 puntos</option>
-                <option value="6">6 puntos</option>
+                <option value="">{t('unspecified')}</option>
+                <option value="0">{t('itraPointsCount', { count: 0 })}</option>
+                <option value="1">{t('itraPointsCount', { count: 1 })}</option>
+                <option value="2">{t('itraPointsCount', { count: 2 })}</option>
+                <option value="3">{t('itraPointsCount', { count: 3 })}</option>
+                <option value="4">{t('itraPointsCount', { count: 4 })}</option>
+                <option value="5">{t('itraPointsCount', { count: 5 })}</option>
+                <option value="6">{t('itraPointsCount', { count: 6 })}</option>
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Certificación ITRA (0-6 puntos)
+                {t('itraPointsHelp')}
               </p>
             </div>
 
             {/* UTMB Index */}
             <div>
               <label htmlFor="utmbIndex" className="block text-sm font-medium text-gray-700 mb-1">
-                Índice UTMB
+                {t('utmbIndex')}
               </label>
               <select
                 id="utmbIndex"
@@ -663,14 +665,14 @@ export default function CompetitionForm({
                 onChange={(e) => setFormData({ ...formData, utmbIndex: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="">-- Sin especificar --</option>
+                <option value="">{t('unspecified')}</option>
                 <option value="INDEX_20K">20K</option>
                 <option value="INDEX_50K">50K</option>
                 <option value="INDEX_100K">100K</option>
                 <option value="INDEX_100M">100M</option>
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Categoría según distancia UTMB
+                {t('utmbIndexHelp')}
               </p>
             </div>
           </div>
@@ -682,7 +684,7 @@ export default function CompetitionForm({
         <div className="flex items-center gap-2 mb-4">
           <ImageIcon className="h-5 w-5 text-blue-600" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Imágenes y Medios
+            {t('imagesAndMedia')}
           </h3>
         </div>
 
@@ -690,44 +692,44 @@ export default function CompetitionForm({
           {/* Logo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Logotipo
+              {t('logo')}
             </label>
             <FileUpload
               fieldname="logo"
               onUpload={(url) => setFormData({ ...formData, logoUrl: url })}
               currentUrl={formData.logoUrl}
-              buttonText="Subir logo"
+              buttonText={t('uploadLogo')}
               maxSizeMB={2}
               accept="image/*"
               showPreview={true}
             />
             {formData.logoUrl && (
               <p className="text-xs text-green-600 font-medium mt-2">
-                ✓ Logo subido
+                {t('logoUploaded')}
               </p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Logo específico de la competición (opcional)
+              {t('compLogoHelp')}
             </p>
           </div>
 
           {/* Cover Image */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Imagen de Portada
+              {t('coverImage')}
             </label>
             <FileUpload
               fieldname="cover"
               onUpload={(url) => setFormData({ ...formData, coverImage: url })}
               currentUrl={formData.coverImage}
-              buttonText="Subir portada"
+              buttonText={t('uploadCover')}
               maxSizeMB={5}
               accept="image/*"
               showPreview={true}
             />
             {formData.coverImage && (
               <p className="text-xs text-green-600 font-medium mt-2">
-                ✓ Portada subida
+                {t('coverUploaded')}
               </p>
             )}
           </div>
@@ -735,42 +737,42 @@ export default function CompetitionForm({
           {/* Gallery */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Galería de Fotos
+              {t('photoGallery')}
             </label>
             <FileUpload
               fieldname="gallery"
               multiple={true}
               onUploadMultiple={(urls) => setFormData({ ...formData, gallery: urls })}
               currentUrls={formData.gallery}
-              buttonText="Subir fotos"
+              buttonText={t('uploadPhotos')}
               maxSizeMB={3}
               accept="image/*"
               showPreview={true}
             />
             {formData.gallery.length > 0 && (
               <p className="text-xs text-green-600 font-medium mt-2">
-                ✓ {formData.gallery.length} fotos
+                {t('photosCount', { count: formData.gallery.length })}
               </p>
             )}
           </div>
         </div>
 
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-          💡 Las imágenes se optimizan automáticamente. Máximo 5MB por archivo.
+          {t('imagesOptimizedNote')}
         </div>
       </div>
 
       {/* Display Settings Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Configuración de Visualización
+          {t('displaySettings')}
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Status */}
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-              Estado de Publicación
+              {t('publicationStatus')}
             </label>
             <select
               id="status"
@@ -779,25 +781,25 @@ export default function CompetitionForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               disabled={user?.role !== 'ADMIN' && formData.status !== 'DRAFT'}
             >
-              <option value="DRAFT">Borrador</option>
+              <option value="DRAFT">{t('statusDraft')}</option>
               {user?.role === 'ADMIN' && (
-                <option value="PUBLISHED">Publicada</option>
+                <option value="PUBLISHED">{t('statusPublishedFem')}</option>
               )}
               {user?.role === 'ADMIN' && (
-                <option value="CANCELLED">Cancelada</option>
+                <option value="CANCELLED">{t('statusCancelledFem')}</option>
               )}
             </select>
             <p className="text-xs text-gray-500 mt-1">
               {user?.role === 'ADMIN'
-                ? 'Solo las competiciones publicadas son visibles'
-                : 'Solo los administradores pueden publicar contenido. La competición quedará pendiente de revisión.'}
+                ? t('compVisibilityAdmin')
+                : t('compVisibilityNonAdmin')}
             </p>
           </div>
 
           {/* Display Order */}
           <div>
             <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 mb-1">
-              Orden de Visualización
+              {t('displayOrder')}
             </label>
             <input
               type="number"
@@ -809,7 +811,7 @@ export default function CompetitionForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Número más bajo aparece primero
+              {t('displayOrderHelp')}
             </p>
           </div>
         </div>
@@ -818,7 +820,7 @@ export default function CompetitionForm({
           {/* Featured */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Competición Destacada
+              {t('featuredComp')}
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -828,18 +830,18 @@ export default function CompetitionForm({
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">
-                {formData.featured ? 'Destacada' : 'Normal'}
+                {formData.featured ? t('featuredFem') : t('normal')}
               </span>
             </label>
             <p className="text-xs text-gray-500 mt-1">
-              Las competiciones destacadas se muestran de forma prominente
+              {t('featuredCompHelp')}
             </p>
           </div>
 
           {/* Is Active */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Activa/Inactiva
+              {t('activeInactive')}
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -849,11 +851,11 @@ export default function CompetitionForm({
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">
-                {formData.isActive ? 'Activa' : 'Inactiva'}
+                {formData.isActive ? t('active') : t('inactive')}
               </span>
             </label>
             <p className="text-xs text-gray-500 mt-1">
-              Solo las competiciones activas son visibles al público
+              {t('activeCompHelp')}
             </p>
           </div>
         </div>
@@ -869,12 +871,12 @@ export default function CompetitionForm({
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Guardando...
+              {t('saving')}
             </>
           ) : (
             <>
               <Save className="h-4 w-4" />
-              {isEditMode ? 'Actualizar' : 'Crear'} Competición
+              {isEditMode ? t('updateComp') : t('createComp')}
             </>
           )}
         </button>

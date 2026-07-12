@@ -3,6 +3,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Save, Plus, Trash2, GripVertical, Image as ImageIcon } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 
@@ -28,6 +29,7 @@ export function HeroConfigForm({
   saving,
 }: HeroConfigFormProps) {
   const [showAddImage, setShowAddImage] = useState(false);
+  const t = useTranslations('boAdmin');
 
   const handleAddImage = (url: string) => {
     if (url && !heroImages.includes(url)) {
@@ -57,19 +59,19 @@ export function HeroConfigForm({
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="block text-sm font-medium text-gray-700">
-            Imágenes del Slider ({heroImages.length})
+            {t('sliderImages', { count: heroImages.length })}
           </label>
           <button
             onClick={() => setShowAddImage(true)}
             className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Agregar imagen
+            {t('addImage')}
           </button>
         </div>
 
         <p className="text-sm text-gray-500 mb-4">
-          Las imágenes se mostrarán como un slider automático. Puedes agregar hasta 10 imágenes.
+          {t('sliderImagesHelp')}
         </p>
 
         {/* Image List */}
@@ -86,7 +88,7 @@ export function HeroConfigForm({
                     onClick={() => handleMoveImage(index, 'up')}
                     disabled={index === 0}
                     className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Mover arriba"
+                    title={t('moveUp')}
                   >
                     <GripVertical className="w-4 h-4 rotate-180" />
                   </button>
@@ -95,7 +97,7 @@ export function HeroConfigForm({
                     onClick={() => handleMoveImage(index, 'down')}
                     disabled={index === heroImages.length - 1}
                     className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Mover abajo"
+                    title={t('moveDown')}
                   >
                     <GripVertical className="w-4 h-4" />
                   </button>
@@ -125,7 +127,7 @@ export function HeroConfigForm({
                 <button
                   onClick={() => handleRemoveImage(index)}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                  title="Eliminar imagen"
+                  title={t('deleteImage')}
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
@@ -135,9 +137,9 @@ export function HeroConfigForm({
         ) : (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
             <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No hay imágenes configuradas</p>
+            <p className="text-gray-500">{t('noImagesConfigured')}</p>
             <p className="text-sm text-gray-400 mt-1">
-              Agrega imágenes para crear un slider en el hero
+              {t('noImagesHelp')}
             </p>
           </div>
         )}
@@ -146,10 +148,10 @@ export function HeroConfigForm({
         {showAddImage && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold mb-4">Agregar Imagen al Slider</h3>
+              <h3 className="text-lg font-semibold mb-4">{t('addImageToSlider')}</h3>
               <FileUpload
                 onUpload={handleAddImage}
-                buttonText="Subir imagen"
+                buttonText={t('uploadImage')}
                 fieldname="hero-slider"
                 maxSizeMB={10}
                 showPreview={false}
@@ -159,7 +161,7 @@ export function HeroConfigForm({
                   onClick={() => setShowAddImage(false)}
                   className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                 >
-                  Cancelar
+                  {t('cancel')}
                 </button>
               </div>
             </div>
@@ -170,13 +172,13 @@ export function HeroConfigForm({
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Título
+          {t('fieldTitle')}
         </label>
         <input
           type="text"
           value={heroTitle}
           onChange={(e) => onTitleChange(e.target.value)}
-          placeholder="Bienvenido a WWTRAIL"
+          placeholder={t('heroTitlePlaceholder')}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
@@ -184,13 +186,13 @@ export function HeroConfigForm({
       {/* Subtitle */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Subtítulo
+          {t('fieldSubtitle')}
         </label>
         <input
           type="text"
           value={heroSubtitle}
           onChange={(e) => onSubtitleChange(e.target.value)}
-          placeholder="La plataforma para trail runners"
+          placeholder={t('heroSubtitlePlaceholder')}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
@@ -203,7 +205,7 @@ export function HeroConfigForm({
           className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
         >
           <Save className="w-5 h-5" />
-          {saving ? 'Guardando...' : 'Guardar Hero'}
+          {saving ? t('saving') : t('saveHero')}
         </button>
       </div>
     </div>

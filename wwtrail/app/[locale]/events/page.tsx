@@ -3,7 +3,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { EventList } from '@/components/EventList';
 import { FeaturedEvents } from '@/components/events/FeaturedEvents';
@@ -19,6 +19,7 @@ export default function EventsPage() {
 
 function EventsPageContent() {
   const locale = useLocale();
+  const t = useTranslations('pgEvents');
   const searchParams = useSearchParams();
   const search = (searchParams.get('search') || '').trim();
   const hasSearch = search.length > 0;
@@ -31,15 +32,15 @@ function EventsPageContent() {
         <div className="ww-topo absolute inset-0 opacity-70" aria-hidden />
         <div className="relative z-10 mx-auto max-w-content px-6 py-14 sm:px-8 lg:px-10">
           <p className="mb-3 text-[13px] font-bold uppercase tracking-[0.14em] text-orange-accent">
-            {hasSearch ? 'Resultados de búsqueda' : 'Eventos destacados'}
+            {hasSearch ? t('searchResultsEyebrow') : t('featuredEventsEyebrow')}
           </p>
           <h1 className="max-w-3xl text-[36px] font-black leading-[1.02] tracking-[-0.03em] sm:text-[46px]">
-            {hasSearch ? <>Resultados para «{search}»</> : 'Encuentra tu próxima montaña'}
+            {hasSearch ? <>{t('resultsFor', { q: search })}</> : t('heroTitle')}
           </h1>
           <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-white/70">
             {hasSearch
-              ? 'Eventos, competiciones y servicios que coinciden con tu búsqueda.'
-              : 'Explora y filtra todos los eventos de trail running del mundo.'}
+              ? t('searchSubtitle')
+              : t('heroSubtitle')}
           </p>
 
           <div className="mt-9">

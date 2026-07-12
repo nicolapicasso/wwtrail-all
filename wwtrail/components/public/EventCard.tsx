@@ -9,15 +9,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ArrowRight, MapPin, Globe } from 'lucide-react';
 import type { Event } from '@/types/event';
 import { StatChip } from '@/components/ui/StatChip';
 import { cn } from '@/lib/utils';
 
-const MONTHS_ES = [
-  'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-  'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-];
+const MONTH_KEYS = [
+  'monthJan', 'monthFeb', 'monthMar', 'monthApr', 'monthMay', 'monthJun',
+  'monthJul', 'monthAug', 'monthSep', 'monthOct', 'monthNov', 'monthDec',
+] as const;
 
 export interface PublicEventCardProps {
   event: Event & {
@@ -37,10 +38,11 @@ function EventMedia({
   event: PublicEventCardProps['event'];
   className?: string;
 }) {
+  const t = useTranslations('cmp');
   const img = event.coverImage || event.coverImageUrl || event.logo || event.logoUrl || null;
   const month =
     event.typicalMonth && event.typicalMonth >= 1 && event.typicalMonth <= 12
-      ? MONTHS_ES[event.typicalMonth - 1]
+      ? t(MONTH_KEYS[event.typicalMonth - 1])
       : null;
 
   return (
@@ -115,6 +117,7 @@ function EventMedia({
 }
 
 function EventBody({ event }: { event: PublicEventCardProps['event'] }) {
+  const t = useTranslations('cmp');
   const races = event._count?.competitions;
 
   return (
@@ -127,14 +130,14 @@ function EventBody({ event }: { event: PublicEventCardProps['event'] }) {
 
       {/* Stat row */}
       <div className="mb-4 flex gap-2">
-        <StatChip label="Carreras" value={races ?? '—'} />
+        <StatChip label={t('races')} value={races ?? '—'} />
         <StatChip
-          label="Dist. máx"
+          label={t('maxDistance')}
           value={event.maxDistance ?? '—'}
           suffix={event.maxDistance != null ? 'km' : undefined}
         />
         <StatChip
-          label="Desnivel+"
+          label={t('elevationGain')}
           value={event.maxElevation ?? '—'}
           suffix={event.maxElevation != null ? 'm' : undefined}
           variant="elevation"
@@ -144,11 +147,11 @@ function EventBody({ event }: { event: PublicEventCardProps['event'] }) {
       {/* Footer */}
       <div className="mt-auto flex items-center justify-between border-t border-hairline pt-3 text-[12.5px] font-semibold text-text-muted">
         <span className="flex items-center gap-1.5">
-          {event.firstEditionYear ? <>Desde {event.firstEditionYear}</> : <>&nbsp;</>}
+          {event.firstEditionYear ? <>{t('since', { year: event.firstEditionYear })}</> : <>&nbsp;</>}
           {event.website && (
             <>
               <span className="text-text-faint">·</span>
-              <Globe className="h-3.5 w-3.5" /> Web
+              <Globe className="h-3.5 w-3.5" /> {t('web')}
             </>
           )}
         </span>
@@ -156,7 +159,7 @@ function EventBody({ event }: { event: PublicEventCardProps['event'] }) {
           href={`/events/${event.slug}`}
           className="flex items-center gap-1 font-extrabold text-green-brand hover:underline"
         >
-          Ver detalle <ArrowRight className="h-4 w-4" />
+          {t('viewDetail')} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

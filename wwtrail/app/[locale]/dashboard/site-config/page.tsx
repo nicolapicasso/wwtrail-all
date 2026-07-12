@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Settings, Save, Loader2, Key, Palette, Type, Square,
   Sun, Upload, Eye, EyeOff, Check, Bookmark, Trash2, Plus, Sparkles
@@ -36,22 +37,23 @@ const FONT_OPTIONS = [
 ];
 
 const BORDER_RADIUS_OPTIONS = [
-  { value: '0', label: 'Sin redondeo (0px)' },
-  { value: '4', label: 'Sutil (4px)' },
-  { value: '8', label: 'Moderado (8px)' },
-  { value: '12', label: 'Redondeado (12px)' },
-  { value: '16', label: 'Muy redondeado (16px)' },
-  { value: '9999', label: 'Pill (completo)' },
+  { value: '0', labelKey: 'siteConfigRadiusNone' },
+  { value: '4', labelKey: 'siteConfigRadiusSubtle' },
+  { value: '8', labelKey: 'siteConfigRadiusModerate' },
+  { value: '12', labelKey: 'siteConfigRadiusRounded' },
+  { value: '16', labelKey: 'siteConfigRadiusVeryRounded' },
+  { value: '9999', labelKey: 'siteConfigRadiusPill' },
 ];
 
 const SHADOW_OPTIONS = [
-  { value: 'none', label: 'Sin sombra' },
-  { value: 'subtle', label: 'Sutil' },
-  { value: 'medium', label: 'Media' },
-  { value: 'strong', label: 'Pronunciada' },
+  { value: 'none', labelKey: 'siteConfigShadowNone' },
+  { value: 'subtle', labelKey: 'siteConfigShadowSubtle' },
+  { value: 'medium', labelKey: 'siteConfigShadowMedium' },
+  { value: 'strong', labelKey: 'siteConfigShadowStrong' },
 ];
 
 export default function SiteConfigPage() {
+  const t = useTranslations('boMisc');
   const [config, setConfig] = useState<SiteConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,7 +92,7 @@ export default function SiteConfigPage() {
       patch[field] = preset[field];
     });
     setConfig({ ...config, ...patch });
-    setPresetMsg(`Preset "${preset.name}" cargado — pulsa Guardar para aplicarlo`);
+    setPresetMsg(t('siteConfigPresetLoaded', { name: preset.name }));
     setTimeout(() => setPresetMsg(null), 5000);
   };
 
@@ -105,11 +107,11 @@ export default function SiteConfigPage() {
       });
       await apiClientV2.post('/admin/theme-presets', payload);
       setNewPresetName('');
-      setPresetMsg(`Preset "${payload.name}" guardado`);
+      setPresetMsg(t('siteConfigPresetSaved', { name: payload.name }));
       setTimeout(() => setPresetMsg(null), 4000);
       await fetchPresets();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error guardando el preset');
+      setError(err.response?.data?.error || t('siteConfigPresetSaveError'));
     } finally {
       setSavingPreset(false);
     }
@@ -117,12 +119,12 @@ export default function SiteConfigPage() {
 
   const deletePreset = async (preset: ThemePreset) => {
     if (preset.builtin) return;
-    if (!confirm(`¿Eliminar el preset "${preset.name}"?`)) return;
+    if (!confirm(t('siteConfigDeletePresetConfirm', { name: preset.name }))) return;
     try {
       await apiClientV2.delete(`/admin/theme-presets/${preset.id}`);
       await fetchPresets();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error eliminando el preset');
+      setError(err.response?.data?.error || t('siteConfigPresetDeleteError'));
     }
   };
 
@@ -133,7 +135,7 @@ export default function SiteConfigPage() {
       const data = res.data?.data || res.data;
       setConfig(data);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error cargando configuración');
+      setError(err.response?.data?.error || t('siteConfigLoadError'));
     } finally {
       setLoading(false);
     }
@@ -164,7 +166,7 @@ export default function SiteConfigPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error guardando configuración');
+      setError(err.response?.data?.error || t('siteConfigSaveError'));
     } finally {
       setSaving(false);
     }
@@ -183,7 +185,7 @@ export default function SiteConfigPage() {
       const url = await uploadFile(file, field === 'logoUrl' ? 'logo' : 'favicon');
       setConfig({ ...config, [field]: url });
     } catch (err: any) {
-      setError(`Error subiendo ${field === 'logoUrl' ? 'logo' : 'favicon'}: ${err.message}`);
+      setError(t('siteConfigUploadError', { type: field === 'logoUrl' ? 'logo' : 'favicon', message: err.message }));
     } finally {
       setUploading(false);
     }
@@ -205,7 +207,7 @@ export default function SiteConfigPage() {
   if (!config) {
     return (
       <div className="p-6 text-center text-red-600">
-        {error || 'No se pudo cargar la configuración'}
+        {error || t('siteConfigCannotLoad')}
       </div>
     );
   }
@@ -217,8 +219,8 @@ export default function SiteConfigPage() {
         <div className="flex items-center gap-3">
           <Settings className="h-7 w-7 text-gray-700" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Ajustes del Sitio</h1>
-            <p className="text-sm text-gray-500">Configuración general, estilos y claves API</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('siteConfigTitle')}</h1>
+            <p className="text-sm text-gray-500">{t('siteConfigSubtitle')}</p>
           </div>
         </div>
         <button
@@ -233,7 +235,7 @@ export default function SiteConfigPage() {
           ) : (
             <Save className="h-4 w-4" />
           )}
-          {saving ? 'Guardando...' : saved ? 'Guardado' : 'Guardar'}
+          {saving ? t('guardando') : saved ? t('siteConfigSaved') : t('guardar')}
         </button>
       </div>
 
@@ -248,11 +250,10 @@ export default function SiteConfigPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Bookmark className="h-5 w-5 text-green-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Presets de tema</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('siteConfigThemePresets')}</h2>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            Carga una configuración de estilos guardada o guarda la actual con un nombre.
-            Aplicar un preset rellena el formulario; recuerda pulsar <strong>Guardar</strong> para publicarlo.
+            {t('siteConfigThemePresetsDescPre')}<strong>{t('guardar')}</strong>{t('siteConfigThemePresetsDescPost')}
           </p>
         </div>
         <div className="p-6 space-y-5">
@@ -283,7 +284,7 @@ export default function SiteConfigPage() {
                     <button
                       onClick={() => deletePreset(preset)}
                       className="text-gray-300 hover:text-red-500 transition-colors shrink-0"
-                      title="Eliminar preset"
+                      title={t('siteConfigDeletePreset')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -306,7 +307,7 @@ export default function SiteConfigPage() {
                   onClick={() => applyPreset(preset)}
                   className="mt-3 w-full text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg py-1.5 transition-colors"
                 >
-                  Aplicar
+                  {t('siteConfigApply')}
                 </button>
               </div>
             ))}
@@ -318,7 +319,7 @@ export default function SiteConfigPage() {
               type="text"
               value={newPresetName}
               onChange={(e) => setNewPresetName(e.target.value)}
-              placeholder="Nombre del nuevo preset..."
+              placeholder={t('siteConfigNewPresetPlaceholder')}
               maxLength={80}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
             />
@@ -328,7 +329,7 @@ export default function SiteConfigPage() {
               className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 disabled:opacity-40 transition-colors text-sm whitespace-nowrap"
             >
               {savingPreset ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              Guardar tema actual
+              {t('siteConfigSaveCurrentTheme')}
             </button>
           </div>
         </div>
@@ -339,20 +340,20 @@ export default function SiteConfigPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Key className="h-5 w-5 text-amber-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Claves API</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('siteConfigApiKeys')}</h2>
           </div>
-          <p className="text-sm text-gray-500 mt-1">Configura las claves de servicios externos</p>
+          <p className="text-sm text-gray-500 mt-1">{t('siteConfigApiKeysDesc')}</p>
         </div>
         <div className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               OpenAI API Key
-              <span className="text-gray-400 font-normal ml-2">(Traducciones, SEO, Auto-relleno IA)</span>
+              <span className="text-gray-400 font-normal ml-2">{t('siteConfigOpenaiKeyHint')}</span>
             </label>
             {config.hasOpenaiKey && !newApiKey && (
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
-                  Configurada: {config.openaiApiKey}
+                  {t('siteConfigConfigured')}: {config.openaiApiKey}
                 </span>
               </div>
             )}
@@ -362,7 +363,7 @@ export default function SiteConfigPage() {
                   type={showApiKey ? 'text' : 'password'}
                   value={newApiKey}
                   onChange={(e) => setNewApiKey(e.target.value)}
-                  placeholder={config.hasOpenaiKey ? 'Dejar vacío para mantener la actual' : 'sk-...'}
+                  placeholder={config.hasOpenaiKey ? t('siteConfigApiKeyKeepPlaceholder') : 'sk-...'}
                   className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
                 />
                 <button
@@ -375,7 +376,7 @@ export default function SiteConfigPage() {
               </div>
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              La clave se almacena de forma segura y nunca se muestra completa
+              {t('siteConfigApiKeySecureNote')}
             </p>
           </div>
         </div>
@@ -386,13 +387,13 @@ export default function SiteConfigPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Sun className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Marca e Identidad</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('siteConfigBranding')}</h2>
           </div>
         </div>
         <div className="p-6 space-y-6">
           {/* Site Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Sitio</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('siteConfigSiteName')}</label>
             <input
               type="text"
               value={config.siteName}
@@ -404,7 +405,7 @@ export default function SiteConfigPage() {
           {/* Logo & Favicon */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Logotipo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('siteConfigLogo')}</label>
               <div className="flex items-center gap-4">
                 {config.logoUrl && (
                   <img
@@ -415,7 +416,7 @@ export default function SiteConfigPage() {
                 )}
                 <label className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors text-sm">
                   <Upload className="h-4 w-4" />
-                  {uploadingLogo ? 'Subiendo...' : 'Subir logo'}
+                  {uploadingLogo ? t('siteConfigUploading') : t('siteConfigUploadLogo')}
                   <input
                     type="file"
                     accept="image/*"
@@ -439,7 +440,7 @@ export default function SiteConfigPage() {
                 )}
                 <label className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors text-sm">
                   <Upload className="h-4 w-4" />
-                  {uploadingFavicon ? 'Subiendo...' : 'Subir favicon'}
+                  {uploadingFavicon ? t('siteConfigUploading') : t('siteConfigUploadFavicon')}
                   <input
                     type="file"
                     accept="image/*,.ico"
@@ -459,13 +460,13 @@ export default function SiteConfigPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Type className="h-5 w-5 text-purple-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Tipografía</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('siteConfigTypography')}</h2>
           </div>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fuente principal</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('siteConfigFontPrimary')}</label>
               <select
                 value={config.fontPrimary}
                 onChange={(e) => updateField('fontPrimary', e.target.value)}
@@ -476,11 +477,11 @@ export default function SiteConfigPage() {
                 ))}
               </select>
               <p className="text-sm text-gray-500 mt-2" style={{ fontFamily: config.fontPrimary }}>
-                Vista previa: The quick brown fox jumps
+                {t('siteConfigFontPreview')}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fuente secundaria</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('siteConfigFontSecondary')}</label>
               <select
                 value={config.fontSecondary}
                 onChange={(e) => updateField('fontSecondary', e.target.value)}
@@ -500,17 +501,17 @@ export default function SiteConfigPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Palette className="h-5 w-5 text-pink-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Colores</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('siteConfigColors')}</h2>
           </div>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {([
-              { field: 'colorPrimary', label: 'Primario' },
-              { field: 'colorSecondary', label: 'Secundario' },
-              { field: 'colorAccent', label: 'Acento' },
-              { field: 'colorBackground', label: 'Fondo' },
-              { field: 'colorText', label: 'Texto' },
+              { field: 'colorPrimary', label: t('siteConfigColorPrimary') },
+              { field: 'colorSecondary', label: t('siteConfigColorSecondary') },
+              { field: 'colorAccent', label: t('siteConfigColorAccent') },
+              { field: 'colorBackground', label: t('siteConfigColorBackground') },
+              { field: 'colorText', label: t('siteConfigColorText') },
               { field: 'colorSuccess', label: 'Success' },
               { field: 'colorDanger', label: 'Danger' },
             ] as { field: keyof SiteConfig; label: string }[]).map(({ field, label }) => (
@@ -537,12 +538,12 @@ export default function SiteConfigPage() {
 
           {/* Color Preview */}
           <div className="mt-6 p-4 rounded-lg border border-gray-200" style={{ backgroundColor: config.colorBackground }}>
-            <h3 className="text-lg font-bold mb-2" style={{ color: config.colorText }}>Vista previa de colores</h3>
-            <p className="text-sm mb-3" style={{ color: config.colorText }}>Texto de ejemplo sobre el fondo configurado.</p>
+            <h3 className="text-lg font-bold mb-2" style={{ color: config.colorText }}>{t('siteConfigColorPreview')}</h3>
+            <p className="text-sm mb-3" style={{ color: config.colorText }}>{t('siteConfigColorPreviewText')}</p>
             <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorPrimary }}>Primario</span>
-              <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorSecondary }}>Secundario</span>
-              <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorAccent }}>Acento</span>
+              <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorPrimary }}>{t('siteConfigColorPrimary')}</span>
+              <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorSecondary }}>{t('siteConfigColorSecondary')}</span>
+              <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorAccent }}>{t('siteConfigColorAccent')}</span>
               <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorSuccess }}>Success</span>
               <span className="px-3 py-1 rounded text-white text-sm" style={{ backgroundColor: config.colorDanger }}>Danger</span>
             </div>
@@ -555,32 +556,32 @@ export default function SiteConfigPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Square className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Bordes y Sombras</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('siteConfigBordersShadows')}</h2>
           </div>
         </div>
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Redondeo de bordes</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('siteConfigBorderRadius')}</label>
               <select
                 value={config.borderRadius}
                 onChange={(e) => updateField('borderRadius', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                {BORDER_RADIUS_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
+                {BORDER_RADIUS_OPTIONS.map(({ value, labelKey }) => (
+                  <option key={value} value={value}>{t(labelKey)}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Estilo de sombras</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('siteConfigShadowStyle')}</label>
               <select
                 value={config.shadowStyle}
                 onChange={(e) => updateField('shadowStyle', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                {SHADOW_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
+                {SHADOW_OPTIONS.map(({ value, labelKey }) => (
+                  <option key={value} value={value}>{t(labelKey)}</option>
                 ))}
               </select>
             </div>

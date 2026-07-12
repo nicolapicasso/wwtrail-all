@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard,
@@ -26,64 +27,65 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const t = useTranslations('boAdmin');
 
   const menuItems = [
     {
-      title: 'Dashboard',
+      title: t('menuDashboard'),
       href: '/admin',
       icon: LayoutDashboard,
     },
     {
-      title: 'Administración Web',
+      title: t('menuWebAdmin'),
       href: '/admin/web',
       icon: Globe,
       subItems: [
         {
-          title: 'HOME',
+          title: t('menuHome'),
           href: '/dashboard/home-config',
           icon: Home,
         },
         {
-          title: 'Footer',
+          title: t('menuFooter'),
           href: '/admin/footer',
           icon: LayoutIcon,
         },
         {
-          title: 'Landings',
+          title: t('menuLandings'),
           href: '/admin/landings',
           icon: FileText,
         },
       ],
     },
     {
-      title: 'Usuarios',
+      title: t('menuUsers'),
       href: '/admin/users',
       icon: Users,
     },
     {
-      title: 'Eventos',
+      title: t('menuEvents'),
       href: '/admin/events',
       icon: Calendar,
     },
     {
-      title: 'Servicios',
+      title: t('menuServices'),
       href: '/admin/services',
       icon: MapPin,
       subItems: [
         {
-          title: 'Categorías',
+          title: t('menuCategories'),
           href: '/admin/services/categories',
           icon: Tag,
         },
       ],
     },
     {
-      title: 'Estadísticas',
+      title: t('menuStats'),
       href: '/admin/stats',
       icon: BarChart3,
     },
     {
-      title: 'Configuración',
+      title: t('menuSettings'),
       href: '/admin/settings',
       icon: Settings,
     },
@@ -204,7 +206,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             className="flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
           >
             <LogOut className="mr-3 h-5 w-5" />
-            Cerrar Sesión
+            {t('logout')}
           </button>
         </div>
       </aside>
@@ -214,7 +216,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-16 items-center border-b border-gray-200 bg-white px-6">
           <h1 className="text-xl font-semibold text-gray-900">
-            Panel de Administración
+            {t('adminPanelTitle')}
           </h1>
         </header>
 

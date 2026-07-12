@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import eventsService from '@/lib/api/v2/events.service';
+import competitionsService from '@/lib/api/v2/competitions.service';
 import type { Event } from '@/types/event';
 import { EventStatus } from '@/types/event';
 import { StatChip } from '@/components/ui/StatChip';
@@ -16,8 +17,10 @@ function mediaUrl(e: Event) {
   return e.coverImage || e.coverImageUrl || e.logo || e.logoUrl || null;
 }
 
-function LargeCard({ event }: { event: Event }) {
+function LargeCard({ event, stats }: { event: Event; stats?: { maxDistance: number | null; maxElevation: number | null } }) {
   const img = mediaUrl(event);
+  const distValue = stats?.maxDistance ? `${Math.round(stats.maxDistance)} km` : '—';
+  const elevValue = stats?.maxElevation ? `${Math.round(stats.maxElevation)} m` : '—';
   return (
     <Link
       href={`/events/${event.slug}`}
@@ -40,8 +43,8 @@ function LargeCard({ event }: { event: Event }) {
         </h3>
         <div className="mt-5 flex max-w-md gap-2">
           <StatChip label="Carreras" value={event._count?.competitions ?? '—'} />
-          <StatChip label="Dist. máx" value="—" />
-          <StatChip label="Desnivel+" value="—" variant="elevation" />
+          <StatChip label="Dist. máx" value={distValue} />
+          <StatChip label="Desnivel+" value={elevValue} variant="elevation" />
         </div>
       </div>
     </Link>
@@ -75,6 +78,7 @@ function SmallCard({ event }: { event: Event }) {
 
 export function FeaturedEvents() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [firstStats, setFirstStats] = useState<{ maxDistance: number | null; maxElevation: number | null } | undefined>(undefined);
 
   useEffect(() => {
     let active = true;
@@ -85,7 +89,25 @@ export function FeaturedEvents() {
           limit: 3,
           status: EventStatus.PUBLISHED,
         });
-        if (active) setEvents(res?.data || []);
+        const list: Event[] = res?.data || [];
+        if (!active) return;
+        setEvents(list);
+
+        // Calcular dist. máx / desnivel máx del evento grande a partir de sus competiciones
+        if (list[0]?.id) {
+          try {
+            const comps = await competitionsService.getByEvent(list[0].id);
+            if (!active) return;
+            const distances = comps.map((c: any) => c.baseDistance).filter((n: any) => typeof n === 'number');
+            const elevations = comps.map((c: any) => c.baseElevation).filter((n: any) => typeof n === 'number');
+            setFirstStats({
+              maxDistance: distances.length ? Math.max(...distances) : null,
+              maxElevation: elevations.length ? Math.max(...elevations) : null,
+            });
+          } catch {
+            if (active) setFirstStats(undefined);
+          }
+        }
       } catch {
         if (active) setEvents([]);
       }
@@ -101,7 +123,7 @@ export function FeaturedEvents() {
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.55fr_1fr]">
-      <LargeCard event={first} />
+      <LargeCard event={first} stats={firstStats} />
       <div className="flex flex-col gap-5">
         {rest.slice(0, 2).map((e) => (
           <SmallCard key={e.id} event={e} />

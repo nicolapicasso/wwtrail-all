@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { promotionsService } from '@/lib/api/v2';
 import { Promotion } from '@/types/v2';
@@ -13,6 +14,7 @@ export default function PromotionDetailPage() {
   const router = useRouter();
   const slug = params.slug as string;
   const { user } = useAuth();
+  const t = useTranslations('pgCatalog');
 
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ export default function PromotionDetailPage() {
       setPromotion(response.data);
     } catch (err: any) {
       console.error('Error loading promotion:', err);
-      setError(err.message || 'Error al cargar la promoción');
+      setError(err.message || t('errorLoadingPromotion'));
     } finally {
       setLoading(false);
     }
@@ -61,7 +63,7 @@ export default function PromotionDetailPage() {
       setRedemptionSuccess(true);
       setShowRedeemForm(false);
     } catch (err: any) {
-      alert(err.message || 'Error al canjear el cupón');
+      alert(err.message || t('errorRedeemingCoupon'));
     } finally {
       setRedeeming(false);
     }
@@ -72,7 +74,7 @@ export default function PromotionDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
+          <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -82,12 +84,12 @@ export default function PromotionDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error || 'Promoción no encontrada'}</p>
+          <p className="text-red-600 mb-4">{error || t('promotionNotFound')}</p>
           <button
             onClick={() => router.push('/promotions')}
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
-            Ver todas las promociones
+            {t('viewAllPromotions')}
           </button>
         </div>
       </div>
@@ -122,11 +124,11 @@ export default function PromotionDetailPage() {
               <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
                 isCoupon ? 'bg-blue-500 text-white' : 'bg-[#B66916] text-white'
               }`}>
-                {isCoupon ? '🎟️ Cupón' : '🔒 Contenido Exclusivo'}
+                {isCoupon ? `🎟️ ${t('coupon')}` : `🔒 ${t('exclusiveContent')}`}
               </span>
               {promotion.featured && (
                 <span className="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-400 text-gray-900">
-                  ⭐ Destacado
+                  ⭐ {t('featured')}
                 </span>
               )}
             </div>
@@ -147,18 +149,18 @@ export default function PromotionDetailPage() {
                 {promotion.isGlobal ? (
                   <>
                     <Globe className="h-4 w-4" />
-                    <span>Global</span>
+                    <span>{t('global')}</span>
                   </>
                 ) : (
                   <>
                     <MapPin className="h-4 w-4" />
-                    <span>{promotion.countries?.length || 0} países</span>
+                    <span>{t('countriesCount', { count: promotion.countries?.length || 0 })}</span>
                   </>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
-                <span>{promotion.viewCount} vistas</span>
+                <span>{t('visits', { count: promotion.viewCount })}</span>
               </div>
             </div>
 
@@ -170,7 +172,7 @@ export default function PromotionDetailPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium mb-6"
               >
-                <span>Visitar sitio web</span>
+                <span>{t('visitWebsite')}</span>
                 <ExternalLink className="h-4 w-4" />
               </a>
             )}
@@ -180,7 +182,7 @@ export default function PromotionDetailPage() {
         {/* Gallery */}
         {promotion.gallery && promotion.gallery.length > 0 && (
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Galería</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('gallery')}</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {promotion.gallery.map((img, index) => (
                 <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
@@ -196,11 +198,11 @@ export default function PromotionDetailPage() {
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
             <div className="text-center">
               <Gift className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Obtener Cupón</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('getCoupon')}</h2>
 
               {promotion.couponStats && (
                 <p className="text-gray-600 mb-6">
-                  {promotion.couponStats.available} de {promotion.couponStats.total} cupones disponibles
+                  {t('couponsAvailable', { available: promotion.couponStats.available, total: promotion.couponStats.total })}
                 </p>
               )}
 
@@ -211,15 +213,15 @@ export default function PromotionDetailPage() {
                   className="px-8 py-4 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {promotion.couponStats && promotion.couponStats.available === 0
-                    ? 'Cupones Agotados'
-                    : 'Solicitar Cupón'}
+                    ? t('couponsSoldOut')
+                    : t('requestCoupon')}
                 </button>
               ) : (
                 <form onSubmit={handleRedeemCoupon} className="max-w-md mx-auto">
                   <div className="space-y-4 mb-6">
                     <div>
                       <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-1">
-                        Tu Nombre *
+                        {t('yourName')}
                       </label>
                       <input
                         id="userName"
@@ -232,7 +234,7 @@ export default function PromotionDetailPage() {
                     </div>
                     <div>
                       <label htmlFor="userEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                        Tu Email *
+                        {t('yourEmail')}
                       </label>
                       <input
                         id="userEmail"
@@ -251,14 +253,14 @@ export default function PromotionDetailPage() {
                       className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                       disabled={redeeming}
                     >
-                      Cancelar
+                      {t('cancel')}
                     </button>
                     <button
                       type="submit"
                       disabled={redeeming}
                       className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {redeeming ? 'Canjeando...' : 'Canjear Cupón'}
+                      {redeeming ? t('redeeming') : t('redeemCoupon')}
                     </button>
                   </div>
                 </form>
@@ -273,12 +275,12 @@ export default function PromotionDetailPage() {
             <div className="text-green-600 mb-4">
               <Gift className="h-16 w-16 mx-auto" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Cupón Obtenido!</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('couponObtained')}</h2>
             <p className="text-gray-600 mb-6">
-              Hemos enviado tu cupón a {userEmail}
+              {t('couponSentTo', { email: userEmail })}
             </p>
             <div className="bg-white border-2 border-dashed border-green-500 rounded-lg p-6 mb-6">
-              <p className="text-sm text-gray-600 mb-2">Tu código de cupón:</p>
+              <p className="text-sm text-gray-600 mb-2">{t('yourCouponCode')}</p>
               <p className="text-3xl font-bold text-green-600 font-mono">{redeemedCode}</p>
             </div>
             {promotion.brandUrl && (
@@ -288,7 +290,7 @@ export default function PromotionDetailPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
               >
-                <span>Usar Cupón Ahora</span>
+                <span>{t('useCouponNow')}</span>
                 <ExternalLink className="h-5 w-5" />
               </a>
             )}
@@ -301,22 +303,22 @@ export default function PromotionDetailPage() {
             {requiresLogin ? (
               <div className="text-center py-8">
                 <Lock className="h-16 w-16 text-[#B66916] mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Contenido Exclusivo</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('exclusiveContent')}</h2>
                 <p className="text-gray-600 mb-6">
-                  Debes iniciar sesión para ver este contenido exclusivo
+                  {t('mustLoginForExclusive')}
                 </p>
                 <div className="flex gap-3 justify-center">
                   <button
                     onClick={() => router.push(`/auth/login?redirect=/promotions/${slug}`)}
                     className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
                   >
-                    Iniciar Sesión
+                    {t('login')}
                   </button>
                   <button
                     onClick={() => router.push(`/auth/register?redirect=/promotions/${slug}`)}
                     className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
                   >
-                    Registrarse
+                    {t('register')}
                   </button>
                 </div>
               </div>
@@ -324,7 +326,7 @@ export default function PromotionDetailPage() {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Lock className="h-6 w-6 text-[#B66916]" />
-                  Contenido Exclusivo
+                  {t('exclusiveContent')}
                 </h2>
                 <div
                   className="prose prose-lg max-w-none"

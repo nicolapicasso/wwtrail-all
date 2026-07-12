@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { postsService } from '@/lib/api/v2';
 import { PostListItem } from '@/types/v2';
 import { ArticleGrid } from './ArticleGrid';
@@ -20,9 +21,11 @@ export function RelatedArticles({
   eventId,
   competitionId,
   editionId,
-  title = 'Artículos Relacionados',
+  title,
   className = '',
 }: RelatedArticlesProps) {
+  const t = useTranslations('cmpLayout');
+  const displayTitle = title ?? t('relatedArticles');
   const [articles, setArticles] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,7 +66,7 @@ export function RelatedArticles({
     <div className={`bg-white rounded-lg border p-6 ${className}`}>
       <div className="flex items-center gap-2 mb-6">
         <BookOpen className="h-6 w-6 text-green-600" />
-        <h2 className="text-2xl font-bold">{title}</h2>
+        <h2 className="text-2xl font-bold">{displayTitle}</h2>
       </div>
 
       {loading ? (

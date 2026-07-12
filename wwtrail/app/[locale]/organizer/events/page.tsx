@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Plus, Loader2, LayoutGrid, LayoutList } from 'lucide-react';
 import EventStats from '@/components/EventStats';
 import EventFilters from '@/components/EventFilters';
@@ -17,6 +18,7 @@ type ViewMode = 'list' | 'grid';
 
 export default function MyEventsPage() {
   const router = useRouter();
+  const t = useTranslations('boEvents');
   const { user } = useAuth();
 
   // State
@@ -134,7 +136,7 @@ export default function MyEventsPage() {
       setSelectedEventIds(new Set());
     } catch (error: any) {
       console.error('Error fetching events:', error);
-      alert(error.response?.data?.message || 'Error al cargar eventos');
+      alert(error.response?.data?.message || t('errorLoadingEvents'));
     } finally {
       setIsLoading(false);
     }
@@ -234,15 +236,15 @@ export default function MyEventsPage() {
   const handleBulkStatusChange = (newStatus: EventStatus) => {
     const count = selectedEventIds.size;
     const statusLabels: Record<string, string> = {
-      PUBLISHED: 'publicar',
-      DRAFT: 'cambiar a borrador',
-      CANCELLED: 'cancelar',
+      PUBLISHED: t('bulkPublish'),
+      DRAFT: t('bulkToDraft'),
+      CANCELLED: t('bulkCancel'),
     };
 
     setConfirmDialog({
       isOpen: true,
-      title: `${statusLabels[newStatus].charAt(0).toUpperCase() + statusLabels[newStatus].slice(1)} eventos`,
-      message: `¿Estás seguro de que quieres ${statusLabels[newStatus]} ${count} evento${count > 1 ? 's' : ''}? Esta acción también afectará a todas sus competiciones y ediciones.`,
+      title: t('bulkStatusTitle', { action: statusLabels[newStatus].charAt(0).toUpperCase() + statusLabels[newStatus].slice(1) }),
+      message: t('bulkStatusMessage', { action: statusLabels[newStatus], count }),
       variant: newStatus === 'CANCELLED' ? 'warning' : 'info',
       action: async () => {
         try {
@@ -261,7 +263,7 @@ export default function MyEventsPage() {
           setConfirmDialog({ ...confirmDialog, isOpen: false });
         } catch (error: any) {
           console.error('Error updating status:', error);
-          alert(error.response?.data?.message || 'Error al actualizar estado');
+          alert(error.response?.data?.message || t('errorUpdatingStatus'));
         } finally {
           setIsLoadingAction(false);
         }
@@ -277,8 +279,8 @@ export default function MyEventsPage() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Eliminar eventos',
-      message: `¿Estás seguro de que quieres eliminar ${count} evento${count > 1 ? 's' : ''}? Esta acción no se puede deshacer y eliminará todas sus competiciones y ediciones.`,
+      title: t('bulkDeleteTitle'),
+      message: t('bulkDeleteMessage', { count }),
       variant: 'danger',
       action: async () => {
         try {
@@ -297,7 +299,7 @@ export default function MyEventsPage() {
           setConfirmDialog({ ...confirmDialog, isOpen: false });
         } catch (error: any) {
           console.error('Error deleting events:', error);
-          alert(error.response?.data?.message || 'Error al eliminar eventos');
+          alert(error.response?.data?.message || t('errorDeletingEvents'));
         } finally {
           setIsLoadingAction(false);
         }
@@ -321,8 +323,8 @@ export default function MyEventsPage() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Eliminar Evento',
-      message: `¿Estás seguro de que quieres eliminar "${event.name}"? Esta acción no se puede deshacer.`,
+      title: t('deleteEventTitle'),
+      message: t('deleteEventMessage', { name: event.name }),
       variant: 'danger',
       action: async () => {
         try {
@@ -333,7 +335,7 @@ export default function MyEventsPage() {
           setConfirmDialog({ ...confirmDialog, isOpen: false });
         } catch (error: any) {
           console.error('Error deleting event:', error);
-          alert(error.response?.data?.message || 'Error al eliminar evento');
+          alert(error.response?.data?.message || t('errorDeletingEvent'));
         } finally {
           setIsLoadingAction(false);
         }
@@ -357,8 +359,8 @@ export default function MyEventsPage() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Aprobar Evento',
-      message: `¿Aprobar "${event.name}"? El evento será visible públicamente.`,
+      title: t('approveEventTitle'),
+      message: t('approveEventMessage', { name: event.name }),
       variant: 'success',
       action: async () => {
         try {
@@ -369,7 +371,7 @@ export default function MyEventsPage() {
           setConfirmDialog({ ...confirmDialog, isOpen: false });
         } catch (error: any) {
           console.error('Error approving event:', error);
-          alert(error.response?.data?.message || 'Error al aprobar evento');
+          alert(error.response?.data?.message || t('errorApprovingEvent'));
         } finally {
           setIsLoadingAction(false);
         }
@@ -384,13 +386,13 @@ export default function MyEventsPage() {
     const event = events.find((e) => e.id === eventId);
     if (!event) return;
 
-    const reason = prompt(`Motivo del rechazo de "${event.name}":`);
+    const reason = prompt(t('rejectReasonPrompt', { name: event.name }));
     if (reason === null) return;
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Rechazar Evento',
-      message: `¿Rechazar "${event.name}"?`,
+      title: t('rejectEventTitle'),
+      message: t('rejectEventMessage', { name: event.name }),
       variant: 'danger',
       action: async () => {
         try {
@@ -401,7 +403,7 @@ export default function MyEventsPage() {
           setConfirmDialog({ ...confirmDialog, isOpen: false });
         } catch (error: any) {
           console.error('Error rejecting event:', error);
-          alert(error.response?.data?.message || 'Error al rechazar evento');
+          alert(error.response?.data?.message || t('errorRejectingEvent'));
         } finally {
           setIsLoadingAction(false);
         }
@@ -418,7 +420,7 @@ export default function MyEventsPage() {
       await fetchEvents();
     } catch (error: any) {
       console.error('Error toggling featured:', error);
-      alert(error.response?.data?.message || 'Error al destacar evento');
+      alert(error.response?.data?.message || t('errorTogglingFeatured'));
     }
   };
 
@@ -438,12 +440,12 @@ export default function MyEventsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {isAdmin ? 'Gestión de Eventos (Admin)' : 'Mis Eventos'}
+              {isAdmin ? t('eventsAdminTitle') : t('myEvents')}
             </h1>
             <p className="mt-1 text-sm text-gray-600">
               {isAdmin
-                ? 'Gestiona todos los eventos de la plataforma'
-                : 'Gestiona tus eventos y competiciones'}
+                ? t('eventsAdminSubtitle')
+                : t('myEventsSubtitle')}
             </p>
           </div>
           <button
@@ -451,7 +453,7 @@ export default function MyEventsPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-5 w-5" />
-            Nuevo Evento
+            {t('newEvent')}
           </button>
         </div>
 
@@ -488,7 +490,7 @@ export default function MyEventsPage() {
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor="select-all" className="text-sm text-gray-700 cursor-pointer">
-                Seleccionar todos ({events.length})
+                {t('selectAll', { count: events.length })}
               </label>
             </div>
 
@@ -501,7 +503,7 @@ export default function MyEventsPage() {
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
-                title="Vista lista"
+                title={t('viewList')}
               >
                 <LayoutList className="h-4 w-4" />
               </button>
@@ -512,7 +514,7 @@ export default function MyEventsPage() {
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
-                title="Vista cuadrícula"
+                title={t('viewGrid')}
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
@@ -527,13 +529,13 @@ export default function MyEventsPage() {
           </div>
         ) : !events || events.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <p className="text-gray-600">No se encontraron eventos</p>
+            <p className="text-gray-600">{t('noEventsFound')}</p>
             <button
               onClick={() => router.push('/organizer/events/new')}
               className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              Crear tu primer evento
+              {t('createFirstEvent')}
             </button>
           </div>
         ) : (
@@ -570,17 +572,17 @@ export default function MyEventsPage() {
               disabled={page === 1 || isLoading}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Anterior
+              {t('previous')}
             </button>
             <span className="text-sm text-gray-600">
-              Página {page} de {totalPages}
+              {t('pageOf', { page, totalPages })}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages || isLoading}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Siguiente
+              {t('next')}
             </button>
           </div>
         )}

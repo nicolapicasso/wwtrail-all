@@ -11,9 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Mountain, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function RegisterPage() {
   const { register: registerUser } = useAuth();
+  const t = useTranslations('pgAccount');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,7 +36,7 @@ export default function RegisterPage() {
       const { confirmPassword, ...registerData } = data;
       await registerUser(registerData);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al registrarse. Intenta de nuevo.');
+      setError(err.response?.data?.message || t('errorRegister'));
     } finally {
       setIsLoading(false);
     }
@@ -50,9 +52,9 @@ export default function RegisterPage() {
               <span className="text-2xl font-bold text-primary">WWTRAIL</span>
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
+          <CardTitle className="text-2xl text-center">{t('createAccount')}</CardTitle>
           <CardDescription className="text-center">
-            Únete a la comunidad de trail running
+            {t('createAccountSubtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -65,7 +67,7 @@ export default function RegisterPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">{t('email')} *</Label>
               <Input
                 id="email"
                 type="email"
@@ -79,7 +81,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username">Nombre de Usuario *</Label>
+              <Label htmlFor="username">{t('usernameLabel')} *</Label>
               <Input
                 id="username"
                 type="text"
@@ -94,7 +96,7 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nombre</Label>
+                <Label htmlFor="firstName">{t('firstName')}</Label>
                 <Input
                   id="firstName"
                   type="text"
@@ -105,7 +107,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName">Apellido</Label>
+                <Label htmlFor="lastName">{t('lastName')}</Label>
                 <Input
                   id="lastName"
                   type="text"
@@ -117,7 +119,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña *</Label>
+              <Label htmlFor="password">{t('password')} *</Label>
               <Input
                 id="password"
                 type="password"
@@ -131,7 +133,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Contraseña *</Label>
+              <Label htmlFor="confirmPassword">{t('confirmPassword')} *</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -154,17 +156,17 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creando cuenta...
+                  {t('creatingAccount')}
                 </>
               ) : (
-                'Crear Cuenta'
+                t('createAccount')
               )}
             </Button>
 
             <div className="text-sm text-center text-muted-foreground">
-              ¿Ya tienes cuenta?{' '}
+              {t('alreadyHaveAccount')}{' '}
               <Link href="/auth/login" className="text-primary hover:underline">
-                Inicia sesión
+                {t('signIn')}
               </Link>
             </div>
           </CardFooter>

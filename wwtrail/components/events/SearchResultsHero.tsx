@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { MapPin, Calendar, Flag, Building2, Loader2 } from 'lucide-react';
 import eventsService from '@/lib/api/v2/events.service';
 import competitionsService from '@/lib/api/v2/competitions.service';
@@ -23,10 +24,10 @@ interface Result {
   img: string | null;
 }
 
-const TYPE_META: Record<ResultType, { label: string; icon: any }> = {
-  event: { label: 'Evento', icon: Calendar },
-  competition: { label: 'Competición', icon: Flag },
-  service: { label: 'Servicio', icon: Building2 },
+const TYPE_META: Record<ResultType, { labelKey: string; icon: any }> = {
+  event: { labelKey: 'typeEvent', icon: Calendar },
+  competition: { labelKey: 'typeCompetition', icon: Flag },
+  service: { labelKey: 'typeService', icon: Building2 },
 };
 
 function toArray(res: any): any[] {
@@ -35,6 +36,7 @@ function toArray(res: any): any[] {
 }
 
 export function SearchResultsHero({ search }: { search: string }) {
+  const t = useTranslations('cmpLayout');
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -96,7 +98,7 @@ export function SearchResultsHero({ search }: { search: string }) {
   if (loading) {
     return (
       <div className="flex items-center gap-2 py-8 text-white/70">
-        <Loader2 className="h-5 w-5 animate-spin" /> Buscando «{search}»…
+        <Loader2 className="h-5 w-5 animate-spin" /> {t('searching', { search })}
       </div>
     );
   }
@@ -104,8 +106,8 @@ export function SearchResultsHero({ search }: { search: string }) {
   if (results.length === 0) {
     return (
       <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-        <p className="text-[16px] font-semibold text-white">Sin resultados para «{search}»</p>
-        <p className="mt-1 text-[14px] text-white/60">Prueba con otro término o revisa el listado completo debajo.</p>
+        <p className="text-[16px] font-semibold text-white">{t('noResultsFor', { search })}</p>
+        <p className="mt-1 text-[14px] text-white/60">{t('noResultsHint')}</p>
       </div>
     );
   }
@@ -113,7 +115,11 @@ export function SearchResultsHero({ search }: { search: string }) {
   return (
     <div>
       <p className="mb-4 text-[14px] text-white/70">
-        <span className="font-bold text-white">{results.length}</span> resultado(s) para «{search}»
+        {t.rich('resultsCountFor', {
+          count: results.length,
+          search,
+          b: (chunks) => <span className="font-bold text-white">{chunks}</span>,
+        })}
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {results.slice(0, 9).map((r) => {
@@ -133,7 +139,7 @@ export function SearchResultsHero({ search }: { search: string }) {
               )}
               <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 30%, rgba(15,19,21,.85))' }} />
               <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-pill bg-black/50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-                <Icon className="h-3 w-3" /> {meta.label}
+                <Icon className="h-3 w-3" /> {t(meta.labelKey)}
               </span>
               <div className="relative p-4">
                 {r.place && (

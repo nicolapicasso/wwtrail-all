@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
 import { ArrowLeft, Save, Loader2, Check, X, AlertCircle, Image as ImageIcon, Share2, Sparkles, Building2, Globe } from 'lucide-react';
@@ -21,6 +22,7 @@ interface SpecialSeriesFormProps {
 
 export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }: SpecialSeriesFormProps) {
   const router = useRouter();
+  const t = useTranslations('boForms');
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,7 +125,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
       setSlugValidation({
         isChecking: false,
         isAvailable: null,
-        error: 'Error al verificar disponibilidad',
+        error: t('slugAvailabilityError'),
       });
     }
   };
@@ -137,16 +139,16 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setError('El nombre de la serie especial es obligatorio');
+      setError(t('seriesNameRequired'));
       return false;
     }
     if (!formData.country.trim()) {
-      setError('El país es obligatorio');
+      setError(t('countryRequired'));
       return false;
     }
 
     if (formData.slug.length >= 3 && slugValidation.isAvailable === false) {
-      setError('El slug ya está en uso. Por favor, modifica el nombre de la serie.');
+      setError(t('slugInUseSeries'));
       return false;
     }
 
@@ -190,10 +192,10 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
       let response;
       if (mode === 'create') {
         response = await specialSeriesService.create(cleanSpecialSeriesData);
-        alert('✓ Serie especial creada exitosamente. Pendiente de aprobación por el administrador.');
+        alert(t('seriesCreatedSuccess'));
       } else {
         response = await specialSeriesService.update(specialSeriesId!, cleanSpecialSeriesData);
-        alert('✓ Serie especial actualizada exitosamente');
+        alert(t('seriesUpdatedSuccess'));
       }
 
       console.log('✅ Respuesta del backend:', response);
@@ -201,7 +203,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
       router.push('/organizer/special-series');
     } catch (err: any) {
       console.error(`❌ Error al ${mode === 'create' ? 'crear' : 'actualizar'} special series:`, err);
-      setError(err.message || `Error al ${mode === 'create' ? 'crear' : 'actualizar'} la serie especial`);
+      setError(err.message || (mode === 'create' ? t('seriesCreateError') : t('seriesUpdateError')));
     } finally {
       setLoading(false);
     }
@@ -217,7 +219,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver
+            {t('back')}
           </button>
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
@@ -225,12 +227,12 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {mode === 'create' ? 'Nueva Serie Especial' : 'Editar Serie Especial'}
+                {mode === 'create' ? t('newSeriesTitle') : t('editSeriesTitle')}
               </h1>
               <p className="text-gray-600 mt-1">
                 {mode === 'create'
-                  ? 'Crea una nueva serie especial (circuito) para agrupar competiciones'
-                  : 'Modifica los datos de la serie especial'}
+                  ? t('seriesCreateSubtitle')
+                  : t('seriesEditSubtitle')}
               </p>
             </div>
           </div>
@@ -242,7 +244,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
             <div className="flex items-start">
               <AlertCircle className="h-5 w-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <h3 className="text-sm font-medium text-red-800">{t('errorTitle')}</h3>
                 <p className="text-sm text-red-700 mt-1">{error}</p>
               </div>
             </div>
@@ -255,14 +257,14 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
           <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <Building2 className="h-5 w-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Información Básica</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('basicInfo')}</h2>
             </div>
 
             <div className="space-y-4">
               {/* Name */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de la Serie <span className="text-red-500">*</span>
+                  {t('seriesNameLabel')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -278,7 +280,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
               {/* Slug - Auto generado */}
               <div>
                 <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-                  Slug (URL amigable)
+                  {t('slugLabel')}
                 </label>
                 <div className="relative">
                   <input
@@ -305,16 +307,16 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {slugValidation.isAvailable === true && '✓ Slug disponible'}
-                  {slugValidation.isAvailable === false && '✗ Slug ya está en uso'}
-                  {!slugValidation.isChecking && slugValidation.isAvailable === null && 'Se genera automáticamente del nombre'}
+                  {slugValidation.isAvailable === true && t('slugAvailableCheck')}
+                  {slugValidation.isAvailable === false && t('slugInUseCheck')}
+                  {!slugValidation.isChecking && slugValidation.isAvailable === null && t('slugAutoFromName')}
                 </p>
               </div>
 
               {/* Country */}
               <div>
                 <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-                  País de Origen <span className="text-red-500">*</span>
+                  {t('originCountry')} <span className="text-red-500">*</span>
                 </label>
                 <CountrySelect
                   value={formData.country}
@@ -322,21 +324,21 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  País donde se originó la serie especial
+                  {t('originCountryHelp')}
                 </p>
               </div>
 
               {/* Description */}
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Descripción
+                  {t('description')}
                 </label>
                 <textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   rows={4}
-                  placeholder="Descripción de la serie especial, su historia, objetivos, etc."
+                  placeholder={t('seriesDescriptionPlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none resize-none"
                 />
               </div>
@@ -346,7 +348,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
                 <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
                   <span className="flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    Idioma del Contenido <span className="text-red-500">*</span>
+                    {t('contentLanguage')} <span className="text-red-500">*</span>
                   </span>
                 </label>
                 <select
@@ -363,14 +365,14 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  Selecciona el idioma en el que escribes el contenido. Se traducirá automáticamente a los otros idiomas.
+                  {t('contentLanguageHelp')}
                 </p>
               </div>
 
               {/* Website */}
               <div>
                 <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
-                  Sitio Web
+                  {t('website')}
                 </label>
                 <input
                   type="url"
@@ -388,7 +390,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
           <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <ImageIcon className="h-5 w-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Logo</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('logo')}</h2>
             </div>
 
             <div>
@@ -396,13 +398,13 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
                 fieldname="logo"
                 onUpload={(url) => handleChange('logoUrl', url)}
                 currentUrl={formData.logoUrl}
-                buttonText="Subir logo"
+                buttonText={t('uploadLogo')}
                 maxSizeMB={2}
                 accept="image/*"
                 showPreview={true}
               />
               <p className="text-xs text-gray-500 mt-2">
-                Logo de la serie especial (opcional). Formato recomendado: PNG con fondo transparente.
+                {t('seriesLogoHelp')}
               </p>
             </div>
           </div>
@@ -411,7 +413,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
           <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <Share2 className="h-5 w-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Redes Sociales</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('socialMedia')}</h2>
             </div>
 
             <div className="space-y-4">
@@ -481,7 +483,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
           {mode === 'create' && user?.role !== 'ADMIN' && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <p className="text-sm text-blue-800">
-                <strong>Nota:</strong> Tu serie especial quedará en estado "Borrador" hasta que un administrador la apruebe. Recibirás una notificación cuando sea aprobada.
+                <strong>{t('noteLabel')}</strong> {t('seriesDraftNote')}
               </p>
             </div>
           )}
@@ -493,7 +495,7 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
               onClick={() => router.back()}
               className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -503,12 +505,12 @@ export default function SpecialSeriesForm({ mode, initialData, specialSeriesId }
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Guardando...
+                  {t('saving')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  {mode === 'create' ? 'Crear Serie Especial' : 'Guardar Cambios'}
+                  {mode === 'create' ? t('createSeries') : t('saveChanges')}
                 </>
               )}
             </button>

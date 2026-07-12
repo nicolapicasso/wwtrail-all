@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslations } from 'next-intl';
 import { Trophy, Menu, X } from 'lucide-react';
 import { DashboardNav } from '@/components/layout/DashboardNav';
 import { CollapsibleUserInfo } from '@/components/layout/CollapsibleUserInfo';
@@ -14,6 +15,7 @@ export default function OrganizerLayout({
   children: React.ReactNode;
 }) {
   const { user, loading, logout } = useAuth();
+  const t = useTranslations('boEvents');
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,7 +33,7 @@ export default function OrganizerLayout({
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+          <p className="mt-4 text-gray-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -56,7 +58,7 @@ export default function OrganizerLayout({
               <div>
                 <h1 className="text-lg font-bold text-gray-900">WWTRAIL</h1>
                 <p className="text-xs text-gray-500">
-                  {user.role === 'ADMIN' ? 'Admin' : 'Organizador'}
+                  {user.role === 'ADMIN' ? t('roleAdmin') : t('roleOrganizer')}
                 </p>
               </div>
             </Link>
@@ -98,7 +100,7 @@ export default function OrganizerLayout({
                   <div>
                     <h1 className="text-lg font-bold text-gray-900">WWTRAIL</h1>
                     <p className="text-xs text-gray-500">
-                      {user.role === 'ADMIN' ? 'Admin' : 'Organizador'}
+                      {user.role === 'ADMIN' ? t('roleAdmin') : t('roleOrganizer')}
                     </p>
                   </div>
                 </Link>

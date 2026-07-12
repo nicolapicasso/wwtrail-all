@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Promotion } from '@/types/v2';
 import { Gift, Lock, Globe, MapPin } from 'lucide-react';
 
@@ -11,6 +14,7 @@ interface PromotionCardProps {
 }
 
 export default function PromotionCard({ promotion, showActions = false, onEdit, onDelete }: PromotionCardProps) {
+  const t = useTranslations('boAdmin');
   const isCoupon = promotion.type === 'COUPON';
   const isExclusive = promotion.type === 'EXCLUSIVE_CONTENT';
 
@@ -38,7 +42,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
         {/* Type Badge */}
         <div className="absolute top-2 left-2">
           <span className={`px-3 py-1 rounded-none text-xs font-semibold bg-gray-800 text-white`}>
-            {isCoupon ? '🎟️ Cupón' : '🔒 Exclusivo'}
+            {isCoupon ? `🎟️ ${t('couponType')}` : `🔒 ${t('exclusiveShort')}`}
           </span>
         </div>
 
@@ -46,7 +50,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
         {promotion.featured && (
           <div className="absolute top-2 right-2">
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-gray-900">
-              ⭐ Destacado
+              ⭐ {t('featured')}
             </span>
           </div>
         )}
@@ -55,7 +59,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
         {promotion.status !== 'PUBLISHED' && (
           <div className="absolute bottom-2 right-2">
             <span className={`px-3 py-1 rounded-none text-xs font-semibold bg-gray-800 text-white`}>
-              {promotion.status === 'DRAFT' ? 'Borrador' : 'Archivado'}
+              {promotion.status === 'DRAFT' ? t('statusDraft') : t('statusArchived')}
             </span>
           </div>
         )}
@@ -86,12 +90,12 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
           {promotion.isGlobal ? (
             <>
               <Globe className="h-3 w-3" />
-              <span>Global</span>
+              <span>{t('global')}</span>
             </>
           ) : (
             <>
               <MapPin className="h-3 w-3" />
-              <span>{promotion.countries?.length || 0} países</span>
+              <span>{t('countriesCount', { count: promotion.countries?.length || 0 })}</span>
             </>
           )}
         </div>
@@ -100,7 +104,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
         {isCoupon && promotion.couponStats && (
           <div className="bg-blue-50 rounded-lg p-3 mb-3">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Disponibles:</span>
+              <span className="text-gray-600">{t('available')}</span>
               <span className="font-bold text-blue-600">
                 {promotion.couponStats.available}/{promotion.couponStats.total}
               </span>
@@ -123,13 +127,13 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
               onClick={() => onEdit(promotion.id)}
               className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50"
             >
-              Editar
+              {t('edit')}
             </button>
             <button
               onClick={() => onDelete(promotion.id)}
               className="flex-1 px-3 py-2 text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-50"
             >
-              Eliminar
+              {t('delete')}
             </button>
           </div>
         )}
@@ -140,7 +144,7 @@ export default function PromotionCard({ promotion, showActions = false, onEdit, 
             href={`/promotions/${promotion.slug}`}
             className="block w-full mt-3 px-4 py-2 text-center text-sm font-medium text-white bg-[#16A34A] rounded-lg hover:bg-[#B66916]"
           >
-            {isCoupon ? 'Obtener Cupón' : 'Ver Contenido'}
+            {isCoupon ? t('getCoupon') : t('viewContent')}
           </Link>
         )}
       </div>

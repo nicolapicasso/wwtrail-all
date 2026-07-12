@@ -4,6 +4,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2, Building2, Search, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { organizersService } from '@/lib/api/v2';
 import { OrganizerListItem } from '@/types/v2';
@@ -11,6 +12,7 @@ import CountrySelect from '@/components/CountrySelect';
 import { Link } from '@/i18n/navigation';
 
 export default function OrganizersPublicPage() {
+  const t = useTranslations('pgCatalog');
   // State
   const [organizers, setOrganizers] = useState<OrganizerListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,10 +101,10 @@ export default function OrganizersPublicPage() {
         {/* Header */}
         <div className="mb-6 flex items-center gap-2">
           <Building2 className="h-7 w-7 text-green-brand" />
-          <h1 className="text-[36px] font-black tracking-[-0.02em] text-ink-2">Organizadores</h1>
+          <h1 className="text-[36px] font-black tracking-[-0.02em] text-ink-2">{t('organizersTitle')}</h1>
         </div>
         <p className="text-[15px] text-text-muted">
-          Descubre las entidades y clubes que organizan eventos de trail running
+          {t('organizersSubtitle')}
           {total > 0 && (
             <> · <span className="font-semibold text-ink-2">{total}</span></>
           )}
@@ -117,14 +119,14 @@ export default function OrganizersPublicPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-                placeholder="Nombre del organizador..."
+                placeholder={t('organizerNamePlaceholder')}
                 className="w-full rounded-md border border-border py-2 pl-10 pr-4 text-[15px] outline-none placeholder:text-placeholder focus:border-green-brand focus:ring-2 focus:ring-green-brand/30"
               />
             </div>
             <CountrySelect
               value={countryFilter}
               onChange={(code) => { setCountryFilter(code); setPage(1); }}
-              placeholder="Todos los países"
+              placeholder={t('allCountries')}
             />
           </div>
           {(searchQuery || countryFilter) && (
@@ -133,7 +135,7 @@ export default function OrganizersPublicPage() {
                 onClick={() => { setSearchQuery(''); setCountryFilter(''); setPage(1); }}
                 className="text-[14px] font-semibold text-green-brand hover:underline"
               >
-                Limpiar filtros
+                {t('clearFilters')}
               </button>
             </div>
           )}
@@ -153,12 +155,12 @@ export default function OrganizersPublicPage() {
               <div className="mt-8 rounded-lg border border-border bg-surface p-12 text-center">
                 <Building2 className="mx-auto mb-4 h-14 w-14 text-text-faint/50" />
                 <h3 className="mb-2 text-[18px] font-extrabold text-ink-2">
-                  No se encontraron organizadores
+                  {t('noOrganizersFound')}
                 </h3>
                 <p className="text-[15px] text-text-muted">
                   {searchQuery || countryFilter
-                    ? 'Intenta ajustar los filtros de búsqueda'
-                    : 'No hay organizadores disponibles en este momento'}
+                    ? t('adjustFilters')
+                    : t('noOrganizersAvailable')}
                 </p>
               </div>
             ) : (
@@ -195,7 +197,7 @@ export default function OrganizersPublicPage() {
                         {org._count && (
                           <>
                             <span className="text-text-faint">·</span>
-                            <span>{org._count.events} eventos</span>
+                            <span>{t('eventsCount', { count: org._count.events })}</span>
                           </>
                         )}
                       </div>
@@ -212,7 +214,7 @@ export default function OrganizersPublicPage() {
                   onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                   disabled={page === 1}
                   className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-surface text-ink-2 transition-colors hover:border-green-brand disabled:pointer-events-none disabled:opacity-40"
-                  aria-label="Página anterior"
+                  aria-label={t('previousPage')}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -242,7 +244,7 @@ export default function OrganizersPublicPage() {
                   onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                   disabled={page === totalPages}
                   className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-surface text-ink-2 transition-colors hover:border-green-brand disabled:pointer-events-none disabled:opacity-40"
-                  aria-label="Página siguiente"
+                  aria-label={t('nextPage')}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

@@ -6,6 +6,7 @@ import {
   Globe, Loader2, Sparkles, Search, AlertCircle, CheckCircle2, Link2, ClipboardPaste,
   Calendar, Trophy, MapPin, ExternalLink,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClientV2 } from '@/lib/api/client';
 
@@ -59,6 +60,7 @@ interface Graph { event: EventNode; competitions: Competition[]; }
 interface ScanResult { sourceUrl: string | null; fetchMode: FetchMode; title: string | null; graph: Graph; warnings: string[]; }
 
 export default function ScraperPage() {
+  const t = useTranslations('boMisc');
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -79,7 +81,7 @@ export default function ScraperPage() {
   const runScan = async () => {
     setError(null); setImportResult(null); setScan(null); setGraph(null);
     if (mode === 'paste' ? !html.trim() : !url.trim()) {
-      setError(mode === 'paste' ? 'Pega el HTML de la página' : 'Introduce una URL');
+      setError(mode === 'paste' ? t('scraperErrorPasteHtml') : t('scraperErrorEnterUrl'));
       return;
     }
     try {
@@ -91,7 +93,7 @@ export default function ScraperPage() {
       setScan(data);
       setGraph(data.graph);
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Error al escanear');
+      setError(err.response?.data?.error || err.message || t('scraperErrorScan'));
     } finally {
       setScanning(false);
     }
@@ -106,7 +108,7 @@ export default function ScraperPage() {
       const res = await apiClientV2.post('/admin/scraper/import', payload);
       setImportResult(res.data?.data || res.data);
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Error al importar');
+      setError(err.response?.data?.error || err.message || t('scraperErrorImport'));
     } finally {
       setImporting(false);
     }
@@ -142,8 +144,8 @@ export default function ScraperPage() {
       <div className="flex items-center gap-3">
         <Sparkles className="h-7 w-7 text-green-brand" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Importador con IA</h1>
-          <p className="text-sm text-gray-500">Escanea una web de carreras y extrae eventos, competiciones y ediciones</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('scraperTitle')}</h1>
+          <p className="text-sm text-gray-500">{t('scraperSubtitle')}</p>
         </div>
       </div>
 
@@ -152,10 +154,10 @@ export default function ScraperPage() {
         {/* Mode tabs */}
         <div className="mb-4 flex flex-wrap gap-2">
           {([
-            { k: 'auto', label: 'Auto', icon: Sparkles },
-            { k: 'static', label: 'Estático', icon: Link2 },
-            { k: 'render', label: 'Render (SPA)', icon: Globe },
-            { k: 'paste', label: 'Pegar HTML', icon: ClipboardPaste },
+            { k: 'auto', label: t('scraperModeAuto'), icon: Sparkles },
+            { k: 'static', label: t('scraperModeStatic'), icon: Link2 },
+            { k: 'render', label: t('scraperModeRender'), icon: Globe },
+            { k: 'paste', label: t('scraperModePaste'), icon: ClipboardPaste },
           ] as { k: FetchMode; label: string; icon: any }[]).map(({ k, label, icon: Icon }) => (
             <button
               key={k}
@@ -174,21 +176,21 @@ export default function ScraperPage() {
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://ejemplo.com/calendario-trail-2026"
+            placeholder={t('scraperUrlPlaceholder')}
             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/30"
           />
         ) : (
           <textarea
             value={html}
             onChange={(e) => setHtml(e.target.value)}
-            placeholder="Pega aquí el HTML de la página (Ctrl+U → copiar todo)…"
+            placeholder={t('scraperHtmlPlaceholder')}
             rows={6}
             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 font-mono text-xs outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/30"
           />
         )}
         {mode === 'render' && (
           <p className="mt-2 text-xs text-amber-600">
-            El render headless requiere playwright-core instalado en el servidor. Si no está, usa «Pegar HTML».
+            {t('scraperRenderHint')}
           </p>
         )}
 
@@ -198,7 +200,7 @@ export default function ScraperPage() {
           className="mt-4 flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
         >
           {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-          {scanning ? 'Escaneando…' : 'Escanear'}
+          {scanning ? t('scraperScanning') : t('scraperScan')}
         </button>
       </div>
 
@@ -219,16 +221,16 @@ export default function ScraperPage() {
       {importResult && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-5">
           <div className="mb-2 flex items-center gap-2 font-semibold text-green-800">
-            <CheckCircle2 className="h-5 w-5" /> Importación completada
+            <CheckCircle2 className="h-5 w-5" /> {t('scraperImportComplete')}
           </div>
           <div className="text-sm text-green-900">
-            Evento: <b>{importResult.event.created ? 'creado' : 'reutilizado'}</b> ·{' '}
-            Competiciones creadas: <b>{importResult.competitions.filter((c: any) => c.created).length}</b> ·{' '}
-            Ediciones creadas: <b>{importResult.editions.filter((e: any) => e.created).length}</b>
+            {t('scraperResultEventLabel')} <b>{importResult.event.created ? t('scraperResultCreated') : t('scraperResultReused')}</b> ·{' '}
+            {t('scraperResultCompsLabel')} <b>{importResult.competitions.filter((c: any) => c.created).length}</b> ·{' '}
+            {t('scraperResultEditionsLabel')} <b>{importResult.editions.filter((e: any) => e.created).length}</b>
           </div>
           {importResult.event.slug && (
             <a href={`/events/${importResult.event.slug}`} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-green-700 hover:underline">
-              Ver evento <ExternalLink className="h-3.5 w-3.5" />
+              {t('scraperViewEvent')} <ExternalLink className="h-3.5 w-3.5" />
             </a>
           )}
         </div>
@@ -241,37 +243,37 @@ export default function ScraperPage() {
           <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-                <Calendar className="h-5 w-5 text-green-600" /> Evento
+                <Calendar className="h-5 w-5 text-green-600" /> {t('scraperEvent')}
               </h2>
               {graph.event.existing ? (
                 <span className="flex items-center gap-2 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
-                  Ya existe · se reutilizará
-                  <button onClick={() => setEvent({ existing: null })} className="text-blue-500 underline">deshacer</button>
+                  {t('scraperAlreadyExistsReuse')}
+                  <button onClick={() => setEvent({ existing: null })} className="text-blue-500 underline">{t('scraperUndo')}</button>
                 </span>
               ) : graph.event.suggestion ? (
                 <div className="flex items-center gap-2 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
-                  <span title={graph.event.suggestion.reason}>¿Es «{graph.event.suggestion.name}»? ({Math.round(graph.event.suggestion.score * 100)}%)</span>
-                  <button onClick={promoteEventSuggestion} className="rounded bg-amber-600 px-2 py-0.5 text-white">Sí, usar</button>
-                  <button onClick={() => setEvent({ suggestion: null })} className="text-amber-700 underline">No, es nuevo</button>
+                  <span title={graph.event.suggestion.reason}>{t('scraperEventSuggestionAsk', { name: graph.event.suggestion.name, score: Math.round(graph.event.suggestion.score * 100) })}</span>
+                  <button onClick={promoteEventSuggestion} className="rounded bg-amber-600 px-2 py-0.5 text-white">{t('scraperYesUse')}</button>
+                  <button onClick={() => setEvent({ suggestion: null })} className="text-amber-700 underline">{t('scraperNoIsNewMasc')}</button>
                 </div>
               ) : (
-                <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700">Nuevo</span>
+                <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700">{t('scraperNew')}</span>
               )}
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="Nombre"><input value={graph.event.name} onChange={(e) => setEvent({ name: e.target.value })} className={inputCls} /></Field>
-              <Field label="País (ISO-2)"><input value={graph.event.country || ''} onChange={(e) => setEvent({ country: e.target.value.toUpperCase().slice(0, 2) })} className={inputCls} /></Field>
-              <Field label="Ciudad"><input value={graph.event.city || ''} onChange={(e) => setEvent({ city: e.target.value })} className={inputCls} /></Field>
-              <Field label="Web"><input value={graph.event.website || ''} onChange={(e) => setEvent({ website: e.target.value })} className={inputCls} /></Field>
-              <Field label="Primera edición (año)"><input type="number" value={graph.event.firstEditionYear ?? ''} onChange={(e) => setEvent({ firstEditionYear: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
-              <Field label="Mes habitual (1-12)"><input type="number" min="1" max="12" value={graph.event.typicalMonth ?? ''} onChange={(e) => setEvent({ typicalMonth: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
-              <Field label="Organizador"><input value={graph.event.organizerName || ''} onChange={(e) => setEvent({ organizerName: e.target.value })} placeholder="Club / entidad organizadora" className={inputCls} /></Field>
-              <Field label="Email"><input value={graph.event.email || ''} onChange={(e) => setEvent({ email: e.target.value })} className={inputCls} /></Field>
+              <Field label={t('scraperFieldName')}><input value={graph.event.name} onChange={(e) => setEvent({ name: e.target.value })} className={inputCls} /></Field>
+              <Field label={t('scraperFieldCountry')}><input value={graph.event.country || ''} onChange={(e) => setEvent({ country: e.target.value.toUpperCase().slice(0, 2) })} className={inputCls} /></Field>
+              <Field label={t('scraperFieldCity')}><input value={graph.event.city || ''} onChange={(e) => setEvent({ city: e.target.value })} className={inputCls} /></Field>
+              <Field label={t('scraperFieldWebsite')}><input value={graph.event.website || ''} onChange={(e) => setEvent({ website: e.target.value })} className={inputCls} /></Field>
+              <Field label={t('scraperFieldFirstEdition')}><input type="number" value={graph.event.firstEditionYear ?? ''} onChange={(e) => setEvent({ firstEditionYear: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
+              <Field label={t('scraperFieldTypicalMonth')}><input type="number" min="1" max="12" value={graph.event.typicalMonth ?? ''} onChange={(e) => setEvent({ typicalMonth: e.target.value ? Number(e.target.value) : null })} className={inputCls} /></Field>
+              <Field label={t('scraperFieldOrganizer')}><input value={graph.event.organizerName || ''} onChange={(e) => setEvent({ organizerName: e.target.value })} placeholder={t('scraperOrganizerPlaceholder')} className={inputCls} /></Field>
+              <Field label={t('scraperFieldEmail')}><input value={graph.event.email || ''} onChange={(e) => setEvent({ email: e.target.value })} className={inputCls} /></Field>
             </div>
 
             {graph.event.description && (
               <div className="mt-3">
-                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-400">Descripción</span>
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-400">{t('scraperDescription')}</span>
                 <textarea value={graph.event.description} onChange={(e) => setEvent({ description: e.target.value })} rows={3} className={inputCls} />
               </div>
             )}
@@ -279,8 +281,8 @@ export default function ScraperPage() {
             {/* Images */}
             {(graph.event.logoUrl || graph.event.coverImage || (graph.event.suggestedImages?.length || 0) > 0) && (
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <ImageSlot label="Logo" url={graph.event.logoUrl} images={graph.event.suggestedImages} onPick={(u) => setEvent({ logoUrl: u })} />
-                <ImageSlot label="Portada" url={graph.event.coverImage} images={graph.event.suggestedImages} onPick={(u) => setEvent({ coverImage: u })} />
+                <ImageSlot label={t('scraperLogo')} url={graph.event.logoUrl} images={graph.event.suggestedImages} onPick={(u) => setEvent({ logoUrl: u })} noImageLabel={t('scraperNoImage')} noneOption={t('scraperNoneOption')} />
+                <ImageSlot label={t('scraperCover')} url={graph.event.coverImage} images={graph.event.suggestedImages} onPick={(u) => setEvent({ coverImage: u })} noImageLabel={t('scraperNoImage')} noneOption={t('scraperNoneOption')} />
               </div>
             )}
           </div>
@@ -288,7 +290,7 @@ export default function ScraperPage() {
           {/* Competitions */}
           <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
             <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-gray-900">
-              <Trophy className="h-5 w-5 text-green-600" /> Competiciones ({graph.competitions.length})
+              <Trophy className="h-5 w-5 text-green-600" /> {t('scraperCompetitions', { count: graph.competitions.length })}
             </h2>
             <div className="space-y-3">
               {graph.competitions.map((c, i) => (
@@ -300,24 +302,24 @@ export default function ScraperPage() {
                     <input value={c.name} onChange={(e) => setComp(i, { name: e.target.value })} className="flex-1 rounded border border-gray-300 px-2 py-1 text-sm font-semibold" />
                     {c.existing ? (
                       <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700">
-                        Existe
-                        <button onClick={() => setComp(i, { existing: null, _include: true })} className="text-blue-500 underline">deshacer</button>
+                        {t('scraperExists')}
+                        <button onClick={() => setComp(i, { existing: null, _include: true })} className="text-blue-500 underline">{t('scraperUndo')}</button>
                       </span>
                     ) : (
-                      <span className="shrink-0 rounded-full bg-green-50 px-2 py-0.5 text-xs font-bold text-green-700">Nueva</span>
+                      <span className="shrink-0 rounded-full bg-green-50 px-2 py-0.5 text-xs font-bold text-green-700">{t('scraperNewFem')}</span>
                     )}
                   </div>
                   {c.suggestion && !c.existing && (
                     <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md bg-amber-100/60 px-2 py-1.5 pl-7 text-xs text-amber-900">
-                      <span title={c.suggestion.reason}>Posible duplicado: <b>{c.suggestion.name}</b> ({Math.round(c.suggestion.score * 100)}% · {c.suggestion.reason})</span>
-                      <button onClick={() => promoteCompSuggestion(i)} className="rounded bg-amber-600 px-2 py-0.5 font-semibold text-white">Sí, es la misma</button>
-                      <button onClick={() => setComp(i, { suggestion: null })} className="underline">No, es nueva</button>
+                      <span title={c.suggestion.reason}>{t('scraperPossibleDuplicate')} <b>{c.suggestion.name}</b> ({Math.round(c.suggestion.score * 100)}% · {c.suggestion.reason})</span>
+                      <button onClick={() => promoteCompSuggestion(i)} className="rounded bg-amber-600 px-2 py-0.5 font-semibold text-white">{t('scraperYesSame')}</button>
+                      <button onClick={() => setComp(i, { suggestion: null })} className="underline">{t('scraperNoIsNewFem')}</button>
                     </div>
                   )}
                   <div className="mt-2 flex flex-wrap items-center gap-2 pl-7 text-sm">
-                    <label className="flex items-center gap-1 text-gray-500">Dist.
+                    <label className="flex items-center gap-1 text-gray-500">{t('scraperDistance')}
                       <input type="number" value={c.baseDistance ?? ''} onChange={(e) => setComp(i, { baseDistance: e.target.value ? Number(e.target.value) : null })} className="w-16 rounded border border-gray-300 px-1.5 py-0.5" /> km</label>
-                    <label className="flex items-center gap-1 text-gray-500">Desnivel
+                    <label className="flex items-center gap-1 text-gray-500">{t('scraperElevation')}
                       <input type="number" value={c.baseElevation ?? ''} onChange={(e) => setComp(i, { baseElevation: e.target.value ? Number(e.target.value) : null })} className="w-20 rounded border border-gray-300 px-1.5 py-0.5" /> m</label>
                     {c.type && <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">{c.type}</span>}
                   </div>
@@ -325,7 +327,7 @@ export default function ScraperPage() {
                     <div className="mt-2 flex flex-wrap gap-1.5 pl-7">
                       {c.editions.map((ed, j) => (
                         <span key={j} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${ed.existing ? 'bg-gray-100 text-gray-500' : ed.startDate ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
-                          <MapPin className="h-3 w-3" />{ed.year}{ed.startDate ? ` · ${ed.startDate}` : ' · sin fecha'}{ed.existing ? ' · existe' : ''}
+                          <MapPin className="h-3 w-3" />{ed.year}{ed.startDate ? ` · ${ed.startDate}` : ` · ${t('scraperNoDate')}`}{ed.existing ? ` · ${t('scraperEditionExists')}` : ''}
                         </span>
                       ))}
                     </div>
@@ -338,7 +340,7 @@ export default function ScraperPage() {
           {/* Import action */}
           <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
             <span className="text-sm text-gray-600">
-              {graph.event.existing ? 'Se reutilizará el evento' : 'Se creará el evento'} · {newComps} competición(es) nueva(s)
+              {graph.event.existing ? t('scraperEventWillReuse') : t('scraperEventWillCreate')} · {t('scraperNewCompsCount', { count: newComps })}
             </span>
             <button
               onClick={runImport}
@@ -346,7 +348,7 @@ export default function ScraperPage() {
               className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
             >
               {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              {importing ? 'Importando…' : 'Importar al portal'}
+              {importing ? t('scraperImporting') : t('scraperImportToPortal')}
             </button>
           </div>
         </div>
@@ -367,12 +369,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function ImageSlot({
-  label, url, images, onPick,
+  label, url, images, onPick, noImageLabel, noneOption,
 }: {
   label: string;
   url?: string | null;
   images?: { url: string; alt?: string; type: string }[];
   onPick: (url: string | null) => void;
+  noImageLabel: string;
+  noneOption: string;
 }) {
   const opts = images || [];
   return (
@@ -384,7 +388,7 @@ function ImageSlot({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={url} alt={label} className="h-full w-full object-contain" />
           ) : (
-            <span className="text-[10px] text-gray-400">sin imagen</span>
+            <span className="text-[10px] text-gray-400">{noImageLabel}</span>
           )}
         </div>
         <div className="flex-1">
@@ -393,7 +397,7 @@ function ImageSlot({
             onChange={(e) => onPick(e.target.value || null)}
             className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
           >
-            <option value="">— ninguna —</option>
+            <option value="">{noneOption}</option>
             {url && !opts.some((o) => o.url === url) && <option value={url}>{url.split('/').pop()}</option>}
             {opts.map((o, i) => (
               <option key={i} value={o.url}>

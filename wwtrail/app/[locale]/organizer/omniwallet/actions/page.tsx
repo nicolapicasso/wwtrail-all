@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { zancadasAdminService, ZancadasAction } from '@/lib/api/zancadas-admin.service';
 import { Loader2, Footprints, Save, UserPlus, LogIn, Star, Trophy } from 'lucide-react';
 
@@ -18,24 +19,26 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   PARTICIPATION: Trophy,
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  REGISTER: 'Registro de usuario',
-  LOGIN: 'Inicio de sesión diario',
-  RATING: 'Crear valoración',
-  PARTICIPATION: 'Participar en edición',
-};
-
-const PARTICIPATION_STATUSES = [
-  { value: 'INTERESTED', label: 'Interesado' },
-  { value: 'REGISTERED', label: 'Inscrito' },
-  { value: 'CONFIRMED', label: 'Confirmado' },
-  { value: 'COMPLETED', label: 'Completado' },
-  { value: 'DNS', label: 'No presentado (DNS)' },
-  { value: 'DNF', label: 'No finalizado (DNF)' },
-  { value: 'DSQ', label: 'Descalificado (DSQ)' },
-];
-
 export default function OmniwalletActionsPage() {
+  const t = useTranslations('boMisc');
+
+  const ACTION_LABELS: Record<string, string> = {
+    REGISTER: t('omniActionRegister'),
+    LOGIN: t('omniActionLogin'),
+    RATING: t('omniActionRating'),
+    PARTICIPATION: t('omniActionParticipation'),
+  };
+
+  const PARTICIPATION_STATUSES = [
+    { value: 'INTERESTED', label: t('omniStatusInterested') },
+    { value: 'REGISTERED', label: t('omniStatusRegistered') },
+    { value: 'CONFIRMED', label: t('omniStatusConfirmed') },
+    { value: 'COMPLETED', label: t('omniStatusCompleted') },
+    { value: 'DNS', label: t('omniStatusDns') },
+    { value: 'DNF', label: t('omniStatusDnf') },
+    { value: 'DSQ', label: t('omniStatusDsq') },
+  ];
+
   const [actions, setActions] = useState<ZancadasAction[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -64,7 +67,7 @@ export default function OmniwalletActionsPage() {
       setEditedActions(edited);
     } catch (error) {
       console.error('Error loading actions:', error);
-      toast.error('Error al cargar las acciones');
+      toast.error(t('omniActionsLoadError'));
     } finally {
       setLoading(false);
     }
@@ -93,11 +96,11 @@ export default function OmniwalletActionsPage() {
         isEnabled: edited.isEnabled,
         triggerStatuses: edited.triggerStatuses,
       });
-      toast.success(`Acción "${ACTION_LABELS[action.actionCode] || action.actionCode}" actualizada`);
+      toast.success(t('omniActionUpdated', { name: ACTION_LABELS[action.actionCode] || action.actionCode }));
       await loadActions();
     } catch (error) {
       console.error('Error saving action:', error);
-      toast.error('Error al guardar la acción');
+      toast.error(t('omniActionSaveError'));
     } finally {
       setSavingId(null);
     }
@@ -142,9 +145,9 @@ export default function OmniwalletActionsPage() {
           <Footprints className="h-6 w-6 text-primary-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Acciones y Puntos</h1>
+          <h1 className="text-2xl font-bold">{t('omniActionsTitle')}</h1>
           <p className="text-muted-foreground">
-            Configura las acciones que otorgan Zancadas a los usuarios
+            {t('omniActionsSubtitle')}
           </p>
         </div>
       </div>
@@ -178,7 +181,7 @@ export default function OmniwalletActionsPage() {
                         onCheckedChange={(checked) => updateLocalAction(action.id, 'isEnabled', checked)}
                       />
                       <Label className="text-sm">
-                        {edited.isEnabled ? 'Activo' : 'Inactivo'}
+                        {edited.isEnabled ? t('omniActive') : t('omniInactive')}
                       </Label>
                     </div>
                     <Button
@@ -191,7 +194,7 @@ export default function OmniwalletActionsPage() {
                       ) : (
                         <>
                           <Save className="h-4 w-4 mr-1" />
-                          Guardar
+                          {t('guardar')}
                         </>
                       )}
                     </Button>
@@ -201,7 +204,7 @@ export default function OmniwalletActionsPage() {
               <CardContent className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-3">
                   <div className="space-y-2">
-                    <Label htmlFor={`points-${action.id}`}>Puntos por acción</Label>
+                    <Label htmlFor={`points-${action.id}`}>{t('omniPointsPerAction')}</Label>
                     <Input
                       id={`points-${action.id}`}
                       type="number"
@@ -210,16 +213,16 @@ export default function OmniwalletActionsPage() {
                       onChange={(e) => updateLocalAction(action.id, 'points', parseInt(e.target.value) || 0)}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Zancadas otorgadas cada vez
+                      {t('omniZancadasEachTime')}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor={`maxPerDay-${action.id}`}>Máximo por día</Label>
+                    <Label htmlFor={`maxPerDay-${action.id}`}>{t('omniMaxPerDay')}</Label>
                     <Input
                       id={`maxPerDay-${action.id}`}
                       type="number"
                       min={0}
-                      placeholder="Sin límite"
+                      placeholder={t('omniNoLimit')}
                       value={edited.maxPerDay ?? ''}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -227,16 +230,16 @@ export default function OmniwalletActionsPage() {
                       }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Deja vacío para sin límite
+                      {t('omniLeaveEmptyNoLimit')}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor={`maxPerUser-${action.id}`}>Máximo por usuario</Label>
+                    <Label htmlFor={`maxPerUser-${action.id}`}>{t('omniMaxPerUser')}</Label>
                     <Input
                       id={`maxPerUser-${action.id}`}
                       type="number"
                       min={0}
-                      placeholder="Sin límite"
+                      placeholder={t('omniNoLimit')}
                       value={edited.maxPerUser ?? ''}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -244,7 +247,7 @@ export default function OmniwalletActionsPage() {
                       }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Límite total por usuario
+                      {t('omniTotalLimitPerUser')}
                     </p>
                   </div>
                 </div>
@@ -252,9 +255,9 @@ export default function OmniwalletActionsPage() {
                 {/* Trigger Statuses for PARTICIPATION */}
                 {action.actionCode === 'PARTICIPATION' && (
                   <div className="space-y-3 pt-4 border-t">
-                    <Label>Estados que otorgan puntos</Label>
+                    <Label>{t('omniStatusesGivePoints')}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Selecciona en qué estados de participación se otorgan los puntos
+                      {t('omniStatusesGivePointsHelp')}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {PARTICIPATION_STATUSES.map((status) => {
@@ -288,7 +291,7 @@ export default function OmniwalletActionsPage() {
           <CardContent className="py-12 text-center">
             <Footprints className="h-12 w-12 mx-auto text-gray-300 mb-4" />
             <p className="text-muted-foreground">
-              No hay acciones configuradas. Las acciones se crearán automáticamente al ejecutar la migración.
+              {t('omniNoActions')}
             </p>
           </CardContent>
         </Card>
