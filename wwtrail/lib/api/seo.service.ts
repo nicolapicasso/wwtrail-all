@@ -116,7 +116,8 @@ class SEOService {
     const response = await apiClientV2.get(`/seo/list/${entityType}`, {
       params: { page, limit },
     });
-    return response.data;
+    // apiSuccess wraps as { success, data: { data, meta } } — unwrap it.
+    return response.data?.data ?? response.data;
   }
 
   /**

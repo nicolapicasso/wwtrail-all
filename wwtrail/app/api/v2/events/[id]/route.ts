@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { EventService } from '@/lib/services/event.service';
-import { requireRole, apiSuccess, apiError, ApiError } from '@/lib/auth';
+import { requireRole, getAuthUser, apiSuccess, apiError, ApiError } from '@/lib/auth';
+import prisma from '@/lib/db';
 
 // GET /api/v2/events/:id
 export async function GET(
@@ -9,6 +10,23 @@ export async function GET(
 ) {
   try {
     const event = await EventService.findById(params.id);
+
+    // Attach per-user edit flags (used by the edit page guard). Computed on a
+    // copy so the cached event object stays user-agnostic.
+    const authUser = await getAuthUser(request);
+    if (authUser) {
+      const isOwner = (event as any).userId === authUser.id;
+      let isManager = false;
+      if (!isOwner) {
+        const m = await prisma.eventManager.findUnique({
+          where: { eventId_userId: { eventId: params.id, userId: authUser.id } },
+          select: { id: true },
+        });
+        isManager = !!m;
+      }
+      return apiSuccess({ ...event, isOwner, isManager, isAdmin: authUser.role === 'ADMIN' });
+    }
+
     return apiSuccess(event);
   } catch (error: any) {
     if (error?.message?.includes('not found')) {

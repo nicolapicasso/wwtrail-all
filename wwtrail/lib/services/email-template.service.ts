@@ -21,12 +21,89 @@ interface UpdateEmailTemplateInput {
   isActive?: boolean;
 }
 
+// Default templates seeded on first access so the admin always has the full set
+// to edit (the table ships empty). Content is a sensible starting point.
+const DEFAULT_TEMPLATES: Array<{
+  type: EmailTemplateType;
+  name: string;
+  subject: string;
+  htmlBody: string;
+  textBody: string;
+  availableVariables: Record<string, string>;
+}> = [
+  {
+    type: 'COUPON_REDEMPTION' as EmailTemplateType,
+    name: 'Cupón Canjeado',
+    subject: 'Has canjeado: {{promotionTitle}}',
+    htmlBody: '<p>Hola {{userName}},</p><p>Has canjeado el cupón <strong>{{couponCode}}</strong> de <strong>{{promotionTitle}}</strong>.</p><p>{{promotionDescription}}</p>',
+    textBody: 'Hola {{userName}}, has canjeado el cupón {{couponCode}} de {{promotionTitle}}. {{promotionDescription}}',
+    availableVariables: { userName: 'Nombre del usuario', couponCode: 'Código del cupón', promotionTitle: 'Título', promotionDescription: 'Descripción', brandUrl: 'URL de la marca' },
+  },
+  {
+    type: 'WELCOME' as EmailTemplateType,
+    name: 'Bienvenida',
+    subject: '¡Bienvenido/a a WWTRAIL, {{userName}}!',
+    htmlBody: '<p>Hola {{userName}},</p><p>¡Bienvenido/a a WWTRAIL! Tu cuenta ({{userEmail}}) ya está activa.</p>',
+    textBody: 'Hola {{userName}}, ¡bienvenido/a a WWTRAIL! Tu cuenta ({{userEmail}}) ya está activa.',
+    availableVariables: { userName: 'Nombre del usuario', userEmail: 'Email del usuario' },
+  },
+  {
+    type: 'PASSWORD_RESET' as EmailTemplateType,
+    name: 'Resetear Contraseña',
+    subject: 'Restablece tu contraseña',
+    htmlBody: '<p>Hola {{userName}},</p><p>Para restablecer tu contraseña haz clic <a href="{{resetLink}}">aquí</a>. El enlace caduca en {{expiresIn}}.</p>',
+    textBody: 'Hola {{userName}}, restablece tu contraseña en: {{resetLink}} (caduca en {{expiresIn}}).',
+    availableVariables: { userName: 'Nombre del usuario', resetLink: 'Enlace de reseteo', expiresIn: 'Expiración' },
+  },
+  {
+    type: 'EVENT_REMINDER' as EmailTemplateType,
+    name: 'Recordatorio de Evento',
+    subject: 'Recordatorio: {{eventName}} el {{eventDate}}',
+    htmlBody: '<p>Hola {{userName}},</p><p>Te recordamos que <strong>{{eventName}}</strong> se celebra el {{eventDate}} en {{eventLocation}}.</p>',
+    textBody: 'Hola {{userName}}, {{eventName}} se celebra el {{eventDate}} en {{eventLocation}}.',
+    availableVariables: { userName: 'Nombre del usuario', eventName: 'Nombre del evento', eventDate: 'Fecha', eventLocation: 'Ubicación' },
+  },
+  {
+    type: 'COMPETITION_UPDATE' as EmailTemplateType,
+    name: 'Actualización de Competición',
+    subject: 'Novedades en {{competitionName}}',
+    htmlBody: '<p>Hola {{userName}},</p><p>Hay novedades en <strong>{{competitionName}}</strong>:</p><p>{{updateMessage}}</p>',
+    textBody: 'Hola {{userName}}, novedades en {{competitionName}}: {{updateMessage}}',
+    availableVariables: { userName: 'Nombre del usuario', competitionName: 'Nombre de la competición', updateMessage: 'Mensaje' },
+  },
+];
+
 export class EmailTemplateService {
+  /** Ensure a row exists for every known template type (idempotent). */
+  private static async ensureDefaults() {
+    const existing = await prisma.emailTemplate.findMany({ select: { type: true } });
+    const have = new Set(existing.map((t) => t.type));
+    const missing = DEFAULT_TEMPLATES.filter((d) => !have.has(d.type));
+    if (missing.length === 0) return;
+    for (const d of missing) {
+      try {
+        await prisma.emailTemplate.create({
+          data: {
+            type: d.type,
+            name: d.name,
+            subject: d.subject,
+            htmlBody: d.htmlBody,
+            textBody: d.textBody,
+            availableVariables: d.availableVariables,
+          },
+        });
+      } catch {
+        // Ignore races (unique type) — another request may have created it.
+      }
+    }
+  }
+
   /**
-   * Get all email templates
+   * Get all email templates (seeding the default set on first access).
    */
   static async getAll() {
     try {
+      await this.ensureDefaults();
       const templates = await prisma.emailTemplate.findMany({
         orderBy: { type: 'asc' },
       });
