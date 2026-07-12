@@ -41,7 +41,13 @@
     "admin": "Administración",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
-    "register": "Registrarse"
+    "register": "Registrarse",
+    "map": "Mapa",
+    "calendar": "Calendario",
+    "community": "Comunidad",
+    "usersDirectory": "Directorio de usuarios",
+    "insiders": "Insiders",
+    "advantages": "Ventajas"
   },
   "dashboard": {
     "title": "Panel de Control",

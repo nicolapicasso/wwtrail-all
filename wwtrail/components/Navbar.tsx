@@ -151,20 +151,20 @@ export default function Navbar() {
                 href="/directory"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors"
               >
-                Mapa
+                {t('map')}
               </Link>
               <Link
                 href="/calendar"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors"
               >
-                Calendario
+                {t('calendar')}
               </Link>
 
               {/* Comunidad dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="inline-flex items-center gap-1 px-1 pt-1 text-sm font-medium text-white hover:text-green-bright transition-colors">
-                    Comunidad
+                    {t('community')}
                     <ChevronDown className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
@@ -172,20 +172,20 @@ export default function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link href="/users" className="cursor-pointer flex items-center">
                       <Users className="mr-2 h-4 w-4" />
-                      Directorio de usuarios
+                      {t('usersDirectory')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/users/insiders" className="cursor-pointer flex items-center">
                       <Star className="mr-2 h-4 w-4" />
-                      Insiders
+                      {t('insiders')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/promotions" className="cursor-pointer flex items-center">
                       <Gift className="mr-2 h-4 w-4" />
-                      Ventajas
+                      {t('advantages')}
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -314,39 +314,39 @@ export default function Navbar() {
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Mapa
+              {t('map')}
             </Link>
             <Link
               href="/calendar"
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Calendario
+              {t('calendar')}
             </Link>
             {/* Comunidad section */}
             <div className="block pl-3 pr-4 py-2 text-base font-medium text-gray-300">
-              Comunidad
+              {t('community')}
             </div>
             <Link
               href="/users"
               className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              → Directorio de usuarios
+              → {t('usersDirectory')}
             </Link>
             <Link
               href="/users/insiders"
               className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              → Insiders
+              → {t('insiders')}
             </Link>
             <Link
               href="/promotions"
               className="block pl-6 pr-4 py-2 text-sm font-medium text-gray-400 hover:bg-gray-900 hover:text-green-bright transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              → Ventajas
+              → {t('advantages')}
             </Link>
             <Link
               href="/magazine"

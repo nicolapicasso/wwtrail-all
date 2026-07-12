@@ -1105,8 +1105,8 @@
     "semantic_hash": ""
   },
   "components/Navbar.tsx": {
-    "mtime": 1783787042.1709118,
-    "ast_hash": "c2195b96f4f69dfd64acfef677e7ccac",
+    "mtime": 1783871433.4544895,
+    "ast_hash": "7109f874226f8d3f7be083d89db8de1a",
     "semantic_hash": ""
   },
   "components/OrganizerCard.tsx": {
@@ -2175,33 +2175,33 @@
     "semantic_hash": ""
   },
   "messages/ca.json": {
-    "mtime": 1783752630.8539002,
-    "ast_hash": "75b1d0ce4cfdf396ebdec40d61e0f3f5",
+    "mtime": 1783871404.8704906,
+    "ast_hash": "aa37fd9f048dc3f1bd21b21771936eeb",
     "semantic_hash": ""
   },
   "messages/de.json": {
-    "mtime": 1783752630.8558083,
-    "ast_hash": "75b1d0ce4cfdf396ebdec40d61e0f3f5",
+    "mtime": 1783871404.8744905,
+    "ast_hash": "547313b298c2f281560bf171cc4665e0",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1783752630.8558083,
-    "ast_hash": "bee4b0e90f09ca6e1257a1c86bf50bd9",
+    "mtime": 1783871404.8704906,
+    "ast_hash": "f9f5793500b0ef256d6393ecde92f907",
     "semantic_hash": ""
   },
   "messages/es.json": {
-    "mtime": 1783752630.8558083,
-    "ast_hash": "75b1d0ce4cfdf396ebdec40d61e0f3f5",
+    "mtime": 1783871404.8624904,
+    "ast_hash": "6b2cb53952529ab8416572f0ee6bf4e7",
     "semantic_hash": ""
   },
   "messages/fr.json": {
-    "mtime": 1783752630.8558083,
-    "ast_hash": "75b1d0ce4cfdf396ebdec40d61e0f3f5",
+    "mtime": 1783871404.8744905,
+    "ast_hash": "edcfdb4ea358556785584a4d6e7379c8",
     "semantic_hash": ""
   },
   "messages/it.json": {
-    "mtime": 1783752630.8558083,
-    "ast_hash": "75b1d0ce4cfdf396ebdec40d61e0f3f5",
+    "mtime": 1783871404.8704906,
+    "ast_hash": "e972001afa4b2d735bcd1bef0abcc825",
     "semantic_hash": ""
   },
   "middleware.ts": {
