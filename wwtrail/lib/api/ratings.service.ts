@@ -32,7 +32,13 @@ export const ratingsService = {
     }
   ): Promise<RatingsResponse> {
     const response = await apiClientV2.get(`/editions/${editionId}/ratings`, { params });
-    return response.data;
+    // El servidor responde con el envelope apiSuccess: { success, data: { ratings, pagination } }.
+    // Normalizamos a la forma que espera el cliente: { data: EditionRating[], pagination }.
+    const payload = response.data?.data ?? response.data ?? {};
+    return {
+      data: payload.ratings ?? payload.data ?? [],
+      pagination: payload.pagination ?? null,
+    } as RatingsResponse;
   },
 
   /**

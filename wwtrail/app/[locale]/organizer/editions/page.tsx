@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, Loader2, Calendar, Mountain, TrendingUp, Users, Edit, Trash2, Eye, MapPin, Star } from 'lucide-react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import EventSelect from '@/components/EventSelect';
 import editionsService from '@/lib/api/v2/editions.service';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import eventsService from '@/lib/api/v2/events.service';
@@ -244,19 +245,20 @@ export default function OrganizerEditionsPage() {
               <label htmlFor="event-filter" className="block text-sm font-medium text-gray-700 mb-2">
                 Filtrar por Evento
               </label>
-              <select
-                id="event-filter"
+              <EventSelect
                 value={selectedEventId}
-                onChange={(e) => setSelectedEventId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="">Todos los eventos</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedEventId}
+                events={events.map((e) => ({
+                  id: e.id,
+                  name: e.name,
+                  city: e.city,
+                  country: e.country,
+                }))}
+                placeholder="Selecciona un evento"
+                showAllOption={true}
+                allOptionLabel="Todos los eventos"
+                isLoading={isLoading}
+              />
             </div>
 
             {/* Competition Filter */}
