@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { requireAuth, apiSuccess, apiError } from '@/lib/auth';
 import prisma from '@/lib/db';
+import { CompetitionService } from '@/lib/services/competition.service';
 
 // GET /api/v2/events/:id/competitions
 export async function GET(
@@ -35,13 +36,11 @@ export async function POST(
     const { id } = await params;
     const data = await request.json();
 
-    const competition = await prisma.competition.create({
-      data: {
-        ...data,
-        eventId: id,
-        slug: data.slug || data.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      },
-    });
+    // Usar el servicio (igual que el importador): genera slug único, asigna
+    // organizerId, conecta specialSeries (many-to-many) e ignora campos que no
+    // son columnas (p.ej. specialSeriesIds). El prisma.create directo fallaba
+    // con Internal Server Error por esos campos y por faltar slug/organizerId.
+    const competition = await CompetitionService.create(id, data, user.id);
 
     return apiSuccess(competition, 201);
   } catch (error) {
