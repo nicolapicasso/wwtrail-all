@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LogOut, ChevronUp, ChevronDown } from 'lucide-react';
+import { BackofficeLocaleSwitcher } from './BackofficeLocaleSwitcher';
 
 interface CollapsibleUserInfoProps {
   username?: string;
@@ -29,6 +30,9 @@ export function CollapsibleUserInfo({
     // Expanded view
     return (
       <div className="flex-shrink-0 border-t border-gray-200 p-4">
+        <div className="mb-3">
+          <BackofficeLocaleSwitcher />
+        </div>
         <div className="mb-3 rounded-lg bg-gray-50 p-3">
           <div className="flex items-center justify-between mb-1">
             <p className="text-sm font-medium text-gray-900">{username}</p>
@@ -58,9 +62,12 @@ export function CollapsibleUserInfo({
     );
   }
 
-  // Collapsed view - just email and expand button
+  // Collapsed view - locale switcher, email and expand button
   return (
     <div className="flex-shrink-0 border-t border-gray-200 p-4">
+      <div className="mb-2">
+        <BackofficeLocaleSwitcher />
+      </div>
       <div className="rounded-lg bg-gray-50 p-2 flex items-center justify-between gap-2">
         <p className="text-xs text-gray-600 truncate flex-1">{email}</p>
         <button

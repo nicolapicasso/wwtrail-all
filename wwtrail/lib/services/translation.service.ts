@@ -205,24 +205,26 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           continue;
         }
 
-        // Traducir usando OpenAI
+        // El nombre de la competición es un nombre propio: no se traduce,
+        // debe ser siempre idéntico en todos los idiomas. Solo traducimos la descripción.
         const textsToTranslate = [
-          { key: 'name', text: competition.name },
           ...(competition.description ? [{ key: 'description', text: competition.description }] : []),
         ];
 
-        const translated = await this.translateMultipleTexts(
-          textsToTranslate,
-          sourceLanguage,
-          targetLang,
-          'trail running competition'
-        );
+        const translated = textsToTranslate.length
+          ? await this.translateMultipleTexts(
+              textsToTranslate,
+              sourceLanguage,
+              targetLang,
+              'trail running competition'
+            )
+          : {};
 
-        // Guardar o actualizar traducción
+        // Guardar o actualizar traducción (name se mantiene igual al original)
         const translationData = {
           competitionId: competition.id,
           language: targetLang,
-          name: translated.name,
+          name: competition.name,
           description: translated.description || null,
           status: 'APPROVED' as TranslationStatus,
         };

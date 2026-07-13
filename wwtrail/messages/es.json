@@ -960,7 +960,8 @@
     "errorMarking": "Error al marcar competición",
     "errorUnmarking": "Error al desmarcar competición",
     "confirm": "Confirmar",
-    "processing": "Procesando..."
+    "processing": "Procesando...",
+    "language": "Idioma"
   },
   "boCatalog": {
     "accessDenied": "Acceso denegado",

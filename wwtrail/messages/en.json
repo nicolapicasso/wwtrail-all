@@ -960,7 +960,8 @@
     "errorMarking": "Error marking competition",
     "errorUnmarking": "Error unmarking competition",
     "confirm": "Confirm",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "language": "Language"
   },
   "boCatalog": {
     "accessDenied": "Access denied",
