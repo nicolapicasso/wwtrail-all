@@ -960,7 +960,8 @@
     "errorMarking": "Error al marcar competición",
     "errorUnmarking": "Error al desmarcar competición",
     "confirm": "Confirmar",
-    "processing": "Procesando..."
+    "processing": "Procesando...",
+    "language": "Idioma"
   },
   "boCatalog": {
     "accessDenied": "Acceso denegado",
@@ -1515,8 +1516,8 @@
     "footerGuardarConfiguracion": "Guardar Configuración",
     "footerHtmlContent": "HTML Content",
     "footerHtmlContentFor": "Contenido HTML para {lang}",
-    "footerHtmlHint": "Puedes usar HTML: <h3>, <p>, <a>, <ul>, <li>, <img>, etc.",
-    "footerHtmlPlaceholder": "<h3>Título</h3><p>Contenido...</p>",
+    "footerHtmlHint": "Puedes usar HTML: '<'h3>, '<'p>, '<'a>, '<'ul>, '<'li>, '<'img>, etc.",
+    "footerHtmlPlaceholder": "'<'h3>Título'<'/h3>'<'p>Contenido...'<'/p>",
     "footerSavedSuccess": "Configuración del footer actualizada correctamente",
     "footerSavedTitle": "✅ Guardado",
     "footerSubtitle": "Gestiona el contenido del footer en todos los idiomas. Usa HTML para personalizar el contenido.",
