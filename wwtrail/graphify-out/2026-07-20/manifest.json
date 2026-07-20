@@ -65,12 +65,12 @@
     "semantic_hash": ""
   },
   "app/[locale]/events/[eventSlug]/[competitionSlug]/page.tsx": {
-    "mtime": 1784529109.7236373,
-    "ast_hash": "a7f17f080d21467d354bab8977eb8e08",
+    "mtime": 1783872045.3264692,
+    "ast_hash": "e368bee331dd4b09062924c60c70e3d7",
     "semantic_hash": ""
   },
   "app/[locale]/events/[eventSlug]/page.tsx": {
-    "mtime": 1783934462.4537792,
+    "mtime": 1783871959.506472,
     "ast_hash": "5e3b1de8cfb2b91966cd218a62feda1b",
     "semantic_hash": ""
   },
@@ -200,8 +200,8 @@
     "semantic_hash": ""
   },
   "app/[locale]/organizer/omniwallet/page.tsx": {
-    "mtime": 1783876130.8343341,
-    "ast_hash": "a7c124978fcc88c94dc176c6926e8c6c",
+    "mtime": 1783874258.750396,
+    "ast_hash": "918c107d37794bd0092bf58c101d2f1d",
     "semantic_hash": ""
   },
   "app/[locale]/organizer/organizers/edit/[id]/page.tsx": {
@@ -1025,8 +1025,8 @@
     "semantic_hash": ""
   },
   "components/EditionSelector.tsx": {
-    "mtime": 1784529024.9916322,
-    "ast_hash": "910998356226ac5f7ed47dd744ef6710",
+    "mtime": 1783873443.030423,
+    "ast_hash": "15189094e0ab2d732a8956ff837df821",
     "semantic_hash": ""
   },
   "components/EditionStats.tsx": {
@@ -1290,8 +1290,8 @@
     "semantic_hash": ""
   },
   "components/forms/LandingForm.tsx": {
-    "mtime": 1783875255.458363,
-    "ast_hash": "bcccf411295a149a4a1af2d670c2ff04",
+    "mtime": 1783875157.1103663,
+    "ast_hash": "140411ca60c1b00106418167c0845907",
     "semantic_hash": ""
   },
   "components/forms/OrganizerForm.tsx": {
@@ -1370,8 +1370,8 @@
     "semantic_hash": ""
   },
   "components/layout/CollapsibleUserInfo.tsx": {
-    "mtime": 1783930902.411265,
-    "ast_hash": "0a0f9995e24bda595f08ab48f7463c1d",
+    "mtime": 1783873226.60243,
+    "ast_hash": "ba0410a3a31fdee729bff184ccf07a13",
     "semantic_hash": ""
   },
   "components/layout/DashboardNav.tsx": {
@@ -1605,8 +1605,8 @@
     "semantic_hash": ""
   },
   "i18n.ts": {
-    "mtime": 1783933016.1542928,
-    "ast_hash": "cbee89f49bd684cfa582280fe1ade057",
+    "mtime": 1783759786.2776992,
+    "ast_hash": "66c56f6b52275b1ed78f1b7e2532a13b",
     "semantic_hash": ""
   },
   "i18n/navigation.ts": {
@@ -2085,8 +2085,8 @@
     "semantic_hash": ""
   },
   "lib/services/translation.service.ts": {
-    "mtime": 1783930846.9792616,
-    "ast_hash": "87cd694ab8763149313f4cd81fdaf7bd",
+    "mtime": 1783785675.3489685,
+    "ast_hash": "d54fb127a046b012f2b8767ead67bfaf",
     "semantic_hash": ""
   },
   "lib/services/user-competition.service.ts": {
@@ -2175,33 +2175,33 @@
     "semantic_hash": ""
   },
   "messages/ca.json": {
-    "mtime": 1784528978.6636295,
-    "ast_hash": "7b90f843b2553c42ac928e33a7f3a294",
+    "mtime": 1783875139.0143669,
+    "ast_hash": "ff8f83534c37758a27338d1afdc20c68",
     "semantic_hash": ""
   },
   "messages/de.json": {
-    "mtime": 1784528978.6716297,
-    "ast_hash": "f107343d63e8d20270a377580766ac42",
+    "mtime": 1783875139.0143669,
+    "ast_hash": "1052ef540b4b9fa04e4c055cc1cc35e5",
     "semantic_hash": ""
   },
   "messages/en.json": {
-    "mtime": 1784528978.5276296,
-    "ast_hash": "27505a2d7a4fbf950dc186497f222619",
+    "mtime": 1783875139.010367,
+    "ast_hash": "10b5ad41e7b803cb6864780a1dd33454",
     "semantic_hash": ""
   },
   "messages/es.json": {
-    "mtime": 1784528978.4716296,
-    "ast_hash": "d8035ab7d6a0e96cbeb679c785a4ef6e",
+    "mtime": 1783875139.010367,
+    "ast_hash": "b45133bdd6fabc7696adedaa4943d2d6",
     "semantic_hash": ""
   },
   "messages/fr.json": {
-    "mtime": 1784528978.6676295,
-    "ast_hash": "b11642394efde80ee0b83f953dd479f1",
+    "mtime": 1783875139.0143669,
+    "ast_hash": "a0eec0bc635497f8d1fe41b152420fbf",
     "semantic_hash": ""
   },
   "messages/it.json": {
-    "mtime": 1784528978.6156297,
-    "ast_hash": "76ccbfb5edb5b9c61a7b098c8641b42e",
+    "mtime": 1783875139.0143669,
+    "ast_hash": "5bfd4e47628df93b71e86a46cccca4cd",
     "semantic_hash": ""
   },
   "middleware.ts": {
@@ -2862,16 +2862,6 @@
   "prisma/migrations/20260712120000_add_competition_order_and_edition_active/migration.sql": {
     "mtime": 1783843717.5468917,
     "ast_hash": "3448c15fc80258a171570a919c7fcaa9",
-    "semantic_hash": ""
-  },
-  "app/[locale]/not-found.tsx": {
-    "mtime": 1783934210.9257865,
-    "ast_hash": "1307572ef86ba8f74c2a698e9440fb2e",
-    "semantic_hash": ""
-  },
-  "components/layout/BackofficeLocaleSwitcher.tsx": {
-    "mtime": 1783930887.863264,
-    "ast_hash": "0cfc63ae40eedfc589a2cc8b99568411",
     "semantic_hash": ""
   }
 }
