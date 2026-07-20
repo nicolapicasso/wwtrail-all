@@ -7,13 +7,10 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { useCompetition } from '@/hooks/useCompetitions';
-import { useEditions } from '@/hooks/useEditions';
 import { eventsService } from '@/lib/api/events.service';
 import { seoService } from '@/lib/api/seo.service';
 import servicesService from '@/lib/api/v2/services.service';
 import { EditionSelector } from '@/components/EditionSelector';
-import { EditionCard } from '@/components/EditionCard';
-import { Edition } from '@/types/v2';
 import { Mountain, TrendingUp, Users, ArrowLeft, Calendar, MapPin, Info, Award, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import EventMap from '@/components/EventMap';
@@ -29,13 +26,12 @@ import { FavoriteButton } from '@/components/FavoriteButton';
 export default function CompetitionDetailPage() {
   const params = useParams();
   const t = useTranslations('pgEvents');
+  const tc = useTranslations('cmp');
   const competitionSlug = params?.competitionSlug as string;
   const eventSlug = params?.eventSlug as string;
   const locale = params?.locale as string; // ✅ Get current locale
 
   const { competition, loading, error } = useCompetition(competitionSlug, locale); // ✅ Pass locale
-  const { editions, loading: editionsLoading } = useEditions(competition?.id || '');
-  const [selectedEdition, setSelectedEdition] = useState<Edition | null>(null);
   const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
   const [nearbyServices, setNearbyServices] = useState<any[]>([]);
   const [seo, setSeo] = useState<any>(null);
@@ -117,9 +113,6 @@ export default function CompetitionDetailPage() {
     );
   }
 
-  const handleYearChange = (year: number, edition: Edition | null) => {
-    setSelectedEdition(edition);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -203,23 +196,17 @@ export default function CompetitionDetailPage() {
               </div>
             )}
 
-            {/* Edition Selector */}
+            {/* Editions */}
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-xl font-bold">{t('selectEdition')}</h2>
+              <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
+                <Calendar className="h-6 w-6 text-[#B66916]" />
+                {tc('editionsTitle')}
+              </h2>
               <EditionSelector
                 competitionId={competition.id}
                 competitionName={competition.name}
-                onYearChange={handleYearChange}
               />
             </div>
-
-            {/* Selected Edition Details */}
-            {selectedEdition && (
-              <div className="rounded-lg border bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-xl font-bold">{t('editionDetails')}</h2>
-                <EditionCard edition={selectedEdition} showInheritance />
-              </div>
-            )}
 
             {/* Gallery */}
             {competition.gallery && competition.gallery.length > 0 && (
@@ -230,97 +217,6 @@ export default function CompetitionDetailPage() {
                 />
               </div>
             )}
-
-            {/* All Editions List */}
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
-                <Calendar className="h-6 w-6 text-[#B66916]" />
-                {t('allEditionsWithCount', { count: editions.length })}
-              </h2>
-              <p className="text-sm text-gray-600 mb-4">
-                {t('browseAllEditions')}
-              </p>
-
-              {editionsLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse" />
-                  ))}
-                </div>
-              ) : editions.length > 0 ? (
-                <div className="space-y-3">
-                  {editions.map((edition) => (
-                    <Link
-                      key={edition.id}
-                      href={`/editions/${edition.slug}`}
-                      className="block p-4 border rounded-lg hover:border-[#B66916] hover:bg-orange-50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl font-bold text-[#B66916]">
-                              {edition.year}
-                            </span>
-                            {edition.specificDate && (
-                              <div className="flex items-center gap-1 text-sm text-gray-600">
-                                <Calendar className="h-4 w-4" />
-                                {new Date(edition.specificDate).toLocaleDateString('es-ES', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                })}
-                              </div>
-                            )}
-                          </div>
-
-                          {edition.city && (
-                            <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-                              <MapPin className="h-3 w-3" />
-                              {edition.city}
-                            </div>
-                          )}
-
-                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                            {edition.distance && (
-                              <span>{edition.distance} km</span>
-                            )}
-                            {edition.elevation && (
-                              <span>{edition.elevation} m D+</span>
-                            )}
-                            {edition.currentParticipants !== undefined && (
-                              <span>{t('participantsCount', { count: edition.currentParticipants })}</span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {edition.status && (
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              edition.status === 'FINISHED' ? 'bg-gray-100 text-gray-700' :
-                              edition.status === 'UPCOMING' ? 'bg-orange-100 text-orange-700' :
-                              edition.status === 'ONGOING' ? 'bg-green-100 text-green-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {edition.status === 'FINISHED' ? t('statusFinished') :
-                               edition.status === 'UPCOMING' ? t('statusUpcoming') :
-                               edition.status === 'ONGOING' ? t('statusOngoing') :
-                               edition.status}
-                            </span>
-                          )}
-                          <span className="text-[#B66916] font-semibold">→</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-                  <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-600">
-                    {t('noEditionsAvailable')}
-                  </p>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Sidebar */}

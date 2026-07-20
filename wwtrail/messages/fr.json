@@ -812,7 +812,24 @@
     "noRegulations": "Cette édition n'a pas encore de règlement publié.",
     "rankingsByCategory": "Classements par catégorie",
     "noRankings": "Cette édition n'a pas encore de classements publiés",
-    "noRatings": "Cette édition n'a pas encore d'évaluations"
+    "noRatings": "Cette édition n'a pas encore d'évaluations",
+    "editionsTitle": "Éditions",
+    "statusUpcoming": "À venir",
+    "statusOngoing": "En cours",
+    "statusFinished": "Terminée",
+    "regOpen": "Inscriptions ouvertes",
+    "regClosed": "Inscriptions fermées",
+    "regFull": "Complet",
+    "regComingSoon": "Bientôt",
+    "labelDistance": "Distance",
+    "labelParticipants": "Participants",
+    "winnerLabel": "Vainqueur",
+    "viewFullRanking": "Voir le classement complet",
+    "classificationsCount": "{count, plural, one {# classement} other {# classements}}",
+    "viewEdition": "Voir l’édition {year}",
+    "ctaNote": "Page complète avec inscription, parcours et résultats",
+    "noEditionsYet": "Aucune édition pour l’instant",
+    "noEditionData": "Aucune donnée pour {year}"
   },
   "cmpLayout": {
     "navEventos": "Événements",
@@ -2619,7 +2636,10 @@
     "noClassificationsHint": "Cliquez sur \"Nouveau Classement\" pour en ajouter un.",
     "editClassification": "Modifier le classement",
     "deleteClassification": "Supprimer le classement",
-    "confirmDeleteClassification": "Êtes-vous sûr de vouloir supprimer ce classement ?"
+    "confirmDeleteClassification": "Êtes-vous sûr de vouloir supprimer ce classement ?",
+    "searchEditions": "Rechercher une édition",
+    "searchEditionsPlaceholder": "Année, compétition ou ville…",
+    "selectEventPrompt": "Sélectionnez un événement pour voir ses éditions"
   },
   "boForms": {
     "cancel": "Annuler",

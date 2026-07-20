@@ -812,7 +812,24 @@
     "noRegulations": "Für diese Ausgabe wurde noch kein Reglement veröffentlicht.",
     "rankingsByCategory": "Ranglisten nach Kategorie",
     "noRankings": "Für diese Ausgabe wurden noch keine Ranglisten veröffentlicht",
-    "noRatings": "Diese Ausgabe hat noch keine Bewertungen"
+    "noRatings": "Diese Ausgabe hat noch keine Bewertungen",
+    "editionsTitle": "Ausgaben",
+    "statusUpcoming": "Bevorstehend",
+    "statusOngoing": "Laufend",
+    "statusFinished": "Beendet",
+    "regOpen": "Anmeldung offen",
+    "regClosed": "Anmeldung geschlossen",
+    "regFull": "Ausgebucht",
+    "regComingSoon": "Demnächst",
+    "labelDistance": "Distanz",
+    "labelParticipants": "Teilnehmer",
+    "winnerLabel": "Sieger/in",
+    "viewFullRanking": "Vollständige Ergebnisse ansehen",
+    "classificationsCount": "{count, plural, one {# Rangliste} other {# Ranglisten}}",
+    "viewEdition": "Ausgabe {year} ansehen",
+    "ctaNote": "Vollständige Seite mit Anmeldung, Strecke und Ergebnissen",
+    "noEditionsYet": "Noch keine Ausgaben",
+    "noEditionData": "Keine Daten für {year}"
   },
   "cmpLayout": {
     "navEventos": "Events",
@@ -2619,7 +2636,10 @@
     "noClassificationsHint": "Klicken Sie auf \"Neue Ergebnisliste\", um eine hinzuzufügen.",
     "editClassification": "Ergebnisliste bearbeiten",
     "deleteClassification": "Ergebnisliste löschen",
-    "confirmDeleteClassification": "Möchten Sie diese Ergebnisliste wirklich löschen?"
+    "confirmDeleteClassification": "Möchten Sie diese Ergebnisliste wirklich löschen?",
+    "searchEditions": "Ausgabe suchen",
+    "searchEditionsPlaceholder": "Jahr, Wettkampf oder Stadt…",
+    "selectEventPrompt": "Wähle eine Veranstaltung, um ihre Ausgaben zu sehen"
   },
   "boForms": {
     "cancel": "Abbrechen",

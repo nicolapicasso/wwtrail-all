@@ -24,7 +24,7 @@ export default function OrganizerEditionsPage() {
   const [editions, setEditions] = useState<Edition[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(false);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
 
@@ -83,54 +83,50 @@ export default function OrganizerEditionsPage() {
   }, []);
 
   /**
-   * Fetch editions
+   * Fetch editions.
+   * Cargamos ediciones SOLO cuando hay un evento (o competición) seleccionado,
+   * para evitar la cascada lenta de "todos los eventos → todas las competiciones
+   * → todas las ediciones" al abrir la página. El buscador filtra por literal
+   * sobre las ediciones ya cargadas, igual que en el resto de listados.
    */
   const fetchEditions = useCallback(async () => {
+    // Sin evento ni competición seleccionados no cargamos nada.
+    if (!selectedEventId && !selectedCompetitionId) {
+      setEditions([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
 
-      if (!selectedCompetitionId) {
-        // Si no hay competición seleccionada, cargar todas las ediciones de todas mis competiciones
-        const allEditions: Edition[] = [];
-
-        // Determinar qué competiciones buscar
-        const compsToFetch = selectedEventId
-          ? competitions
-          : await (async () => {
-              const allComps: Competition[] = [];
-              for (const event of events) {
-                const comps = await competitionsService.getByEvent(event.id);
-                allComps.push(...comps);
-              }
-              return allComps;
-            })();
-
-        for (const comp of compsToFetch) {
-          const eds = await editionsService.getByCompetition(comp.id);
-          // Find the event for this competition
-          const event = events.find(e => e.id === comp.eventId);
-          // Agregar información de la competición y evento a cada edición
-          const edsWithCompetition = eds.map(ed => ({
-            ...ed,
-            competition: { id: comp.id, name: comp.name, slug: comp.slug },
-            eventName: event?.name || ''
-          }));
-          allEditions.push(...edsWithCompetition);
-        }
-
-        setEditions(allEditions);
-      } else {
+      if (selectedCompetitionId) {
         // Cargar solo de la competición seleccionada
         const eds = await editionsService.getByCompetition(selectedCompetitionId);
-        // Encontrar la competición y evento para agregar su info
         const selectedComp = competitions.find(c => c.id === selectedCompetitionId);
         const event = events.find(e => e.id === selectedComp?.eventId);
-        const edsWithCompetition = eds.map(ed => ({
-          ...ed,
-          competition: selectedComp ? { id: selectedComp.id, name: selectedComp.name, slug: selectedComp.slug } : undefined,
-          eventName: event?.name || ''
-        }));
-        setEditions(edsWithCompetition);
+        setEditions(
+          eds.map(ed => ({
+            ...ed,
+            competition: selectedComp ? { id: selectedComp.id, name: selectedComp.name, slug: selectedComp.slug } : undefined,
+            eventName: event?.name || '',
+          }))
+        );
+      } else {
+        // Evento seleccionado: cargar las ediciones de sus competiciones (ya cargadas)
+        const event = events.find(e => e.id === selectedEventId);
+        const allEditions: Edition[] = [];
+        for (const comp of competitions) {
+          const eds = await editionsService.getByCompetition(comp.id);
+          allEditions.push(
+            ...eds.map(ed => ({
+              ...ed,
+              competition: { id: comp.id, name: comp.name, slug: comp.slug },
+              eventName: event?.name || '',
+            }))
+          );
+        }
+        setEditions(allEditions);
       }
     } catch (error: any) {
       console.error('Error fetching editions:', error);
@@ -161,13 +157,12 @@ export default function OrganizerEditionsPage() {
   }, [selectedEventId, fetchCompetitions]);
 
   /**
-   * Load editions
+   * Load editions (only runs the fetch when an event/competition is selected;
+   * otherwise fetchEditions clears the list without hitting the API).
    */
   useEffect(() => {
-    if (events.length > 0) {
-      fetchEditions();
-    }
-  }, [fetchEditions, events, selectedCompetitionId]);
+    fetchEditions();
+  }, [fetchEditions]);
 
   /**
    * Handle delete
@@ -210,9 +205,19 @@ export default function OrganizerEditionsPage() {
    * Filter editions
    */
   const filteredEditions = editions.filter((edition) => {
-    // Search by year
-    if (searchQuery && !edition.year.toString().includes(searchQuery)) {
-      return false;
+    // Literal search across year, competition, event and city
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      const haystack = [
+        edition.year?.toString(),
+        (edition as any).competition?.name,
+        (edition as any).eventName,
+        edition.city,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (!haystack.includes(q)) return false;
     }
     // Featured filter
     if (featuredFilter !== 'all') {
@@ -309,14 +314,14 @@ export default function OrganizerEditionsPage() {
             {/* Search */}
             <div>
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
-                {t('searchByYear')}
+                {t('searchEditions')}
               </label>
               <input
                 type="text"
                 id="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="2024..."
+                placeholder={t('searchEditionsPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
             </div>
@@ -385,7 +390,7 @@ export default function OrganizerEditionsPage() {
                 ? t('noEditionsInCompetition')
                 : selectedEventId
                 ? t('noEditionsInEvent')
-                : t('noEditionsFound')}
+                : t('selectEventPrompt')}
             </p>
             {selectedCompetitionId && (
               <button

@@ -1,12 +1,24 @@
-// components/EditionSelector.tsx - Year selector for editions
+// components/EditionSelector.tsx
+// Unified "Ediciones" block: year switcher + a single detail panel for the
+// active edition (dates, status, key stats, weather summary and rankings
+// summary) + a clear CTA to the full edition page. Replaces the old
+// dropdown+mini-card / "edition details" / "all editions" trio.
 
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { useAvailableYears, useEditionByYear } from '@/hooks/useEditions';
+import { podiumsService } from '@/lib/api/podiums.service';
+import { PodiumType, type EditionPodium } from '@/types/podium';
+import { WEATHER_ICONS, type WeatherCondition } from '@/types/weather';
 import { Edition } from '@/types/v2';
-import { Calendar, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight, Trophy, Route, Mountain, Users } from 'lucide-react';
+
+const LOCALE_MAP: Record<string, string> = {
+  es: 'es-ES', en: 'en-US', it: 'it-IT', ca: 'ca-ES', fr: 'fr-FR', de: 'de-DE',
+};
 
 interface EditionSelectorProps {
   competitionId: string;
@@ -14,6 +26,25 @@ interface EditionSelectorProps {
   initialYear?: number;
   onYearChange?: (year: number, edition: Edition | null) => void;
   className?: string;
+}
+
+// A small colored dot + label describing the edition status.
+function statusMeta(status: string | undefined, t: (k: string) => string) {
+  switch (status) {
+    case 'ONGOING':  return { color: '#0E612F', label: t('statusOngoing') };
+    case 'FINISHED': return { color: '#141719', label: t('statusFinished') };
+    default:         return { color: '#163D89', label: t('statusUpcoming') };
+  }
+}
+
+function registrationMeta(status: string | undefined, t: (k: string) => string) {
+  switch (status) {
+    case 'OPEN':        return { color: '#0E612F', label: t('regOpen') };
+    case 'FULL':        return { color: '#991B1B', label: t('regFull') };
+    case 'COMING_SOON': return { color: '#163D89', label: t('regComingSoon') };
+    case 'CLOSED':      return { color: '#141719', label: t('regClosed') };
+    default:            return null;
+  }
 }
 
 export function EditionSelector({
@@ -24,207 +55,100 @@ export function EditionSelector({
   className = '',
 }: EditionSelectorProps) {
   const t = useTranslations('cmp');
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState(initialYear || currentYear);
-  const [isOpen, setIsOpen] = useState(false);
+  const locale = useLocale();
+  const dateLocale = LOCALE_MAP[locale] || 'es-ES';
+
+  const [selectedYear, setSelectedYear] = useState<number | null>(initialYear ?? null);
+  const [podium, setPodium] = useState<EditionPodium | null>(null);
 
   const { years, loading: loadingYears } = useAvailableYears(competitionId);
   const { edition, loading: loadingEdition } = useEditionByYear(competitionId, selectedYear);
 
-  // Set initial year to latest available if not provided
+  // Default to the most recent available year.
   useEffect(() => {
-    if (!initialYear && years.length > 0) {
-      setSelectedYear(years[0]);
-    }
-  }, [years, initialYear]);
+    if (selectedYear == null && years.length > 0) setSelectedYear(years[0]);
+  }, [years, selectedYear]);
 
-  // Notify parent of year change
+  // Notify parent.
   useEffect(() => {
-    if (onYearChange && !loadingEdition) {
+    if (onYearChange && selectedYear != null && !loadingEdition) {
       onYearChange(selectedYear, edition);
     }
   }, [selectedYear, edition, loadingEdition, onYearChange]);
 
-  const handleYearSelect = (year: number) => {
-    setSelectedYear(year);
-    setIsOpen(false);
-  };
+  // Rankings summary: fetch the general podium for the active edition.
+  useEffect(() => {
+    let active = true;
+    setPodium(null);
+    if (!edition?.id) return;
+    (async () => {
+      try {
+        const podiums = await podiumsService.getByEdition(edition.id, PodiumType.GENERAL);
+        if (active) setPodium(podiums?.[0] ?? null);
+      } catch {
+        if (active) setPodium(null);
+      }
+    })();
+    return () => { active = false; };
+  }, [edition?.id]);
 
   if (loadingYears) {
-    return (
-      <div className={`animate-pulse ${className}`}>
-        <div className="h-12 rounded-lg bg-gray-200" />
-      </div>
-    );
+    return <div className={`h-40 animate-pulse rounded-lg bg-gray-100 ${className}`} />;
   }
 
   if (years.length === 0) {
     return (
-      <div className={`rounded-lg border border-dashed p-4 text-center ${className}`}>
-        <p className="text-sm text-muted-foreground">No editions available yet</p>
+      <div className={`rounded-lg border border-dashed border-gray-300 p-6 text-center ${className}`}>
+        <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-300" />
+        <p className="text-sm text-gray-500">{t('noEditionsYet')}</p>
       </div>
     );
   }
 
+  const currentYear = new Date().getFullYear();
+
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Selector Button */}
-      <div className="relative">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex w-full items-center justify-between rounded-lg border bg-card p-4 text-left shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-          aria-label="Select edition year"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Edition</p>
-              <p className="text-lg font-semibold">{selectedYear}</p>
-            </div>
-          </div>
-          <ChevronDown
-            className={`h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          />
-        </button>
+    <div className={className}>
+      {/* Year switcher — only when there is more than one edition */}
+      {years.length > 1 && (
+        <div className="mb-5 flex flex-wrap gap-2" role="tablist" aria-label={t('editionsTitle')}>
+          {years.map((year) => {
+            const selected = year === selectedYear;
+            const dotColor =
+              year > currentYear ? '#163D89' : year < currentYear ? '#141719' : '#0E612F';
+            return (
+              <button
+                key={year}
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setSelectedYear(year)}
+                className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors ${
+                  selected
+                    ? 'border-[#B66916] bg-orange-50 text-[#B66916]'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-[#eecfa8]'
+                }`}
+              >
+                <span className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: dotColor }} />
+                {year}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-        {/* Dropdown */}
-        {isOpen && (
-          <>
-            {/* Overlay */}
-            <div
-              className="fixed inset-0 z-10"
-              onClick={() => setIsOpen(false)}
-            />
-
-            {/* Menu */}
-            <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-80 overflow-auto rounded-lg border bg-card shadow-lg">
-              <div className="p-2">
-                <p className="mb-2 px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
-                  Available Years ({years.length})
-                </p>
-                {years.map((year) => {
-                  const isSelected = year === selectedYear;
-                  const isCurrent = year === currentYear;
-                  const isPast = year < currentYear;
-                  const isFuture = year > currentYear;
-
-                  return (
-                    <button
-                      key={year}
-                      onClick={() => handleYearSelect(year)}
-                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition-colors ${
-                        isSelected
-                          ? 'bg-green-100 text-green-900'
-                          : 'hover:bg-accent hover:text-accent-foreground'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="font-semibold">{year}</span>
-                        {isCurrent && (
-                          <span className="inline-flex items-center rounded-none bg-[#163D89] px-2 py-0.5 text-xs font-medium text-white">
-                            Current
-                          </span>
-                        )}
-                        {isFuture && (
-                          <span className="inline-flex items-center rounded-none bg-[#0E612F] px-2 py-0.5 text-xs font-medium text-white">
-                            Upcoming
-                          </span>
-                        )}
-                        {isPast && (
-                          <span className="inline-flex items-center rounded-none bg-black px-2 py-0.5 text-xs font-medium text-white">
-                            Past
-                          </span>
-                        )}
-                      </span>
-                      {isSelected && (
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Edition Info */}
       {loadingEdition ? (
-        <div className="animate-pulse space-y-3 rounded-lg border p-4">
-          <div className="h-4 rounded bg-gray-200" />
-          <div className="h-4 w-2/3 rounded bg-gray-200" />
-        </div>
+        <div className="h-48 animate-pulse rounded-lg bg-gray-100" />
       ) : edition ? (
-        <div className="rounded-lg border bg-card p-4 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <h4 className="font-semibold text-2xl">{selectedYear}</h4>
-              <p className="text-sm text-muted-foreground">
-                {edition.startDate
-                  ? new Date(edition.startDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })
-                  : t('dateToBeConfirmed')}
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <span
-                className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold ${
-                  edition.status === 'UPCOMING'
-                    ? 'bg-[#163D89] text-white'
-                    : edition.status === 'ONGOING'
-                    ? 'bg-[#0E612F] text-white'
-                    : edition.status === 'FINISHED'
-                    ? 'bg-black text-white'
-                    : 'bg-[#991B1B] text-white'
-                }`}
-              >
-                {edition.status}
-              </span>
-              <span
-                className={`inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-semibold ${
-                  edition.registrationStatus === 'OPEN'
-                    ? 'bg-[#0E612F] text-white'
-                    : edition.registrationStatus === 'FULL'
-                    ? 'bg-[#991B1B] text-white'
-                    : 'bg-black text-white'
-                }`}
-              >
-                {edition.registrationStatus.replace('_', ' ')}
-              </span>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-3 flex gap-4 border-t pt-3 text-sm">
-            {edition.distance && (
-              <div>
-                <span className="text-muted-foreground">Distance:</span>
-                <span className="ml-1 font-semibold">{edition.distance}km</span>
-              </div>
-            )}
-            {edition.elevation && (
-              <div>
-                <span className="text-muted-foreground">Elevation:</span>
-                <span className="ml-1 font-semibold">{edition.elevation}m D+</span>
-              </div>
-            )}
-            {edition.maxParticipants && (
-              <div>
-                <span className="text-muted-foreground">Max:</span>
-                <span className="ml-1 font-semibold">{edition.maxParticipants}</span>
-              </div>
-            )}
-          </div>
-        </div>
+        <EditionDetail
+          edition={edition}
+          podium={podium}
+          dateLocale={dateLocale}
+          t={t}
+        />
       ) : (
-        <div className="rounded-lg border border-dashed p-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            No edition data available for {selectedYear}
+        <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center">
+          <p className="text-sm text-gray-500">
+            {t('noEditionData', { year: selectedYear ?? '' })}
           </p>
         </div>
       )}
@@ -232,46 +156,132 @@ export function EditionSelector({
   );
 }
 
-// Compact version for inline use
-export function EditionSelectorCompact({
-  competitionId,
-  initialYear,
-  onYearChange,
-  className = '',
-}: Omit<EditionSelectorProps, 'competitionName'>) {
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState(initialYear || currentYear);
+function EditionDetail({
+  edition,
+  podium,
+  dateLocale,
+  t,
+}: {
+  edition: Edition;
+  podium: EditionPodium | null;
+  dateLocale: string;
+  t: (k: string, values?: Record<string, any>) => string;
+}) {
+  const status = statusMeta(edition.status, t);
+  const registration = registrationMeta(edition.registrationStatus, t);
+  const dateValue = edition.specificDate || edition.startDate;
+  const formattedDate = dateValue
+    ? new Date(dateValue).toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
+    : t('dateToBeConfirmed');
 
-  const { years, loading } = useAvailableYears(competitionId);
-  const { edition } = useEditionByYear(competitionId, selectedYear);
-
-  useEffect(() => {
-    if (!initialYear && years.length > 0) {
-      setSelectedYear(years[0]);
-    }
-  }, [years, initialYear]);
-
-  useEffect(() => {
-    if (onYearChange) {
-      onYearChange(selectedYear, edition);
-    }
-  }, [selectedYear, edition, onYearChange]);
-
-  if (loading || years.length === 0) {
-    return null;
-  }
+  const participants = edition.currentParticipants ?? 0;
+  const weather = edition.weather;
+  const showWeather = !!weather && edition.weatherFetched !== false;
 
   return (
-    <select
-      value={selectedYear}
-      onChange={(e) => setSelectedYear(Number(e.target.value))}
-      className={`rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className}`}
-    >
-      {years.map((year) => (
-        <option key={year} value={year}>
-          {year}
-        </option>
-      ))}
-    </select>
+    <div className="overflow-hidden rounded-lg border border-gray-200">
+      {/* Header: year + date/city + status badges */}
+      <div className="flex items-start justify-between gap-4 bg-gray-50 p-5">
+        <div>
+          <div className="text-4xl font-black leading-none tracking-tight text-gray-900">
+            {edition.year}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-[#B66916]" />
+              <span className="font-medium text-gray-800">{formattedDate}</span>
+            </span>
+            {edition.city && (
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-[#B66916]" />
+                <span className="font-medium text-gray-800">{edition.city}</span>
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <span className="px-2.5 py-1 text-xs font-bold text-white" style={{ backgroundColor: status.color }}>
+            {status.label}
+          </span>
+          {registration && (
+            <span className="px-2.5 py-1 text-xs font-bold text-white" style={{ backgroundColor: registration.color }}>
+              {registration.label}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Key stats — participants only when > 0 */}
+      <div className="grid grid-cols-2 gap-px border-t border-gray-200 bg-gray-100 sm:grid-cols-3">
+        {edition.distance != null && (
+          <Stat icon={<Route className="h-4 w-4" />} label={t('labelDistance')} value={`${edition.distance} km`} />
+        )}
+        {edition.elevation != null && (
+          <Stat icon={<Mountain className="h-4 w-4" />} label={t('elevationGain')} value={`${edition.elevation} m`} />
+        )}
+        {participants > 0 && (
+          <Stat icon={<Users className="h-4 w-4" />} label={t('labelParticipants')} value={String(participants)} />
+        )}
+      </div>
+
+      {/* Weather summary (if registered) */}
+      {showWeather && weather && (
+        <div className="flex items-center gap-3 border-t border-gray-200 bg-white px-5 py-3">
+          <span className="text-2xl" aria-hidden="true">
+            {WEATHER_ICONS[weather.condition as WeatherCondition] || '🌡️'}
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-400">{t('tabWeather')}</p>
+            <p className="truncate text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">{Math.round(weather.temperature.avg)}°C</span>
+              {' · '}{weather.conditionText}
+              {typeof weather.precipitation === 'number' && weather.precipitation > 0 && (
+                <span className="text-gray-500"> · {weather.precipitation} mm</span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Rankings summary (if registered) */}
+      {podium && (
+        <div className="border-t border-gray-200 bg-white px-5 py-3">
+          <p className="mb-1 text-xs font-bold uppercase tracking-wide text-gray-400">{t('tabRankings')}</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="min-w-0 truncate text-sm text-gray-700">
+              <span aria-hidden="true">🥇</span>{' '}
+              <span className="font-semibold text-gray-900">{podium.firstPlace}</span>
+              {podium.firstTime && <span className="text-gray-500"> · {podium.firstTime}</span>}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* CTA to the full edition page */}
+      {edition.slug && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 bg-white px-5 py-4">
+          <span className="text-sm text-gray-400">{t('ctaNote')}</span>
+          <Link
+            href={`/editions/${edition.slug}`}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#B66916] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#9c5811]"
+          >
+            {t('viewEdition', { year: edition.year })}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="bg-white p-4">
+      <div className="flex items-center gap-1.5 text-gray-400">
+        {icon}
+        <span className="text-[11px] font-bold uppercase tracking-wide">{label}</span>
+      </div>
+      <p className="mt-1 text-lg font-black tabular-nums text-gray-900">{value}</p>
+    </div>
   );
 }
