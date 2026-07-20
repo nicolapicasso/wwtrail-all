@@ -2636,7 +2636,10 @@
     "noClassificationsHint": "Fes clic a \"Nova Classificació\" per afegir-ne una.",
     "editClassification": "Edita classificació",
     "deleteClassification": "Elimina classificació",
-    "confirmDeleteClassification": "Segur que vols eliminar aquesta classificació?"
+    "confirmDeleteClassification": "Segur que vols eliminar aquesta classificació?",
+    "searchEditions": "Cerca edició",
+    "searchEditionsPlaceholder": "Any, competició o ciutat…",
+    "selectEventPrompt": "Selecciona un esdeveniment per veure-hi les edicions"
   },
   "boForms": {
     "cancel": "Cancel·la",

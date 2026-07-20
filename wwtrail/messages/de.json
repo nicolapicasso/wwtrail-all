@@ -2636,7 +2636,10 @@
     "noClassificationsHint": "Klicken Sie auf \"Neue Ergebnisliste\", um eine hinzuzufügen.",
     "editClassification": "Ergebnisliste bearbeiten",
     "deleteClassification": "Ergebnisliste löschen",
-    "confirmDeleteClassification": "Möchten Sie diese Ergebnisliste wirklich löschen?"
+    "confirmDeleteClassification": "Möchten Sie diese Ergebnisliste wirklich löschen?",
+    "searchEditions": "Ausgabe suchen",
+    "searchEditionsPlaceholder": "Jahr, Wettkampf oder Stadt…",
+    "selectEventPrompt": "Wähle eine Veranstaltung, um ihre Ausgaben zu sehen"
   },
   "boForms": {
     "cancel": "Abbrechen",

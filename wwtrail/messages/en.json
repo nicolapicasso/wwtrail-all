@@ -2636,7 +2636,10 @@
     "noClassificationsHint": "Click \"New Classification\" to add one.",
     "editClassification": "Edit classification",
     "deleteClassification": "Delete classification",
-    "confirmDeleteClassification": "Are you sure you want to delete this classification?"
+    "confirmDeleteClassification": "Are you sure you want to delete this classification?",
+    "searchEditions": "Search edition",
+    "searchEditionsPlaceholder": "Year, competition or city…",
+    "selectEventPrompt": "Select an event to see its editions"
   },
   "boForms": {
     "cancel": "Cancel",

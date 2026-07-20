@@ -2636,7 +2636,10 @@
     "noClassificationsHint": "Clicca su \"Nuova Classifica\" per aggiungerne una.",
     "editClassification": "Modifica classifica",
     "deleteClassification": "Elimina classifica",
-    "confirmDeleteClassification": "Sei sicuro di voler eliminare questa classifica?"
+    "confirmDeleteClassification": "Sei sicuro di voler eliminare questa classifica?",
+    "searchEditions": "Cerca edizione",
+    "searchEditionsPlaceholder": "Anno, competizione o città…",
+    "selectEventPrompt": "Seleziona un evento per vedere le sue edizioni"
   },
   "boForms": {
     "cancel": "Annulla",
