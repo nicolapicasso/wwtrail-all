@@ -314,7 +314,23 @@ export const userService = {
    */
   async getEditionParticipants(editionId: string) {
     const response = await apiClientV2.get(`/editions/${editionId}/participants`);
-    return response.data.data;
+    // The endpoint returns { data: { participants, total } }; normalize to a
+    // plain array with the user shape the UI expects.
+    const payload = response.data?.data;
+    const list = Array.isArray(payload) ? payload : (payload?.participants ?? []);
+    return list.map((p: any) => ({
+      ...p,
+      user: {
+        id: p.user?.id,
+        username: p.user?.username,
+        avatar: p.user?.avatar ?? null,
+        fullName:
+          [p.user?.firstName, p.user?.lastName].filter(Boolean).join(' ') ||
+          p.user?.username ||
+          '',
+        country: p.user?.country ?? null,
+      },
+    }));
   },
 };
 
