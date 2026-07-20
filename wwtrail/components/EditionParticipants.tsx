@@ -60,7 +60,7 @@ export function EditionParticipants({
       try {
         setLoading(true);
         const data = await userService.getEditionParticipants(editionId);
-        setParticipants(data);
+        setParticipants(Array.isArray(data) ? data : []);
       } catch (err: any) {
         console.error('Error fetching participants:', err);
         setError('Error al cargar los participantes');
