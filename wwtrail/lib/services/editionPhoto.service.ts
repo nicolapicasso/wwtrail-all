@@ -3,7 +3,7 @@ import { ApiError as AppError } from '@/lib/utils/errors';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
-import { uploadToSpaces, deleteFromSpaces, getKeyFromUrl, isSpacesConfigured } from '@/lib/services/spaces.client';
+import { uploadToSpaces, deleteFromSpaces, getKeyFromUrl, isSpacesConfigured, assertLocalFallbackAllowed } from '@/lib/services/spaces.client';
 import type {
   UpdatePhotoMetadataInput,
   ReorderPhotosInput,
@@ -109,7 +109,9 @@ export class EditionPhotoService {
       url = await uploadToSpaces(processed.originalBuffer, originalKey, 'image/jpeg');
       thumbnail = await uploadToSpaces(processed.thumbnailBuffer, thumbnailKey, 'image/jpeg');
     } else {
-      // Fallback: save locally
+      // Fallback: save locally (dev only; refuse in production so photos are
+      // not written to ephemeral disk and lost on redeploy).
+      assertLocalFallbackAllowed('edition-photo');
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'photos');
       fs.mkdirSync(uploadDir, { recursive: true });
 
