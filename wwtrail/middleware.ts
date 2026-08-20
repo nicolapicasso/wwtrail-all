@@ -47,7 +47,11 @@ export async function middleware(request: NextRequest) {
   ];
 
   const isPublicRoute = (path: string) => {
-    const pathWithoutLocale = path.replace(new RegExp(`^/(${locales.join('|')})`), '');
+    // Only strip a locale when it is a full path segment (followed by "/" or
+    // end of string). Without the lookahead, a locale code that is also the
+    // start of a real path — e.g. "ca" in "/calendar" — would be stripped,
+    // turning "/calendar" into "lendar" and breaking its public-route match.
+    const pathWithoutLocale = path.replace(new RegExp(`^/(${locales.join('|')})(?=/|$)`), '');
     const checkPath = pathWithoutLocale || '/';
     return publicRoutes.some(route => checkPath === route || checkPath.startsWith(route + '/'));
   };
