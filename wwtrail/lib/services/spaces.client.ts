@@ -96,6 +96,24 @@ export function isSpacesConfigured(): boolean {
 }
 
 /**
+ * Guard against silently writing uploads to the container's ephemeral local
+ * disk in production. When Spaces is not configured we must NOT fall back to
+ * `public/uploads/...` in prod, because that directory is wiped on every
+ * rebuild/redeploy and the image (and its DB url) is lost. Callers should run
+ * this right before any local-disk write so the upload fails loudly instead of
+ * disappearing later. In development the local fallback is allowed.
+ */
+export function assertLocalFallbackAllowed(context: string): void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      `[${context}] El almacenamiento remoto (DigitalOcean Spaces) no está configurado. ` +
+        `Configura DO_SPACES_KEY y DO_SPACES_SECRET (y STORAGE_TYPE != 'local') en el entorno. ` +
+        `Se ha evitado guardar la imagen en disco local efímero para que no se pierda en el próximo despliegue.`
+    );
+  }
+}
+
+/**
  * Non-sensitive snapshot of the storage configuration, for diagnostics. Never
  * exposes secret values — only whether they are present.
  */

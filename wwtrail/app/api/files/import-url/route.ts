@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { requireAuth, apiSuccess, apiError, ApiError } from '@/lib/auth';
 import prisma from '@/lib/db';
 import path from 'path';
-import { uploadToSpaces, isSpacesConfigured } from '@/lib/services/spaces.client';
+import { uploadToSpaces, isSpacesConfigured, assertLocalFallbackAllowed } from '@/lib/services/spaces.client';
 import { writeFile, mkdir } from 'fs/promises';
 import { assertSafeUrl } from '@/lib/utils/ssrf';
 import axios from 'axios';
@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
     if (isSpacesConfigured()) {
       uploadedUrl = await uploadToSpaces(buffer, spacesKey, contentType);
     } else {
+      assertLocalFallbackAllowed('import-url');
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', fieldName);
       await mkdir(uploadDir, { recursive: true });
       await writeFile(path.join(uploadDir, uniqueName), buffer);

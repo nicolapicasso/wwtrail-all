@@ -41,6 +41,7 @@ export async function middleware(request: NextRequest) {
     '/special-series',
     '/users',
     '/directory',
+    '/calendar',
     '/page',
     '/editions',
   ];

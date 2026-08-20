@@ -3,7 +3,7 @@ import { requireAuth, apiSuccess, apiError, ApiError } from '@/lib/auth';
 import prisma from '@/lib/db';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { uploadToSpaces, isSpacesConfigured } from '@/lib/services/spaces.client';
+import { uploadToSpaces, isSpacesConfigured, assertLocalFallbackAllowed } from '@/lib/services/spaces.client';
 import logger from '@/lib/utils/logger';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -55,6 +55,9 @@ export async function POST(request: NextRequest) {
       // Upload to DigitalOcean Spaces
       url = await uploadToSpaces(buffer, spacesKey, file.type);
     } else {
+      // In production, refuse to write to ephemeral local disk (files vanish on
+      // redeploy); fail loudly so the missing Spaces config is fixed instead.
+      assertLocalFallbackAllowed('upload');
       logger.warn(
         `[upload] Spaces NO configurado (falta DO_SPACES_KEY/SECRET o STORAGE_TYPE=local). ` +
           `Guardando en local (efímero): ${spacesKey}`
