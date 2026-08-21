@@ -2167,7 +2167,11 @@
     "usersUsernamePlaceholder": "utilisateur123",
     "usersUsernameRequired": "Nom d'utilisateur *",
     "usersViewAsUser": "Voir en tant qu'utilisateur",
-    "usersWillGeneratePassword": "Un nouveau mot de passe aléatoire sera généré pour l'utilisateur"
+    "usersWillGeneratePassword": "Un nouveau mot de passe aléatoire sera généré pour l'utilisateur",
+    "scraperTargetEventLabel": "Événement cible",
+    "scraperSelectTargetEvent": "Rechercher et sélectionner un événement…",
+    "scraperImportAsNewEvent": "➕ Créer un nouvel événement (données détectées)",
+    "scraperTargetEventHint": "Choisissez un événement existant pour y importer les compétitions, ou laissez « Créer un nouvel événement »."
   },
   "boAdmin": {
     "statusActive": "Actif",

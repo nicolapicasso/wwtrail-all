@@ -9,6 +9,8 @@ import {
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClientV2 } from '@/lib/api/client';
+import EventSelect from '@/components/EventSelect';
+import eventsService from '@/lib/api/v2/events.service';
 
 type FetchMode = 'auto' | 'static' | 'render' | 'paste';
 
@@ -73,10 +75,31 @@ export default function ScraperPage() {
   const [scan, setScan] = useState<ScanResult | null>(null);
   const [graph, setGraph] = useState<Graph | null>(null);
   const [importResult, setImportResult] = useState<any>(null);
+  const [allEvents, setAllEvents] = useState<Array<{ id: string; slug: string; name: string; city?: string; country?: string }>>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'ADMIN')) router.push('/organizer');
   }, [user, authLoading, router]);
+
+  // Load all events so the admin can pick the target event for the import.
+  useEffect(() => {
+    if (authLoading || !user || user.role !== 'ADMIN') return;
+    let active = true;
+    (async () => {
+      try {
+        setEventsLoading(true);
+        const res: any = await eventsService.getAll({ limit: 1000 });
+        const list = res?.data || res?.events || res || [];
+        if (active) setAllEvents(Array.isArray(list) ? list : []);
+      } catch {
+        if (active) setAllEvents([]);
+      } finally {
+        if (active) setEventsLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [user, authLoading]);
 
   const runScan = async () => {
     setError(null); setImportResult(null); setScan(null); setGraph(null);
@@ -260,6 +283,28 @@ export default function ScraperPage() {
                 <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700">{t('scraperNew')}</span>
               )}
             </div>
+            {/* Target event selector: let the admin choose which existing
+                event to import into (searchable), overriding the auto-match. */}
+            <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-500">
+                {t('scraperTargetEventLabel')}
+              </label>
+              <EventSelect
+                value={graph.event.existing?.id || ''}
+                onChange={(id) => {
+                  if (!id) { setEvent({ existing: null }); return; }
+                  const ev = allEvents.find((e) => e.id === id);
+                  setEvent({ existing: { id, slug: ev?.slug || '', name: ev?.name || '' }, suggestion: null });
+                }}
+                events={allEvents.map((e) => ({ id: e.id, name: e.name, city: e.city, country: e.country }))}
+                placeholder={t('scraperSelectTargetEvent')}
+                showAllOption={true}
+                allOptionLabel={t('scraperImportAsNewEvent')}
+                isLoading={eventsLoading}
+              />
+              <p className="mt-1.5 text-xs text-gray-500">{t('scraperTargetEventHint')}</p>
+            </div>
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label={t('scraperFieldName')}><input value={graph.event.name} onChange={(e) => setEvent({ name: e.target.value })} className={inputCls} /></Field>
               <Field label={t('scraperFieldCountry')}><input value={graph.event.country || ''} onChange={(e) => setEvent({ country: e.target.value.toUpperCase().slice(0, 2) })} className={inputCls} /></Field>
