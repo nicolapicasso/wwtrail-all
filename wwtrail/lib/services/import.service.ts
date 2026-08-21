@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/db';
 import { EventStatus, Language } from '@prisma/client';
 import logger from '@/lib/utils/logger';
+import { internalizeItemImages } from '@/lib/services/imageImport';
 import { slugify } from '@/lib/utils/slugify';
 import type {
   ImportOrganizer,
@@ -949,6 +950,9 @@ export class ImportService {
   // ============================================
 
   private async createNativeEntity(entityType: EntityType, item: any, userId: string, parentId?: string): Promise<any> {
+    // Download external logo/cover/gallery images into our own storage so
+    // imported entities reference our CDN instead of hot-linking third parties.
+    item = await internalizeItemImages(item, `import/${entityType}`);
     switch (entityType) {
       case 'events':
         return this.createNativeEvent(item, userId);
