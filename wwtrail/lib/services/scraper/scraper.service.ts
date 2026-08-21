@@ -8,6 +8,7 @@ import { EditionService } from '@/lib/services/edition.service';
 import { OrganizerService } from '@/lib/services/organizer.service';
 import prisma from '@/lib/db';
 import logger from '@/lib/utils/logger';
+import { internalizeImageUrl } from '@/lib/services/imageImport';
 import { fetchContent } from './fetcher';
 import { extractGraph } from './extractor';
 import { annotateExisting } from './dedup';
@@ -119,6 +120,13 @@ export class ScraperService {
         userRole
       );
 
+      // Download external logo/cover into our own storage so imported images
+      // live on our CDN instead of hot-linking the scraped site.
+      const [logoUrl, coverImage] = await Promise.all([
+        internalizeImageUrl(graph.event.logoUrl || undefined, 'logos'),
+        internalizeImageUrl(graph.event.coverImage || undefined, 'covers'),
+      ]);
+
       const created = await EventService.create(
         {
           name: graph.event.name,
@@ -134,8 +142,8 @@ export class ScraperService {
           facebookUrl: graph.event.facebookUrl || undefined,
           twitterUrl: graph.event.twitterUrl || undefined,
           youtubeUrl: graph.event.youtubeUrl || undefined,
-          logoUrl: graph.event.logoUrl || undefined,
-          coverImage: graph.event.coverImage || undefined,
+          logoUrl: logoUrl || undefined,
+          coverImage: coverImage || undefined,
           organizerId: organizerId || undefined,
         },
         userId,
