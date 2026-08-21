@@ -1,5 +1,6 @@
 import { PrismaClient, EventStatus, Language } from '@prisma/client';
 import logger from '@/lib/utils/logger';
+import { cache } from '@/lib/cache';
 import { slugify } from '@/lib/utils/slugify';
 import { TranslationService } from './translation.service';
 import { SEOService } from './seo.service';
@@ -427,6 +428,8 @@ export class CompetitionService {
       },
     });
 
+    await this.invalidateEventCache(event.id, event.slug);
+
     logger.info(`Competition created: ${competition.id} - ${competition.name}`);
 
     // Disparar traducciones automáticas
@@ -748,6 +751,8 @@ export class CompetitionService {
       },
     });
 
+    await this.invalidateEventCache(competition.event?.id, competition.event?.slug);
+
     logger.info(`Competition updated: ${id}`);
     return competition;
   }
@@ -755,12 +760,27 @@ export class CompetitionService {
   /**
    * Eliminar una competición
    */
+  /**
+   * Invalidate cached event detail/lists so a competition create/update/delete
+   * is reflected immediately (the event detail cache embeds its competitions).
+   */
+  private static async invalidateEventCache(eventId?: string, eventSlug?: string) {
+    try {
+      if (eventId) await cache.del(`event:${eventId}`);
+      if (eventSlug) await cache.del(`event:slug:${eventSlug}`);
+      await cache.delPattern('events:');
+      await cache.delPattern('competitions:');
+    } catch (e) {
+      logger.warn(`invalidateEventCache failed: ${(e as Error).message}`);
+    }
+  }
+
   static async delete(id: string, userId: string) {
     const existing = await prisma.competition.findUnique({
       where: { id },
       include: {
         event: {
-          select: { id: true, userId: true },
+          select: { id: true, userId: true, slug: true },
         },
         _count: {
           select: {
@@ -798,6 +818,8 @@ export class CompetitionService {
     await prisma.competition.delete({
       where: { id },
     });
+
+    await this.invalidateEventCache(existing.event.id, existing.event.slug);
 
     logger.warn(`Competition deleted: ${id}`);
     return { message: 'Competition deleted successfully' };
