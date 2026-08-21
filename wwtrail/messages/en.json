@@ -2167,7 +2167,11 @@
     "usersUsernamePlaceholder": "user123",
     "usersUsernameRequired": "Username *",
     "usersViewAsUser": "View as user",
-    "usersWillGeneratePassword": "A new random password will be generated for the user"
+    "usersWillGeneratePassword": "A new random password will be generated for the user",
+    "scraperTargetEventLabel": "Target event",
+    "scraperSelectTargetEvent": "Search and select an event…",
+    "scraperImportAsNewEvent": "➕ Create new event (from detected data)",
+    "scraperTargetEventHint": "Pick an existing event to import the competitions into, or leave “Create new event”."
   },
   "boAdmin": {
     "statusActive": "Active",
