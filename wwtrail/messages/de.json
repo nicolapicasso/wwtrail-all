@@ -2171,7 +2171,11 @@
     "scraperTargetEventLabel": "Zielveranstaltung",
     "scraperSelectTargetEvent": "Veranstaltung suchen und auswählen…",
     "scraperImportAsNewEvent": "➕ Neue Veranstaltung erstellen (aus erkannten Daten)",
-    "scraperTargetEventHint": "Wähle eine bestehende Veranstaltung, in die die Wettkämpfe importiert werden, oder belasse „Neue Veranstaltung erstellen“."
+    "scraperTargetEventHint": "Wähle eine bestehende Veranstaltung, in die die Wettkämpfe importiert werden, oder belasse „Neue Veranstaltung erstellen“.",
+    "homeBlockItemsCount": "{count, plural, one {# Element} other {# Elemente}}",
+    "homeBlockLinksCount": "{count, plural, one {# Link} other {# Links}}",
+    "homeBlockFeaturedOnly": "Nur hervorgehoben",
+    "homeBlockHidden": "Ausgeblendet"
   },
   "boAdmin": {
     "statusActive": "Aktiv",

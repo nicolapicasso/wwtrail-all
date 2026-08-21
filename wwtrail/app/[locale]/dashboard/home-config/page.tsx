@@ -15,7 +15,16 @@ import {
   Trash2,
   GripVertical,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Calendar,
+  Trophy,
+  Layers,
+  Wrench,
+  Newspaper,
+  Type as TypeIcon,
+  Link as LinkIcon,
+  Map as MapIcon,
+  LayoutGrid,
 } from 'lucide-react';
 import { homeService } from '@/lib/api/home.service';
 import type { HomeConfiguration, HomeBlock, HomeBlockType } from '@/types/home';
@@ -162,6 +171,54 @@ export default function HomeConfigPage() {
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
 
+  const getBlockIcon = (type: HomeBlockType) => {
+    const icons: Record<HomeBlockType, any> = {
+      EVENTS: Calendar,
+      COMPETITIONS: Trophy,
+      EDITIONS: Layers,
+      SERVICES: Wrench,
+      POSTS: Newspaper,
+      TEXT: TypeIcon,
+      LINKS: LinkIcon,
+      MAP: MapIcon,
+    };
+    return icons[type] || LayoutGrid;
+  };
+
+  // Human-readable summary of a block's config (replaces the raw JSON dump).
+  const getBlockSummary = (block: HomeBlock): { title: string | null; chips: string[] } => {
+    const c: any = block.config || {};
+    const chips: string[] = [];
+    const title = typeof c.title === 'string' && c.title.trim() ? c.title.trim() : null;
+
+    switch (block.type) {
+      case 'EVENTS':
+      case 'COMPETITIONS':
+      case 'EDITIONS':
+      case 'SERVICES':
+      case 'POSTS':
+        if (typeof c.limit === 'number') chips.push(t('homeBlockItemsCount', { count: c.limit }));
+        if (c.viewType) chips.push(String(c.viewType));
+        if (c.featuredOnly === true) chips.push(t('homeBlockFeaturedOnly'));
+        return { title: title || (typeof c.subtitle === 'string' ? c.subtitle : null), chips };
+      case 'LINKS':
+        chips.push(t('homeBlockLinksCount', { count: Array.isArray(c.items) ? c.items.length : 0 }));
+        return { title, chips };
+      case 'MAP':
+        if (c.mapMode) chips.push(String(c.mapMode));
+        if (typeof c.height === 'number') chips.push(`${c.height}px`);
+        if (c.showEvents) chips.push(t('dashEvents'));
+        if (c.showServices) chips.push(t('dashServices'));
+        return { title, chips };
+      case 'TEXT': {
+        const txt = typeof c.text === 'string' ? c.text : typeof c.content === 'string' ? c.content : '';
+        return { title: txt ? txt.slice(0, 90) : title, chips };
+      }
+      default:
+        return { title, chips };
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -233,80 +290,95 @@ export default function HomeConfigPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {sortedBlocks.map((block, index) => (
+            {sortedBlocks.map((block, index) => {
+              const BlockIcon = getBlockIcon(block.type);
+              const summary = getBlockSummary(block);
+              return (
               <div
                 key={block.id}
-                className={`border rounded-lg p-4 ${
-                  block.visible ? 'bg-white' : 'bg-gray-50 opacity-60'
+                className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-shadow hover:shadow-sm ${
+                  block.visible ? 'border-gray-200 bg-white' : 'border-dashed border-gray-300 bg-gray-50'
                 }`}
               >
-                <div className="flex items-center gap-4">
-                  {/* Drag handle visual */}
-                  <div className="flex flex-col gap-1">
-                    <button
-                      onClick={() => handleMoveBlock(block.id, 'up')}
-                      disabled={index === 0}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ArrowUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleMoveBlock(block.id, 'down')}
-                      disabled={index === sortedBlocks.length - 1}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ArrowDown className="w-4 h-4" />
-                    </button>
-                  </div>
+                {/* Reorder */}
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => handleMoveBlock(block.id, 'up')}
+                    disabled={index === 0}
+                    className="text-gray-300 transition-colors hover:text-gray-600 disabled:opacity-0"
+                    aria-label={t('homeConfigOrder')}
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
+                  <span className="my-0.5 text-[11px] font-bold tabular-nums text-gray-400">{index + 1}</span>
+                  <button
+                    onClick={() => handleMoveBlock(block.id, 'down')}
+                    disabled={index === sortedBlocks.length - 1}
+                    className="text-gray-300 transition-colors hover:text-gray-600 disabled:opacity-0"
+                    aria-label={t('homeConfigOrder')}
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </button>
+                </div>
 
-                  {/* Block info */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getBlockTypeColor(
-                          block.type
-                        )}`}
-                      >
-                        {getBlockTypeLabel(block.type)}
-                      </span>
-                      <span className="text-sm text-gray-500">{t('homeConfigOrder')}: {block.order}</span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {block.config && JSON.stringify(block.config, null, 2).substring(0, 100)}...
-                    </div>
-                  </div>
+                {/* Icon tile */}
+                <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${getBlockTypeColor(block.type)} ${block.visible ? '' : 'opacity-70'}`}>
+                  <BlockIcon className="h-5 w-5" />
+                </div>
 
-                  {/* Actions */}
+                {/* Block info */}
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleToggleVisibility(block.id)}
-                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                      title={block.visible ? t('homeConfigHide') : t('homeConfigShow')}
-                    >
-                      {block.visible ? (
-                        <Eye className="w-5 h-5" />
-                      ) : (
-                        <EyeOff className="w-5 h-5" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setEditingBlock(block)}
-                      className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md"
-                      title={t('editar')}
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteBlock(block.id)}
-                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md"
-                      title={t('eliminar')}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${getBlockTypeColor(block.type)}`}>
+                      {getBlockTypeLabel(block.type)}
+                    </span>
+                    {!block.visible && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-600">
+                        <EyeOff className="h-3 w-3" /> {t('homeBlockHidden')}
+                      </span>
+                    )}
                   </div>
+                  {summary.title && (
+                    <p className="mt-1 truncate text-sm font-semibold text-gray-900">{summary.title}</p>
+                  )}
+                  {summary.chips.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {summary.chips.map((chip, i) => (
+                        <span key={i} className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleToggleVisibility(block.id)}
+                    className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                    title={block.visible ? t('homeConfigHide') : t('homeConfigShow')}
+                  >
+                    {block.visible ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                  </button>
+                  <button
+                    onClick={() => setEditingBlock(block)}
+                    className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                    title={t('editar')}
+                  >
+                    <Edit2 className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBlock(block.id)}
+                    className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                    title={t('eliminar')}
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -2171,7 +2171,11 @@
     "scraperTargetEventLabel": "Esdeveniment de destinació",
     "scraperSelectTargetEvent": "Cerca i selecciona un esdeveniment…",
     "scraperImportAsNewEvent": "➕ Crea un esdeveniment nou (segons el detectat)",
-    "scraperTargetEventHint": "Tria un esdeveniment existent per importar-hi les competicions, o deixa «Crea un esdeveniment nou»."
+    "scraperTargetEventHint": "Tria un esdeveniment existent per importar-hi les competicions, o deixa «Crea un esdeveniment nou».",
+    "homeBlockItemsCount": "{count, plural, one {# element} other {# elements}}",
+    "homeBlockLinksCount": "{count, plural, one {# enllaç} other {# enllaços}}",
+    "homeBlockFeaturedOnly": "Només destacats",
+    "homeBlockHidden": "Ocult"
   },
   "boAdmin": {
     "statusActive": "Actiu",
