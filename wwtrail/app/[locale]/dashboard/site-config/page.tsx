@@ -32,6 +32,10 @@ interface SiteConfig {
   hasResendKey?: boolean;
   emailFrom?: string | null;
   organizerReplyTo?: string | null;
+  outreachEnabled?: boolean;
+  emailWelcomeEnabled?: boolean;
+  emailReminderEnabled?: boolean;
+  emailMagazineEnabled?: boolean;
 }
 
 const FONT_OPTIONS = [
@@ -450,6 +454,40 @@ export default function SiteConfigPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
             <p className="text-xs text-gray-400 mt-1">Buzón donde recibirás las respuestas de los organizadores.</p>
+          </div>
+
+          {/* Outreach switches */}
+          <div className="border-t border-gray-100 pt-4">
+            <p className="text-sm font-semibold text-gray-800">Emails automáticos</p>
+            <p className="text-xs text-gray-400 mb-3">Todo apagado por defecto. Nada se envía hasta que actives el interruptor general.</p>
+
+            <label className="flex items-center justify-between gap-3 py-2">
+              <span className="text-sm font-medium text-gray-800">Activar envíos automáticos (interruptor general)</span>
+              <input type="checkbox" checked={!!config.outreachEnabled}
+                onChange={(e) => setConfig({ ...config, outreachEnabled: e.target.checked })}
+                className="h-5 w-5 accent-green-600" />
+            </label>
+
+            <div className={`space-y-1 ${config.outreachEnabled ? '' : 'opacity-50'}`}>
+              <label className="flex items-center justify-between gap-3 py-1.5">
+                <span className="text-sm text-gray-700">Bienvenida al crear un evento (invitación al organizador)</span>
+                <input type="checkbox" disabled={!config.outreachEnabled} checked={!!config.emailWelcomeEnabled}
+                  onChange={(e) => setConfig({ ...config, emailWelcomeEnabled: e.target.checked })}
+                  className="h-5 w-5 accent-green-600" />
+              </label>
+              <label className="flex items-center justify-between gap-3 py-1.5">
+                <span className="text-sm text-gray-700">Recordatorios T‑60 y T‑30 antes de cada edición</span>
+                <input type="checkbox" disabled={!config.outreachEnabled} checked={!!config.emailReminderEnabled}
+                  onChange={(e) => setConfig({ ...config, emailReminderEnabled: e.target.checked })}
+                  className="h-5 w-5 accent-green-600" />
+              </label>
+              <label className="flex items-center justify-between gap-3 py-1.5">
+                <span className="text-sm text-gray-700">Magazine: petición de material tras la edición</span>
+                <input type="checkbox" disabled={!config.outreachEnabled} checked={!!config.emailMagazineEnabled}
+                  onChange={(e) => setConfig({ ...config, emailMagazineEnabled: e.target.checked })}
+                  className="h-5 w-5 accent-green-600" />
+              </label>
+            </div>
           </div>
         </div>
       </section>

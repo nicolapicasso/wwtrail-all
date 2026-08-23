@@ -98,6 +98,10 @@ export class SiteConfigService {
     resendApiKey?: string;
     emailFrom?: string;
     organizerReplyTo?: string;
+    outreachEnabled?: boolean;
+    emailWelcomeEnabled?: boolean;
+    emailReminderEnabled?: boolean;
+    emailMagazineEnabled?: boolean;
   }) {
     let config = await prisma.siteConfig.findFirst();
 
@@ -169,6 +173,24 @@ export class SiteConfigService {
       resendApiKey: decryptSecret(config?.resendApiKey) || process.env.RESEND_API_KEY || null,
       emailFrom: config?.emailFrom || process.env.EMAIL_FROM || null,
       organizerReplyTo: config?.organizerReplyTo || process.env.ORGANIZER_REPLY_TO || null,
+    };
+  }
+
+  /** Outreach on/off switches (default OFF so nothing sends until enabled). */
+  static async getOutreachFlags(): Promise<{
+    outreachEnabled: boolean; welcome: boolean; reminder: boolean; magazine: boolean;
+  }> {
+    const c = await prisma.siteConfig.findFirst({
+      select: {
+        outreachEnabled: true, emailWelcomeEnabled: true,
+        emailReminderEnabled: true, emailMagazineEnabled: true,
+      },
+    });
+    return {
+      outreachEnabled: c?.outreachEnabled ?? false,
+      welcome: c?.emailWelcomeEnabled ?? false,
+      reminder: c?.emailReminderEnabled ?? false,
+      magazine: c?.emailMagazineEnabled ?? false,
     };
   }
 }

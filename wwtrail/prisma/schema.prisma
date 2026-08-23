@@ -1704,6 +1704,12 @@ model SiteConfig {
   emailFrom        String? @db.VarChar(255)
   organizerReplyTo String? @db.VarChar(255)
 
+  // Outreach engine switches (all OFF by default — nothing sends until enabled)
+  outreachEnabled      Boolean @default(false) // master switch
+  emailWelcomeEnabled  Boolean @default(false) // invite on event creation
+  emailReminderEnabled Boolean @default(false) // T-60 / T-30 reminders
+  emailMagazineEnabled Boolean @default(false) // post-event magazine request
+
   // Branding
   siteName    String  @default("WWTRAIL") @db.VarChar(100)
   logoUrl     String? @db.Text
