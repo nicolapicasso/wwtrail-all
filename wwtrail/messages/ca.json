@@ -981,7 +981,8 @@
     "errorUnmarking": "Error en desmarcar la competició",
     "confirm": "Confirma",
     "processing": "Processant...",
-    "language": "Idioma"
+    "language": "Idioma",
+    "navEmailTemplates": "Plantilles de correu"
   },
   "boCatalog": {
     "accessDenied": "Accés denegat",
