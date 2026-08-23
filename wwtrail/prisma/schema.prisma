@@ -1408,6 +1408,21 @@ model EmailTemplate {
   @@map("email_templates")
 }
 
+// Registro de emails automáticos enviados (idempotencia del motor de outreach)
+model EmailLog {
+  id         String   @id @default(uuid())
+  entityType String   @db.VarChar(20) // 'edition' | 'event'
+  entityId   String
+  emailType  String   @db.VarChar(40) // REMINDER_60 | REMINDER_30 | MAGAZINE | WELCOME
+  recipient  String   @db.VarChar(255)
+  sentAt     DateTime @default(now())
+
+  @@unique([entityType, entityId, emailType])
+  @@index([emailType])
+  @@index([sentAt])
+  @@map("email_logs")
+}
+
 // ===================================
 // SEO MANAGEMENT SYSTEM
 // ===================================

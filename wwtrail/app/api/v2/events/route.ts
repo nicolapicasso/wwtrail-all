@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { EventService } from '@/lib/services/event.service';
 import { getAuthUser, requireRole, apiSuccess, apiError } from '@/lib/auth';
+import { OutreachService } from '@/lib/services/outreach.service';
 
 // GET /api/v2/events
 export async function GET(request: NextRequest) {
@@ -25,6 +26,11 @@ export async function POST(request: NextRequest) {
     const user = await requireRole(request, 'ORGANIZER', 'ADMIN');
     const data = await request.json();
     const event = await EventService.create(data, user.id, user.role);
+    // Outreach: when an admin registers an event, invite its organizer to manage
+    // it (best-effort, idempotent — never blocks event creation).
+    if (user.role === 'ADMIN' && event?.id) {
+      await OutreachService.sendWelcome(event.id, user.id);
+    }
     return apiSuccess(event, 201);
   } catch (error) {
     return apiError(error);
