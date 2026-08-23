@@ -725,7 +725,10 @@
     "selectedCount": "{count, plural, one {# seleccionat} other {# seleccionats}}",
     "specialSeries": "Sèrie especial",
     "results": "Resultats:",
-    "onTheMap": "al mapa"
+    "onTheMap": "al mapa",
+    "dayCompetitionsCount": "{count, plural, one {# competició} other {# competicions}}",
+    "viewDayCompetitions": "Veure {count, plural, one {# competició} other {# competicions}}",
+    "close": "Tancar"
   },
   "cmp": {
     "statusPublished": "Publicat",

@@ -725,7 +725,10 @@
     "selectedCount": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
     "specialSeries": "Série spéciale",
     "results": "Résultats :",
-    "onTheMap": "sur la carte"
+    "onTheMap": "sur la carte",
+    "dayCompetitionsCount": "{count, plural, one {# compétition} other {# compétitions}}",
+    "viewDayCompetitions": "Voir {count, plural, one {# compétition} other {# compétitions}}",
+    "close": "Fermer"
   },
   "cmp": {
     "statusPublished": "Publié",
