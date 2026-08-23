@@ -42,6 +42,7 @@ export async function middleware(request: NextRequest) {
     '/users',
     '/directory',
     '/calendar',
+    '/invite',
     '/page',
     '/editions',
   ];

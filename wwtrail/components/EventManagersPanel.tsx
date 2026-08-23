@@ -18,8 +18,10 @@ import {
   Users,
   AlertCircle,
   CheckCircle,
+  Mail,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiClientV2 } from '@/lib/api/client';
 import eventManagersService, {
   EventManager,
   AvailableOrganizer,
@@ -40,6 +42,28 @@ export function EventManagersPanel({ eventId, eventName }: EventManagersPanelPro
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [inviting, setInviting] = useState(false);
+
+  const handleInviteOrganizer = async () => {
+    setInviting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await apiClientV2.post(`/events/${eventId}/invite-organizer`);
+      const data = res.data?.data ?? res.data;
+      if (data?.sent) {
+        setSuccess(`Invitación enviada a ${data.email}. El organizador recibirá un enlace para acceder y gestionar el evento.`);
+      } else if (data?.reason === 'no-organizer-email') {
+        setError('Este evento no tiene un email de organizador. Añádelo en los datos del evento antes de invitar.');
+      } else {
+        setError('No se pudo enviar la invitación.');
+      }
+    } catch (e: any) {
+      setError(e?.response?.data?.error || 'No se pudo enviar la invitación.');
+    } finally {
+      setInviting(false);
+    }
+  };
 
   // Only show for ADMIN
   if (!user || user.role !== 'ADMIN') {
@@ -147,6 +171,17 @@ export function EventManagersPanel({ eventId, eventName }: EventManagersPanelPro
             {success}
           </div>
         )}
+
+        {/* Invite organizer by email (magic link) */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50/60 p-3">
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <Mail className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+            <span>Envía una invitación al email del organizador del evento para que acceda y gestione sus datos (enlace de acceso con contraseña).</span>
+          </div>
+          <Button onClick={handleInviteOrganizer} disabled={inviting} className="bg-blue-600 hover:bg-blue-700">
+            {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Mail className="mr-2 h-4 w-4" /> Invitar organizador</>}
+          </Button>
+        </div>
 
         {/* Add Manager Form */}
         <div className="flex gap-2 mb-6">

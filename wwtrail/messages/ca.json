@@ -2964,5 +2964,20 @@
     "metaDescriptionPlaceholder": "Descripció per a SEO (màx 155 caràcters)",
     "updateLanding": "Actualitza la Landing",
     "createLanding": "Crea la Landing"
+  },
+  "invite": {
+    "title": "Configura el teu accés",
+    "subtitle": "Gestionaràs “{event}”. Crea una contrasenya per accedir.",
+    "password": "Contrasenya",
+    "confirmPassword": "Repeteix la contrasenya",
+    "submit": "Activar el meu compte",
+    "validating": "Validant la invitació…",
+    "invalidTitle": "Invitació no vàlida",
+    "invalidBody": "Aquest enllaç no és vàlid o ha caducat. Demana’n un de nou a l’equip de WWTRAIL.",
+    "doneTitle": "Compte activat!",
+    "doneBody": "Et portem a l’inici de sessió…",
+    "passwordTooShort": "La contrasenya ha de tenir com a mínim 8 caràcters.",
+    "passwordsDontMatch": "Les contrasenyes no coincideixen.",
+    "genericError": "No s’ha pogut completar. Torna-ho a provar."
   }
 }
