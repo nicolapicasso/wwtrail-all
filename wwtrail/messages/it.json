@@ -981,7 +981,8 @@
     "errorUnmarking": "Errore nel rimuovere il segno dalla competizione",
     "confirm": "Conferma",
     "processing": "Elaborazione...",
-    "language": "Lingua"
+    "language": "Lingua",
+    "navEmailTemplates": "Modelli email"
   },
   "boCatalog": {
     "accessDenied": "Accesso negato",

@@ -981,7 +981,8 @@
     "errorUnmarking": "Fehler beim Entmarkieren des Wettkampfs",
     "confirm": "Bestätigen",
     "processing": "Wird verarbeitet...",
-    "language": "Sprache"
+    "language": "Sprache",
+    "navEmailTemplates": "E-Mail-Vorlagen"
   },
   "boCatalog": {
     "accessDenied": "Zugriff verweigert",

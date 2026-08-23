@@ -1423,6 +1423,21 @@ model EmailLog {
   @@map("email_logs")
 }
 
+// Plantillas editables (por tipo + idioma) del motor de outreach.
+// Si no hay fila para (type, language) se usa el texto por defecto en código.
+model OutreachEmailTemplate {
+  id        String   @id @default(uuid())
+  type      String   @db.VarChar(20) // WELCOME | REMINDER | MAGAZINE
+  language  String   @db.VarChar(5)  // ES | EN | IT | CA | FR | DE
+  subject   String   @db.VarChar(500)
+  htmlBody  String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([type, language])
+  @@map("outreach_email_templates")
+}
+
 // ===================================
 // SEO MANAGEMENT SYSTEM
 // ===================================

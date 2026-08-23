@@ -981,7 +981,8 @@
     "errorUnmarking": "Error unmarking competition",
     "confirm": "Confirm",
     "processing": "Processing...",
-    "language": "Language"
+    "language": "Language",
+    "navEmailTemplates": "Email templates"
   },
   "boCatalog": {
     "accessDenied": "Access denied",
