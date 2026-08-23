@@ -1684,6 +1684,10 @@ model SiteConfig {
 
   // API Keys (stored server-side only, never exposed to client)
   openaiApiKey String? @db.Text
+  // Email / Resend integration (resendApiKey is AES-encrypted at rest)
+  resendApiKey     String? @db.Text
+  emailFrom        String? @db.VarChar(255)
+  organizerReplyTo String? @db.VarChar(255)
 
   // Branding
   siteName    String  @default("WWTRAIL") @db.VarChar(100)

@@ -6,6 +6,7 @@
 
 import * as nodemailer from 'nodemailer';
 import logger from '@/lib/utils/logger';
+import { SiteConfigService } from '@/lib/services/siteConfig.service';
 
 export interface SendEmailInput {
   to: string | string[];
@@ -24,17 +25,17 @@ export interface SendEmailResult {
   id?: string;
 }
 
-const DEFAULT_FROM = process.env.EMAIL_FROM || 'WWTRAIL <noreply@wwtrail.com>';
+const FALLBACK_FROM = 'WWTRAIL <noreply@wwtrail.com>';
 
-async function sendViaResend(input: SendEmailInput): Promise<SendEmailResult> {
+async function sendViaResend(input: SendEmailInput, apiKey: string): Promise<SendEmailResult> {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: input.from || DEFAULT_FROM,
+      from: input.from,
       to: Array.isArray(input.to) ? input.to : [input.to],
       subject: input.subject,
       html: input.html,
@@ -68,7 +69,7 @@ function getTransporter(): nodemailer.Transporter {
 
 async function sendViaSmtp(input: SendEmailInput): Promise<SendEmailResult> {
   const info = await getTransporter().sendMail({
-    from: input.from || DEFAULT_FROM,
+    from: input.from,
     to: input.to,
     subject: input.subject,
     html: input.html,
@@ -80,13 +81,22 @@ async function sendViaSmtp(input: SendEmailInput): Promise<SendEmailResult> {
 
 /**
  * Send a transactional email through the best available provider.
+ * Config comes from the backoffice (SiteConfig) first, env vars as fallback.
  * Throws on failure (callers decide whether to swallow or surface it).
  */
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const useResend = !!process.env.RESEND_API_KEY;
+  const cfg = await SiteConfigService.getEmailConfig();
+  const merged: SendEmailInput = {
+    ...input,
+    from: input.from || cfg.emailFrom || FALLBACK_FROM,
+    replyTo: input.replyTo || cfg.organizerReplyTo || undefined,
+  };
+  const useResend = !!cfg.resendApiKey;
   try {
-    const result = useResend ? await sendViaResend(input) : await sendViaSmtp(input);
-    logger.info(`[mailer] sent via ${result.provider} to ${input.to} (${input.subject})`);
+    const result = useResend
+      ? await sendViaResend(merged, cfg.resendApiKey as string)
+      : await sendViaSmtp(merged);
+    logger.info(`[mailer] sent via ${result.provider} to ${merged.to} (${merged.subject})`);
     return result;
   } catch (err: any) {
     logger.error(`[mailer] send failed (${useResend ? 'resend' : 'smtp'}): ${err?.message || err}`);
