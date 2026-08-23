@@ -2964,5 +2964,20 @@
     "metaDescriptionPlaceholder": "Description for SEO (max 155 characters)",
     "updateLanding": "Update Landing",
     "createLanding": "Create Landing"
+  },
+  "invite": {
+    "title": "Set up your access",
+    "subtitle": "You will manage “{event}”. Create a password to sign in.",
+    "password": "Password",
+    "confirmPassword": "Repeat password",
+    "submit": "Activate my account",
+    "validating": "Validating invitation…",
+    "invalidTitle": "Invalid invitation",
+    "invalidBody": "This link is invalid or has expired. Ask the WWTRAIL team for a new one.",
+    "doneTitle": "Account activated!",
+    "doneBody": "Taking you to sign in…",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordsDontMatch": "Passwords do not match.",
+    "genericError": "Could not complete. Please try again."
   }
 }

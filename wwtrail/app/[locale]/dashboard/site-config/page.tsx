@@ -28,6 +28,10 @@ interface SiteConfig {
   shadowStyle: string;
   openaiApiKey: string | null;
   hasOpenaiKey: boolean;
+  resendApiKey?: string | null;
+  hasResendKey?: boolean;
+  emailFrom?: string | null;
+  organizerReplyTo?: string | null;
 }
 
 const FONT_OPTIONS = [
@@ -61,6 +65,7 @@ export default function SiteConfigPage() {
   const [error, setError] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [newApiKey, setNewApiKey] = useState('');
+  const [newResendKey, setNewResendKey] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
 
@@ -150,19 +155,26 @@ export default function SiteConfigPage() {
       const payload: any = { ...config };
       delete payload.id;
       delete payload.hasOpenaiKey;
+      delete payload.hasResendKey;
       delete payload.updatedAt;
 
-      // Only send API key if user typed a new one
+      // Only send API keys if the user typed a new one
       if (newApiKey) {
         payload.openaiApiKey = newApiKey;
       } else {
         delete payload.openaiApiKey;
+      }
+      if (newResendKey) {
+        payload.resendApiKey = newResendKey;
+      } else {
+        delete payload.resendApiKey;
       }
 
       const res = await apiClientV2.put('/admin/site-config', payload);
       const data = res.data?.data || res.data;
       setConfig(data);
       setNewApiKey('');
+      setNewResendKey('');
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
@@ -378,6 +390,66 @@ export default function SiteConfigPage() {
             <p className="text-xs text-gray-400 mt-1">
               {t('siteConfigApiKeySecureNote')}
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Email / Resend Section */}
+      <section className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <Key className="h-5 w-5 text-blue-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Email (Resend)</h2>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Configuración del envío de emails. Si se rellena aquí, tiene prioridad sobre las variables de entorno.
+          </p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Resend API Key
+              <span className="text-gray-400 font-normal ml-2">(se guarda cifrada)</span>
+            </label>
+            {config.hasResendKey && !newResendKey && (
+              <div className="mb-2">
+                <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
+                  Configurada: {config.resendApiKey}
+                </span>
+              </div>
+            )}
+            <input
+              type="password"
+              value={newResendKey}
+              onChange={(e) => setNewResendKey(e.target.value)}
+              placeholder={config.hasResendKey ? 'Deja en blanco para mantener la actual' : 're_...'}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Requiere la variable de entorno SETTINGS_ENC_KEY para el cifrado. La clave nunca se muestra completa.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Remitente (From)</label>
+            <input
+              type="text"
+              value={config.emailFrom || ''}
+              onChange={(e) => setConfig({ ...config, emailFrom: e.target.value })}
+              placeholder="WWTRAIL <hola@tudominio.com>"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">Debe usar un dominio verificado en Resend.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Responder a (Reply-To)</label>
+            <input
+              type="text"
+              value={config.organizerReplyTo || ''}
+              onChange={(e) => setConfig({ ...config, organizerReplyTo: e.target.value })}
+              placeholder="organizadores@tudominio.com"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">Buzón donde recibirás las respuestas de los organizadores.</p>
           </div>
         </div>
       </section>

@@ -2964,5 +2964,20 @@
     "metaDescriptionPlaceholder": "Description pour le SEO (max 155 caractères)",
     "updateLanding": "Mettre à jour la Landing",
     "createLanding": "Créer la Landing"
+  },
+  "invite": {
+    "title": "Configurez votre accès",
+    "subtitle": "Vous allez gérer « {event} ». Créez un mot de passe pour vous connecter.",
+    "password": "Mot de passe",
+    "confirmPassword": "Répétez le mot de passe",
+    "submit": "Activer mon compte",
+    "validating": "Validation de l’invitation…",
+    "invalidTitle": "Invitation non valide",
+    "invalidBody": "Ce lien est invalide ou a expiré. Demandez-en un nouveau à l’équipe WWTRAIL.",
+    "doneTitle": "Compte activé !",
+    "doneBody": "Redirection vers la connexion…",
+    "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères.",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
+    "genericError": "Impossible de finaliser. Réessayez."
   }
 }

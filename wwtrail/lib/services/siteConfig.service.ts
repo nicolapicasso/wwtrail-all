@@ -1,6 +1,10 @@
 // lib/services/siteConfig.service.ts
 import prisma from '@/lib/db';
 import logger from '@/lib/utils/logger';
+import { encryptSecret, decryptSecret } from '@/lib/utils/settingsCrypto';
+
+const maskKey = (k: string) =>
+  k.length > 11 ? `${k.substring(0, 7)}...${k.substring(k.length - 4)}` : '••••';
 
 // Fields that are safe to return to the client (no secrets)
 const PUBLIC_SELECT = {
@@ -38,20 +42,22 @@ export class SiteConfigService {
 
     if (!includeSecrets) {
       // Return without secrets
-      const { openaiApiKey, ...publicConfig } = config;
+      const { openaiApiKey, resendApiKey, ...publicConfig } = config;
       return {
         ...publicConfig,
         hasOpenaiKey: !!openaiApiKey,
+        hasResendKey: !!resendApiKey,
       };
     }
 
-    // For admin: mask the API key
+    // For admin: mask the API keys (resend is stored encrypted → decrypt to mask)
+    const resendPlain = decryptSecret(config.resendApiKey);
     return {
       ...config,
-      openaiApiKey: config.openaiApiKey
-        ? `${config.openaiApiKey.substring(0, 7)}...${config.openaiApiKey.substring(config.openaiApiKey.length - 4)}`
-        : null,
+      openaiApiKey: config.openaiApiKey ? maskKey(config.openaiApiKey) : null,
+      resendApiKey: resendPlain ? maskKey(resendPlain) : null,
       hasOpenaiKey: !!config.openaiApiKey,
+      hasResendKey: !!config.resendApiKey,
     };
   }
 
@@ -89,6 +95,9 @@ export class SiteConfigService {
     borderRadius?: string;
     shadowStyle?: string;
     openaiApiKey?: string;
+    resendApiKey?: string;
+    emailFrom?: string;
+    organizerReplyTo?: string;
   }) {
     let config = await prisma.siteConfig.findFirst();
 
@@ -96,11 +105,20 @@ export class SiteConfigService {
     if (data.openaiApiKey && data.openaiApiKey.includes('...')) {
       delete data.openaiApiKey;
     }
-
-    // If key is empty string, set to null
     if (data.openaiApiKey === '') {
       data.openaiApiKey = undefined;
     }
+
+    // Resend key: ignore masked echo, clear on empty, encrypt a real new value.
+    if (data.resendApiKey && data.resendApiKey.includes('...')) {
+      delete data.resendApiKey;
+    } else if (data.resendApiKey === '') {
+      data.resendApiKey = undefined;
+    } else if (data.resendApiKey) {
+      data.resendApiKey = encryptSecret(data.resendApiKey.trim());
+    }
+    if (data.emailFrom === '') data.emailFrom = undefined;
+    if (data.organizerReplyTo === '') data.organizerReplyTo = undefined;
 
     if (!config) {
       config = await prisma.siteConfig.create({ data });
@@ -114,13 +132,14 @@ export class SiteConfigService {
     logger.info('SiteConfig updated');
 
     // Return masked version
-    const { openaiApiKey, ...publicConfig } = config;
+    const { openaiApiKey, resendApiKey, ...publicConfig } = config;
+    const resendPlain = decryptSecret(resendApiKey);
     return {
       ...publicConfig,
-      openaiApiKey: openaiApiKey
-        ? `${openaiApiKey.substring(0, 7)}...${openaiApiKey.substring(openaiApiKey.length - 4)}`
-        : null,
+      openaiApiKey: openaiApiKey ? maskKey(openaiApiKey) : null,
+      resendApiKey: resendPlain ? maskKey(resendPlain) : null,
       hasOpenaiKey: !!openaiApiKey,
+      hasResendKey: !!resendApiKey,
     };
   }
 
@@ -132,5 +151,24 @@ export class SiteConfigService {
       select: { openaiApiKey: true },
     });
     return config?.openaiApiKey || process.env.OPENAI_API_KEY || null;
+  }
+
+  /**
+   * Effective email/Resend config for server use: DB (backoffice) first,
+   * environment variables as fallback. resendApiKey is decrypted here.
+   */
+  static async getEmailConfig(): Promise<{
+    resendApiKey: string | null;
+    emailFrom: string | null;
+    organizerReplyTo: string | null;
+  }> {
+    const config = await prisma.siteConfig.findFirst({
+      select: { resendApiKey: true, emailFrom: true, organizerReplyTo: true },
+    });
+    return {
+      resendApiKey: decryptSecret(config?.resendApiKey) || process.env.RESEND_API_KEY || null,
+      emailFrom: config?.emailFrom || process.env.EMAIL_FROM || null,
+      organizerReplyTo: config?.organizerReplyTo || process.env.ORGANIZER_REPLY_TO || null,
+    };
   }
 }
