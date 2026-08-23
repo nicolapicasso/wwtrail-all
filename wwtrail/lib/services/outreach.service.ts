@@ -10,6 +10,7 @@ import logger from '@/lib/utils/logger';
 import { sendEmail } from './mailer';
 import { countryToLanguage } from './organizerInvite.service';
 import OrganizerInviteService from './organizerInvite.service';
+import { SiteConfigService } from './siteConfig.service';
 
 type Lang = 'ES' | 'EN' | 'IT' | 'CA' | 'FR' | 'DE';
 type EmailType = 'REMINDER_60' | 'REMINDER_30' | 'MAGAZINE';
@@ -82,48 +83,64 @@ async function editionsInWindow(from: Date, to: Date) {
 async function processWindow(
   editions: Awaited<ReturnType<typeof editionsInWindow>>,
   emailType: EmailType,
-  build: (lang: Lang, event: string, comp: string, link: string) => { subject: string; html: string }
+  build: (lang: Lang, event: string, comp: string, link: string) => { subject: string; html: string },
+  opts: { dryRun: boolean; enabled: boolean }
 ): Promise<number> {
-  let sent = 0;
+  // Count the editions that WOULD receive this email (not already sent). Only
+  // actually send when it's a real run AND this email type is enabled.
+  let count = 0;
   for (const ed of editions) {
     const email = (ed.competition?.event?.email || '').trim().toLowerCase();
     if (!email) continue;
     if (await alreadySent(ed.id, emailType)) continue;
+    count++;
+    if (opts.dryRun || !opts.enabled) continue;
     const lang = countryToLanguage(ed.competition?.event?.country);
     const link = `${APP_URL}/${lang.toLowerCase()}/organizer/events`;
     const { subject, html } = build(lang, ed.competition?.event?.name || '', ed.competition?.name || '', link);
     try {
       await sendEmail({ to: email, subject, html });
       await logSent(ed.id, emailType, email);
-      sent++;
     } catch (e: any) {
       logger.error(`[outreach] ${emailType} to ${email} failed: ${e?.message || e}`);
     }
   }
-  return sent;
+  return count;
 }
 
 export const OutreachService = {
-  async runDaily(): Promise<{ reminder60: number; reminder30: number; magazine: number }> {
+  async runDaily(opts: { dryRun?: boolean } = {}): Promise<{
+    dryRun: boolean; enabled: boolean; reminder60: number; reminder30: number; magazine: number;
+  }> {
+    const dryRun = !!opts.dryRun;
+    const flags = await SiteConfigService.getOutreachFlags();
+
+    // Master switch off → do nothing (dry-run still reports candidates below).
+    if (!flags.outreachEnabled && !dryRun) {
+      return { dryRun, enabled: false, reminder60: 0, reminder30: 0, magazine: 0 };
+    }
+
     const now = new Date();
     const in30 = new Date(now.getTime() + 30 * DAY);
     const in60 = new Date(now.getTime() + 60 * DAY);
     const ago14 = new Date(now.getTime() - 14 * DAY);
 
-    // T-60: editions between +30 and +60 days out (first time they enter the ≤60d window)
+    const send = flags.outreachEnabled; // real sends require the master switch too
+
+    // T-60: editions between +30 and +60 days out
     const w60 = await editionsInWindow(in30, in60);
-    const reminder60 = await processWindow(w60, 'REMINDER_60', (l, e, c, link) => reminderContent(l, e, c, 60, link));
+    const reminder60 = await processWindow(w60, 'REMINDER_60', (l, e, c, link) => reminderContent(l, e, c, 60, link), { dryRun, enabled: send && flags.reminder });
 
     // T-30: editions between now and +30 days out
     const w30 = await editionsInWindow(now, in30);
-    const reminder30 = await processWindow(w30, 'REMINDER_30', (l, e, c, link) => reminderContent(l, e, c, 30, link));
+    const reminder30 = await processWindow(w30, 'REMINDER_30', (l, e, c, link) => reminderContent(l, e, c, 30, link), { dryRun, enabled: send && flags.reminder });
 
     // Magazine: editions that took place in the last 14 days
     const wMag = await editionsInWindow(ago14, now);
-    const magazine = await processWindow(wMag, 'MAGAZINE', (l, e, c, link) => magazineContent(l, e, c, link));
+    const magazine = await processWindow(wMag, 'MAGAZINE', (l, e, c, link) => magazineContent(l, e, c, link), { dryRun, enabled: send && flags.magazine });
 
-    logger.info(`[outreach] daily run: reminder60=${reminder60} reminder30=${reminder30} magazine=${magazine}`);
-    return { reminder60, reminder30, magazine };
+    logger.info(`[outreach] run dryRun=${dryRun} enabled=${flags.outreachEnabled} reminder60=${reminder60} reminder30=${reminder30} magazine=${magazine}`);
+    return { dryRun, enabled: flags.outreachEnabled, reminder60, reminder30, magazine };
   },
 
   /**
@@ -132,6 +149,8 @@ export const OutreachService = {
    */
   async sendWelcome(eventId: string, adminId: string): Promise<void> {
     try {
+      const flags = await SiteConfigService.getOutreachFlags();
+      if (!flags.outreachEnabled || !flags.welcome) return; // disabled → nothing sends
       const existing = await prisma.emailLog.findUnique({
         where: { entityType_entityId_emailType: { entityType: 'event', entityId: eventId, emailType: 'WELCOME' } },
         select: { id: true },

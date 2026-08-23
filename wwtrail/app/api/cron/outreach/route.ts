@@ -19,7 +19,11 @@ async function run(request: NextRequest) {
 
   if (provided !== secret) throw new ApiError('Unauthorized', 401);
 
-  const result = await OutreachService.runDaily();
+  // ?dryRun=true → report what WOULD be sent without sending anything.
+  const dryRun = ['1', 'true', 'yes'].includes(
+    (new URL(request.url).searchParams.get('dryRun') || '').toLowerCase()
+  );
+  const result = await OutreachService.runDaily({ dryRun });
   return apiSuccess({ ok: true, ...result });
 }
 
