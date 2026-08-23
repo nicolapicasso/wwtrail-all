@@ -12,7 +12,7 @@ import {
 import { es } from 'date-fns/locale';
 import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, MapPin, Search,
-  LayoutGrid, List, CalendarDays, Mountain, TrendingUp,
+  LayoutGrid, List, CalendarDays, Mountain, TrendingUp, X, ArrowRight,
 } from 'lucide-react';
 import CountrySelect from '@/components/CountrySelect';
 import specialSeriesService from '@/lib/api/v2/specialSeries.service';
@@ -266,6 +266,7 @@ function MonthView({
   byDay: Map<string, CalEdition[]>;
 }) {
   const t = useTranslations('pgContent');
+  const [openDay, setOpenDay] = useState<string | null>(null);
   const gridStart = startOfWeek(startOfMonth(cursor), { weekStartsOn: 1 });
   const gridEnd = endOfWeek(endOfMonth(cursor), { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
@@ -297,13 +298,17 @@ function MonthView({
                 }`}
               >
                 <div className="mb-1 flex justify-end">
-                  <span
+                  <button
+                    type="button"
+                    onClick={() => items.length > 0 && setOpenDay(key)}
+                    disabled={items.length === 0}
+                    aria-label={items.length > 0 ? t('viewDayCompetitions', { count: items.length }) : undefined}
                     className={`flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-bold ${
                       isToday ? 'bg-green-brand text-white' : inMonth ? 'text-ink-2' : 'text-text-faint'
-                    }`}
+                    } ${items.length > 0 ? 'hover:ring-2 hover:ring-green-brand/40 cursor-pointer' : 'cursor-default'}`}
                   >
                     {format(day, 'd')}
-                  </span>
+                  </button>
                 </div>
                 <div className="space-y-1">
                   {items.slice(0, 3).map((e) => (
@@ -321,12 +326,94 @@ function MonthView({
                     </Link>
                   ))}
                   {items.length > 3 && (
-                    <span className="block px-1.5 text-[11px] font-semibold text-text-faint">
+                    <button
+                      type="button"
+                      onClick={() => setOpenDay(key)}
+                      className="block w-full rounded-sm px-1.5 py-0.5 text-left text-[11px] font-semibold text-text-faint hover:bg-surface-alt hover:text-green-brand"
+                    >
                       {t('moreCount', { count: items.length - 3 })}
-                    </span>
+                    </button>
                   )}
                 </div>
               </div>
+            );
+          })}
+        </div>
+      </div>
+      {openDay && (
+        <DayEditionsModal
+          dayKey={openDay}
+          items={byDay.get(openDay) || []}
+          onClose={() => setOpenDay(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Modal listing ALL editions/competitions of a single day (so nothing is
+// hidden behind the "+N more" truncation in the month grid).
+function DayEditionsModal({
+  dayKey, items, onClose,
+}: {
+  dayKey: string;
+  items: CalEdition[];
+  onClose: () => void;
+}) {
+  const t = useTranslations('pgContent');
+  const sorted = [...items].sort((a, b) => a.competition.name.localeCompare(b.competition.name));
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="max-h-[80vh] w-full max-w-md overflow-hidden rounded-xl bg-surface shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-hairline px-5 py-4">
+          <div>
+            <h3 className="text-[17px] font-black capitalize tracking-[-0.01em] text-ink-2">
+              {format(parseISO(dayKey), "EEEE d 'de' MMMM", { locale: es })}
+            </h3>
+            <p className="mt-0.5 text-[13px] font-semibold text-text-faint">
+              {t('dayCompetitionsCount', { count: sorted.length })}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1.5 text-text-faint hover:bg-surface-alt hover:text-ink-2"
+            aria-label={t('close')}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="max-h-[calc(80vh-72px)] space-y-2 overflow-auto p-4">
+          {sorted.map((e) => {
+            const dist = effDistance(e);
+            const elev = effElevation(e);
+            return (
+              <Link
+                key={e.id}
+                href={editionHref(e)}
+                className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 transition-colors hover:border-green-brand"
+              >
+                <div className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg ${e.featured ? 'bg-orange-tint-bg text-orange-strong' : 'bg-green-tint-bg text-green-brand'}`}>
+                  <span className="text-[14px] font-black leading-none">{dist != null ? dist : '—'}</span>
+                  <span className="text-[9px] font-bold uppercase">km</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[14px] font-bold text-ink-2">{e.competition.name}</p>
+                  <p className="truncate text-[12px] text-text-muted">{e.competition.event.name}</p>
+                  {elev != null && (
+                    <p className="mt-0.5 text-[11px] font-semibold text-text-faint">{elev} m D+</p>
+                  )}
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-text-faint" />
+              </Link>
             );
           })}
         </div>
