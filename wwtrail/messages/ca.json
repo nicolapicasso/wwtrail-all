@@ -982,7 +982,8 @@
     "confirm": "Confirma",
     "processing": "Processant...",
     "language": "Idioma",
-    "navEmailTemplates": "Plantilles de correu"
+    "navEmailTemplates": "Plantilles de correu",
+    "navMarketing": "Màrqueting"
   },
   "boCatalog": {
     "accessDenied": "Accés denegat",

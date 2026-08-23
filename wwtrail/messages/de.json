@@ -982,7 +982,8 @@
     "confirm": "Bestätigen",
     "processing": "Wird verarbeitet...",
     "language": "Sprache",
-    "navEmailTemplates": "E-Mail-Vorlagen"
+    "navEmailTemplates": "E-Mail-Vorlagen",
+    "navMarketing": "Marketing"
   },
   "boCatalog": {
     "accessDenied": "Zugriff verweigert",
