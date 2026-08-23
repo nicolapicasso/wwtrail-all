@@ -257,6 +257,12 @@ export const userService = {
     return response.data.data;
   },
 
+  /** Update the user's own marketing consent. */
+  async setMarketingOptIn(optIn: boolean) {
+    const response = await apiClientV2.put('/users/me/marketing', { optIn });
+    return response.data.data;
+  },
+
   /**
    * Cambiar contraseña
    */

@@ -624,7 +624,11 @@
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette participation ?",
     "deleteCannotUndo": "Cette action est irréversible.",
     "deleting": "Suppression...",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "marketingPrefsTitle": "Actualités et marketing",
+    "marketingPrefsDescription": "Choisissez si vous souhaitez recevoir les actualités, recommandations et campagnes de WWTRAIL.",
+    "marketingPrefsLabel": "Recevoir les actualités par e-mail",
+    "marketingPrefsHint": "Vous pouvez vous désabonner à tout moment depuis n’importe quel e-mail."
   },
   "pgContent": {
     "loading": "Chargement...",

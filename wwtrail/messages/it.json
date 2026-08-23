@@ -624,7 +624,11 @@
     "deleteConfirm": "Sei sicuro di voler eliminare questa partecipazione?",
     "deleteCannotUndo": "Questa azione non può essere annullata.",
     "deleting": "Eliminazione...",
-    "delete": "Elimina"
+    "delete": "Elimina",
+    "marketingPrefsTitle": "Novità e marketing",
+    "marketingPrefsDescription": "Scegli se ricevere novità, consigli e campagne di WWTRAIL.",
+    "marketingPrefsLabel": "Ricevi novità via email",
+    "marketingPrefsHint": "Puoi annullare l’iscrizione in qualsiasi momento da qualsiasi email."
   },
   "pgContent": {
     "loading": "Caricamento...",

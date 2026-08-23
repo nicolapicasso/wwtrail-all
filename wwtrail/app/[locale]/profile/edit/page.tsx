@@ -56,6 +56,21 @@ export default function EditProfilePage() {
     youtubeUrl: null,
   });
 
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
+  const [savingMarketing, setSavingMarketing] = useState(false);
+
+  const handleMarketingToggle = async (checked: boolean) => {
+    setMarketingOptIn(checked);
+    setSavingMarketing(true);
+    try {
+      await userService.setMarketingOptIn(checked);
+    } catch {
+      setMarketingOptIn(!checked);
+    } finally {
+      setSavingMarketing(false);
+    }
+  };
+
   // Fetch profile data
   useEffect(() => {
     const fetchProfile = async () => {
@@ -63,6 +78,7 @@ export default function EditProfilePage() {
         setLoading(true);
         const data = await userService.getOwnProfile();
         setProfile(data);
+        setMarketingOptIn(!!(data as any).marketingOptIn);
         setFormData({
           firstName: data.firstName || '',
           lastName: data.lastName || '',
@@ -223,6 +239,33 @@ export default function EditProfilePage() {
                   id="isPublic"
                   checked={formData.isPublic}
                   onCheckedChange={handleSwitchChange('isPublic')}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Marketing / notifications preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-600" />
+                {t('marketingPrefsTitle')}
+              </CardTitle>
+              <CardDescription>{t('marketingPrefsDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="marketingOptIn" className="text-base font-medium">
+                    {t('marketingPrefsLabel')}
+                  </Label>
+                  <p className="text-sm text-gray-500">{t('marketingPrefsHint')}</p>
+                </div>
+                <Switch
+                  id="marketingOptIn"
+                  checked={marketingOptIn}
+                  disabled={savingMarketing}
+                  onCheckedChange={handleMarketingToggle}
                 />
               </div>
             </CardContent>

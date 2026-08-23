@@ -118,6 +118,7 @@ export class UserService {
         gender: true,
         birthDate: true,
         isPublic: true,
+        marketingOptIn: true,
         instagramUrl: true,
         facebookUrl: true,
         twitterUrl: true,

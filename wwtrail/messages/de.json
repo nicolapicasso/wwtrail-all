@@ -624,7 +624,11 @@
     "deleteConfirm": "Möchtest du diese Teilnahme wirklich löschen?",
     "deleteCannotUndo": "Diese Aktion kann nicht rückgängig gemacht werden.",
     "deleting": "Wird gelöscht...",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "marketingPrefsTitle": "Neuigkeiten & Marketing",
+    "marketingPrefsDescription": "Entscheide, ob du News, Empfehlungen und Kampagnen von WWTRAIL erhalten möchtest.",
+    "marketingPrefsLabel": "News per E-Mail erhalten",
+    "marketingPrefsHint": "Du kannst dich jederzeit über jede E-Mail abmelden."
   },
   "pgContent": {
     "loading": "Wird geladen...",
