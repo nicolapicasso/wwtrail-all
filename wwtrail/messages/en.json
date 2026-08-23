@@ -624,7 +624,11 @@
     "deleteConfirm": "Are you sure you want to delete this participation?",
     "deleteCannotUndo": "This action cannot be undone.",
     "deleting": "Deleting...",
-    "delete": "Delete"
+    "delete": "Delete",
+    "marketingPrefsTitle": "News & marketing",
+    "marketingPrefsDescription": "Choose whether to receive WWTRAIL news, recommendations and campaigns.",
+    "marketingPrefsLabel": "Receive news by email",
+    "marketingPrefsHint": "You can unsubscribe at any time from any email."
   },
   "pgContent": {
     "loading": "Loading...",

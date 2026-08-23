@@ -624,7 +624,11 @@
     "deleteConfirm": "Segur que vols eliminar aquesta participació?",
     "deleteCannotUndo": "Aquesta acció no es pot desfer.",
     "deleting": "Eliminant...",
-    "delete": "Elimina"
+    "delete": "Elimina",
+    "marketingPrefsTitle": "Novetats i màrqueting",
+    "marketingPrefsDescription": "Decideix si vols rebre novetats, recomanacions i campanyes de WWTRAIL.",
+    "marketingPrefsLabel": "Rebre novetats per correu",
+    "marketingPrefsHint": "Pots donar-te de baixa en qualsevol moment des de qualsevol correu."
   },
   "pgContent": {
     "loading": "Carregant...",
