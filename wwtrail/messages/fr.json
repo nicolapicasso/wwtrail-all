@@ -982,7 +982,8 @@
     "confirm": "Confirmer",
     "processing": "Traitement...",
     "language": "Langue",
-    "navEmailTemplates": "Modèles d'e-mail"
+    "navEmailTemplates": "Modèles d'e-mail",
+    "navMarketing": "Marketing"
   },
   "boCatalog": {
     "accessDenied": "Accès refusé",

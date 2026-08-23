@@ -43,6 +43,7 @@ export async function middleware(request: NextRequest) {
     '/directory',
     '/calendar',
     '/invite',
+    '/unsubscribe',
     '/page',
     '/editions',
   ];
