@@ -2,7 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { apiClientV2 } from '@/lib/api/client';
-import { Mail, Save, RotateCcw, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, Save, RotateCcw, Loader2, CheckCircle2, AlertCircle, Send } from 'lucide-react';
+import EventSelect from '@/components/EventSelect';
+import eventsService from '@/lib/api/v2/events.service';
+import competitionsService from '@/lib/api/v2/competitions.service';
 
 const TYPES = [
   { key: 'WELCOME', label: 'Bienvenida (invitación al crear evento)' },
@@ -33,6 +36,55 @@ export default function OutreachTemplatesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  // Send-test state
+  const [events, setEvents] = useState<Array<{ id: string; name: string; city?: string; country?: string }>>([]);
+  const [testEventId, setTestEventId] = useState('');
+  const [competitions, setCompetitions] = useState<Array<{ id: string; name: string }>>([]);
+  const [testCompetitionId, setTestCompetitionId] = useState('');
+  const [testEmail, setTestEmail] = useState('');
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testMsg, setTestMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res: any = await eventsService.getAll({ limit: 1000 });
+        const list = res?.data || res?.events || res || [];
+        setEvents(Array.isArray(list) ? list : []);
+      } catch { setEvents([]); }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!testEventId) { setCompetitions([]); setTestCompetitionId(''); return; }
+    (async () => {
+      try {
+        const comps = await competitionsService.getByEvent(testEventId);
+        setCompetitions((comps || []).map((c: any) => ({ id: c.id, name: c.name })));
+      } catch { setCompetitions([]); }
+      setTestCompetitionId('');
+    })();
+  }, [testEventId]);
+
+  const sendTest = async () => {
+    setTestMsg(null);
+    if (!testEmail) { setTestMsg({ ok: false, text: 'Indica un email de destino.' }); return; }
+    setSendingTest(true);
+    try {
+      await apiClientV2.post('/admin/outreach-templates/test', {
+        language, subject, htmlBody,
+        eventId: testEventId || undefined,
+        competitionId: testCompetitionId || undefined,
+        to: testEmail,
+      });
+      setTestMsg({ ok: true, text: `Prueba enviada a ${testEmail}.` });
+    } catch (e: any) {
+      setTestMsg({ ok: false, text: e?.response?.data?.error || 'No se pudo enviar la prueba.' });
+    } finally {
+      setSendingTest(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -166,7 +218,55 @@ export default function OutreachTemplatesPage() {
             <p className="mb-1 text-sm font-medium text-gray-700">Vista previa</p>
             <div className="rounded-lg border border-gray-200 bg-white p-3">
               <p className="mb-2 text-xs text-gray-500">Asunto: <span className="font-semibold text-gray-800">{previewSubject}</span></p>
-              <iframe title="preview" srcDoc={previewHtml} className="h-[520px] w-full rounded border border-gray-100" />
+              <iframe title="preview" srcDoc={previewHtml} className="h-[420px] w-full rounded border border-gray-100" />
+            </div>
+
+            {/* Send test */}
+            <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                <Send className="h-4 w-4 text-blue-600" /> Enviar prueba
+              </p>
+              <p className="mt-0.5 text-xs text-gray-400">
+                Envía este correo (con el contenido actual del editor) a un email, usando los datos reales del evento/competición que elijas.
+              </p>
+              <div className="mt-3 space-y-2">
+                <EventSelect
+                  value={testEventId}
+                  onChange={setTestEventId}
+                  events={events.map((e) => ({ id: e.id, name: e.name, city: e.city, country: e.country }))}
+                  placeholder="Evento (opcional)…"
+                  showAllOption
+                  allOptionLabel="— Sin evento (datos de ejemplo) —"
+                />
+                {type !== 'WELCOME' && (
+                  <select
+                    value={testCompetitionId}
+                    onChange={(e) => setTestCompetitionId(e.target.value)}
+                    disabled={!testEventId}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100"
+                  >
+                    <option value="">{testEventId ? 'Competición (opcional)…' : 'Elige un evento primero'}</option>
+                    {competitions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                )}
+                <input
+                  type="email"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  placeholder="Email de destino"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+                <button
+                  onClick={sendTest}
+                  disabled={sendingTest}
+                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-60"
+                >
+                  {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Enviar prueba
+                </button>
+                {testMsg && (
+                  <p className={`text-sm font-semibold ${testMsg.ok ? 'text-green-600' : 'text-red-600'}`}>{testMsg.text}</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
