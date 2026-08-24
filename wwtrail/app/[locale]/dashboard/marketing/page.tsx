@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from '@/i18n/navigation';
 import { apiClientV2 } from '@/lib/api/client';
 import { Megaphone, Upload, Send, Users, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -96,7 +97,7 @@ export default function MarketingPage() {
       <section className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-gray-900"><Upload className="h-5 w-5 text-blue-600" /> Importar usuarios (consentimiento heredado)</h2>
         <p className="mb-2 text-sm text-gray-500">Pega una línea por usuario. Formato: <code>email,nombre,apellido,país(ISO2),idioma</code> (solo el email es obligatorio). Se marcan como suscritos.</p>
-        <p className="mb-3 text-sm">¿Necesitas subir un CSV con mapeo de columnas o crear cuentas de portal? Usa el <a href="import-users" className="font-semibold text-blue-600 underline">importador avanzado</a>.</p>
+        <p className="mb-3 text-sm">¿Necesitas subir un CSV con mapeo de columnas o crear cuentas de portal? Usa el <Link href="/dashboard/import-users" className="font-semibold text-blue-600 underline">importador avanzado</Link>.</p>
         <textarea value={importText} onChange={(e) => setImportText(e.target.value)} rows={6}
           placeholder="ana@example.com,Ana,García,ES,ES&#10;joe@example.com" className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs" />
         <div className="mt-3 flex items-center gap-3">
