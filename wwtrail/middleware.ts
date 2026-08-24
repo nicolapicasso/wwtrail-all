@@ -44,6 +44,7 @@ export async function middleware(request: NextRequest) {
     '/calendar',
     '/invite',
     '/unsubscribe',
+    '/legal',
     '/page',
     '/editions',
   ];

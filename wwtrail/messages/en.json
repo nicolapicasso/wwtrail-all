@@ -987,7 +987,11 @@
     "processing": "Processing...",
     "language": "Language",
     "navEmailTemplates": "Email templates",
-    "navMarketing": "Marketing"
+    "navMarketing": "Marketing",
+    "footerCookies": "Cookies",
+    "footerManageCookies": "Manage cookies",
+    "navLegal": "Legal pages",
+    "navCookies": "Cookies"
   },
   "boCatalog": {
     "accessDenied": "Access denied",
@@ -2985,5 +2989,24 @@
     "passwordTooShort": "Password must be at least 8 characters.",
     "passwordsDontMatch": "Passwords do not match.",
     "genericError": "Could not complete. Please try again."
+  },
+  "cookies": {
+    "title": "We use cookies",
+    "description": "We use our own and third-party cookies to improve your experience and analyse site usage.",
+    "moreInfo": "More info",
+    "acceptAll": "Accept all",
+    "rejectAll": "Reject",
+    "customize": "Preferences",
+    "savePrefs": "Save preferences",
+    "manage": "Manage cookies",
+    "always": "Always",
+    "catNecessary": "Necessary",
+    "catNecessaryDesc": "Essential for the site to work.",
+    "catPreferences": "Preferences",
+    "catPreferencesDesc": "Remember your settings (language, etc.).",
+    "catAnalytics": "Analytics",
+    "catAnalyticsDesc": "Help us understand site usage.",
+    "catMarketing": "Marketing",
+    "catMarketingDesc": "Personalisation and advertising."
   }
 }

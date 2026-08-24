@@ -81,7 +81,8 @@ class LandingService {
    */
   async getAll(params?: GetLandingsParams): Promise<GetLandingsResponse> {
     const response = await api.get('/landings', { params });
-    return response.data;
+    // Unwrap the apiSuccess envelope: { success, data: { data, pagination } }
+    return response.data?.data ?? response.data;
   }
 
   /**
@@ -89,7 +90,7 @@ class LandingService {
    */
   async getById(id: string): Promise<Landing> {
     const response = await api.get(`/landings/${id}`);
-    return response.data;
+    return response.data?.data ?? response.data;
   }
 
   /**
@@ -98,7 +99,7 @@ class LandingService {
   async getBySlug(slug: string, language?: Language): Promise<Landing> {
     const params = language ? { language } : {};
     const response = await api.get(`/landings/slug/${slug}`, { params });
-    return response.data;
+    return response.data?.data ?? response.data;
   }
 
   /**

@@ -1441,6 +1441,38 @@ model OutreachEmailTemplate {
   @@map("outreach_email_templates")
 }
 
+// Páginas legales editables (privacidad, cookies, términos) por idioma.
+model LegalPage {
+  id        String   @id @default(uuid())
+  slug      String   @db.VarChar(40) // privacy | cookies | terms
+  language  String   @db.VarChar(5)
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, language])
+  @@map("legal_pages")
+}
+
+// Catálogo dinámico de cookies (alimenta el banner y la página de cookies).
+model CookieDefinition {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(120)
+  category  String   @db.VarChar(20) // NECESSARY | PREFERENCES | ANALYTICS | MARKETING
+  provider  String?  @db.VarChar(120)
+  purpose   String   @db.Text
+  duration  String?  @db.VarChar(60)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@map("cookie_definitions")
+}
+
 // ===================================
 // SEO MANAGEMENT SYSTEM
 // ===================================

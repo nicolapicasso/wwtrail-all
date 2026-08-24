@@ -987,7 +987,11 @@
     "processing": "Processant...",
     "language": "Idioma",
     "navEmailTemplates": "Plantilles de correu",
-    "navMarketing": "Màrqueting"
+    "navMarketing": "Màrqueting",
+    "footerCookies": "Cookies",
+    "footerManageCookies": "Gestionar cookies",
+    "navLegal": "Pàgines legals",
+    "navCookies": "Cookies"
   },
   "boCatalog": {
     "accessDenied": "Accés denegat",
@@ -2985,5 +2989,24 @@
     "passwordTooShort": "La contrasenya ha de tenir com a mínim 8 caràcters.",
     "passwordsDontMatch": "Les contrasenyes no coincideixen.",
     "genericError": "No s’ha pogut completar. Torna-ho a provar."
+  },
+  "cookies": {
+    "title": "Fem servir cookies",
+    "description": "Utilitzem cookies pròpies i de tercers per millorar la teva experiència i analitzar l’ús del lloc.",
+    "moreInfo": "Més informació",
+    "acceptAll": "Acceptar-les totes",
+    "rejectAll": "Rebutjar",
+    "customize": "Preferències",
+    "savePrefs": "Desar preferències",
+    "manage": "Gestionar cookies",
+    "always": "Sempre",
+    "catNecessary": "Necessàries",
+    "catNecessaryDesc": "Imprescindibles per al funcionament del lloc.",
+    "catPreferences": "Preferències",
+    "catPreferencesDesc": "Recorden els teus ajustos (idioma, etc.).",
+    "catAnalytics": "Analítiques",
+    "catAnalyticsDesc": "Ens ajuden a entendre l’ús del lloc.",
+    "catMarketing": "Màrqueting",
+    "catMarketingDesc": "Personalització i publicitat."
   }
 }
