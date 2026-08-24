@@ -1727,6 +1727,7 @@ model SiteConfig {
   emailWelcomeEnabled  Boolean @default(false) // invite on event creation
   emailReminderEnabled Boolean @default(false) // T-60 / T-30 reminders
   emailMagazineEnabled Boolean @default(false) // post-event magazine request
+  marketingDigestEnabled Boolean @default(false) // weekly "new competitions by country" digest
 
   // Branding
   siteName    String  @default("WWTRAIL") @db.VarChar(100)

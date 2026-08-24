@@ -102,6 +102,7 @@ export class SiteConfigService {
     emailWelcomeEnabled?: boolean;
     emailReminderEnabled?: boolean;
     emailMagazineEnabled?: boolean;
+    marketingDigestEnabled?: boolean;
   }) {
     let config = await prisma.siteConfig.findFirst();
 
@@ -192,5 +193,11 @@ export class SiteConfigService {
       reminder: c?.emailReminderEnabled ?? false,
       magazine: c?.emailMagazineEnabled ?? false,
     };
+  }
+
+  /** Whether the weekly "new competitions by country" digest is enabled. */
+  static async getMarketingDigestEnabled(): Promise<boolean> {
+    const c = await prisma.siteConfig.findFirst({ select: { marketingDigestEnabled: true } });
+    return c?.marketingDigestEnabled ?? false;
   }
 }

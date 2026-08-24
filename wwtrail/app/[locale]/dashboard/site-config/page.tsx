@@ -36,6 +36,7 @@ interface SiteConfig {
   emailWelcomeEnabled?: boolean;
   emailReminderEnabled?: boolean;
   emailMagazineEnabled?: boolean;
+  marketingDigestEnabled?: boolean;
 }
 
 const FONT_OPTIONS = [
@@ -488,6 +489,18 @@ export default function SiteConfigPage() {
                   className="h-5 w-5 accent-green-600" />
               </label>
             </div>
+          </div>
+
+          {/* Marketing automation (independent of the outreach master) */}
+          <div className="border-t border-gray-100 pt-4">
+            <p className="text-sm font-semibold text-gray-800">Marketing a usuarios</p>
+            <p className="text-xs text-gray-400 mb-3">Solo a usuarios con consentimiento. Tiene su propio cron semanal.</p>
+            <label className="flex items-center justify-between gap-3 py-1.5">
+              <span className="text-sm text-gray-700">Digest semanal de nuevas competiciones por país</span>
+              <input type="checkbox" checked={!!config.marketingDigestEnabled}
+                onChange={(e) => setConfig({ ...config, marketingDigestEnabled: e.target.checked })}
+                className="h-5 w-5 accent-green-600" />
+            </label>
           </div>
         </div>
       </section>
