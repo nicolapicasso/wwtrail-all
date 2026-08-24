@@ -155,13 +155,13 @@ const navItems: NavItem[] = [
         href: '/organizer/services',
         icon: Building2,
       },
+      {
+        label: 'navCategoriasServicios',
+        href: '/organizer/services/categories',
+        icon: Tag,
+        adminOnly: true,
+      },
     ],
-  },
-  {
-    label: 'navCategoriasServicios',
-    href: '/organizer/services/categories',
-    icon: Tag,
-    adminOnly: true,
   },
   {
     label: 'navBlogArticulos',
@@ -444,7 +444,7 @@ export function DashboardNav() {
             {/* Children */}
             {hasChildren && isExpanded && (
               <div className="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 pl-4">
-                {item.children!.map((child) => {
+                {item.children!.filter((child) => !child.adminOnly || isAdmin).map((child) => {
                   const ChildIcon = child.icon;
                   const childIsActive = pathname.startsWith(child.href || "");
 

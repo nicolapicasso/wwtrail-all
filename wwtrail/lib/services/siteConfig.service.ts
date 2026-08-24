@@ -103,6 +103,9 @@ export class SiteConfigService {
     emailReminderEnabled?: boolean;
     emailMagazineEnabled?: boolean;
     marketingDigestEnabled?: boolean;
+    gtmContainerId?: string;
+    gaMeasurementId?: string;
+    brevoTrackerId?: string;
   }) {
     let config = await prisma.siteConfig.findFirst();
 
@@ -124,6 +127,12 @@ export class SiteConfigService {
     }
     if (data.emailFrom === '') data.emailFrom = undefined;
     if (data.organizerReplyTo === '') data.organizerReplyTo = undefined;
+
+    // Analytics IDs: empty string clears the value (store NULL), trim otherwise.
+    for (const k of ['gtmContainerId', 'gaMeasurementId', 'brevoTrackerId'] as const) {
+      if (data[k] === '') (data as any)[k] = null;
+      else if (typeof data[k] === 'string') (data as any)[k] = (data[k] as string).trim();
+    }
 
     if (!config) {
       config = await prisma.siteConfig.create({ data });
@@ -192,6 +201,27 @@ export class SiteConfigService {
       welcome: c?.emailWelcomeEnabled ?? false,
       reminder: c?.emailReminderEnabled ?? false,
       magazine: c?.emailMagazineEnabled ?? false,
+    };
+  }
+
+  /**
+   * Public analytics/tag-manager IDs for browser injection. These are not
+   * secrets (they ship in the page), but they only load third-party tags
+   * after the visitor grants the matching cookie consent. Env vars act as a
+   * fallback so analytics can be configured either in the backoffice or infra.
+   */
+  static async getAnalyticsConfig(): Promise<{
+    gtmContainerId: string | null;
+    gaMeasurementId: string | null;
+    brevoTrackerId: string | null;
+  }> {
+    const c = await prisma.siteConfig.findFirst({
+      select: { gtmContainerId: true, gaMeasurementId: true, brevoTrackerId: true },
+    });
+    return {
+      gtmContainerId: c?.gtmContainerId || process.env.GTM_CONTAINER_ID || null,
+      gaMeasurementId: c?.gaMeasurementId || process.env.GA_MEASUREMENT_ID || null,
+      brevoTrackerId: c?.brevoTrackerId || process.env.BREVO_TRACKER_ID || null,
     };
   }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiClientV2 } from '@/lib/api/client';
-import { Cookie, Plus, Save, Trash2, Loader2 } from 'lucide-react';
+import { Cookie, Plus, Save, Trash2, Loader2, Wand2 } from 'lucide-react';
 
 const CATEGORIES = ['NECESSARY', 'PREFERENCES', 'ANALYTICS', 'MARKETING'];
 
@@ -17,6 +17,8 @@ export default function CookiesAdminPage() {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [nw, setNw] = useState({ name: '', category: 'NECESSARY', provider: '', purpose: '', duration: '' });
   const [adding, setAdding] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -53,17 +55,49 @@ export default function CookiesAdminPage() {
     } finally { setAdding(false); }
   };
 
+  const seed = async () => {
+    setSeeding(true); setSeedMsg(null);
+    try {
+      const res = await apiClientV2.post('/admin/cookies/seed');
+      const d = res.data?.data ?? res.data;
+      const added = d.added?.length || 0;
+      const parts: string[] = [];
+      parts.push(added > 0 ? `${added} cookie(s) añadida(s)` : 'Nada nuevo que añadir');
+      if (d.skipped?.length) parts.push(`${d.skipped.length} ya existían (sin tocar)`);
+      if (d.integrations?.length) parts.push(`Integraciones: ${d.integrations.join(', ')}`);
+      setSeedMsg(parts.join(' · '));
+      await load();
+    } catch (e: any) {
+      setSeedMsg(e?.response?.data?.error || 'No se pudo regenerar.');
+    } finally { setSeeding(false); }
+  };
+
   const inp = 'w-full rounded border border-gray-300 px-2 py-1 text-sm';
 
   return (
     <div className="p-8">
-      <div className="mb-6 flex items-center gap-3">
-        <Cookie className="h-8 w-8 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Catálogo de cookies</h1>
-          <p className="text-gray-600">Estas cookies se muestran en el banner de consentimiento y en la página de cookies.</p>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Cookie className="h-8 w-8 text-blue-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Catálogo de cookies</h1>
+            <p className="text-gray-600">Estas cookies se muestran en el banner de consentimiento y en la página de cookies.</p>
+          </div>
         </div>
+        <button
+          onClick={seed}
+          disabled={seeding}
+          title="Añade automáticamente las cookies estándar de las integraciones activas (GA4/Ads vía GTM, Brevo) y las necesarias. No sobreescribe las existentes."
+          className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-60"
+        >
+          {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+          Regenerar desde integraciones
+        </button>
       </div>
+
+      {seedMsg && (
+        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">{seedMsg}</div>
+      )}
 
       {/* Add new */}
       <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
