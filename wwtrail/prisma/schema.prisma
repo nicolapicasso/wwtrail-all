@@ -1761,6 +1761,11 @@ model SiteConfig {
   emailMagazineEnabled Boolean @default(false) // post-event magazine request
   marketingDigestEnabled Boolean @default(false) // weekly "new competitions by country" digest
 
+  // Analytics / tag management (public IDs — injected into the browser, gated by cookie consent)
+  gtmContainerId  String? @db.VarChar(20)  // Google Tag Manager container, e.g. GTM-XXXXXXX
+  gaMeasurementId String? @db.VarChar(20)  // GA4 measurement ID, e.g. G-XXXXXXXXXX (optional if GA fires via GTM)
+  brevoTrackerId  String? @db.VarChar(40)  // Brevo (1st-party) tracker client key
+
   // Branding
   siteName    String  @default("WWTRAIL") @db.VarChar(100)
   logoUrl     String? @db.Text

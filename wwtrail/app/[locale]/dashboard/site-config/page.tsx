@@ -37,6 +37,9 @@ interface SiteConfig {
   emailReminderEnabled?: boolean;
   emailMagazineEnabled?: boolean;
   marketingDigestEnabled?: boolean;
+  gtmContainerId?: string | null;
+  gaMeasurementId?: string | null;
+  brevoTrackerId?: string | null;
 }
 
 const FONT_OPTIONS = [
@@ -501,6 +504,67 @@ export default function SiteConfigPage() {
                 onChange={(e) => setConfig({ ...config, marketingDigestEnabled: e.target.checked })}
                 className="h-5 w-5 accent-green-600" />
             </label>
+          </div>
+        </div>
+      </section>
+
+      {/* Analytics / Consent Section */}
+      <section className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Analítica y etiquetas</h2>
+          <p className="text-xs text-gray-400 mt-1">
+            IDs públicos que se inyectan en el navegador. Las etiquetas de terceros solo se
+            cargan tras el consentimiento del usuario (Consent Mode v2). GTM es el punto de
+            entrada recomendado: cualquier otra cookie o script se gestiona desde el contenedor.
+          </p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Google Tag Manager – ID de contenedor
+            </label>
+            <input
+              type="text"
+              value={config.gtmContainerId || ''}
+              onChange={(e) => setConfig({ ...config, gtmContainerId: e.target.value })}
+              placeholder="GTM-XXXXXXX"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Se carga con el dataLayer completo y consentimiento denegado por defecto; las
+              etiquetas del contenedor se activan al aceptar cookies.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Google Analytics 4 – Measurement ID
+            </label>
+            <input
+              type="text"
+              value={config.gaMeasurementId || ''}
+              onChange={(e) => setConfig({ ...config, gaMeasurementId: e.target.value })}
+              placeholder="G-XXXXXXXXXX"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Opcional. Déjalo vacío si GA se dispara a través de GTM. Solo se carga directamente
+              cuando no hay contenedor de GTM configurado.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Brevo – Client key del tracker
+            </label>
+            <input
+              type="text"
+              value={config.brevoTrackerId || ''}
+              onChange={(e) => setConfig({ ...config, brevoTrackerId: e.target.value })}
+              placeholder="xxxxxxxxxxxxxxxxxxxxxxxx"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Brevo es 1st-party, pero solo se carga tras el consentimiento de analítica o marketing.
+            </p>
           </div>
         </div>
       </section>

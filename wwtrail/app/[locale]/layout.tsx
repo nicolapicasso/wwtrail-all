@@ -8,6 +8,8 @@ import { Toaster } from 'sonner';
 import { IntlProvider } from "@/components/providers/IntlProvider";
 import { SiteStylesProvider } from "@/components/providers/SiteStylesProvider";
 import { CookieConsent } from '@/components/cookies/CookieConsent';
+import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
+import { SiteConfigService } from '@/lib/services/siteConfig.service';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 
@@ -52,9 +54,20 @@ export default async function RootLayout({
     notFound();
   }
 
+  // Public analytics IDs (consent-gated in the browser). Never blocks render.
+  let analytics = { gtmContainerId: null as string | null, gaMeasurementId: null as string | null, brevoTrackerId: null as string | null };
+  try {
+    analytics = await SiteConfigService.getAnalyticsConfig();
+  } catch { /* config table not ready — skip analytics */ }
+
   return (
     <html lang={locale} className={`${archivo.variable} ${barlow.variable}`}>
       <body className="font-sans">
+        <AnalyticsScripts
+          gtmContainerId={analytics.gtmContainerId}
+          gaMeasurementId={analytics.gaMeasurementId}
+          brevoTrackerId={analytics.brevoTrackerId}
+        />
         <IntlProvider locale={locale} messages={messages}>
           <SiteStylesProvider>
           <AuthProvider>
