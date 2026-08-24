@@ -54,6 +54,13 @@ function unsubFooter(lang: Lang, link: string): string {
   </div>`;
 }
 
+/** Public helper: per-user unsubscribe link + localized footer HTML. */
+export function unsubscribeBlock(userId: string, lang: string): { link: string; footer: string } {
+  const l = normLang(lang);
+  const link = unsubLink(userId, l);
+  return { link, footer: unsubFooter(l, link) };
+}
+
 export const MarketingService = {
   /** Bulk-import already-consented users (migrated). Creates missing ones. */
   async importConsentedUsers(rows: ImportRow[]): Promise<{ created: number; updated: number; skipped: number }> {
