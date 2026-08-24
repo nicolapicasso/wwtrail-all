@@ -7,6 +7,7 @@ import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { Toaster } from 'sonner';
 import { IntlProvider } from "@/components/providers/IntlProvider";
 import { SiteStylesProvider } from "@/components/providers/SiteStylesProvider";
+import { CookieConsent } from '@/components/cookies/CookieConsent';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 
@@ -61,6 +62,7 @@ export default async function RootLayout({
               <LayoutWrapper>
                 {children}
               </LayoutWrapper>
+              <CookieConsent />
               <Toaster position="top-right" />
             </InsiderProvider>
           </AuthProvider>

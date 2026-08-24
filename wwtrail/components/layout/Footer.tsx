@@ -115,13 +115,23 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-content flex-col items-center justify-between gap-2 px-6 py-5 text-[13px] text-white/50 sm:flex-row sm:px-8 lg:px-10">
           <span>{t('footerCopyright', { year })}</span>
-          <div className="flex gap-5">
+          <div className="flex flex-wrap gap-5">
             <Link href="/legal/privacy" className="hover:text-white/80">
               {t('footerPrivacidad')}
+            </Link>
+            <Link href="/legal/cookies" className="hover:text-white/80">
+              {t('footerCookies')}
             </Link>
             <Link href="/legal/terms" className="hover:text-white/80">
               {t('footerTerminos')}
             </Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
+              className="hover:text-white/80"
+            >
+              {t('footerManageCookies')}
+            </button>
           </div>
         </div>
       </div>

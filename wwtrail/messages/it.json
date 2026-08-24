@@ -987,7 +987,11 @@
     "processing": "Elaborazione...",
     "language": "Lingua",
     "navEmailTemplates": "Modelli email",
-    "navMarketing": "Marketing"
+    "navMarketing": "Marketing",
+    "footerCookies": "Cookie",
+    "footerManageCookies": "Gestisci cookie",
+    "navLegal": "Pagine legali",
+    "navCookies": "Cookie"
   },
   "boCatalog": {
     "accessDenied": "Accesso negato",
@@ -2985,5 +2989,24 @@
     "passwordTooShort": "La password deve avere almeno 8 caratteri.",
     "passwordsDontMatch": "Le password non coincidono.",
     "genericError": "Impossibile completare. Riprova."
+  },
+  "cookies": {
+    "title": "Usiamo i cookie",
+    "description": "Utilizziamo cookie propri e di terzi per migliorare la tua esperienza e analizzare l’uso del sito.",
+    "moreInfo": "Maggiori informazioni",
+    "acceptAll": "Accetta tutti",
+    "rejectAll": "Rifiuta",
+    "customize": "Preferenze",
+    "savePrefs": "Salva preferenze",
+    "manage": "Gestisci cookie",
+    "always": "Sempre",
+    "catNecessary": "Necessari",
+    "catNecessaryDesc": "Indispensabili per il funzionamento del sito.",
+    "catPreferences": "Preferenze",
+    "catPreferencesDesc": "Ricordano le tue impostazioni (lingua, ecc.).",
+    "catAnalytics": "Analitici",
+    "catAnalyticsDesc": "Ci aiutano a capire l’uso del sito.",
+    "catMarketing": "Marketing",
+    "catMarketingDesc": "Personalizzazione e pubblicità."
   }
 }
