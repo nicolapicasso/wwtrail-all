@@ -246,6 +246,11 @@ const navItems: NavItem[] = [
         icon: Upload,
       },
       {
+        label: 'navImportarUsuarios',
+        href: '/dashboard/import-users',
+        icon: UserCog,
+      },
+      {
         label: 'navImportadorIA',
         href: '/organizer/scraper',
         icon: Sparkles,
