@@ -6,6 +6,7 @@ import { Language, TranslationStatus } from '@prisma/client';
 import { EventService } from './event.service';
 import { TranslationService } from './translation.service';
 import { TranslationConfig, getTargetLanguages, isAutoTranslateEnabled } from '@/lib/utils/translation';
+import { sanitizeFaqItems } from './faqSanitizer';
 
 // Configuración de OpenAI
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
@@ -99,7 +100,12 @@ export class SEOService {
             {
               role: 'system',
               content:
-                'Eres un experto en SEO y trail running. Genera preguntas y respuestas optimizadas para LLMs.',
+                'Eres un experto en SEO y trail running. Genera preguntas y respuestas optimizadas para LLMs. ' +
+                'REGLAS OBLIGATORIAS: WWTRAIL es un directorio/agregador, NO es la página oficial de ningún evento. ' +
+                'NUNCA afirmes que WWTRAIL es la web oficial de un evento ni que las inscripciones se hacen en WWTRAIL. ' +
+                'NUNCA digas al usuario que se inscriba, registre o compre dorsales en WWTRAIL. ' +
+                'Para inscripciones e información oficial, dirige SIEMPRE a la web oficial del evento (su URL propia). ' +
+                'Responde en el mismo idioma que el contenido proporcionado.',
             },
             {
               role: 'user',
@@ -144,8 +150,12 @@ export class SEOService {
       // Filtrar items vacíos
       faq = faq.filter((item: { question: string; answer: string }) => item.question && item.answer);
 
+      // Safety net: strip any "WWTRAIL is official / register on WWTRAIL"
+      // phrasing the model may still produce, pointing to the event site.
+      faq = sanitizeFaqItems(faq.slice(0, 5), entityData?.language).items;
+
       logger.info(`✅ Generated ${faq.length} FAQ items successfully`);
-      return faq.slice(0, 5); // Limitar a 5 preguntas
+      return faq; // Limitar a 5 preguntas (ya recortado)
     } catch (error: any) {
       logger.error('❌ Error generating FAQ with OpenAI:');
       if (error.response?.data) {
@@ -531,6 +541,33 @@ export class SEOService {
       logger.error('Error regenerating SEO:', error);
       throw error;
     }
+  }
+
+  /**
+   * Bulk-clean every stored FAQ, removing any phrasing that presents WWTRAIL as
+   * the official event site or tells users to register on WWTRAIL, replacing it
+   * with a pointer to the event's official website. No AI calls — cheap and
+   * safe to run repeatedly. Returns how many records were scanned/modified.
+   */
+  static async cleanupAllFaqs(): Promise<{ scanned: number; modified: number }> {
+    const rows = await prisma.sEO.findMany({
+      select: { id: true, language: true, llmFaq: true },
+    });
+    let modified = 0;
+    for (const row of rows) {
+      const items = Array.isArray(row.llmFaq) ? (row.llmFaq as any[]) : [];
+      if (items.length === 0) continue;
+      const result = sanitizeFaqItems(items, row.language as any);
+      if (result.changed) {
+        await prisma.sEO.update({
+          where: { id: row.id },
+          data: { llmFaq: result.items as any, lastRegenerated: new Date() },
+        });
+        modified++;
+      }
+    }
+    logger.info(`[faq-cleanup] scanned=${rows.length} modified=${modified}`);
+    return { scanned: rows.length, modified };
   }
 
   /**

@@ -39,6 +39,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
     country: initialData?.country || '',
     description: initialData?.description || '',
     website: initialData?.websiteUrl || initialData?.website || '',
+    email: initialData?.email || '',
     typicalMonth: initialData?.typicalMonth?.toString() || '',
     firstEditionYear: initialData?.firstEditionYear?.toString() || new Date().getFullYear().toString(),
     latitude: initialData?.latitude?.toString() || '',
@@ -122,6 +123,51 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
       setError(err.response?.data?.error || err.message || t('aiUrlError'));
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  // Per-block AI autofill: fetches the same source but only applies the fields
+  // of the chosen section (basic / additional / social / images). Overwrites
+  // that section's fields since the user explicitly asked to (re)fill it.
+  const [sectionLoading, setSectionLoading] = useState<null | 'basic' | 'additional' | 'social' | 'images'>(null);
+  const handleSectionAutofill = async (section: 'basic' | 'additional' | 'social' | 'images') => {
+    if (!aiUrl.trim()) { setError(t('aiUrlRequiredEvent')); return; }
+    try {
+      setSectionLoading(section);
+      setError(null);
+      const result = await aiAutofillService.autofillEvent(aiUrl.trim());
+      setFormData(prev => {
+        const next = { ...prev };
+        if (section === 'basic') {
+          if (result.name) next.name = result.name;
+          if (result.city) next.city = result.city;
+          if (result.country) next.country = result.country;
+          if (result.website) next.website = result.website;
+        } else if (section === 'additional') {
+          if (result.description) next.description = result.description;
+          if (result.typicalMonth) next.typicalMonth = result.typicalMonth.toString();
+          if (result.firstEditionYear) next.firstEditionYear = result.firstEditionYear.toString();
+        } else if (section === 'social') {
+          if (result.instagramUrl) next.instagramUrl = result.instagramUrl;
+          if (result.facebookUrl) next.facebookUrl = result.facebookUrl;
+          if (result.twitterUrl) next.twitterUrl = result.twitterUrl;
+          if (result.youtubeUrl) next.youtubeUrl = result.youtubeUrl;
+        }
+        return next;
+      });
+      if (section === 'images') {
+        if (result.suggestedImages && result.suggestedImages.length > 0) {
+          setSuggestedImages(result.suggestedImages);
+          setShowImageSuggestions(true);
+        } else {
+          setError(t('aiNoImagesFound'));
+        }
+      }
+    } catch (err: any) {
+      console.error('AI section autofill error:', err);
+      setError(err.response?.data?.error || err.message || t('aiUrlError'));
+    } finally {
+      setSectionLoading(null);
     }
   };
 
@@ -349,6 +395,9 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
         longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
         websiteUrl: formData.website.trim() || undefined,
+        // Sent even when empty (as '') so the backend can apply the organizer
+        // fallback; undefined would be filtered out and leave the old value.
+        email: formData.email.trim(),
         firstEditionYear: parseInt(formData.firstEditionYear),
         typicalMonth: formData.typicalMonth ? parseInt(formData.typicalMonth) : undefined,
         // Send null/[] when cleared so removals persist (undefined omits the key
@@ -391,6 +440,20 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
       setLoading(false);
     }
   };
+
+  // Small "AI fill this block" button shown in each section header.
+  const aiBtn = (section: 'basic' | 'additional' | 'social' | 'images') => (
+    <button
+      type="button"
+      onClick={() => handleSectionAutofill(section)}
+      disabled={sectionLoading !== null || !aiUrl.trim()}
+      title={!aiUrl.trim() ? t('aiUrlRequiredEvent') : t('aiFillThisHint')}
+      className="ml-auto inline-flex items-center gap-1 rounded-md border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-100 disabled:opacity-50"
+    >
+      {sectionLoading === section ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+      {t('aiFillThis')}
+    </button>
+  );
 
   return (
     <>
@@ -529,7 +592,10 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
 
         {/* Card: Información Básica */}
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('basicInfo')}</h2>
+          <div className="mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900">{t('basicInfo')}</h2>
+            {aiBtn('basic')}
+          </div>
 
           <div className="space-y-4">
             {/* Nombre */}
@@ -604,6 +670,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           <div className="flex items-center gap-2 mb-4">
             <ImageIcon className="h-5 w-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('images')}</h2>
+            {aiBtn('images')}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -774,6 +841,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="h-5 w-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('additionalInfo')}</h2>
+            {aiBtn('additional')}
           </div>
 
           <div className="space-y-4">
@@ -835,6 +903,21 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
               />
             </div>
 
+            {/* Contact email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('contactEmail')}
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="contacto@ejemplo.com"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <p className="mt-1 text-xs text-gray-400">{t('contactEmailHint')}</p>
+            </div>
+
             {/* Organizer */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -865,6 +948,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           <div className="flex items-center gap-2 mb-4">
             <Share2 className="h-5 w-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('socialMedia')}</h2>
+            {aiBtn('social')}
           </div>
 
           <div className="space-y-4">

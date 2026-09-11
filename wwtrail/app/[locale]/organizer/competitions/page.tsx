@@ -30,6 +30,10 @@ export default function OrganizerCompetitionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [featuredFilter, setFeaturedFilter] = useState<string>('all');
 
+  // Pagination (client-side over the loaded list)
+  const PAGE_SIZE = 24;
+  const [page, setPage] = useState(1);
+
   // Confirm Dialog
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -68,13 +72,14 @@ export default function OrganizerCompetitionsPage() {
       setIsLoading(true);
 
       if (!selectedEventId) {
-        // Si no hay evento seleccionado, cargar todas las competiciones de todos mis eventos
-        const allCompetitions: Competition[] = [];
-        for (const event of events) {
-          const comps = await competitionsService.getByEvent(event.id);
-          allCompetitions.push(...comps);
-        }
-        setCompetitions(allCompetitions);
+        // Sin evento seleccionado: cargar en paralelo las competiciones de todos
+        // mis eventos (antes era secuencial → muy lento con muchos eventos).
+        const results = await Promise.all(
+          events.map((event) =>
+            competitionsService.getByEvent(event.id).catch(() => [] as Competition[])
+          )
+        );
+        setCompetitions(results.flat());
       } else {
         // Cargar solo del evento seleccionado
         const comps = await competitionsService.getByEvent(selectedEventId);
@@ -154,6 +159,18 @@ export default function OrganizerCompetitionsPage() {
     }
     return true;
   });
+
+  // Reset to first page whenever the filtered set changes.
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, featuredFilter, selectedEventId, competitions.length]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredCompetitions.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedCompetitions = filteredCompetitions.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -298,7 +315,7 @@ export default function OrganizerCompetitionsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredCompetitions.map((competition) => (
+            {pagedCompetitions.map((competition) => (
               <div
                 key={competition.id}
                 className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
@@ -400,6 +417,29 @@ export default function OrganizerCompetitionsPage() {
                 </div>
               </div>
             ))}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-4">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {t('previous')}
+                </button>
+                <span className="text-sm text-gray-600">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {t('next')}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

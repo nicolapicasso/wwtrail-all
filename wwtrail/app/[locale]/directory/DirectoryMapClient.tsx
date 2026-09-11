@@ -418,6 +418,16 @@ export default function DirectoryMapClient() {
 
           // Add competition markers
           adjustedCompetitions.forEach((comp: any) => {
+            // specialSeries comes back as an array of { id, name, slug }; build
+            // the label from it (was read as an object → always "Undefined").
+            const ssArr: any[] = Array.isArray(comp.specialSeries)
+              ? comp.specialSeries
+              : (comp.specialSeries ? [comp.specialSeries] : []);
+            const ssHtml = ssArr.length
+              ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>${t('specialSeriesLabel')}:</strong> ${ssArr
+                  .map((s: any) => `<a href="/special-series/${s.slug}" style="color: #000; text-decoration: underline;" onmouseover="this.style.color='#1f7a4d'" onmouseout="this.style.color='#000'">${s.name}</a>`)
+                  .join(', ')}</p>`
+              : '';
             const marker = L.marker([comp.latitude, comp.longitude], {
               icon: createCompetitionIcon(),
             })
@@ -435,7 +445,7 @@ export default function DirectoryMapClient() {
                   </p>
                   ${comp.baseDistance ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>${t('distanceLabel')}:</strong> ${comp.baseDistance} km</p>` : ''}
                   ${comp.baseElevation ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>${t('elevationLabel')}:</strong> ${comp.baseElevation}m+</p>` : ''}
-                  ${comp.specialSeries ? `<p style="font-size: 14px; color: #000; margin-bottom: 6px;"><strong>${t('specialSeriesLabel')}:</strong> <a href="/special-series/${comp.specialSeries.slug}" style="color: #000; text-decoration: underline;" onmouseover="this.style.color='#1f7a4d'" onmouseout="this.style.color='#000'">${comp.specialSeries.name}</a></p>` : ''}
+                  ${ssHtml}
                   <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #000;">
                     <a href="/events/${comp.event.slug}/${comp.slug}" style="color: #000; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.color='#1f7a4d'" onmouseout="this.style.color='#000'">
                       ${t('viewCompetition')}
@@ -526,9 +536,11 @@ export default function DirectoryMapClient() {
       // Update country counts for the selector
       setCountryCounts(newCountryCounts);
 
-      // Fit bounds if there are markers
-      if (markersRef.current.length > 0) {
-        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+      // Keep the initial view stable. Only recenter when the user actively
+      // selects a country (a helpful zoom-in); never auto-zoom out to the whole
+      // world on load, and don't jump the view on other filter changes.
+      if (markersRef.current.length > 0 && filters.country) {
+        mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 9 });
       }
     } catch (error) {
       console.error('Error loading data:', error);
