@@ -2702,6 +2702,8 @@
     "gettingCoords": "Wird abgerufen...",
     "getCoords": "Koord. abrufen",
     "officialWebsite": "Offizielle Website",
+    "contactEmail": "Kontakt-E-Mail",
+    "contactEmailHint": "Wenn leer, wird die E-Mail des Veranstalters verwendet.",
     "website": "Website",
     "socialMedia": "Soziale Medien",
     "socialOptionalNote": "💡 Alle Social-Media-Felder sind optional",

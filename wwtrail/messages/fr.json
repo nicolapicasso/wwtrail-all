@@ -2702,6 +2702,8 @@
     "gettingCoords": "Récupération...",
     "getCoords": "Obtenir les coord.",
     "officialWebsite": "Site web officiel",
+    "contactEmail": "E-mail de contact",
+    "contactEmailHint": "Si laissé vide, l'e-mail de l'organisateur sera utilisé.",
     "website": "Site web",
     "socialMedia": "Réseaux sociaux",
     "socialOptionalNote": "💡 Tous les champs des réseaux sociaux sont facultatifs",

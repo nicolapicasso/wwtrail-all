@@ -39,6 +39,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
     country: initialData?.country || '',
     description: initialData?.description || '',
     website: initialData?.websiteUrl || initialData?.website || '',
+    email: initialData?.email || '',
     typicalMonth: initialData?.typicalMonth?.toString() || '',
     firstEditionYear: initialData?.firstEditionYear?.toString() || new Date().getFullYear().toString(),
     latitude: initialData?.latitude?.toString() || '',
@@ -349,6 +350,9 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
         latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
         longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
         websiteUrl: formData.website.trim() || undefined,
+        // Sent even when empty (as '') so the backend can apply the organizer
+        // fallback; undefined would be filtered out and leave the old value.
+        email: formData.email.trim(),
         firstEditionYear: parseInt(formData.firstEditionYear),
         typicalMonth: formData.typicalMonth ? parseInt(formData.typicalMonth) : undefined,
         // Send null/[] when cleared so removals persist (undefined omits the key
@@ -833,6 +837,21 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
                 placeholder="https://www.ejemplo.com"
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
+            </div>
+
+            {/* Contact email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('contactEmail')}
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="contacto@ejemplo.com"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <p className="mt-1 text-xs text-gray-400">{t('contactEmailHint')}</p>
             </div>
 
             {/* Organizer */}

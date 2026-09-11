@@ -2702,6 +2702,8 @@
     "gettingCoords": "Getting...",
     "getCoords": "Get coords",
     "officialWebsite": "Official Website",
+    "contactEmail": "Contact email",
+    "contactEmailHint": "If left empty, the organizer's email will be used.",
     "website": "Website",
     "socialMedia": "Social Media",
     "socialOptionalNote": "💡 All social media fields are optional",

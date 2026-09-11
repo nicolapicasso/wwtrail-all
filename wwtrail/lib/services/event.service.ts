@@ -388,6 +388,20 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
    * - ADMIN: crea con status PUBLISHED
    * - ORGANIZER: crea con status DRAFT (pendiente aprobación)
    */
+  /**
+   * Resolve a fallback contact email for an event from its organizer.
+   * The Organizer entity has no email column, so we use the email of the user
+   * who created that organizer.
+   */
+  static async resolveOrganizerEmail(organizerId: string): Promise<string | null> {
+    if (!organizerId) return null;
+    const organizer = await prisma.organizer.findUnique({
+      where: { id: organizerId },
+      select: { createdBy: { select: { email: true } } },
+    });
+    return organizer?.createdBy?.email || null;
+  }
+
   static async create(data: any, userId: string, userRole: string) {
     try {
       // Determinar status según rol
@@ -416,7 +430,14 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       // Campos opcionales que SÍ existen en el schema
       if (data.description) eventData.description = data.description;
       if (data.website) eventData.website = data.website;
-      if (data.email) eventData.email = data.email;
+      // Contact email: use the provided one, or fall back to the organizer's
+      // (Organizer has no email field → the user who created the organizer).
+      if (data.email && String(data.email).trim()) {
+        eventData.email = String(data.email).trim();
+      } else if (eventData.organizerId) {
+        const fallback = await EventService.resolveOrganizerEmail(eventData.organizerId);
+        if (fallback) eventData.email = fallback;
+      }
       if (data.phone) eventData.phone = data.phone;
       if (data.logoUrl) eventData.logoUrl = data.logoUrl;
       if (data.logo) eventData.logo = data.logo;
@@ -876,6 +897,17 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
       transformedData.logo = transformedData.logoUrl;
     } else if ('logo' in transformedData) {
       transformedData.logoUrl = transformedData.logo;
+    }
+
+    // Contact email fallback: if it is being cleared/left empty but the event
+    // has an organizer, default to the organizer's email.
+    const emailProvided = 'email' in transformedData && String(transformedData.email || '').trim();
+    if ('email' in transformedData && !emailProvided) {
+      const organizerId = transformedData.organizerId ?? event.organizerId;
+      const fallback = organizerId ? await EventService.resolveOrganizerEmail(organizerId) : null;
+      transformedData.email = fallback || null;
+    } else if (emailProvided) {
+      transformedData.email = String(transformedData.email).trim();
     }
 
     // ✅ EXTRAER latitude y longitude ANTES de actualizar

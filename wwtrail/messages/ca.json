@@ -2702,6 +2702,8 @@
     "gettingCoords": "Obtenint...",
     "getCoords": "Obtenir coord.",
     "officialWebsite": "Lloc web oficial",
+    "contactEmail": "Correu de contacte",
+    "contactEmailHint": "Si el deixes buit, s'utilitzarà el correu de l'organitzador.",
     "website": "Lloc web",
     "socialMedia": "Xarxes socials",
     "socialOptionalNote": "💡 Tots els camps de xarxes socials són opcionals",
