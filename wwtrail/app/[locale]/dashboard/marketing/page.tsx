@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from '@/i18n/navigation';
 import { apiClientV2 } from '@/lib/api/client';
+import { EmailBuilder } from '@/components/marketing/EmailBuilder';
 import { Megaphone, Upload, Send, Users, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const LANGS = ['', 'ES', 'EN', 'IT', 'CA', 'FR', 'DE'];
@@ -28,6 +29,7 @@ export default function MarketingPage() {
 
   // Compose / broadcast
   const [subject, setSubject] = useState('');
+  const [composeMode, setComposeMode] = useState<'visual' | 'html'>('visual');
   const [html, setHtml] = useState('<p>Hola {{firstName}},</p>\n<p>...</p>');
   const [country, setCountry] = useState('');
   const [language, setLanguage] = useState('');
@@ -135,8 +137,18 @@ export default function MarketingPage() {
               <input value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Cuerpo (HTML)</label>
-              <textarea value={html} onChange={(e) => setHtml(e.target.value)} rows={12} className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs" />
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">Cuerpo</label>
+                <div className="flex rounded-lg border border-gray-200 p-0.5 text-xs">
+                  <button type="button" onClick={() => setComposeMode('visual')} className={`rounded px-2 py-1 font-semibold ${composeMode === 'visual' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}>Editor visual</button>
+                  <button type="button" onClick={() => setComposeMode('html')} className={`rounded px-2 py-1 font-semibold ${composeMode === 'html' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}>HTML</button>
+                </div>
+              </div>
+              {composeMode === 'visual' ? (
+                <EmailBuilder onChange={setHtml} />
+              ) : (
+                <textarea value={html} onChange={(e) => setHtml(e.target.value)} rows={12} className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs" />
+              )}
               <p className="mt-1 text-xs text-gray-400">Variables: <code>{'{{firstName}}'}</code>. El enlace de baja se añade automáticamente al pie.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
