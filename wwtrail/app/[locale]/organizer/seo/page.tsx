@@ -98,6 +98,25 @@ export default function SEOManagementPage() {
     }
   };
 
+  const [cleaningFaqs, setCleaningFaqs] = useState(false);
+  const handleFaqCleanup = async () => {
+    try {
+      setCleaningFaqs(true);
+      const response = await fetch('/api/v2/seo/faq-cleanup', { method: 'POST' });
+      const json = await response.json();
+      const result = json.data || json;
+      toast({
+        title: t('seoFaqCleanupDone'),
+        description: t('seoFaqCleanupResult', { modified: result.modified ?? 0, scanned: result.scanned ?? 0 }),
+      });
+      loadAllSEO();
+    } catch (error: any) {
+      toast({ title: t('seoError'), description: error.message || t('seoErrorGenerating'), variant: 'destructive' });
+    } finally {
+      setCleaningFaqs(false);
+    }
+  };
+
   useEffect(() => {
     loadAllSEO();
   }, []);
@@ -357,6 +376,16 @@ export default function SEOManagementPage() {
               {t('seoGenerateEntity', { entity: type === 'event' ? t('seoEventos') : t('seoCompeticiones') })}
             </Button>
           ))}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={cleaningFaqs}
+            onClick={handleFaqCleanup}
+            title={t('seoFaqCleanupHint')}
+          >
+            {cleaningFaqs ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+            {t('seoFaqCleanup')}
+          </Button>
         </div>
       </div>
 
