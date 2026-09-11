@@ -126,6 +126,51 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
     }
   };
 
+  // Per-block AI autofill: fetches the same source but only applies the fields
+  // of the chosen section (basic / additional / social / images). Overwrites
+  // that section's fields since the user explicitly asked to (re)fill it.
+  const [sectionLoading, setSectionLoading] = useState<null | 'basic' | 'additional' | 'social' | 'images'>(null);
+  const handleSectionAutofill = async (section: 'basic' | 'additional' | 'social' | 'images') => {
+    if (!aiUrl.trim()) { setError(t('aiUrlRequiredEvent')); return; }
+    try {
+      setSectionLoading(section);
+      setError(null);
+      const result = await aiAutofillService.autofillEvent(aiUrl.trim());
+      setFormData(prev => {
+        const next = { ...prev };
+        if (section === 'basic') {
+          if (result.name) next.name = result.name;
+          if (result.city) next.city = result.city;
+          if (result.country) next.country = result.country;
+          if (result.website) next.website = result.website;
+        } else if (section === 'additional') {
+          if (result.description) next.description = result.description;
+          if (result.typicalMonth) next.typicalMonth = result.typicalMonth.toString();
+          if (result.firstEditionYear) next.firstEditionYear = result.firstEditionYear.toString();
+        } else if (section === 'social') {
+          if (result.instagramUrl) next.instagramUrl = result.instagramUrl;
+          if (result.facebookUrl) next.facebookUrl = result.facebookUrl;
+          if (result.twitterUrl) next.twitterUrl = result.twitterUrl;
+          if (result.youtubeUrl) next.youtubeUrl = result.youtubeUrl;
+        }
+        return next;
+      });
+      if (section === 'images') {
+        if (result.suggestedImages && result.suggestedImages.length > 0) {
+          setSuggestedImages(result.suggestedImages);
+          setShowImageSuggestions(true);
+        } else {
+          setError(t('aiNoImagesFound'));
+        }
+      }
+    } catch (err: any) {
+      console.error('AI section autofill error:', err);
+      setError(err.response?.data?.error || err.message || t('aiUrlError'));
+    } finally {
+      setSectionLoading(null);
+    }
+  };
+
   // Slug validation state
   const [slugValidation, setSlugValidation] = useState<{
     isChecking: boolean;
@@ -396,6 +441,20 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
     }
   };
 
+  // Small "AI fill this block" button shown in each section header.
+  const aiBtn = (section: 'basic' | 'additional' | 'social' | 'images') => (
+    <button
+      type="button"
+      onClick={() => handleSectionAutofill(section)}
+      disabled={sectionLoading !== null || !aiUrl.trim()}
+      title={!aiUrl.trim() ? t('aiUrlRequiredEvent') : t('aiFillThisHint')}
+      className="ml-auto inline-flex items-center gap-1 rounded-md border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-100 disabled:opacity-50"
+    >
+      {sectionLoading === section ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+      {t('aiFillThis')}
+    </button>
+  );
+
   return (
     <>
       {/* Error Message */}
@@ -533,7 +592,10 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
 
         {/* Card: Información Básica */}
         <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('basicInfo')}</h2>
+          <div className="mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900">{t('basicInfo')}</h2>
+            {aiBtn('basic')}
+          </div>
 
           <div className="space-y-4">
             {/* Nombre */}
@@ -608,6 +670,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           <div className="flex items-center gap-2 mb-4">
             <ImageIcon className="h-5 w-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('images')}</h2>
+            {aiBtn('images')}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -778,6 +841,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="h-5 w-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('additionalInfo')}</h2>
+            {aiBtn('additional')}
           </div>
 
           <div className="space-y-4">
@@ -884,6 +948,7 @@ export default function EventForm({ mode, initialData, eventId }: EventFormProps
           <div className="flex items-center gap-2 mb-4">
             <Share2 className="h-5 w-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('socialMedia')}</h2>
+            {aiBtn('social')}
           </div>
 
           <div className="space-y-4">
