@@ -251,6 +251,11 @@ const navItems: NavItem[] = [
         icon: UserCog,
       },
       {
+        label: 'navImportarPosts',
+        href: '/dashboard/import-posts',
+        icon: BookOpen,
+      },
+      {
         label: 'navImportadorIA',
         href: '/organizer/scraper',
         icon: Sparkles,
