@@ -10,6 +10,7 @@ import { postsService } from '@/lib/api/v2';
 import { Post, POST_CATEGORY_LABELS, LANGUAGE_LABELS } from '@/types/v2';
 import { seoService } from '@/lib/api/seo.service';
 import { SEOFaqSchema } from '@/components/SEOFaqSchema';
+import { AdminEditButtonFloating } from '@/components/AdminEditButton';
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -309,6 +310,9 @@ export default function ArticleDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Admin Edit Button (floating) */}
+      <AdminEditButtonFloating editUrl={`/organizer/posts/edit/${article.id}`} />
     </div>
   );
 }

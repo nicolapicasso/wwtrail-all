@@ -89,6 +89,44 @@ export async function internalizeImageUrl(
 }
 
 /**
+ * Rewrite every <img src> (and matching srcset entries) inside an HTML blob so
+ * external images are downloaded to our Spaces bucket and referenced from our
+ * CDN. Each distinct external URL is internalized once. Returns the rewritten
+ * HTML plus how many images were moved to our storage.
+ */
+export async function internalizeHtmlImages(
+  html: string | null | undefined,
+  folder = 'imported/posts'
+): Promise<{ html: string; migrated: number }> {
+  if (!html || typeof html !== 'string') return { html: html || '', migrated: 0 };
+
+  // Collect unique external image URLs from src="" and src=''.
+  const srcRegex = /(?:src|data-src)\s*=\s*["']([^"']+)["']/gi;
+  const urls = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = srcRegex.exec(html)) !== null) {
+    const u = m[1].trim();
+    if (/^https?:\/\//i.test(u) && !isAlreadyStored(u)) urls.add(u);
+  }
+  if (urls.size === 0) return { html, migrated: 0 };
+
+  // Internalize each once and build a replacement map.
+  const map = new Map<string, string>();
+  let migrated = 0;
+  for (const url of urls) {
+    const newUrl = await internalizeImageUrl(url, folder);
+    if (newUrl && newUrl !== url) { map.set(url, newUrl); migrated++; }
+  }
+
+  // Replace all occurrences of each migrated URL (src, srcset, links, etc.).
+  let out = html;
+  for (const [oldUrl, newUrl] of map) {
+    out = out.split(oldUrl).join(newUrl);
+  }
+  return { html: out, migrated };
+}
+
+/**
  * Internalize the common image fields of an import item in place, returning a
  * shallow copy with logoUrl / coverImage / gallery[] pointing at our storage.
  */

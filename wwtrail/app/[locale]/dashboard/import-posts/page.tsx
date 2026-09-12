@@ -54,11 +54,36 @@ export default function ImportPostsPage() {
   const [language, setLanguage] = useState('ES');
   const [category, setCategory] = useState('GENERAL');
   const [onlyDrafts, setOnlyDrafts] = useState(true);
+  const [internalizeImages, setInternalizeImages] = useState(true);
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<{ created: number; skipped: number; errors: any[] } | null>(null);
   const [err, setErr] = useState<string | null>(null);
+
+  // Migrate images of already-imported posts to our CDN (batched loop).
+  const [migrating, setMigrating] = useState(false);
+  const [migrateMsg, setMigrateMsg] = useState<string | null>(null);
+  const runImageMigration = async () => {
+    setMigrating(true); setMigrateMsg('Iniciando…');
+    try {
+      let offset = 0, updated = 0, images = 0, total = 0;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const res = await apiClientV2.post('/admin/posts/migrate-images', { offset, limit: 15 });
+        const d = res.data?.data ?? res.data;
+        total = d.total;
+        updated += d.updated || 0;
+        images += d.migratedImages || 0;
+        offset += d.processed || 0;
+        setMigrateMsg(`Procesando ${Math.min(offset, total)}/${total} · ${images} imágenes migradas…`);
+        if (d.remaining <= 0 || d.processed === 0) break;
+      }
+      setMigrateMsg(`Listo: ${updated} posts actualizados, ${images} imágenes movidas a nuestro CDN.`);
+    } catch (e: any) {
+      setMigrateMsg(e?.response?.data?.error || 'Error durante la migración.');
+    } finally { setMigrating(false); }
+  };
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,7 +111,7 @@ export default function ImportPostsPage() {
       for (let i = 0; i < posts.length; i += CHUNK) {
         const chunk = posts.slice(i, i + CHUNK);
         const res = await apiClientV2.post('/admin/posts/import-wordpress', {
-          posts: chunk, language, category, onlyDrafts,
+          posts: chunk, language, category, onlyDrafts, internalizeImages,
         });
         const d = res.data?.data ?? res.data;
         acc.created += d.created || 0;
@@ -151,6 +176,11 @@ export default function ImportPostsPage() {
             </div>
           </div>
 
+          <label className="mb-4 flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" checked={internalizeImages} onChange={(e) => setInternalizeImages(e.target.checked)} className="h-4 w-4 accent-blue-600" />
+            Descargar las imágenes a nuestro CDN y enlazarlas a nuestro servidor (recomendado)
+          </label>
+
           <div className="mb-4 max-h-80 overflow-auto rounded-lg border border-gray-200">
             <table className="min-w-full text-sm">
               <thead className="sticky top-0 bg-gray-50 text-gray-500">
@@ -188,6 +218,25 @@ export default function ImportPostsPage() {
           </button>
         </>
       )}
+
+      {/* Migrate images of already-imported posts to our CDN */}
+      <div className="mt-10 rounded-lg border border-gray-200 bg-white p-5">
+        <h2 className="text-lg font-semibold text-gray-900">Migrar imágenes de posts al CDN</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Descarga las imágenes que aún apuntan a servidores externos (por ejemplo el antiguo
+          WordPress) y las vuelve a enlazar desde nuestro CDN. Aplica a todos los artículos
+          existentes; se puede ejecutar varias veces sin duplicar.
+        </p>
+        <button
+          onClick={runImageMigration}
+          disabled={migrating}
+          className="mt-3 inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-60"
+        >
+          {migrating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          Migrar imágenes ahora
+        </button>
+        {migrateMsg && <p className="mt-2 text-sm text-gray-600">{migrateMsg}</p>}
+      </div>
     </div>
   );
 }
