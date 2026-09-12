@@ -24,28 +24,55 @@ export async function POST(request: NextRequest) {
       throw new ApiError('URL is required', 400);
     }
 
-    // SSRF guard: reject internal/reserved hosts before making any request.
-    try {
-      await assertSafeUrl(url);
-    } catch (e: any) {
-      throw new ApiError(e?.message || 'URL is not allowed', 400);
+    // Download the image, following redirects manually so we can re-check each
+    // hop against the SSRF guard (many event sites redirect image URLs, so a
+    // hard maxRedirects:0 was silently breaking imports).
+    let currentUrl = url;
+    let response: any = null;
+    for (let hop = 0; hop <= 3; hop++) {
+      try {
+        await assertSafeUrl(currentUrl);
+      } catch (e: any) {
+        throw new ApiError(e?.message || 'URL is not allowed', 400);
+      }
+      const resp = await axios.get(currentUrl, {
+        responseType: 'arraybuffer',
+        timeout: 15000,
+        maxContentLength: MAX_FILE_SIZE,
+        maxRedirects: 0,
+        validateStatus: (s) => s >= 200 && s < 400,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; WWTRAIL/1.0)',
+          'Accept': 'image/*',
+        },
+      });
+      const location = resp.headers['location'] || resp.headers['Location'];
+      if (resp.status >= 300 && resp.status < 400 && location) {
+        currentUrl = new URL(location, currentUrl).toString();
+        continue; // follow the redirect
+      }
+      response = resp;
+      break;
+    }
+    if (!response) {
+      throw new ApiError('Too many redirects while fetching the image', 400);
     }
 
-    // Download the image
-    const response = await axios.get(url, {
-      responseType: 'arraybuffer',
-      timeout: 15000,
-      maxContentLength: MAX_FILE_SIZE,
-      maxRedirects: 0, // prevent redirect-based SSRF bypass
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; WWTRAIL/1.0)',
-        'Accept': 'image/*',
-      },
-    });
-
     const buffer = Buffer.from(response.data);
-    const contentType = response.headers['content-type']?.split(';')[0]?.trim() || 'image/jpeg';
+    const contentType = response.headers['content-type']?.split(';')[0]?.trim().toLowerCase() || '';
 
+    // Validate it is actually an image (otherwise a redirect/HTML error page
+    // would be "imported successfully" but show nothing).
+    if (!contentType.startsWith('image/') || !ALLOWED_CONTENT_TYPES.includes(contentType)) {
+      throw new ApiError(
+        `The URL did not return a valid image (received "${contentType || 'unknown'}").`,
+        400
+      );
+    }
+
+    if (buffer.length === 0) {
+      throw new ApiError('The downloaded image is empty', 400);
+    }
     if (buffer.length > MAX_FILE_SIZE) {
       throw new ApiError('Image too large (max 10MB)', 400);
     }

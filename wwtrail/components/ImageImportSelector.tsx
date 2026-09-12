@@ -51,6 +51,7 @@ export function ImageImportSelector({ images, onImport, onClose }: Props) {
     }))
   );
   const [isImporting, setIsImporting] = useState(false);
+  const [batchError, setBatchError] = useState<string | null>(null);
 
   const updateRole = (index: number, role: ImageRole) => {
     setAssignments(prev => {
@@ -68,11 +69,12 @@ export function ImageImportSelector({ images, onImport, onClose }: Props) {
 
   const handleImportAll = async () => {
     setIsImporting(true);
-    const toImport = assignments.filter(a => a.role !== 'skip');
+    setBatchError(null);
 
     let logoUrl: string | undefined;
     let coverImage: string | undefined;
     const gallery: string[] = [];
+    let errorCount = 0;
 
     for (let i = 0; i < assignments.length; i++) {
       const a = assignments[i];
@@ -109,16 +111,27 @@ export function ImageImportSelector({ images, onImport, onClose }: Props) {
           case 'gallery': gallery.push(uploadedUrl); break;
         }
       } catch (err: any) {
+        const msg = err?.response?.data?.error || err?.message || 'Error';
+        errorCount++;
         setAssignments(prev => {
           const next = [...prev];
-          next[i] = { ...next[i], importing: false, error: err.message || 'Error' };
+          next[i] = { ...next[i], importing: false, error: msg };
           return next;
         });
       }
     }
 
-    onImport({ logoUrl, coverImage, gallery });
     setIsImporting(false);
+
+    if (errorCount > 0) {
+      // Keep the modal open so the user sees exactly which images failed and
+      // why, instead of a silent "success" that changes nothing.
+      setBatchError(`No se pudieron importar ${errorCount} imagen(es). Revisa los mensajes en rojo y prueba con otra imagen o súbela manualmente.`);
+      return;
+    }
+
+    setBatchError(null);
+    onImport({ logoUrl, coverImage, gallery });
   };
 
   const selectedCount = assignments.filter(a => a.role !== 'skip').length;
@@ -201,6 +214,12 @@ export function ImageImportSelector({ images, onImport, onClose }: Props) {
           </div>
         ))}
       </div>
+
+      {batchError && (
+        <div className="mt-4 rounded-lg border-l-4 border-red-500 bg-red-50 p-3 text-sm text-red-700">
+          {batchError}
+        </div>
+      )}
 
       {/* Import button */}
       <div className="mt-4 flex items-center justify-between">
