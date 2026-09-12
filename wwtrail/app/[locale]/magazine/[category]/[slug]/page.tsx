@@ -228,10 +228,10 @@ export default function ArticleDetailPage() {
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
 
-            {/* Gallery (with lightbox — click to view large) */}
+            {/* Gallery (with lightbox — click to view large).
+                EventGallery renders its own heading, so no extra title here. */}
             {article.images && article.images.length > 0 && (
               <div className="mt-12 mb-8">
-                <h3 className="text-2xl font-bold mb-6">{t('gallery')}</h3>
                 <EventGallery
                   images={article.images.map((image) => image.imageUrl)}
                   eventName={article.title}

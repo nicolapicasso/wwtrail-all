@@ -80,16 +80,19 @@ export function RichTextEditor({
             'data-size': {
               default: 'full',
               parseHTML: (element) => element.getAttribute('data-size'),
-              renderHTML: (attributes) => {
-                return {
-                  'data-size': attributes['data-size'],
-                };
-              },
+              renderHTML: (attributes) => ({ 'data-size': attributes['data-size'] }),
+            },
+            'data-align': {
+              default: 'center',
+              parseHTML: (element) => element.getAttribute('data-align'),
+              renderHTML: (attributes) => ({ 'data-align': attributes['data-align'] }),
             },
           };
         },
       }).configure({
-        inline: true,
+        // Block-level images so a click selects the node and the size/position
+        // controls appear (inline images were not reliably selectable).
+        inline: false,
         allowBase64: true,
         HTMLAttributes: {
           class: 'rounded-lg cursor-pointer',
@@ -190,27 +193,25 @@ export function RichTextEditor({
     editor.chain().focus().updateAttributes('image', { 'data-size': size }).run();
   };
 
+  const setImageAlign = (align: 'left' | 'center' | 'right') => {
+    if (!editor.isActive('image')) return;
+    editor.chain().focus().updateAttributes('image', { 'data-align': align }).run();
+  };
+
   return (
     <>
       {/* Estilos para los tamaños de imagen */}
       <style dangerouslySetInnerHTML={{
         __html: `
-          .ProseMirror img[data-size="small"] {
-            width: 33.333333% !important;
-            height: auto !important;
-          }
-          .ProseMirror img[data-size="medium"] {
-            width: 50% !important;
-            height: auto !important;
-          }
-          .ProseMirror img[data-size="large"] {
-            width: 75% !important;
-            height: auto !important;
-          }
-          .ProseMirror img[data-size="full"] {
-            width: 100% !important;
-            height: auto !important;
-          }
+          .ProseMirror img { display: block; height: auto !important; }
+          .ProseMirror img[data-size="small"]  { width: 33.333333% !important; }
+          .ProseMirror img[data-size="medium"] { width: 50% !important; }
+          .ProseMirror img[data-size="large"]  { width: 75% !important; }
+          .ProseMirror img[data-size="full"]   { width: 100% !important; }
+          .ProseMirror img[data-align="left"]   { margin-left: 0; margin-right: auto; }
+          .ProseMirror img[data-align="center"] { margin-left: auto; margin-right: auto; }
+          .ProseMirror img[data-align="right"]  { margin-left: auto; margin-right: 0; }
+          .ProseMirror img.ProseMirror-selectednode { outline: 3px solid #3b82f6; outline-offset: 2px; }
         `
       }} />
 
@@ -225,8 +226,8 @@ export function RichTextEditor({
         className="hidden"
       />
 
-      {/* Toolbar */}
-      <div className="border-b bg-gray-50 p-2 flex flex-wrap gap-1">
+      {/* Toolbar (sticky so it stays visible while scrolling long content) */}
+      <div className="sticky top-0 z-20 border-b bg-gray-50 p-2 flex flex-wrap gap-1 rounded-t-lg">
         {/* Text Style Buttons */}
         <button
           type="button"
@@ -433,6 +434,19 @@ export function RichTextEditor({
               title="Ancho completo (100%)"
             >
               XL
+            </button>
+
+            <div className="w-px h-8 bg-gray-300 mx-1" />
+
+            {/* Image position */}
+            <button type="button" onClick={() => setImageAlign('left')} className="p-2 rounded hover:bg-gray-200 bg-purple-50" title="Imagen a la izquierda">
+              <AlignLeft className="h-4 w-4" />
+            </button>
+            <button type="button" onClick={() => setImageAlign('center')} className="p-2 rounded hover:bg-gray-200 bg-purple-50" title="Imagen centrada">
+              <AlignCenter className="h-4 w-4" />
+            </button>
+            <button type="button" onClick={() => setImageAlign('right')} className="p-2 rounded hover:bg-gray-200 bg-purple-50" title="Imagen a la derecha">
+              <AlignRight className="h-4 w-4" />
             </button>
 
             <div className="w-px h-8 bg-gray-300 mx-1" />

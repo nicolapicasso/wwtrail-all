@@ -208,3 +208,13 @@
     color: var(--ww-green) !important;
   }
 }
+
+/* Article images: honor the size/position set in the rich-text editor,
+   both in the editor preview and on the public article (.prose) page. */
+.prose img[data-size="small"]  { width: 33.333333%; height: auto; }
+.prose img[data-size="medium"] { width: 50%; height: auto; }
+.prose img[data-size="large"]  { width: 75%; height: auto; }
+.prose img[data-size="full"]   { width: 100%; height: auto; }
+.prose img[data-align="left"]   { display: block; margin-left: 0; margin-right: auto; }
+.prose img[data-align="center"] { display: block; margin-left: auto; margin-right: auto; }
+.prose img[data-align="right"]  { display: block; margin-left: auto; margin-right: 0; }

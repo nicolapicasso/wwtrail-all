@@ -42,7 +42,13 @@ export function PostForm({ post, mode }: PostFormProps) {
     setSeoGenerating(true); setSeoMsg(null);
     try {
       await seoService.regenerateSEO({ entityType: 'post', entityId: post.id });
-      setSeoMsg({ ok: true, text: 'SEO generado. Revisa las preguntas en el panel de SEO.' });
+      // Pull the generated record and fill the Meta fields so they are no
+      // longer empty (the generation also creates the FAQ shown in the SEO panel).
+      const seo = await seoService.getSEO('post', post.id, language).catch(() => null);
+      if (seo?.metaTitle && !metaTitle) setMetaTitle(seo.metaTitle);
+      if (seo?.metaDescription && !metaDescription) setMetaDescription(seo.metaDescription);
+      const faqCount = seo?.llmFaq?.length || 0;
+      setSeoMsg({ ok: true, text: `SEO generado${faqCount ? ` · ${faqCount} preguntas` : ''}. Recuerda guardar el artículo para conservar el meta.` });
     } catch (e: any) {
       const msg = e?.response?.data?.error || e?.message || 'No se pudo generar el SEO.';
       setSeoMsg({ ok: false, text: /disabled/i.test(msg) ? 'Activa la generación de SEO para "Posts" en Administración web → SEO → Configuración.' : msg });
