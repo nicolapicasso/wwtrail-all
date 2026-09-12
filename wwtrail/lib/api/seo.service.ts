@@ -33,7 +33,8 @@ export interface GenerateSEOInput {
   entityType: string;
   entityId?: string;
   slug?: string;
-  data: Record<string, any>;
+  // Optional: when omitted the backend fetches the entity data itself.
+  data?: Record<string, any>;
 }
 
 export interface UpsertConfigInput {

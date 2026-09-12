@@ -57,6 +57,11 @@ export function RichTextEditor({
         heading: {
           levels: [1, 2, 3],
         },
+        // StarterKit v3 already bundles Link and Underline; disable them here
+        // so our custom-configured versions below are the only ones (duplicate
+        // extensions break the editor's commands).
+        link: false,
+        underline: false,
       }),
       Underline,
       TextAlign.configure({

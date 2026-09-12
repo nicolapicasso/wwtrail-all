@@ -118,6 +118,16 @@ async function getEntitiesWithoutSEO(entityType: string): Promise<any[]> {
       });
       break;
 
+    case 'post':
+      allEntities = await prisma.post.findMany({
+        where: { status: 'PUBLISHED' },
+        select: {
+          id: true, title: true, slug: true, excerpt: true,
+          content: true, category: true,
+        },
+      });
+      break;
+
     default:
       return [];
   }

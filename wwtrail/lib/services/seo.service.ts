@@ -90,6 +90,26 @@ export class SEOService {
       // Aplicar variables al prompt
       const processedPrompt = this.applyTemplate(prompt, entityData);
 
+      // Bloque de datos concretos: garantiza que el modelo SIEMPRE dispone de
+      // la URL oficial, la localidad, etc., para no dejar huecos ni placeholders.
+      const known: Record<string, any> = {
+        nombre: entityData.name || entityData.title,
+        web_oficial: entityData.website || entityData.websiteUrl,
+        localidad: entityData.city,
+        pais: entityData.country,
+        tipo: entityData.type,
+        distancia_km: entityData.baseDistance,
+        desnivel_m: entityData.baseElevation,
+        mes_habitual: entityData.typicalMonth,
+      };
+      const dataLines = Object.entries(known)
+        .filter(([, v]) => v !== undefined && v !== null && v !== '')
+        .map(([k, v]) => `- ${k}: ${v}`)
+        .join('\n');
+      const dataBlock = dataLines
+        ? `\n\nDATOS DISPONIBLES (usa EXCLUSIVAMENTE estos valores reales; no inventes ni dejes huecos):\n${dataLines}`
+        : '';
+
       logger.info('🤖 Generating FAQ with OpenAI GPT-4o-mini...');
 
       const response = await axios.post(
@@ -100,16 +120,18 @@ export class SEOService {
             {
               role: 'system',
               content:
-                'Eres un experto en SEO y trail running. Genera preguntas y respuestas optimizadas para LLMs. ' +
+                'Eres un experto en SEO y trail running. Genera 3-4 preguntas y respuestas breves, claras y útiles, optimizadas para LLMs. ' +
                 'REGLAS OBLIGATORIAS: WWTRAIL es un directorio/agregador, NO es la página oficial de ningún evento. ' +
                 'NUNCA afirmes que WWTRAIL es la web oficial de un evento ni que las inscripciones se hacen en WWTRAIL. ' +
                 'NUNCA digas al usuario que se inscriba, registre o compre dorsales en WWTRAIL. ' +
-                'Para inscripciones e información oficial, dirige SIEMPRE a la web oficial del evento (su URL propia). ' +
+                'Para inscripciones e información oficial, dirige SIEMPRE a la web oficial del evento (usa la URL de DATOS DISPONIBLES). ' +
+                'NUNCA uses marcadores de posición ni corchetes como "[insertar URL]", "[fecha]" o "[localidad]": usa los valores reales de DATOS DISPONIBLES. ' +
+                'Si un dato concreto (por ejemplo fechas exactas de inscripción) NO está en DATOS DISPONIBLES, NO lo inventes ni dejes un hueco: remite a la web oficial para consultarlo. ' +
                 'Responde en el mismo idioma que el contenido proporcionado.',
             },
             {
               role: 'user',
-              content: processedPrompt,
+              content: processedPrompt + dataBlock,
             },
           ],
           response_format: { type: 'json_object' },
@@ -151,8 +173,13 @@ export class SEOService {
       faq = faq.filter((item: { question: string; answer: string }) => item.question && item.answer);
 
       // Safety net: strip any "WWTRAIL is official / register on WWTRAIL"
-      // phrasing the model may still produce, pointing to the event site.
-      faq = sanitizeFaqItems(faq.slice(0, 5), entityData?.language).items;
+      // phrasing plus leftover "[insertar …]" placeholders, filling known ones
+      // (website / locality) from the entity data.
+      faq = sanitizeFaqItems(faq.slice(0, 5), entityData?.language, {
+        website: entityData?.website || entityData?.websiteUrl,
+        city: entityData?.city,
+        country: entityData?.country,
+      }).items;
 
       logger.info(`✅ Generated ${faq.length} FAQ items successfully`);
       return faq; // Limitar a 5 preguntas (ya recortado)
@@ -471,11 +498,23 @@ export class SEOService {
           entity = await EventService.findBySlug(entityIdOrSlug);
         }
       } else if (entityType === 'competition') {
-        // TODO: Implementar cuando exista CompetitionService
-        throw new Error('Competition entity type not yet supported for auto-fetch');
+        entity = await prisma.competition.findFirst({
+          where: { OR: [{ id: entityIdOrSlug }, { slug: entityIdOrSlug }] },
+          select: {
+            id: true, name: true, slug: true, description: true, type: true,
+            baseDistance: true, baseElevation: true,
+            event: { select: { name: true, city: true, country: true, website: true } },
+          },
+        });
+        if (entity?.event) {
+          // Flatten a few event fields so placeholders/data block can use them.
+          entity = { ...entity, city: entity.event.city, country: entity.event.country, website: entity.event.website };
+        }
       } else if (entityType === 'post') {
-        // TODO: Implementar cuando exista PostService
-        throw new Error('Post entity type not yet supported for auto-fetch');
+        entity = await prisma.post.findFirst({
+          where: { OR: [{ id: entityIdOrSlug }, { slug: entityIdOrSlug }] },
+          select: { id: true, title: true, slug: true, excerpt: true, content: true, category: true },
+        });
       } else {
         throw new Error(`Unknown entity type: ${entityType}`);
       }
@@ -543,6 +582,31 @@ export class SEOService {
     }
   }
 
+  /** Fetch website/city/country for an entity so FAQ placeholders can be filled. */
+  private static async resolvePlaceholderData(
+    entityType: string | null,
+    entityId: string | null
+  ): Promise<{ website?: string | null; city?: string | null; country?: string | null }> {
+    if (!entityId) return {};
+    try {
+      if (entityType === 'event') {
+        const e = await prisma.event.findUnique({
+          where: { id: entityId },
+          select: { website: true, city: true, country: true },
+        });
+        return { website: e?.website, city: e?.city, country: e?.country };
+      }
+      if (entityType === 'competition') {
+        const c = await prisma.competition.findUnique({
+          where: { id: entityId },
+          select: { event: { select: { website: true, city: true, country: true } } },
+        });
+        return { website: c?.event?.website, city: c?.event?.city, country: c?.event?.country };
+      }
+    } catch { /* ignore */ }
+    return {};
+  }
+
   /**
    * Bulk-clean every stored FAQ, removing any phrasing that presents WWTRAIL as
    * the official event site or tells users to register on WWTRAIL, replacing it
@@ -551,13 +615,15 @@ export class SEOService {
    */
   static async cleanupAllFaqs(): Promise<{ scanned: number; modified: number }> {
     const rows = await prisma.sEO.findMany({
-      select: { id: true, language: true, llmFaq: true },
+      select: { id: true, language: true, llmFaq: true, entityType: true, entityId: true },
     });
     let modified = 0;
     for (const row of rows) {
       const items = Array.isArray(row.llmFaq) ? (row.llmFaq as any[]) : [];
       if (items.length === 0) continue;
-      const result = sanitizeFaqItems(items, row.language as any);
+      // Resolve real website/locality so placeholders can be filled, not just dropped.
+      const data = await this.resolvePlaceholderData(row.entityType, row.entityId);
+      const result = sanitizeFaqItems(items, row.language as any, data);
       if (result.changed) {
         await prisma.sEO.update({
           where: { id: row.id },

@@ -360,7 +360,7 @@ export default function SEOManagementPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          {['event', 'competition'].map((type) => (
+          {['event', 'competition', 'post'].map((type) => (
             <Button
               key={type}
               variant="outline"
@@ -373,7 +373,7 @@ export default function SEOManagementPage() {
               ) : (
                 <RefreshCw className="h-4 w-4 mr-1" />
               )}
-              {t('seoGenerateEntity', { entity: type === 'event' ? t('seoEventos') : t('seoCompeticiones') })}
+              {t('seoGenerateEntity', { entity: type === 'event' ? t('seoEventos') : type === 'competition' ? t('seoCompeticiones') : t('seoPosts') })}
             </Button>
           ))}
           <Button

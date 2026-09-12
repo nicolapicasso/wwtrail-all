@@ -66,18 +66,61 @@ export function sanitizeText(text: string, language?: string): { text: string; c
   return { text: result, changed };
 }
 
+/** Known entity data used to resolve or drop leftover placeholders. */
+export interface PlaceholderData {
+  website?: string | null;
+  city?: string | null;
+  country?: string | null;
+}
+
+/**
+ * Replace or remove leftover placeholder brackets like "[insertar URL]",
+ * "[insertar localidad]", "[fecha de inicio]". Known placeholders (URL/web,
+ * locality) are filled from the entity data; unknown ones are dropped, and the
+ * surrounding punctuation/spacing is tidied so no awkward gaps remain.
+ */
+export function fillPlaceholders(text: string, data?: PlaceholderData): { text: string; changed: boolean } {
+  if (!text || !text.includes('[')) return { text, changed: false };
+  const web = data?.website || '';
+  const city = data?.city || '';
+  let changed = false;
+
+  let out = text.replace(/\[[^\]]*\]/g, (match) => {
+    changed = true;
+    const f = fold(match);
+    if (web && /(url|web|sitio|enlace|link|inscrip|registr)/.test(f)) return web;
+    if (city && /(localidad|ciudad|poblaci|lugar|sede|municipi)/.test(f)) return city;
+    return ''; // unknown placeholder → drop
+  });
+
+  if (changed) {
+    out = out
+      .replace(/\bdesde\s+hasta\b/gi, '')     // "desde [x] hasta [y]" → both dropped
+      .replace(/\bentre\s+y\b/gi, '')          // "entre [x] y [y]" → both dropped
+      .replace(/\(\s*\)/g, '')
+      .replace(/([([]) +/g, '$1')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+([.,;:!?])/g, '$1')         // orphan space before punctuation (last)
+      .trim();
+  }
+  return { text: out, changed };
+}
+
 /** Sanitize an array of { question, answer } FAQ items. */
 export function sanitizeFaqItems(
   items: Array<{ question: string; answer: string }>,
-  language?: string
+  language?: string,
+  data?: PlaceholderData
 ): { items: Array<{ question: string; answer: string }>; changed: boolean } {
   if (!Array.isArray(items)) return { items: [], changed: false };
   let changed = false;
   const cleaned = items.map((it) => {
     const q = sanitizeText(it.question || '', language);
+    const qp = fillPlaceholders(q.text, data);
     const a = sanitizeText(it.answer || '', language);
-    if (q.changed || a.changed) changed = true;
-    return { question: q.text, answer: a.text };
+    const ap = fillPlaceholders(a.text, data);
+    if (q.changed || a.changed || qp.changed || ap.changed) changed = true;
+    return { question: qp.text, answer: ap.text };
   });
   return { items: cleaned, changed };
 }

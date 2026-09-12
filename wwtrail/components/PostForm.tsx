@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { RichTextEditor } from './RichTextEditor';
 import FileUpload from './FileUpload';
 import { postsService, eventsService, competitionsService, editionsService } from '@/lib/api/v2';
+import { seoService } from '@/lib/api/seo.service';
+import { Sparkles } from 'lucide-react';
 import {
   PostCategory,
   Language,
@@ -31,6 +33,21 @@ export function PostForm({ post, mode }: PostFormProps) {
   // Form state
   const [title, setTitle] = useState(post?.title || '');
   const [excerpt, setExcerpt] = useState(post?.excerpt || '');
+
+  // Generate SEO (meta + FAQ) for this post with AI
+  const [seoGenerating, setSeoGenerating] = useState(false);
+  const [seoMsg, setSeoMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const generatePostSeo = async () => {
+    if (!post?.id) return;
+    setSeoGenerating(true); setSeoMsg(null);
+    try {
+      await seoService.regenerateSEO({ entityType: 'post', entityId: post.id });
+      setSeoMsg({ ok: true, text: 'SEO generado. Revisa las preguntas en el panel de SEO.' });
+    } catch (e: any) {
+      const msg = e?.response?.data?.error || e?.message || 'No se pudo generar el SEO.';
+      setSeoMsg({ ok: false, text: /disabled/i.test(msg) ? 'Activa la generación de SEO para "Posts" en Administración web → SEO → Configuración.' : msg });
+    } finally { setSeoGenerating(false); }
+  };
   const [content, setContent] = useState(post?.content || '');
   const [featuredImage, setFeaturedImage] = useState(post?.featuredImage || '');
   const [galleryImages, setGalleryImages] = useState<string[]>(
@@ -251,7 +268,24 @@ export function PostForm({ post, mode }: PostFormProps) {
 
       {/* SEO */}
       <div className="bg-white rounded-lg border p-6 space-y-4">
-        <h2 className="text-xl font-bold mb-4">SEO</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold">SEO</h2>
+          {mode === 'edit' && post?.id && (
+            <button
+              type="button"
+              onClick={generatePostSeo}
+              disabled={seoGenerating}
+              className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-60"
+              title="Genera meta y preguntas frecuentes de este artículo con IA"
+            >
+              {seoGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Generar SEO con IA
+            </button>
+          )}
+        </div>
+        {seoMsg && (
+          <p className={`text-sm font-medium ${seoMsg.ok ? 'text-green-600' : 'text-red-600'}`}>{seoMsg.text}</p>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
