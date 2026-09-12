@@ -98,7 +98,7 @@ export default async function EventDetailPage({
     // Get translated content if available
     const translation = (event as any).translations?.find((t: any) => t.language === params.locale.toUpperCase());
     if (translation) {
-      event.name = translation.name || event.name;
+      // The event name is a proper noun — never translate it, only the description.
       event.description = translation.description || event.description;
     }
 

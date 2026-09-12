@@ -24,9 +24,19 @@ export interface Translatable {
  * If translation exists for requested language, replace name/description
  * Otherwise, keep original fields
  */
+export interface ApplyTranslationsOptions {
+  /**
+   * Whether the `name` field may be replaced by its translation. Proper names
+   * of events and competitions (e.g. "Tor des Géants") must never be
+   * translated, so those callers pass `false`. Defaults to `true`.
+   */
+  translateName?: boolean;
+}
+
 export function applyTranslations<T extends Translatable>(
   entity: T,
-  requestedLanguage: Language
+  requestedLanguage: Language,
+  options: ApplyTranslationsOptions = {}
 ): T {
   // If no translations or requesting original language, return as is
   if (!entity.translations || entity.language === requestedLanguage) {
@@ -46,7 +56,8 @@ export function applyTranslations<T extends Translatable>(
   // Apply translation fields
   const translated = { ...entity };
 
-  if (translation.name) translated.name = translation.name;
+  // Proper names stay as entered unless explicitly allowed to translate.
+  if (options.translateName !== false && translation.name) translated.name = translation.name;
   if (translation.title) translated.title = translation.title;
   if (translation.description) translated.description = translation.description;
 
@@ -58,9 +69,10 @@ export function applyTranslations<T extends Translatable>(
  */
 export function applyTranslationsToList<T extends Translatable>(
   entities: T[],
-  requestedLanguage: Language
+  requestedLanguage: Language,
+  options: ApplyTranslationsOptions = {}
 ): T[] {
-  return entities.map((entity) => applyTranslations(entity, requestedLanguage));
+  return entities.map((entity) => applyTranslations(entity, requestedLanguage, options));
 }
 
 /**

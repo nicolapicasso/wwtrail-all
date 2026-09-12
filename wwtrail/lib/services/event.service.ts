@@ -684,7 +684,8 @@ const coordinates = await prisma.$queryRawUnsafe<Array<{ id: string; lat: number
     });
 
     // ✅ NUEVO: Apply translations based on requested language
-    const translatedEvents = applyTranslationsToList(aggregatedEvents, language);
+    // Event names are proper nouns — never translate them (only description).
+    const translatedEvents = applyTranslationsToList(aggregatedEvents, language, { translateName: false });
 
     // ✅ Shuffle results for featured queries to show variety
     const finalEvents = isFeaturedQuery

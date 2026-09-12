@@ -305,7 +305,8 @@ export class CompetitionService {
     }
 
     // ✅ NUEVO: Apply translations AFTER extracting coordinates
-    const translatedCompetitions = applyTranslationsToList(competitions as any[], requestedLanguage);
+    // Competition names are proper nouns — never translate them (only description).
+    const translatedCompetitions = applyTranslationsToList(competitions as any[], requestedLanguage, { translateName: false });
 
     // Ordenar según el campo (only if not featured query - featured gets shuffled)
     if (!isFeatured) {

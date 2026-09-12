@@ -366,8 +366,9 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
           continue;
         }
 
+        // The event name is a proper noun (e.g. "Tor des Géants") and must
+        // never be translated — only the description is.
         const textsToTranslate = [
-          { key: 'name', text: event.name },
           ...(event.description ? [{ key: 'description', text: event.description }] : []),
         ];
 
@@ -381,7 +382,7 @@ IMPORTANT: Return ONLY a valid JSON object with the same keys but translated val
         const translationData = {
           eventId: event.id,
           language: targetLang,
-          name: translated.name,
+          name: event.name, // keep original — never translate proper names
           description: translated.description || null,
           status: 'APPROVED' as TranslationStatus,
         };

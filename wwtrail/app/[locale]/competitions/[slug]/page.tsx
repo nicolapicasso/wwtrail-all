@@ -61,7 +61,7 @@ export default function CompetitionDetailPage() {
       // ✅ Apply translations if available
       const translation = comp.translations?.find((t: any) => t.language === locale?.toUpperCase());
       if (translation) {
-        comp.name = translation.name || comp.name;
+        // The competition name is a proper noun — never translate it, only description.
         comp.description = translation.description || comp.description;
       }
 
