@@ -193,6 +193,9 @@ export function ImageImportSelector({ images, onImport, onClose }: Props) {
 
             {/* Role selector */}
             <div className="p-2 bg-white">
+              {a.error && (
+                <p className="mb-1 text-[11px] leading-tight text-red-600" title={a.error}>{a.error}</p>
+              )}
               <div className="flex flex-wrap gap-1">
                 {(['logo', 'cover', 'gallery', 'skip'] as ImageRole[]).map(role => (
                   <button

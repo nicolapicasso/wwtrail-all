@@ -10,6 +10,22 @@ import axios from 'axios';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 
+/** Detect the image type from magic bytes (more reliable than Content-Type). */
+function sniffImageType(buf: Buffer): string | null {
+  if (buf.length < 12) return null;
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return 'image/png';
+  if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) return 'image/gif';
+  if (
+    buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
+    buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50
+  ) return 'image/webp';
+  // SVG (text): look for an <svg tag in the first chunk.
+  const head = buf.slice(0, 256).toString('utf8').toLowerCase();
+  if (head.includes('<svg')) return 'image/svg+xml';
+  return null;
+}
+
 /**
  * POST /api/files/import-url
  * Download an image from an external URL and upload it to storage
@@ -35,15 +51,21 @@ export async function POST(request: NextRequest) {
       } catch (e: any) {
         throw new ApiError(e?.message || 'URL is not allowed', 400);
       }
+      // Send browser-like headers, including a Referer pointing at the image's
+      // own origin. Many CDNs / sites block hotlinking (403) for requests
+      // without these, even when the page HTML itself loads fine.
+      let referer = '';
+      try { const u = new URL(currentUrl); referer = `${u.protocol}//${u.host}/`; } catch { /* ignore */ }
       const resp = await axios.get(currentUrl, {
         responseType: 'arraybuffer',
-        timeout: 15000,
+        timeout: 20000,
         maxContentLength: MAX_FILE_SIZE,
         maxRedirects: 0,
         validateStatus: (s) => s >= 200 && s < 400,
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; WWTRAIL/1.0)',
-          'Accept': 'image/*',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+          ...(referer ? { Referer: referer } : {}),
         },
       });
       const location = resp.headers['location'] || resp.headers['Location'];
@@ -59,22 +81,24 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(response.data);
-    const contentType = response.headers['content-type']?.split(';')[0]?.trim().toLowerCase() || '';
-
-    // Validate it is actually an image (otherwise a redirect/HTML error page
-    // would be "imported successfully" but show nothing).
-    if (!contentType.startsWith('image/') || !ALLOWED_CONTENT_TYPES.includes(contentType)) {
-      throw new ApiError(
-        `The URL did not return a valid image (received "${contentType || 'unknown'}").`,
-        400
-      );
-    }
-
     if (buffer.length === 0) {
       throw new ApiError('The downloaded image is empty', 400);
     }
     if (buffer.length > MAX_FILE_SIZE) {
       throw new ApiError('Image too large (max 10MB)', 400);
+    }
+
+    const headerType = response.headers['content-type']?.split(';')[0]?.trim().toLowerCase() || '';
+    // Sniff the actual bytes: many CDNs serve images as octet-stream/generic
+    // types, so trust the magic bytes over the declared content-type.
+    const sniffed = sniffImageType(buffer);
+    const contentType = sniffed || headerType;
+
+    if (!contentType.startsWith('image/') || !ALLOWED_CONTENT_TYPES.includes(contentType)) {
+      throw new ApiError(
+        `The URL did not return a valid image (received "${headerType || 'unknown'}").`,
+        400
+      );
     }
 
     // Determine extension from content type or URL
