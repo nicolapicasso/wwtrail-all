@@ -59,6 +59,28 @@ export interface SuggestedImage {
   type: 'logo' | 'cover' | 'gallery' | 'unknown';
 }
 
+export interface EditionAutoFillResult {
+  year?: number;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
+  registrationOpenDate?: string; // YYYY-MM-DD
+  registrationCloseDate?: string; // YYYY-MM-DD
+  registrationUrl?: string;
+  distance?: number; // km
+  elevation?: number; // m D+
+  maxParticipants?: number;
+  prices?: { early?: number; normal?: number; late?: number };
+  notes?: string; // qué se encontró / qué no
+}
+
+export interface EditionAutoFillContext {
+  year: number;
+  competitionName?: string;
+  eventName?: string;
+  baseDistance?: number | null;
+  baseElevation?: number | null;
+}
+
 /**
  * Extrae el contenido de texto de una página web
  */
@@ -350,6 +372,77 @@ IMPORTANT RULES:
     return JSON.parse(jsonStr) as CompetitionAutoFillResult;
   } catch (parseError) {
     logger.error('Error parsing AI response:', content);
+    throw new Error('Error al procesar la respuesta de la IA');
+  }
+}
+
+/**
+ * Extract data for ONE specific edition (a given year) of a competition from a
+ * web page. Used by the "Crear edición con IA" flow — the result is shown for
+ * review before creating the edition.
+ */
+export async function autoFillEdition(
+  url: string,
+  ctx: EditionAutoFillContext
+): Promise<EditionAutoFillResult> {
+  const apiKey = await getOpenAIKey();
+  const pageContent = await fetchPageContent(url);
+
+  const systemPrompt = `You are an expert data extraction assistant for trail running events.
+You are given the text of an event/competition web page. Extract the data for the ${ctx.year} edition of the race described below.
+
+Race context:
+- Competition: ${ctx.competitionName || 'N/A'}
+- Event: ${ctx.eventName || 'N/A'}
+- Target year: ${ctx.year}
+${ctx.baseDistance ? `- Approx. distance: ${ctx.baseDistance} km (use it to identify the right race if several are listed)` : ''}
+
+Return ONLY a valid JSON object with these fields (OMIT any field you cannot find reliably — never guess):
+
+{
+  "year": ${ctx.year},
+  "startDate": "YYYY-MM-DD",
+  "endDate": "YYYY-MM-DD",
+  "registrationOpenDate": "YYYY-MM-DD",
+  "registrationCloseDate": "YYYY-MM-DD",
+  "registrationUrl": "https://...",
+  "distance": 0,
+  "elevation": 0,
+  "maxParticipants": 0,
+  "prices": { "early": 0, "normal": 0, "late": 0 },
+  "notes": "Short note in Spanish about what was found and what could not be confirmed for ${ctx.year}."
+}
+
+IMPORTANT RULES:
+- Extract ONLY the ${ctx.year} edition. If the page clearly refers to a different year, return just { "notes": "..." } explaining it.
+- Dates MUST be ISO YYYY-MM-DD. Convert any human date (e.g. "12-14 septiembre 2026") correctly.
+- "distance" in km, "elevation" in meters D+, prices as numbers (no currency symbol).
+- If the page only shows a date range, set startDate and endDate accordingly.
+- NEVER invent registration dates, prices or a URL that are not in the page. Omit them instead.
+- Return ONLY valid JSON, no markdown, no code blocks.`;
+
+  const response = await axios.post(
+    OPENAI_API_URL,
+    {
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Extract the ${ctx.year} edition data from this page (URL: ${url}):\n\n${pageContent}` },
+      ],
+      temperature: 0.1,
+      max_tokens: 1500,
+    },
+    { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` } }
+  );
+
+  const content = response.data.choices[0]?.message?.content?.trim();
+  if (!content) throw new Error('La IA no devolvió contenido');
+
+  try {
+    const jsonStr = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    return JSON.parse(jsonStr) as EditionAutoFillResult;
+  } catch {
+    logger.error('Error parsing AI edition response:', content);
     throw new Error('Error al procesar la respuesta de la IA');
   }
 }

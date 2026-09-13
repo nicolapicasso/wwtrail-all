@@ -37,6 +37,28 @@ export interface SuggestedImage {
   type: 'logo' | 'cover' | 'gallery' | 'unknown';
 }
 
+export interface EditionAutoFillResult {
+  year?: number;
+  startDate?: string;
+  endDate?: string;
+  registrationOpenDate?: string;
+  registrationCloseDate?: string;
+  registrationUrl?: string;
+  distance?: number;
+  elevation?: number;
+  maxParticipants?: number;
+  prices?: { early?: number; normal?: number; late?: number };
+  notes?: string;
+  error?: string;
+}
+
+export interface EditionAutoFillContext {
+  competitionName?: string;
+  eventName?: string;
+  baseDistance?: number | null;
+  baseElevation?: number | null;
+}
+
 class AiAutofillService {
   async autofillEvent(url: string): Promise<EventAutoFillResult> {
     const response = await apiClientV2.post('/ai-autofill', { url, type: 'event' });
@@ -45,6 +67,11 @@ class AiAutofillService {
 
   async autofillCompetition(url: string): Promise<CompetitionAutoFillResult> {
     const response = await apiClientV2.post('/ai-autofill', { url, type: 'competition' });
+    return response.data.data;
+  }
+
+  async autofillEdition(url: string, year: number, context: EditionAutoFillContext): Promise<EditionAutoFillResult> {
+    const response = await apiClientV2.post('/ai-autofill', { url, type: 'edition', year, context });
     return response.data.data;
   }
 }

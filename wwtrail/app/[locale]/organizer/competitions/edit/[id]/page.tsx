@@ -7,11 +7,13 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 import CompetitionForm from '@/components/forms/CompetitionForm';
 import competitionsService from '@/lib/api/v2/competitions.service';
 import type { Competition } from '@/types/competition';
 import { Button } from '@/components/ui/button';
 import { GenerateTranslationsButton } from '@/components/GenerateTranslationsButton';
+import { AiEditionCreator } from '@/components/AiEditionCreator';
 
 interface EditCompetitionPageProps {
   params: {
@@ -25,6 +27,7 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAiEdition, setShowAiEdition] = useState(false);
 
   useEffect(() => {
     const fetchCompetition = async () => {
@@ -90,6 +93,15 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
             {t('backToEvent')}
           </Link>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAiEdition(true)}
+              className="flex items-center gap-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+            >
+              <Sparkles className="h-4 w-4" />
+              Crear edición con IA
+            </Button>
             <GenerateTranslationsButton
               entityType="competition"
               entityId={params.id}
@@ -105,6 +117,19 @@ export default function EditCompetitionPage({ params }: EditCompetitionPageProps
             </Button>
           </div>
         </div>
+
+        {showAiEdition && (
+          <AiEditionCreator
+            competitionId={params.id}
+            competitionName={competition.name}
+            eventName={(competition as any).event?.name}
+            eventWebsite={(competition as any).event?.website || (competition as any).event?.websiteUrl}
+            baseDistance={competition.baseDistance ?? null}
+            baseElevation={competition.baseElevation ?? null}
+            onClose={() => setShowAiEdition(false)}
+            onCreated={() => router.push('/organizer/editions')}
+          />
+        )}
 
         {/* Competition Context */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
