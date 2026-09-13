@@ -98,6 +98,17 @@ export default async function EditionDetailPage({
     }
   };
 
+  // Canonical edition date: startDate (with endDate as a range). The API returns
+  // startDate/endDate — the old `specificDate` field is not populated.
+  const editionStart: string | undefined = (edition as any).startDate || edition.specificDate;
+  const editionEnd: string | undefined = (edition as any).endDate;
+  const formatDateRange = () => {
+    const s = formatDate(editionStart);
+    if (!s) return null;
+    const e = editionEnd && editionEnd.slice(0, 10) !== (editionStart || '').slice(0, 10) ? formatDate(editionEnd) : null;
+    return e ? `${s} – ${e}` : s;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section with Cover Image */}
@@ -151,10 +162,10 @@ export default async function EditionDetailPage({
                   <MapPin className="h-5 w-5" />
                   <span>{editionWithDetails.resolvedCity}, {event.country}</span>
                 </div>
-                {edition.specificDate && (
-                  <div className="flex items-center gap-2">
+                {formatDateRange() && (
+                  <div className="flex items-center gap-2 font-semibold">
                     <Calendar className="h-5 w-5" />
-                    <span>{formatDate(edition.specificDate)}</span>
+                    <span>{formatDateRange()}</span>
                   </div>
                 )}
               </div>
@@ -370,11 +381,24 @@ export default async function EditionDetailPage({
               </div>
             )}
 
-            {/* Registration Info */}
-            {edition.registrationUrl && (
+            {/* Key info: dates, registration window, prices — shown whenever we
+                have any of it, not only when a registration URL exists. */}
+            {(() => {
+              const hasPrices = !!(edition.prices && (edition.prices.early || edition.prices.normal || edition.prices.late));
+              const hasKeyInfo = formatDateRange() || edition.registrationOpenDate || edition.registrationCloseDate || hasPrices || edition.registrationUrl;
+              if (!hasKeyInfo) return null;
+              return (
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-bold text-lg mb-4">{t('registration')}</h3>
                 <div className="space-y-3">
+                  {/* Edition date — the primary info, highlighted */}
+                  {formatDateRange() && (
+                    <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
+                      <Calendar className="h-5 w-5 text-gray-700" />
+                      <span className="font-bold text-gray-900">{formatDateRange()}</span>
+                    </div>
+                  )}
+
                   {edition.registrationOpenDate && (
                     <InfoRow
                       label={t('opening')}
@@ -389,39 +413,40 @@ export default async function EditionDetailPage({
                   )}
 
                   {/* Prices */}
-                  {edition.prices && (edition.prices.early || edition.prices.normal || edition.prices.late) && (
-                    <>
-                      <div className="border-t pt-3 mt-3">
-                        <p className="text-sm font-medium text-gray-700 mb-2">{t('prices')}</p>
-                        <div className="space-y-1">
-                          {edition.prices.early && (
-                            <InfoRow label="Early Bird" value={`${edition.prices.early}€`} />
-                          )}
-                          {edition.prices.normal && (
-                            <InfoRow label={t('priceNormal')} value={`${edition.prices.normal}€`} />
-                          )}
-                          {edition.prices.late && (
-                            <InfoRow label={t('priceLate')} value={`${edition.prices.late}€`} />
-                          )}
-                        </div>
+                  {hasPrices && (
+                    <div className="border-t pt-3 mt-3">
+                      <p className="text-sm font-medium text-gray-700 mb-2">{t('prices')}</p>
+                      <div className="space-y-1">
+                        {edition.prices!.early && (
+                          <InfoRow label="Early Bird" value={`${edition.prices!.early}€`} />
+                        )}
+                        {edition.prices!.normal && (
+                          <InfoRow label={t('priceNormal')} value={`${edition.prices!.normal}€`} />
+                        )}
+                        {edition.prices!.late && (
+                          <InfoRow label={t('priceLate')} value={`${edition.prices!.late}€`} />
+                        )}
                       </div>
-                    </>
+                    </div>
                   )}
 
                   <div className="pt-3">
                     <RegistrationStatusBadge status={edition.registrationStatus} />
                   </div>
-                  <a
-                    href={edition.registrationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full px-4 py-2 bg-black text-white text-center rounded-lg hover:bg-gray-800 transition-colors font-semibold"
-                  >
-                    {t('registerAction')}
-                  </a>
+                  {edition.registrationUrl && (
+                    <a
+                      href={edition.registrationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full px-4 py-2 bg-black text-white text-center rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+                    >
+                      {t('registerAction')}
+                    </a>
+                  )}
                 </div>
               </div>
-            )}
+              );
+            })()}
 
             {/* Results */}
             {edition.resultsUrl && (
